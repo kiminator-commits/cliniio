@@ -1,0 +1,209 @@
+[33mcommit 4ab91f65a7fbbc7fc2df508548b00acbf03fce16[m
+Author: kiminator-commits <kim.radomske@cliniio.com>
+Date:   Wed Jun 25 13:14:48 2025 -0230
+
+    fix: resolve all ESLint errors in Inventory page - remove unused variables and functions, fix formatting with Prettier
+
+[1mdiff --git a/src/pages/Inventory/index.tsx b/src/pages/Inventory/index.tsx[m
+[1mindex e989c723..88564658 100644[m
+[1m--- a/src/pages/Inventory/index.tsx[m
+[1m+++ b/src/pages/Inventory/index.tsx[m
+[36m@@ -71,9 +71,6 @@[m [mconst Inventory: React.FC = () => {[m
+   const [activeTab, setActiveTab] = useState<TabType>('tools');[m
+   const [showAddModal, setShowAddModal] = useState(false);[m
+   const [showTrackModal, setShowTrackModal] = useState(false);[m
+[31m-  const [showScanModal, setShowScanModal] = useState(false);[m
+[31m-  const [showUploadModal, setShowUploadModal] = useState(false);[m
+[31m-  const [deletingItem, setDeletingItem] = useState<LocalInventoryItem | null>(null);[m
+ [m
+   // Track modal search state[m
+   const [searchTerm, setSearchTerm] = useState('');[m
+[36m@@ -227,140 +224,116 @@[m [mconst Inventory: React.FC = () => {[m
+     setShowAddModal(true);[m
+   }, []);[m
+ [m
+[32m+[m[32m  const handleDeleteItem = useCallback(() => {[m
+[32m+[m[32m    // setDeletingItem(item);[m
+[32m+[m[32m  }, []);[m
+[32m+[m
+   // const handleCloseEditModal = () => {[m
+   //   setShowAddModal(false);[m
+   // };[m
+ [m
+[31m-  const handleDeleteItem = useCallback((item: LocalInventoryItem) => {[m
+[31m-    setDeletingItem(item);[m
+[31m-  }, []);[m
+[32m+[m[32m  // Inventory data state - converted from mock arrays[m
+[32m+[m[32m  const inventoryData = useMemo([m
+[32m+[m[32m    () => [[m
+[32m+[m[32m      {[m
+[32m+[m[32m        item: 'Scalpel Handle #3',[m
+[32m+[m[32m        category: 'Surgical',[m
+[32m+[m[32m        toolId: 'T-001',[m
+[32m+[m[32m        location: 'OR 1',[m
+[32m+[m[32m        p2Status: 'clean',[m
+[32m+[m[32m        cost: 45.0,[m
+[32m+[m[32m      },[m
+[32m+[m[32m      {[m
+[32m+[m[32m        item: 'Forceps 5"',[m
+[32m+[m[32m        category: 'Surgical',[m
+[32m+[m[32m        toolId: 'T-002',[m
+[32m+[m[32m        location: 'OR 2',[m
+[32m+[m[32m        p2Status: 'dirty',[m
+[32m+[m[32m        cost: 35.0,[m
+[32m+[m[32m      },[m
+[32m+[m[32m      {[m
+[32m+[m[32m        item: 'Retractor Set',[m
+[32m+[m[32m        category: 'Surgical',[m
+[32m+[m[32m        toolId: 'T-003',[m
+[32m+[m[32m        location: 'OR 1',[m
+[32m+[m[32m        p2Status: 'bath1',[m
+[32m+[m[32m        cost: 150.0,[m
+[32m+[m[32m      },[m
+[32m+[m[32m    ],[m
+[32m+[m[32m    [][m
+[32m+[m[32m  );[m
+ [m
+[31m-  const confirmDelete = useCallback(() => {[m
+[31m-    if (!deletingItem) return;[m
+[31m-[m
+[31m-    if (activeTab === 'tools' && 'toolId' in deletingItem) {[m
+[31m-      setInventoryData(prev => prev.filter(tool => tool.toolId !== deletingItem.toolId));[m
+[31m-    } else if (activeTab === 'supplies' && 'supplyId' in deletingItem) {[m
+[31m-      setSuppliesData(prev => prev.filter(supply => supply.supplyId !== deletingItem.supplyId));[m
+[31m-    } else if (activeTab === 'equipment' && 'equipmentId' in deletingItem) {[m
+[31m-      setEquipmentData(prev =>[m
+[31m-        prev.filter(equipment => equipment.equipmentId !== deletingItem.equipmentId)[m
+[31m-      );[m
+[31m-    } else if (activeTab === 'officeHardware' && 'hardwareId' in deletingItem) {[m
+[31m-      setOfficeHardwareData(prev =>[m
+[31m-        prev.filter(hardware => hardware.hardwareId !== deletingItem.hardwareId)[m
+[31m-      );[m
+[31m-    }[m
+[32m+[m[32m  const suppliesData = useMemo([m
+[32m+[m[32m    () => [[m
+[32m+[m[32m      {[m
+[32m+[m[32m        item: 'Gauze',[m
+[32m+[m[32m        category: 'Supplies',[m
+[32m+[m[32m        supplyId: 'S-002',[m
+[32m+[m[32m        location: 'Supply Room',[m
+[32m+[m[32m        quantity: 500,[m
+[32m+[m[32m        expiration: '2025-12-31',[m
+[32m+[m[32m        cost: 25.0,[m
+[32m+[m[32m      },[m
+[32m+[m[32m      {[m
+[32m+[m[32m        item: 'Surgical Tape',[m
+[32m+[m[32m        category: 'Supplies',[m
+[32m+[m[32m        supplyId: 'S-003',[m
+[32m+[m[32m        location: 'Supply Room',[m
+[32m+[m[32m        quantity: 200,[m
+[32m+[m[32m        expiration: '2025-06-30',[m
+[32m+[m[32m        cost: 15.0,[m
+[32m+[m[32m      },[m
+[32m+[m[32m    ],[m
+[32m+[m[32m    [][m
+[32m+[m[32m  );[m
+ [m
+[31m-    setDeletingItem(null);[m
+[31m-  }, [deletingItem, activeTab]);[m
+[31m-[m
+[31m-  // const handleSaveEdit = (e: React.FormEvent) => {[m
+[31m-  //   e.preventDefault();[m
+[31m-  //   // Implementation of save logic[m
+[31m-  //   if (activeTab === 'tools') {[m
+[31m-  //     // Implementation of update for tools[m
+[31m-  //   } else if (activeTab === 'supplies') {[m
+[31m-  //     // Implementation of update for supplies[m
+[31m-  //   } else if (activeTab === 'equipment') {[m
+[31m-  //     // Implementation of update for equipment[m
+[31m-  //   } else if (activeTab === 'officeHardware') {[m
+[31m-  //     // Implementation of update for office hardware[m
+[31m-  //   }[m
+[31m-  //   setShowAddModal(false);[m
+[31m-  //   setIsEditMode(false);[m
+[31m-  // };[m
+[32m+[m[32m  const equipmentData = useMemo([m
+[32m+[m[32m    () => [[m
+[32m+[m[32m      {[m
+[32m+[m[32m        item: 'Autoclave',[m
+[32m+[m[32m        category: 'Equipment',[m
+[32m+[m[32m        equipmentId: 'E-001',[m
+[32m+[m[32m        location: 'Sterilization Room',[m
+[32m+[m[32m        status: 'operational',[m
+[32m+[m[32m        lastServiced: '2024-01-15',[m
+[32m+[m[32m        cost: 5000.0,[m
+[32m+[m[32m      },[m
+[32m+[m[32m      {[m
+[32m+[m[32m        item: 'Ultrasonic Cleaner',[m
+[32m+[m[32m        category: 'Equipment',[m
+[32m+[m[32m        equipmentId: 'E-002',[m
+[32m+[m[32m        location: 'Sterilization Room',[m
+[32m+[m[32m        status: 'operational',[m
+[32m+[m[32m        lastServiced: '2024-02-20',[m
+[32m+[m[32m        cost: 1200.0,[m
+[32m+[m[32m      },[m
+[32m+[m[32m    ],[m
+[32m+[m[32m    [][m
+[32m+[m[32m  );[m
+ [m
+[31m-  // Inventory data state - converted from mock arrays[m
+[31m-  const [inventoryData, setInventoryData] = useState([[m
+[31m-    {[m
+[31m-      item: 'Scalpel Handle #3',[m
+[31m-      category: 'Surgical',[m
+[31m-      toolId: 'T-001',[m
+[31m-      location: 'OR 1',[m
+[31m-      p2Status: 'clean',[m
+[31m-      cost: 45.0,[m
+[31m-    },[m
+[31m-    {[m
+[31m-      item: 'Forceps 5"',[m
+[31m-      category: 'Surgical',[m
+[31m-      toolId: 'T-002',[m
+[31m-      location: 'OR 2',[m
+[31m-      p2Status: 'dirty',[m
+[31m-      cost: 35.0,[m
+[31m-    },[m
+[31m-    {[m
+[31m-      item: 'Retractor Set',[m
+[31m-      category: 'Surgical',[m
+[31m-      toolId: 'T-003',[m
+[31m-      location: 'OR 1',[m
+[31m-      p2Status: 'bath1',[m
+[31m-      cost: 150.0,[m
+[31m-    },[m
+[31m-  ]);[m
+[31m-[m
+[31m-  const [suppliesData, setSuppliesData] = useState([[m
+[31m-    {[m
+[31m-      item: 'Gauze',[m
+[31m-      category: 'Supplies',[m
+[31m-      supplyId: 'S-002',[m
+[31m-      location: 'Supply Room',[m
+[31m-      quantity: 200,[m
+[31m-      expiration: '2024-12-31',[m
+[31m-      cost: 25.5,[m
+[31m-    },[m
+[31m-    {[m
+[31m-      item: 'Syringe',[m
+[31m-      category: 'Supplies',[m
+[31m-      supplyId: 'S-003',[m
+[31m-      location: 'Supply Room',[m
+[31m-      quantity: 150,[m
+[31m-      expiration: '2025-03-15',[m
+[31m-      cost: 15.75,[m
+[31m-    },[m
+[31m-  ]);[m
+[31m-[m
+[31m-  const [equipmentData, setEquipmentData] = useState([[m
+[31m-    {[m
+[31m-      item: 'Monitor',[m
+[31m-      category: 'Equipment',[m
+[31m-      equipmentId: 'E-003',[m
+[31m-      location: 'ICU',[m
+[31m-      status: 'Operational',[m
+[31m-      lastServiced: '2024-01-10',[m
+[31m-      cost: 2500.0,[m
+[31m-    },[m
+[31m-    {[m
+[31m-      item: 'Defib

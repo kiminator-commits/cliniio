@@ -1,0 +1,80 @@
+/* Sterilization page specific styles */
+.sterilization-container {
+  padding: 1rem;
+  max-height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.sterilization-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Status indicator styles */
+.status-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  margin-top: 0.5rem;
+}
+
+.status-indicator.in-progress {
+  background-color: #3b82f6;
+}
+
+.status-indicator.completed {
+  background-color: #22c55e;
+}
+
+.status-indicator.failed {
+  background-color: #ef4444;
+}
+
+/* Log entry styles */
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.log-entry-content {
+  flex: 1;
+}
+
+.log-entry-time {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Cycle status badge styles */
+.cycle-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.cycle-status.in-progress {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.cycle-status.completed {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.cycle-status.failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.cycle-status.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}

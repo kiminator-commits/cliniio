@@ -1,0 +1,38 @@
+import { sanitizeInput } from '@/utils/sanitizeInput';
+import { rateLimiter } from '@/utils/rateLimiter';
+import { useDebouncedState } from '@/hooks/useDebouncedState';
+import { useFormProtection } from '@/hooks/useFormProtection';
+import { useErrorRecovery } from '@/hooks/useErrorRecovery';
+import { useLoadingProtection } from '@/hooks/useLoadingProtection';
+import { throttle } from '@/utils/throttle';
+import { createAbortController } from '@/utils/abortController';
+import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
+import { useCleanup } from '@/hooks/useCleanup';
+import { validateInput, isNotEmpty, isSafeText } from '@/utils/validation';
+import { logError, getErrorLog } from '@/utils/errorLogger';
+import { validateState } from '@/utils/validateState';
+import { dispatchFeedback } from '@/utils/feedback';
+import { runStressTest } from '@/utils/stressTest';
+import { printSecurityChecklist } from '@/utils/securityChecklist';
+
+test('Hardening utilities load and basic calls do not crash', () => {
+  expect(typeof sanitizeInput).toBe('function');
+  expect(typeof rateLimiter.checkLimit).toBe('function');
+  expect(typeof useDebouncedState).toBe('function');
+  expect(typeof useFormProtection).toBe('function');
+  expect(typeof useErrorRecovery).toBe('function');
+  expect(typeof useLoadingProtection).toBe('function');
+  expect(typeof throttle).toBe('function');
+  expect(typeof createAbortController).toBe('function');
+  expect(typeof usePerformanceMonitor).toBe('function');
+  expect(typeof useCleanup).toBe('function');
+  expect(typeof validateInput).toBe('function');
+  expect(typeof isNotEmpty).toBe('function');
+  expect(typeof isSafeText).toBe('function');
+  expect(typeof logError).toBe('function');
+  expect(typeof getErrorLog).toBe('function');
+  expect(typeof validateState).toBe('function');
+  expect(typeof dispatchFeedback).toBe('function');
+  expect(typeof runStressTest).toBe('function');
+  expect(typeof printSecurityChecklist).toBe('function');
+});
