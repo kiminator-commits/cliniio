@@ -89,7 +89,13 @@ export const validateCategory = (category: string): ValidationResult => {
  */
 export const validateStatus = (status: string): ValidationResult => {
   const errors: string[] = [];
-  const validStatuses = ['active', 'inactive', 'expired', 'low_stock', 'out_of_stock'];
+  const validStatuses = [
+    'active',
+    'inactive',
+    'expired',
+    'low_stock',
+    'out_of_stock',
+  ];
 
   if (!status || status.trim().length === 0) {
     errors.push('Status is required');
@@ -132,7 +138,9 @@ export const validateExpiryDate = (expiryDate?: string): ValidationResult => {
 /**
  * Validates complete inventory item
  */
-export const validateInventoryItem = (item: Partial<InventoryItemValidation>): ValidationResult => {
+export const validateInventoryItem = (
+  item: Partial<InventoryItemValidation>
+): ValidationResult => {
   const errors: string[] = [];
 
   // Validate each field
@@ -170,7 +178,7 @@ export const validateInventoryBatch = (
 
   items.forEach((item, index) => {
     const itemValidation = validateInventoryItem(item);
-    itemValidation.errors.forEach(error => {
+    itemValidation.errors.forEach((error) => {
       errors.push(`Item ${index + 1}: ${error}`);
     });
   });

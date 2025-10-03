@@ -11,12 +11,14 @@ export type PaginationState = {
   };
 };
 
-export const createInventoryPaginationSlice: StateCreator<PaginationState> = set => ({
+export const createInventoryPaginationSlice: StateCreator<PaginationState> = (
+  set
+) => ({
   itemsPerPage: 3,
   setItemsPerPage: (count: number) => set({ itemsPerPage: count }),
   currentPage: 1,
   setCurrentPage: (page: number) =>
-    set(state => ({
+    set((state) => ({
       currentPage: page,
       pagination: { ...state.pagination, currentPage: page },
     })),

@@ -1,40 +1,39 @@
 import React, { Suspense, lazy } from 'react';
-import { TabType } from '../../types';
+import { TabType } from '../types';
+import { CardSkeleton } from '../../../components/ui/Skeleton';
+import { LocalInventoryItem } from '@/types/inventoryTypes';
 
 const InventoryInsightsCard = lazy(
-  () => import('../../components/Inventory/analytics/InventoryInsightsCard')
+  () => import('../../../components/Inventory/analytics/InventoryInsightsCard')
 );
-const CategoriesCard = lazy(() => import('../../components/Inventory/analytics/CategoriesCard'));
-
-interface InventoryItem {
-  category: string;
-  quantity: number;
-}
+const CategoriesCard = lazy(
+  () => import('../../../components/Inventory/analytics/CategoriesCard')
+);
 
 interface InventoryAnalyticsSectionProps {
-  filteredData: InventoryItem[];
+  filteredData: LocalInventoryItem[];
   onCategoryChange: (tab: TabType) => void;
 }
 
 const InventoryAnalyticsSection: React.FC<InventoryAnalyticsSectionProps> = ({
-  filteredData,
   onCategoryChange,
 }) => {
-  const categories = Array.from(new Set(filteredData.map(item => item.category)));
-  const lowStockItems = filteredData.filter(item => item.quantity < 10).length;
+  // Create the data structure expected by InventoryInsightsCard
+  const insightsData = {
+    tools: [] as LocalInventoryItem[],
+    supplies: [] as LocalInventoryItem[],
+    equipment: [] as LocalInventoryItem[],
+    officeHardware: [] as LocalInventoryItem[],
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <Suspense fallback={null}>
-        <InventoryInsightsCard
-          totalItems={filteredData.length}
-          lowStockItems={lowStockItems}
-          categories={categories}
-        />
+      <Suspense fallback={<CardSkeleton />}>
+        <InventoryInsightsCard data={insightsData} />
       </Suspense>
 
-      <Suspense fallback={null}>
-        <CategoriesCard categories={categories} onCategoryChange={onCategoryChange} />
+      <Suspense fallback={<CardSkeleton />}>
+        <CategoriesCard onCategoryChange={onCategoryChange} />
       </Suspense>
     </div>
   );

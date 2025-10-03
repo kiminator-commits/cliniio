@@ -5,12 +5,13 @@ interface ProblemWorkflowProps {
   onFlagResolved: () => void;
 }
 
-export default function ProblemWorkflow({ scannedData, onFlagResolved }: ProblemWorkflowProps) {
+export default function ProblemWorkflow({
+  scannedData,
+  onFlagResolved,
+}: ProblemWorkflowProps) {
   // Placeholder internal logic for handling problem tools
   function handleProblemToolWorkflow() {
-    console.log('Scanned problem tool');
-    console.log('Flagged for inspection');
-    console.log('Removed from active cycle');
+    // Tool processing logic would go here
   }
 
   // Example usage

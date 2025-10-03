@@ -5,7 +5,10 @@ interface ProgressButtonProps {
   status: string;
 }
 
-export default function ProgressButton({ onClick, status }: ProgressButtonProps) {
+export default function ProgressButton({
+  onClick,
+  status,
+}: ProgressButtonProps) {
   if (status === 'Not Started') {
     return (
       <button

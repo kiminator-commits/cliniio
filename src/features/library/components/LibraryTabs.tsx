@@ -8,7 +8,10 @@ interface LibraryTabsProps {
   setActiveTab: (tab: string) => void;
 }
 
-const LibraryTabs: React.FC<LibraryTabsProps> = ({ activeTab, setActiveTab }) => {
+const LibraryTabs: React.FC<LibraryTabsProps> = ({
+  activeTab,
+  setActiveTab,
+}) => {
   const tabs = [
     {
       id: 'favourites',
@@ -39,7 +42,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ activeTab, setActiveTab }) =>
   return (
     <div className="mb-8">
       <div className="flex flex-wrap gap-2 justify-center">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <motion.button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -72,7 +75,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ activeTab, setActiveTab }) =>
       {/* Tab Description */}
       <div className="text-center mt-4">
         <p className="text-gray-600 text-sm">
-          {tabs.find(tab => tab.id === activeTab)?.description}
+          {tabs.find((tab) => tab.id === activeTab)?.description}
         </p>
       </div>
     </div>

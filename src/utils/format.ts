@@ -18,7 +18,10 @@ export const formatDate = (
 /**
  * Format a number to a localized string with specified decimal places
  */
-export const formatNumber = (number: number, options: Intl.NumberFormatOptions = {}): string => {
+export const formatNumber = (
+  number: number,
+  options: Intl.NumberFormatOptions = {}
+): string => {
   const defaultOptions: Intl.NumberFormatOptions = {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -35,7 +38,7 @@ export const toTitleCase = (str: string): string => {
   return str
     .toLowerCase()
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 };
 

@@ -1,51 +1,59 @@
+// Library imports
 import { StateCreator } from 'zustand';
 
-export interface SterilizationPhase {
-  id: string;
-  name: string;
-  duration: number;
-  completed: boolean;
-  startedAt: string | null;
-  completedAt: string | null;
-}
+// Type imports
+import { SterilizationCycleState } from './types/sterilizationCycleTypes';
+import { Tool } from '../../types/toolTypes';
+import { BITestResult } from '../../types/sterilizationTypes';
+import { ToolActionsState } from './toolActionsSlice';
+import { ToolDataState } from './toolDataSlice';
 
-export interface SterilizationCycle {
-  id: string;
-  phases: SterilizationPhase[];
-  tools: string[];
-  operator: string;
-  startedAt: string;
-  completedAt: string | null;
-}
+// Action imports
+import { createCycleActions } from './actions/cycleActions';
+import { createPhaseActions } from './actions/phaseActions';
+import { createToolActions } from './actions/toolActions';
 
-export interface SterilizationCycleState {
-  currentCycle: SterilizationCycle | null;
-  error: string | null;
-  setCurrentCycle: (cycle: SterilizationCycle | null) => void;
-  setError: (error: string | null) => void;
-  startNewCycle: (operator: string) => void;
-}
+// Utility imports
+import { getCycleStats } from './utils/cycleStatsUtils';
+
+// Commented imports (for future use)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// import { useSterilizationStore } from '../sterilizationStore';
 
 export const createSterilizationCycleSlice: StateCreator<
-  SterilizationCycleState,
+  SterilizationCycleState & ToolActionsState & ToolDataState,
   [],
   [],
   SterilizationCycleState
-> = set => ({
-  currentCycle: null,
-  error: null,
-  setCurrentCycle: cycle => set({ currentCycle: cycle }),
-  setError: error => set({ error }),
-  startNewCycle: (operator: string) => {
-    const cycleId = `cycle_${Date.now()}`;
-    const newCycle: SterilizationCycle = {
-      id: cycleId,
-      phases: [],
-      tools: [],
-      operator,
-      startedAt: new Date().toISOString(),
-      completedAt: null,
-    };
-    set({ currentCycle: newCycle });
-  },
-});
+> = (set, get, store) => {
+  // set parameter is used by the slice creator pattern
+  const cycleActions = createCycleActions(set, get, store);
+  const phaseActions = createPhaseActions(set, get, store);
+  const toolActions = createToolActions(set, get, store);
+
+  return {
+    // Initial state
+    currentCycle: null,
+    cycles: [],
+    error: null,
+
+    // Cycle actions
+    ...cycleActions,
+
+    // Phase actions
+    ...phaseActions,
+
+    // Tool actions
+    ...toolActions,
+
+    // Statistics
+    getCycleStats: () => {
+      const state = get() as SterilizationCycleState; // Access to combined store state
+      return getCycleStats(
+        state.cycles || [],
+        (state.availableTools as Tool[]) || [],
+        (state.biTestResults as BITestResult[]) || []
+      );
+    },
+  };
+};

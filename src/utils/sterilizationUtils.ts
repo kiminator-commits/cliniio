@@ -16,7 +16,9 @@ export function generateAuditSignature(event: Record<string, unknown>): string {
   return `SIG-${Math.abs(hash)}`;
 }
 
-export async function backupSterilizationRecords(records: Record<string, unknown>[]) {
+export async function backupSterilizationRecords(
+  records: Record<string, unknown>[]
+) {
   const blob = new Blob([JSON.stringify(records, null, 2)], {
     type: 'application/json',
   });

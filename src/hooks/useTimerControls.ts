@@ -1,51 +1,81 @@
 import { useCallback } from 'react';
+import { useTimerStore } from '../store/timerStore';
+import { useSterilizationStore } from '../store/sterilizationStore';
 
-interface UseTimerControlsProps {
-  isRunning: boolean;
-  setIsRunning: (running: boolean) => void;
-  setStartTime: (time: number) => void;
-  setPauseTime: (time: number) => void;
-  onStart?: () => void;
-  onPause?: () => void;
-  onReset?: () => void;
-}
+export const useTimerControls = () => {
+  const { timers, startTimer, pauseTimer, resetTimer, resumeTimer } =
+    useTimerStore();
+  const { currentCycle, setCurrentCycle } = useSterilizationStore();
 
-export const useTimerControls = ({
-  isRunning,
-  setIsRunning,
-  setStartTime,
-  setPauseTime,
-  onStart,
-  onPause,
-  onReset,
-}: UseTimerControlsProps) => {
-  const handleStart = useCallback(() => {
-    if (!isRunning) {
-      setIsRunning(true);
-      setStartTime(Date.now());
-      onStart?.();
-    }
-  }, [isRunning, setIsRunning, setStartTime, onStart]);
+  const handleStartTimer = useCallback(
+    (phaseId: string, duration: number) => {
+      startTimer(phaseId, duration);
+    },
+    [startTimer]
+  );
 
-  const handlePause = useCallback(() => {
-    if (isRunning) {
-      setIsRunning(false);
-      setPauseTime(Date.now());
-      onPause?.();
-    }
-  }, [isRunning, setIsRunning, setPauseTime, onPause]);
+  const handlePauseTimer = useCallback(
+    (phaseId: string) => {
+      const timer = timers[phaseId];
+      if (timer?.isRunning) {
+        pauseTimer(phaseId);
+      } else {
+        // Resume timer if it exists and was paused
+        if (timer) {
+          resumeTimer(phaseId);
+        }
+      }
+    },
+    [timers, pauseTimer, resumeTimer]
+  );
 
-  const handleReset = useCallback(() => {
-    setIsRunning(false);
-    setStartTime(0);
-    setPauseTime(0);
-    onReset?.();
-  }, [setIsRunning, setStartTime, setPauseTime, onReset]);
+  const handleStopTimer = useCallback(
+    (phaseId: string) => {
+      // 🚨 CRITICAL FEATURE - DO NOT REMOVE THIS LOGIC
+      // This function MUST clear tools from the cycle to allow workflow restart
+      // Without this, users cannot restart workflows after cancelling
+      // See TIMER_CANCELLATION_FEATURE.md for full documentation
+
+      console.log('🛑 Cancelling timer for phase:', phaseId);
+
+      // Stop and reset the timer
+      pauseTimer(phaseId);
+      resetTimer(phaseId);
+
+      // Clear tools from the cycle to allow restarting the workflow
+      if (currentCycle) {
+        console.log(
+          '🛑 Clearing tools from cycle. Current tools:',
+          currentCycle.tools
+        );
+
+        // Create a new cycle with no tools
+        const clearedCycle = {
+          ...currentCycle,
+          tools: [],
+          phases: currentCycle.phases.map((phase) => ({
+            ...phase,
+            tools: [],
+            isActive: false,
+            status: 'pending' as const,
+            startTime: null,
+            endTime: null,
+          })),
+        };
+
+        setCurrentCycle(clearedCycle);
+        console.log(
+          '✅ Cycle cleared, tools removed. Workflow can be restarted.'
+        );
+      }
+    },
+    [pauseTimer, resetTimer, currentCycle, setCurrentCycle]
+  );
 
   return {
-    handleStart,
-    handlePause,
-    handleReset,
+    handleStartTimer,
+    handlePauseTimer,
+    handleStopTimer,
   };
 };
 
@@ -57,30 +87,6 @@ export function calculateOverexposure({
   duration: number;
 }): boolean {
   return elapsedTime > duration;
-}
-
-export function saveTimerState(key: string, state: Record<string, unknown>) {
-  try {
-    localStorage.setItem(key, JSON.stringify(state));
-  } catch (e) {
-    console.error('Failed to save timer state:', e);
-  }
-}
-
-export function loadTimerState<T = Record<string, unknown>>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : null;
-  } catch (e) {
-    console.error('Failed to load timer state:', e);
-    return null;
-  }
-}
-
-export function getElapsedTime(startTime: number, pauseTime?: number): number {
-  if (!startTime) return 0;
-  const endTime = pauseTime || Date.now();
-  return Math.max(0, endTime - startTime);
 }
 
 export function formatTime(ms: number): string {

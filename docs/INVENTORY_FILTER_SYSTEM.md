@@ -5,6 +5,7 @@ This document describes the new modular and composable filter system for the inv
 ## Overview
 
 The inventory filter system has been refactored to provide:
+
 - **Separation of concerns**: Filter logic is separated from UI components
 - **Composability**: Filters can be combined and composed in various ways
 - **Type safety**: Full TypeScript support with proper interfaces
@@ -16,6 +17,7 @@ The inventory filter system has been refactored to provide:
 ### Core Hooks
 
 #### 1. `useInventoryFilters`
+
 **Location**: `src/hooks/inventory/useInventoryFilters.ts`
 
 Manages filter state and provides filter actions.
@@ -23,7 +25,7 @@ Manages filter state and provides filter actions.
 ```typescript
 const [filters, actions] = useInventoryFilters({
   initialFilters: { category: 'tools' },
-  onFiltersChange: (filters) => console.log('Filters changed:', filters)
+  onFiltersChange: (filters) => console.log('Filters changed:', filters),
 });
 
 // Actions available:
@@ -35,48 +37,43 @@ actions.resetFilters();
 ```
 
 #### 2. `useInventorySearch`
+
 **Location**: `src/hooks/inventory/useInventorySearch.ts`
 
 Handles search functionality with debouncing and abort controllers.
 
 ```typescript
-const {
-  searchResults,
-  isSearching,
-  totalResults,
-  searchError
-} = useInventorySearch({
-  data: inventoryData,
-  filters,
-  searchOptions: {
-    debounceMs: 300,
-    caseSensitive: false,
-    searchFields: ['item', 'category', 'location']
-  }
-});
+const { searchResults, isSearching, totalResults, searchError } =
+  useInventorySearch({
+    data: inventoryData,
+    filters,
+    searchOptions: {
+      debounceMs: 300,
+      caseSensitive: false,
+      searchFields: ['item', 'category', 'location'],
+    },
+  });
 ```
 
 #### 3. `useInventorySorting`
+
 **Location**: `src/hooks/inventory/useInventorySorting.ts`
 
 Provides sorting functionality with support for multi-sort.
 
 ```typescript
-const {
-  sortedData,
-  sortBy,
-  isFieldSorted,
-  getNextSortDirection
-} = useInventorySorting({
-  data: filteredData,
-  initialSort: { field: 'item', direction: 'asc' },
-  sortOptions: { multiSort: false, caseSensitive: false }
-});
+const { sortedData, sortBy, isFieldSorted, getNextSortDirection } =
+  useInventorySorting({
+    data: filteredData,
+    initialSort: { field: 'item', direction: 'asc' },
+    sortOptions: { multiSort: false, caseSensitive: false },
+  });
 ```
 
 ### Filter Utilities
 
 #### `filterUtils.ts`
+
 **Location**: `src/utils/inventory/filterUtils.ts`
 
 Contains composable filter functions and business logic.
@@ -98,22 +95,19 @@ const supplyFilters = createSupplyFilters(filters, favorites);
 ### Composition Hook
 
 #### `useInventoryFilterComposition`
+
 **Location**: `src/hooks/inventory/useInventoryFilterComposition.ts`
 
 Combines all filter hooks into a single, easy-to-use interface.
 
 ```typescript
-const {
-  filters,
-  finalData,
-  filterStats,
-  actions
-} = useInventoryFilterComposition({
-  data: inventoryData,
-  activeTab: 'tools',
-  favorites: new Set(['tool1', 'tool2']),
-  onDataChange: (data) => setDisplayData(data)
-});
+const { filters, finalData, filterStats, actions } =
+  useInventoryFilterComposition({
+    data: inventoryData,
+    activeTab: 'tools',
+    favorites: new Set(['tool1', 'tool2']),
+    onDataChange: (data) => setDisplayData(data),
+  });
 
 // Use actions
 actions.filterByCategory('surgical');
@@ -160,25 +154,25 @@ import { createCustomFilter, composeFilters } from '@/utils/inventory/filterUtil
 
 function AdvancedInventoryTable({ data }) {
   const [filters, filterActions] = useInventoryFilters();
-  
+
   // Create custom filter
   const customFilter = createCustomFilter((item) => {
     return item.cost > 50 && item.location === 'OR1';
   });
-  
+
   // Compose with existing filters
   const combinedFilter = composeFilters(
     createTextFilter(filters.searchQuery, ['item']),
     customFilter
   );
-  
+
   const filteredData = data.filter(combinedFilter);
-  
+
   const { searchResults } = useInventorySearch({
     data: filteredData,
     filters
   });
-  
+
   const { sortedData, sortBy } = useInventorySorting({
     data: searchResults
   });
@@ -190,6 +184,7 @@ function AdvancedInventoryTable({ data }) {
 ## Filter Composition Patterns
 
 ### 1. Sequential Filtering
+
 Filters are applied in sequence, each reducing the dataset.
 
 ```typescript
@@ -201,6 +196,7 @@ const sequentialFilter = composeFilters(
 ```
 
 ### 2. Conditional Filtering
+
 Apply filters based on conditions.
 
 ```typescript
@@ -213,6 +209,7 @@ const conditionalFilter = (item) => {
 ```
 
 ### 3. Tab-Specific Filtering
+
 Different filter sets for different inventory types.
 
 ```typescript
@@ -268,32 +265,35 @@ describe('useInventoryFilters', () => {
 ### From Old Filter System
 
 1. **Replace direct state management**:
+
    ```typescript
    // Old
    const [searchQuery, setSearchQuery] = useState('');
    const [categoryFilter, setCategoryFilter] = useState('');
-   
+
    // New
    const [filters, actions] = useInventoryFilters();
    ```
 
 2. **Replace filter logic**:
+
    ```typescript
    // Old
-   const filteredData = data.filter(item => 
-     item.name.includes(searchQuery) && 
-     item.category === categoryFilter
+   const filteredData = data.filter(
+     (item) =>
+       item.name.includes(searchQuery) && item.category === categoryFilter
    );
-   
+
    // New
    const { finalData } = useInventoryFilterComposition({ data, activeTab });
    ```
 
 3. **Replace sorting logic**:
+
    ```typescript
    // Old
    const sortedData = [...data].sort((a, b) => a.name.localeCompare(b.name));
-   
+
    // New
    const { sortedData, sortBy } = useInventorySorting({ data });
    ```
@@ -305,4 +305,4 @@ describe('useInventoryFilters', () => {
 3. **Testability**: Each piece can be tested independently
 4. **Performance**: Optimized with proper memoization and debouncing
 5. **Type Safety**: Full TypeScript support prevents runtime errors
-6. **Flexibility**: Easy to add new filters or modify existing ones 
+6. **Flexibility**: Easy to add new filters or modify existing ones

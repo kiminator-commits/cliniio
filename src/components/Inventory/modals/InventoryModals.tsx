@@ -1,148 +1,121 @@
-import React, { useEffect, useCallback } from 'react';
-import { useInventoryStore } from '../../../store/useInventoryStore';
-import AddItemModal from './AddItemModal';
-import TrackToolsModal from './TrackToolsModal';
+import React from 'react';
+import { useInventoryModals } from '@/hooks/inventory/useInventoryModals';
+import {
+  INVENTORY_MODAL_CONFIGS,
+  ADD_EDIT_ITEM_SECTIONS,
+} from '@/config/modalConfig';
+import { validateFormData } from '@/config/modalConfig';
+import ModalContent from './ModalContent';
 import UploadBarcodeModal from './UploadBarcodeModal';
 
-interface InventoryModalsProps {
-  formData: {
-    itemName: string;
-    category: string;
-    id: string;
-    location: string;
-    purchaseDate: string;
-    vendor: string;
-    cost: string;
-    warranty: string;
-    maintenanceSchedule: string;
-    lastServiced: string;
-    nextDue: string;
-    serviceProvider: string;
-    assignedTo: string;
-    status: string;
-    quantity: string;
-    notes: string;
-  };
-  isEditMode: boolean;
-  expandedSections: {
-    general: boolean;
-    purchase: boolean;
-    maintenance: boolean;
-    usage: boolean;
-  };
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  activeFilter: string;
-  setActiveFilter: (filter: string) => void;
-  favorites: Set<string>;
-  filteredTools: Array<{
-    id: string;
-    name: string;
-    barcode: string;
-    currentPhase: string;
-    category: string;
-  }>;
-  handleCloseAddModal: () => void;
-  handleSave?: () => void;
-  toggleSection: (section: string) => void;
-  handleFormChange: (field: string, value: string) => void;
-  toggleFavorite: (toolId: string) => void;
-  getStatusBadge: (phase: string) => string;
-  getStatusText: (phase: string) => string;
-  progressInfo?: {
-    current: number;
-    total: number;
-    currentItemName: string;
-  };
-}
-
-const InventoryModals: React.FC<InventoryModalsProps> = ({
-  formData,
-  isEditMode,
-  expandedSections,
-  searchTerm,
-  setSearchTerm,
-  activeFilter,
-  setActiveFilter,
-  favorites,
-  filteredTools,
-  handleCloseAddModal,
-  handleSave,
-  toggleSection,
-  handleFormChange,
-  toggleFavorite,
-  getStatusBadge,
-  getStatusText,
-  progressInfo,
-}) => {
+/**
+ * Refactored InventoryModals component that uses the new modal management system
+ * Separates modal content from modal management
+ */
+const InventoryModals: React.FC = () => {
   const {
+    // Modal visibility states
     showAddModal,
-    showTrackModal,
-    trackedItems,
-    trackingData,
-    toggleTrackedItem,
     showUploadBarcodeModal,
-    toggleUploadBarcodeModal,
-  } = useInventoryStore();
+    showScanModal,
 
-  // Prevent default drag behaviors
-  useEffect(() => {
-    const preventDefault = (e: DragEvent) => {
-      e.preventDefault();
-    };
+    // Modal close handlers
+    closeAddModal,
+    closeUploadBarcodeModal,
+    closeScanModal,
 
-    document.addEventListener('dragover', preventDefault);
-    document.addEventListener('drop', preventDefault);
+    // Form and edit mode states
+    formData,
+    isEditMode,
+    expandedSections,
 
-    return () => {
-      document.removeEventListener('dragover', preventDefault);
-      document.removeEventListener('drop', preventDefault);
-    };
-  }, []);
+    // Form handlers
+    handleFormChange,
+    toggleSection,
+    handleSaveItem,
+  } = useInventoryModals();
 
-  const toggleTracking = useCallback(
-    (toolId: string) => {
-      toggleTrackedItem(toolId, 'Current User');
-    },
-    [toggleTrackedItem]
-  );
+  // Validate form data before saving
+  const handleSave = () => {
+    const errors = validateFormData(formData);
+    if (Object.keys(errors).length === 0) {
+      handleSaveItem();
+    } else {
+      // Handle validation errors - could show toast or error messages
+      console.error('Validation errors:', errors);
+      // For now, just prevent save
+      return;
+    }
+  };
+
+  // Wrapper function to convert the type mismatch
+  const handleToggleSection = (section: string) => {
+    toggleSection(section as keyof typeof expandedSections);
+  };
 
   return (
     <>
-      {/* Add Item Modal */}
-      <AddItemModal
+      {/* Add/Edit Item Modal */}
+      <ModalContent
+        modalConfig={INVENTORY_MODAL_CONFIGS.ADD_ITEM}
         show={showAddModal}
-        onHide={handleCloseAddModal}
+        onHide={closeAddModal}
         formData={formData}
         isEditMode={isEditMode}
         expandedSections={expandedSections}
-        toggleSection={toggleSection}
+        toggleSection={handleToggleSection}
         handleFormChange={handleFormChange}
-        progressInfo={progressInfo}
         onSave={handleSave}
+        sections={ADD_EDIT_ITEM_SECTIONS}
       />
 
-      {/* Track Tools Modal */}
-      {showTrackModal && (
-        <TrackToolsModal
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
-          filteredTools={filteredTools}
-          favorites={favorites}
-          toggleFavorite={toggleFavorite}
-          trackedItems={trackedItems}
-          trackingData={Object.fromEntries(trackingData)}
-          toggleTracking={toggleTracking}
-          getStatusBadge={getStatusBadge}
-          getStatusText={getStatusText}
-          handleCloseAddModal={handleCloseAddModal}
-        />
-      )}
-
       {/* Upload Barcode Modal */}
-      <UploadBarcodeModal show={showUploadBarcodeModal} onClose={toggleUploadBarcodeModal} />
+      <UploadBarcodeModal
+        show={showUploadBarcodeModal}
+        onClose={closeUploadBarcodeModal}
+      />
+
+      {/* Scan Modal - could be refactored to use ModalContent as well */}
+      {showScanModal && (
+        <ModalContent
+          modalConfig={INVENTORY_MODAL_CONFIGS.SCAN_ITEM}
+          show={showScanModal}
+          onHide={closeScanModal}
+          formData={{
+            itemName: '',
+            category: '',
+            id: '',
+            location: '',
+            status: '',
+            quantity: 1,
+            unitCost: 0,
+            minimumQuantity: 0,
+            maximumQuantity: 999,
+            supplier: '',
+            barcode: '',
+            sku: '',
+            description: '',
+            notes: '',
+            updated_at: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+          }}
+          isEditMode={false}
+          expandedSections={{
+            general: false,
+            purchase: false,
+            maintenance: false,
+            usage: false,
+          }}
+          toggleSection={() => {}}
+          handleFormChange={() => {}}
+        >
+          {/* Custom scan modal content would go here */}
+          <div className="text-center p-4">
+            <h4>Scan Items</h4>
+            <p>Scan modal content would be implemented here</p>
+          </div>
+        </ModalContent>
+      )}
     </>
   );
 };

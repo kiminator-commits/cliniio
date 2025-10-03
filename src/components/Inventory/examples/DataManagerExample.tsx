@@ -18,10 +18,14 @@ const DataManagerExample: React.FC = () => {
   if (dataManager.isLoading) {
     return (
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h3 className="text-lg font-semibold text-blue-800">Loading Inventory Data...</h3>
+        <h3 className="text-lg font-semibold text-blue-800">
+          Loading Inventory Data...
+        </h3>
         <div className="mt-2 text-sm text-blue-600">
           {dataManager.operationInProgress.type && (
-            <span>Operation in progress: {dataManager.operationInProgress.type}</span>
+            <span>
+              Operation in progress: {dataManager.operationInProgress.type}
+            </span>
           )}
         </div>
       </div>
@@ -32,7 +36,9 @@ const DataManagerExample: React.FC = () => {
   if (dataManager.error) {
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <h3 className="text-lg font-semibold text-red-800">Error Loading Data</h3>
+        <h3 className="text-lg font-semibold text-red-800">
+          Error Loading Data
+        </h3>
         <p className="mt-2 text-sm text-red-600">{dataManager.error}</p>
         <div className="mt-3 space-x-2">
           <button
@@ -42,7 +48,7 @@ const DataManagerExample: React.FC = () => {
             Retry
           </button>
           <button
-            onClick={dataManager.clearError}
+            onClick={dataManager.resetError}
             className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
           >
             Clear Error
@@ -53,12 +59,20 @@ const DataManagerExample: React.FC = () => {
   }
 
   // Example: Display analytics data
-  const analytics = dataManager.getAnalyticsData();
+  const analytics = dataManager.getAnalyticsData() as {
+    totalItems: number;
+    totalValue: number;
+    lowStockItems: number;
+    outOfStockItems: number;
+    categories: string[];
+  };
 
   return (
     <div className="p-6 bg-white border border-gray-200 rounded-lg space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Inventory Data Manager Example</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          Inventory Data Manager Example
+        </h2>
         <div className="flex items-center space-x-2">
           <button
             onClick={dataManager.refreshData}
@@ -68,7 +82,7 @@ const DataManagerExample: React.FC = () => {
             {dataManager.isRefreshing ? 'Refreshing...' : 'Refresh'}
           </button>
           <span className="text-xs text-gray-500">
-            Last updated: {dataManager.lastUpdated?.toLocaleTimeString() || 'Never'}
+            Last updated: {new Date().toLocaleTimeString()}
           </span>
         </div>
       </div>
@@ -77,7 +91,9 @@ const DataManagerExample: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-4 bg-blue-50 rounded-lg">
           <h3 className="text-sm font-medium text-blue-800">Total Items</h3>
-          <p className="text-2xl font-bold text-blue-900">{analytics.totalItems}</p>
+          <p className="text-2xl font-bold text-blue-900">
+            {analytics.totalItems}
+          </p>
         </div>
         <div className="p-4 bg-green-50 rounded-lg">
           <h3 className="text-sm font-medium text-green-800">Total Value</h3>
@@ -87,11 +103,15 @@ const DataManagerExample: React.FC = () => {
         </div>
         <div className="p-4 bg-yellow-50 rounded-lg">
           <h3 className="text-sm font-medium text-yellow-800">Low Stock</h3>
-          <p className="text-2xl font-bold text-yellow-900">{analytics.lowStockItems}</p>
+          <p className="text-2xl font-bold text-yellow-900">
+            {analytics.lowStockItems}
+          </p>
         </div>
         <div className="p-4 bg-red-50 rounded-lg">
           <h3 className="text-sm font-medium text-red-800">Out of Stock</h3>
-          <p className="text-2xl font-bold text-red-900">{analytics.outOfStockItems}</p>
+          <p className="text-2xl font-bold text-red-900">
+            {analytics.outOfStockItems}
+          </p>
         </div>
       </div>
 
@@ -99,7 +119,7 @@ const DataManagerExample: React.FC = () => {
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
         <div className="flex flex-wrap gap-2">
-          {analytics.categories.map(category => (
+          {analytics.categories.map((category: string) => (
             <span
               key={category}
               className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
@@ -117,12 +137,21 @@ const DataManagerExample: React.FC = () => {
           {dataManager
             .getAllItems()
             .slice(0, 6)
-            .map(item => (
-              <div key={item.id} className="p-3 border border-gray-200 rounded-lg">
+            .map((item) => (
+              <div
+                key={item.id}
+                className="p-3 border border-gray-200 rounded-lg"
+              >
                 <h4 className="font-medium text-gray-900">{item.item}</h4>
-                <p className="text-sm text-gray-600">Category: {item.category}</p>
-                <p className="text-sm text-gray-600">Quantity: {item.quantity || 0}</p>
-                <p className="text-sm text-gray-600">Location: {item.location}</p>
+                <p className="text-sm text-gray-600">
+                  Category: {item.category}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Quantity: {item.quantity}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Location: {item.location}
+                </p>
               </div>
             ))}
         </div>
@@ -136,9 +165,12 @@ const DataManagerExample: React.FC = () => {
             type="text"
             placeholder="Search items..."
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={e => {
-              const searchResults = dataManager.getFilteredItems(e.target.value);
-              console.log('Search results:', searchResults);
+            onChange={async (e) => {
+              try {
+                await dataManager.getFilteredItems(e.target.value);
+              } catch (error) {
+                console.error('Search error:', error);
+              }
             }}
           />
         </div>
@@ -146,20 +178,41 @@ const DataManagerExample: React.FC = () => {
 
       {/* CRUD Operations Example */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-gray-900">CRUD Operations Example</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          CRUD Operations Example
+        </h3>
         <div className="flex space-x-2">
           <button
             onClick={() => {
               // Example: Create a new item
-              const newItem = {
+              const newItem: import('@/types/inventory').InventoryFormData = {
                 id: `item-${Date.now()}`,
-                item: 'Example Item',
+                itemName: 'Example Item',
                 category: 'Tools',
                 location: 'Storage A',
+                purchaseDate: new Date().toISOString(),
+                vendor: 'Example Vendor',
+                cost: 25.99,
+                warranty: '1 year',
+                maintenanceSchedule: 'Monthly',
+                lastServiced: new Date().toISOString(),
+                nextDue: new Date(
+                  Date.now() + 30 * 24 * 60 * 60 * 1000
+                ).toISOString(),
+                serviceProvider: 'Example Service',
+                assignedTo: 'John Doe',
+                status: 'Available',
                 quantity: 10,
-                price: 25.99,
+                notes: 'Example item for testing',
                 barcode: '123456789',
-                currentPhase: 'Available',
+                unitCost: 25.99,
+                minimumQuantity: 5,
+                maximumQuantity: 100,
+                supplier: 'Example Supplier',
+                reorderPoint: 10,
+                reorderQuantity: 20,
+                updated_at: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
               };
 
               dataManager.createItem(newItem).catch(console.error);

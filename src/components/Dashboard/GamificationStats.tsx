@@ -42,9 +42,10 @@ export const GamificationStats = ({
 }: GamificationStatsProps) => {
   return (
     <div
-      className="bg-white rounded-xl shadow-lg p-2 mb-4 border-l-4 border-[#4ECDC4] border-opacity-50"
+      className="bg-white rounded-xl shadow-lg p-2 mb-4 border-l-4 border-[#4ECDC4] border-opacity-50 mt-2"
       aria-label={HOME_SECTION_TITLES.STATS}
       aria-live="polite"
+      data-testid="gamification-stats"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         {/* Current Streak */}
@@ -53,7 +54,9 @@ export const GamificationStats = ({
             <FaFire size={20} className="text-[#4ECDC4]" />
           </div>
           <div className="ml-2">
-            <h2 className="text-sm font-semibold text-[#1e293b]">Current Streak</h2>
+            <h2 className="text-sm font-semibold text-[#1e293b]">
+              Current Streak
+            </h2>
             <div className="flex items-baseline">
               <StreakDisplay streakCount={gamificationData.streak} />
             </div>
@@ -68,7 +71,9 @@ export const GamificationStats = ({
           <div className="ml-2">
             <h2 className="text-sm font-semibold text-[#1e293b]">Level</h2>
             <div className="flex items-baseline">
-              <span className="text-xl font-bold text-[#4ECDC4]">{gamificationData.level}</span>
+              <span className="text-xl font-bold text-[#4ECDC4]">
+                {gamificationData.level}
+              </span>
               <div className="ml-2 px-2 py-0.5 bg-blue-100 rounded-full">
                 <span className="text-xs font-semibold text-blue-600">
                   Top {gamificationData.rank}%

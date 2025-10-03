@@ -1,5 +1,6 @@
 import React from 'react';
-import { useInventoryStore } from '@/hooks/useInventoryStore';
+import { useInventoryStore } from '@/store/useInventoryStore';
+import { TabType } from '@/pages/Inventory/types';
 
 /**
  * Example component demonstrating the new clean inventory store
@@ -76,17 +77,17 @@ const InventoryExample: React.FC = () => {
           type="text"
           placeholder="Search items..."
           value={searchQuery}
-          onChange={e => handleSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           className="w-full p-2 border rounded"
         />
 
         <select
           value={categoryFilter}
-          onChange={e => handleCategoryChange(e.target.value)}
+          onChange={(e) => handleCategoryChange(e.target.value)}
           className="w-full p-2 border rounded"
         >
           <option value="">All Categories</option>
-          {categories.map(category => (
+          {categories.map((category) => (
             <option key={category} value={category}>
               {category}
             </option>
@@ -98,7 +99,7 @@ const InventoryExample: React.FC = () => {
       <div className="mb-4 space-x-2">
         <button
           onClick={handleAddItem}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-4 py-2 bg-[#4ECDC4] hover:bg-[#3db8b0] text-white rounded transition-colors duration-200"
         >
           Add Item
         </button>
@@ -119,12 +120,14 @@ const InventoryExample: React.FC = () => {
       {/* Tabs */}
       <div className="mb-4">
         <div className="flex space-x-2">
-          {['tools', 'supplies', 'equipment'].map(tab => (
+          {(['tools', 'supplies', 'equipment'] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded ${
-                activeTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                activeTab === tab
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 text-gray-700'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -139,8 +142,11 @@ const InventoryExample: React.FC = () => {
           <p>Loading items...</p>
         ) : (
           <div className="space-y-2">
-            {items.slice(0, 5).map(item => (
-              <div key={item.id} className="p-2 border rounded flex justify-between items-center">
+            {items.slice(0, 5).map((item) => (
+              <div
+                key={item.id}
+                className="p-2 border rounded flex justify-between items-center"
+              >
                 <span>{item.name}</span>
                 <button
                   onClick={() => toggleFavorite(item.id)}
@@ -162,7 +168,8 @@ const InventoryExample: React.FC = () => {
       <div className="mb-4 flex justify-between items-center">
         <span>
           Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-          {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} items
+          {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}{' '}
+          items
         </span>
         <div className="space-x-2">
           <button
@@ -191,15 +198,21 @@ const InventoryExample: React.FC = () => {
         ) : (
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold">{analyticsData.totalItems}</div>
+              <div className="text-2xl font-bold">
+                {analyticsData.totalItems}
+              </div>
               <div className="text-sm text-gray-600">Total Items</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{analyticsData.lowStockItems}</div>
+              <div className="text-2xl font-bold">
+                {analyticsData.lowStockItems}
+              </div>
               <div className="text-sm text-gray-600">Low Stock</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{analyticsData.expiredItems}</div>
+              <div className="text-2xl font-bold">
+                {analyticsData.expiredItems}
+              </div>
               <div className="text-sm text-gray-600">Expired</div>
             </div>
           </div>
@@ -218,7 +231,10 @@ const InventoryExample: React.FC = () => {
           <div className="bg-white p-4 rounded">
             <h3 className="font-bold mb-2">Add New Item</h3>
             <p className="mb-4">Add item form would go here...</p>
-            <button onClick={closeAddModal} className="px-4 py-2 bg-gray-500 text-white rounded">
+            <button
+              onClick={closeAddModal}
+              className="px-4 py-2 bg-gray-500 text-white rounded"
+            >
               Close
             </button>
           </div>
@@ -230,7 +246,10 @@ const InventoryExample: React.FC = () => {
           <div className="bg-white p-4 rounded">
             <h3 className="font-bold mb-2">Scan Item</h3>
             <p className="mb-4">Scanner interface would go here...</p>
-            <button onClick={closeScanModal} className="px-4 py-2 bg-gray-500 text-white rounded">
+            <button
+              onClick={closeScanModal}
+              className="px-4 py-2 bg-gray-500 text-white rounded"
+            >
               Close
             </button>
           </div>

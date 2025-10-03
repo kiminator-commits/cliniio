@@ -1,0 +1,18 @@
+import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
+import { useHandleSave } from '../../src/hooks/useHandleSave';
+
+describe('useHandleSave', () => {
+  it('returns a handleSave function', () => {
+    const { result } = renderHook(() =>
+      useHandleSave({
+        formData: { id: '123', itemName: 'Test Item', category: 'Tools' },
+        setFormData: vi.fn(),
+        closeModal: vi.fn(),
+        isEditMode: false,
+      })
+    );
+
+    expect(typeof result.current.handleSave).toBe('function');
+  });
+});

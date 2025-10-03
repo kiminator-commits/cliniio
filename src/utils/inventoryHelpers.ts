@@ -1,15 +1,25 @@
 import React from 'react';
-import { FormData, ExpandedSections, Tool, LocalInventoryItem } from '../types/inventoryTypes';
+import { ExpandedSections, Tool, InventoryItem } from '../types/inventoryTypes';
+import { InventoryFormData } from '../types/inventory';
 
-export const getItemId = (item: LocalInventoryItem): string => {
-  if ('toolId' in item) return item.toolId!;
-  if ('supplyId' in item) return item.supplyId!;
-  if ('equipmentId' in item) return item.equipmentId!;
-  if ('hardwareId' in item) return item.hardwareId!;
-  return '';
+export const getItemId = (item: InventoryItem): string => {
+  return (
+    ((item.data as Record<string, unknown>)?.toolId as string) ||
+    ((item.data as Record<string, unknown>)?.supplyId as string) ||
+    ((item.data as Record<string, unknown>)?.equipmentId as string) ||
+    ((item.data as Record<string, unknown>)?.hardwareId as string) ||
+    item.toolId ||
+    item.supplyId ||
+    item.equipmentId ||
+    item.hardwareId ||
+    item.id
+  );
 };
 
-export const toggleFavorite = (prev: Set<string>, toolId: string): Set<string> => {
+export const toggleFavorite = (
+  prev: Set<string>,
+  toolId: string
+): Set<string> => {
   const newFavorites = new Set(prev);
   if (newFavorites.has(toolId)) {
     newFavorites.delete(toolId);
@@ -19,7 +29,11 @@ export const toggleFavorite = (prev: Set<string>, toolId: string): Set<string> =
   return newFavorites;
 };
 
-export const handleFormChange = <T extends object>(prev: T, field: keyof T, value: string): T => {
+export const handleFormChange = <T extends object>(
+  prev: T,
+  field: keyof T,
+  value: string
+): T => {
   return {
     ...prev,
     [field]: value,
@@ -34,14 +48,20 @@ export const createFormChangeHandler = <T extends object>(
   };
 };
 
-export const toggleSection = <T extends object>(prev: T, section: keyof T): T => {
+export const toggleSection = <T extends object>(
+  prev: T,
+  section: keyof T
+): T => {
   return {
     ...prev,
     [section]: !prev[section],
   };
 };
 
-export const handleCategoryChange = <T>(setter: (tab: T) => void, tab: T): void => {
+export const handleCategoryChange = <T>(
+  setter: (tab: T) => void,
+  tab: T
+): void => {
   setter(tab);
 };
 
@@ -69,43 +89,44 @@ Example Hardware,Office Hardware,Admin Office,800.00,Online,Example hardware not
   }
 };
 
-export const getDefaultFormState = (): FormData => ({
+export const getDefaultFormState = (): InventoryFormData => ({
   itemName: '',
   category: '',
   id: '',
   location: '',
-  purchaseDate: '',
-  vendor: '',
-  cost: '',
-  warranty: '',
-  maintenanceSchedule: '',
-  lastServiced: '',
-  nextDue: '',
-  serviceProvider: '',
-  assignedTo: '',
   status: '',
-  quantity: '',
+  quantity: 1,
+  unitCost: 0,
+  minimumQuantity: 0,
+  maximumQuantity: 999,
+  supplier: '',
+  barcode: '',
+  sku: '',
+  description: '',
   notes: '',
+  lastUpdated: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  createdAt: new Date().toISOString(),
 });
 
-export function getDefaultFormData() {
+export function getDefaultFormData(): InventoryFormData {
   return {
     itemName: '',
     category: '',
     id: '',
     location: '',
-    purchaseDate: '',
-    vendor: '',
-    cost: '',
-    warranty: '',
-    maintenanceSchedule: '',
-    lastServiced: '',
-    nextDue: '',
-    serviceProvider: '',
-    assignedTo: '',
     status: 'Available',
-    quantity: '1',
+    quantity: 1,
+    unitCost: 0,
+    minimumQuantity: 0,
+    maximumQuantity: 999,
+    supplier: '',
+    barcode: '',
+    sku: '',
+    description: '',
     notes: '',
+    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   };
 }
 
@@ -122,7 +143,7 @@ export const filterTools = (
   activeFilter: string,
   favorites: Set<string>
 ): Tool[] => {
-  return tools.filter(tool => {
+  return tools.filter((tool) => {
     const matchesSearch =
       tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tool.barcode.toLowerCase().includes(searchTerm.toLowerCase());
@@ -139,27 +160,26 @@ export const filterTools = (
   });
 };
 
-export const getFormDataFromItem = (item: LocalInventoryItem) => ({
-  itemName: item.item,
-  category: item.category,
+export const getFormDataFromItem = (
+  item: InventoryItem
+): InventoryFormData => ({
+  itemName: item.name || item.item || '',
+  category: item.category || '',
   id: getItemId(item),
-  location: item.location,
-  purchaseDate: '',
-  vendor: '',
-  cost: item.cost?.toString() || '',
-  warranty: '',
-  maintenanceSchedule: '',
-  lastServiced: '',
-  nextDue: '',
-  serviceProvider: '',
-  assignedTo: '',
-  status: '',
-  quantity: '',
-  notes: '',
+  location: item.location || '',
+  status: item.status || '',
+  quantity: item.quantity || 1,
+  unitCost: item.unit_cost || 0,
+  minimumQuantity: item.reorder_point || 0,
+  maximumQuantity:
+    ((item.data as Record<string, unknown>)?.maximumQuantity as number) || 0,
+  supplier: item.supplier || '',
+  updated_at: item.updated_at || new Date().toISOString(),
+  createdAt: item.created_at || new Date().toISOString(),
 });
 
 export const resetAddModalState = (
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>,
+  setFormData: React.Dispatch<React.SetStateAction<InventoryFormData>>,
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>,
   setExpandedSections: React.Dispatch<React.SetStateAction<ExpandedSections>>
 ): void => {
@@ -168,18 +188,25 @@ export const resetAddModalState = (
   setExpandedSections(getDefaultExpandedSections());
 };
 
-export const filterInventoryBySearch = <T extends Record<string, string | number | boolean>>(
+export const filterInventoryBySearch = <
+  T extends Record<string, string | number | boolean>,
+>(
   items: T[],
   fields: (keyof T)[],
   searchQuery: string
 ): T[] => {
   const query = searchQuery.toLowerCase();
-  return items.filter(item =>
-    fields.some(field => item[field]?.toString().toLowerCase().includes(query))
+  return items.filter((item) =>
+    fields.some((field) =>
+      item[field]?.toString().toLowerCase().includes(query)
+    )
   );
 };
 
-export const simulateLoading = (setter: (loading: boolean) => void, delay = 500): (() => void) => {
+export const simulateLoading = (
+  setter: (loading: boolean) => void,
+  delay = 500
+): (() => void) => {
   const timer = setTimeout(() => setter(false), delay);
   return () => clearTimeout(timer);
 };

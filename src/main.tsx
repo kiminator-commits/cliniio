@@ -5,6 +5,23 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/globals.css';
 import './styles/login.css';
 
+// Aggressively unregister all service workers to prevent issues
+if ('serviceWorker' in navigator) {
+  // Unregister all existing service workers
+  navigator.serviceWorker.getRegistrations().then(function (registrations) {
+    for (const registration of registrations) {
+      registration.unregister();
+      console.log('Service worker unregistered');
+    }
+  });
+
+  // Also try to unregister the main service worker
+  navigator.serviceWorker.ready.then((registration) => {
+    registration.unregister();
+    console.log('Main service worker unregistered');
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

@@ -1,7 +1,10 @@
 import { useCallback } from 'react';
 import { toggleFavorite } from '@/utils/inventoryHelpers';
 
-export function useFavoriteToggle(favorites: string[], setFavorites: (favs: string[]) => void) {
+export function useFavoriteToggle(
+  favorites: string[],
+  setFavorites: (favs: string[]) => void
+) {
   const handleToggleFavorite = useCallback(
     (toolId: string) => {
       const newFavorites = toggleFavorite(new Set(favorites), toolId);

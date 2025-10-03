@@ -1,10 +1,4 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import {
-  inventoryData as staticInventoryData,
-  suppliesData as staticSuppliesData,
-  equipmentData as staticEquipmentData,
-  officeHardwareData as staticOfficeHardwareData,
-} from '@/utils/Inventory/inventoryData';
 import { LocalInventoryItem } from '@/types/inventoryTypes';
 import { useCentralizedInventoryData } from '@/hooks/useCentralizedInventoryData';
 
@@ -36,13 +30,17 @@ interface InventoryDataContextType {
   data: unknown;
 }
 
-const InventoryDataContext = createContext<InventoryDataContextType | undefined>(undefined);
+const InventoryDataContext = createContext<
+  InventoryDataContextType | undefined
+>(undefined);
 
 interface InventoryDataProviderProps {
   children: React.ReactNode;
 }
 
-export const InventoryDataProvider: React.FC<InventoryDataProviderProps> = ({ children }) => {
+export const InventoryDataProvider: React.FC<InventoryDataProviderProps> = ({
+  children,
+}) => {
   // Use centralized data management
   const {
     data,
@@ -62,27 +60,26 @@ export const InventoryDataProvider: React.FC<InventoryDataProviderProps> = ({ ch
   } = useCentralizedInventoryData();
 
   // Create inventory data object with centralized data or fallback to static data
-  const inventoryData = useMemo(
-    () => ({
-      tools:
-        centralizedTools.length > 0
-          ? centralizedTools
-          : (staticInventoryData as LocalInventoryItem[]),
-      supplies:
-        centralizedSupplies.length > 0
-          ? centralizedSupplies
-          : (staticSuppliesData as LocalInventoryItem[]),
-      equipment:
-        centralizedEquipment.length > 0
-          ? centralizedEquipment
-          : (staticEquipmentData as LocalInventoryItem[]),
-      officeHardware:
-        centralizedOfficeHardware.length > 0
-          ? centralizedOfficeHardware
-          : (staticOfficeHardwareData as LocalInventoryItem[]),
-    }),
-    [centralizedTools, centralizedSupplies, centralizedEquipment, centralizedOfficeHardware]
-  );
+  const inventoryData = useMemo(() => {
+    const data = {
+      tools: centralizedTools,
+      supplies: centralizedSupplies,
+      equipment: centralizedEquipment,
+      officeHardware: centralizedOfficeHardware,
+    };
+    console.log('🏪 InventoryDataProvider - inventoryData created:', {
+      tools: data.tools.length,
+      supplies: data.supplies.length,
+      equipment: data.equipment.length,
+      officeHardware: data.officeHardware.length,
+    });
+    return data;
+  }, [
+    centralizedTools,
+    centralizedSupplies,
+    centralizedEquipment,
+    centralizedOfficeHardware,
+  ]);
 
   const contextValue = useMemo(
     () => ({
@@ -114,14 +111,18 @@ export const InventoryDataProvider: React.FC<InventoryDataProviderProps> = ({ ch
   );
 
   return (
-    <InventoryDataContext.Provider value={contextValue}>{children}</InventoryDataContext.Provider>
+    <InventoryDataContext.Provider value={contextValue}>
+      {children}
+    </InventoryDataContext.Provider>
   );
 };
 
 export const useInventoryDataContext = (): InventoryDataContextType => {
   const context = useContext(InventoryDataContext);
   if (context === undefined) {
-    throw new Error('useInventoryDataContext must be used within an InventoryDataProvider');
+    throw new Error(
+      'useInventoryDataContext must be used within an InventoryDataProvider'
+    );
   }
   return context;
 };

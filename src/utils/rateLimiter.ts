@@ -1,26 +1,45 @@
-type RequestRecord = { timestamps: number[] };
-
-const requests = new Map<string, RequestRecord>();
+import { generalRateLimiter } from '@/services/rateLimiting/DistributedRateLimiter';
 
 export const rateLimiter = {
   windowMs: 60000,
   maxRequests: 30,
 
-  checkLimit(userId: string): boolean {
-    const now = Date.now();
-    const record = requests.get(userId) || { timestamps: [] };
-
-    // Filter out timestamps older than window
-    record.timestamps = record.timestamps.filter(ts => now - ts < this.windowMs);
-
-    if (record.timestamps.length >= this.maxRequests) {
-      requests.set(userId, record);
-      return false; // limit exceeded
+  async checkLimit(userId: string): Promise<boolean> {
+    try {
+      const result = await generalRateLimiter.checkRateLimit(userId);
+      return result.allowed;
+    } catch (error) {
+      // Fallback to allowing request if rate limiting fails
+      console.warn('Rate limiting failed, allowing request:', error);
+      return true;
     }
+  },
 
-    // Add current timestamp and update record
-    record.timestamps.push(now);
-    requests.set(userId, record);
-    return true; // within limit
+  async getStatus(
+    userId: string
+  ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+    try {
+      const result = await generalRateLimiter.getRateLimitStatus(userId);
+      return {
+        allowed: result.allowed,
+        remaining: result.remaining,
+        resetTime: result.resetTime,
+      };
+    } catch (error) {
+      console.warn('Rate limit status check failed:', error);
+      return {
+        allowed: true,
+        remaining: this.maxRequests,
+        resetTime: Date.now() + this.windowMs,
+      };
+    }
+  },
+
+  async resetLimit(userId: string): Promise<void> {
+    try {
+      await generalRateLimiter.resetRateLimit(userId);
+    } catch (error) {
+      console.warn('Rate limit reset failed:', error);
+    }
   },
 };

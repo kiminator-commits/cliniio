@@ -7,6 +7,7 @@ This document outlines the clear data flow patterns established for the inventor
 ## Problem Solved
 
 **Before**: Data flows through multiple layers with mixed responsibilities, making it difficult to:
+
 - Understand where data comes from
 - Track state changes
 - Maintain separation of concerns
@@ -22,6 +23,7 @@ This document outlines the clear data flow patterns established for the inventor
 **Purpose**: Manages all inventory data, loading states, and error handling
 
 **Responsibilities**:
+
 - Raw inventory data (tools, supplies, equipment, office hardware)
 - Data loading states
 - Error handling and recovery
@@ -29,12 +31,14 @@ This document outlines the clear data flow patterns established for the inventor
 - Centralized data access methods
 
 **Key Features**:
+
 - Uses `useCentralizedInventoryData` hook for data management
 - Provides fallback to static data when centralized data is unavailable
 - Exposes data access methods for different categories
 - Handles data refresh and error clearing
 
 **Usage**:
+
 ```typescript
 const { data, uiState, actions } = useInventoryProviders();
 // Access data
@@ -46,6 +50,7 @@ const { inventoryData, isLoading, error } = data;
 **Purpose**: Manages all UI-related state separately from data
 
 **Responsibilities**:
+
 - Active tab selection
 - Filter states (search, category, location, tracked, favorites)
 - Pagination state
@@ -54,12 +59,14 @@ const { inventoryData, isLoading, error } = data;
 - UI interaction state
 
 **Key Features**:
+
 - Uses Zustand store for state management
 - Provides utility actions for state reset
 - Manages modal states independently
 - Handles filter and pagination state
 
 **Usage**:
+
 ```typescript
 const { data, uiState, actions } = useInventoryProviders();
 // Access UI state
@@ -71,6 +78,7 @@ const { activeTab, showFilters, searchQuery } = uiState;
 **Purpose**: Handles all user actions and business logic
 
 **Responsibilities**:
+
 - CRUD operations (Create, Read, Update, Delete)
 - Filtering and search operations
 - Sorting operations
@@ -81,6 +89,7 @@ const { activeTab, showFilters, searchQuery } = uiState;
 - Validation and utility functions
 
 **Key Features**:
+
 - Centralized business logic
 - Audit logging for all operations
 - Error handling for all actions
@@ -88,6 +97,7 @@ const { activeTab, showFilters, searchQuery } = uiState;
 - Validation and utility functions
 
 **Usage**:
+
 ```typescript
 const { data, uiState, actions } = useInventoryProviders();
 // Access actions
@@ -129,6 +139,7 @@ The providers are composed in a specific order to establish clear data flow:
 ```
 
 This hierarchy ensures that:
+
 1. Data is available to UI state management
 2. UI state is available to business logic
 3. Actions can access both data and UI state
@@ -138,6 +149,7 @@ This hierarchy ensures that:
 ### Component Access Patterns
 
 #### 1. Full Access (All Contexts)
+
 ```typescript
 const { data, uiState, actions } = useInventoryProviders();
 
@@ -152,16 +164,19 @@ const { addItem, searchItems } = actions;
 ```
 
 #### 2. Data-Only Access
+
 ```typescript
 const { inventoryData, isLoading, error } = useInventoryData();
 ```
 
 #### 3. UI State-Only Access
+
 ```typescript
 const { activeTab, showFilters, setShowFilters } = useInventoryUIState();
 ```
 
 #### 4. Actions-Only Access
+
 ```typescript
 const { addItem, updateItem, deleteItem } = useInventoryActions();
 ```
@@ -169,13 +184,14 @@ const { addItem, updateItem, deleteItem } = useInventoryActions();
 ### Migration Guide
 
 #### Before (Mixed Responsibilities)
+
 ```typescript
 // Component with mixed responsibilities
 const Component = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({});
-  
+
   const handleAdd = async (item) => {
     setLoading(true);
     try {
@@ -188,21 +204,22 @@ const Component = () => {
       setLoading(false);
     }
   };
-  
+
   return <div>{/* component JSX */}</div>;
 };
 ```
 
 #### After (Clear Separation)
+
 ```typescript
 // Component with clear responsibilities
 const Component = () => {
   const { data, uiState, actions } = useInventoryProviders();
-  
+
   const handleAdd = async (item) => {
     await actions.addItem(item);
   };
-  
+
   return (
     <div>
       {data.isLoading ? <Loading /> : <ItemList data={data.inventoryData} />}
@@ -214,26 +231,31 @@ const Component = () => {
 ## Benefits
 
 ### 1. Clear Separation of Concerns
+
 - Data management is isolated
 - UI state is managed separately
 - Business logic is centralized
 
 ### 2. Improved Maintainability
+
 - Easy to locate specific functionality
 - Clear data flow paths
 - Reduced coupling between components
 
 ### 3. Better Testing
+
 - Each provider can be tested in isolation
 - Mock providers for component testing
 - Clear interfaces for testing
 
 ### 4. Enhanced Debugging
+
 - Clear data flow paths
 - Isolated error handling
 - Easy to trace state changes
 
 ### 5. Scalability
+
 - Easy to add new data sources
 - Simple to extend UI state
 - Centralized business logic
@@ -249,6 +271,7 @@ const Component = () => {
 ### Error Handling
 
 Each provider handles errors at its level:
+
 - **Data Provider**: Handles data fetching errors
 - **UI State Provider**: Handles state management errors
 - **Actions Provider**: Handles business logic errors
@@ -270,4 +293,4 @@ Each provider handles errors at its level:
 
 ## Conclusion
 
-This data flow pattern establishes a clear, maintainable, and scalable architecture for the inventory page. It separates concerns effectively while providing a clean API for components to interact with the system. 
+This data flow pattern establishes a clear, maintainable, and scalable architecture for the inventory page. It separates concerns effectively while providing a clean API for components to interact with the system.

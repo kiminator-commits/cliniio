@@ -1,7 +1,9 @@
 import { useCallback } from 'react';
 import { useModalState } from './useModalState';
-import { useInventoryStore } from '@/store/useInventoryStore';
-import { LocalInventoryItem } from '@/types/inventoryTypes';
+import { useInventoryStore } from '../../store/useInventoryStore';
+import { InventoryItem, InventoryFormData } from '../../types/inventory';
+import { inventoryServiceFacade } from '../../services/inventory/InventoryServiceFacade';
+import { useCentralizedInventoryData } from '../useCentralizedInventoryData';
 
 /**
  * Hook to manage inventory modal business logic
@@ -9,12 +11,8 @@ import { LocalInventoryItem } from '@/types/inventoryTypes';
  */
 export const useInventoryModals = () => {
   const modalState = useModalState();
+  const { refreshData } = useCentralizedInventoryData();
   const {
-    // Inventory data operations
-    addInventoryItem,
-    updateInventoryItem,
-    deleteInventoryItem,
-
     // Search and filter state
     searchQuery,
     setSearchQuery,
@@ -30,6 +28,7 @@ export const useInventoryModals = () => {
   // Handler for form changes in add/edit modal
   const handleFormChange = useCallback(
     (field: string, value: string) => {
+      console.log(`🔄 Form field changed: ${field} = "${value}"`);
       modalState.setFormData({
         ...modalState.formData,
         [field]: value,
@@ -40,7 +39,7 @@ export const useInventoryModals = () => {
 
   // Handler for toggling sections in add/edit modal
   const toggleSection = useCallback(
-    (section: string) => {
+    (section: keyof typeof modalState.expandedSections) => {
       modalState.setExpandedSections({
         ...modalState.expandedSections,
         [section]: !modalState.expandedSections[section],
@@ -49,25 +48,165 @@ export const useInventoryModals = () => {
     [modalState]
   );
 
+  // Convert FormData to InventoryItem format for saving
+  const convertFormDataToItem = useCallback(
+    (
+      formData: InventoryFormData
+    ): Omit<InventoryItem, 'id' | 'lastUpdated'> => {
+      // Parse cost from text input
+      const parseCost = (costText?: string | number): number => {
+        if (!costText) return 0;
+        if (typeof costText === 'number') return costText;
+
+        // Remove currency symbols and commas, then parse
+        const cleanCost = costText.toString().replace(/[$,\s]/g, '');
+        const parsed = parseFloat(cleanCost);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const parsedCost = parseCost(formData.unitCost);
+      console.log(`💰 Cost parsing: "${formData.unitCost}" -> ${parsedCost}`);
+
+      const itemToSave: Omit<InventoryItem, 'id' | 'lastUpdated'> = {
+        name: formData.itemName || null,
+        category: formData.category || null,
+        location: formData.location || undefined,
+        status: formData.status || undefined,
+        quantity: formData.quantity || 1,
+        unit_cost: parsedCost,
+        facility_id: 'unknown',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        reorder_point: null,
+        expiration_date: null,
+        data: {
+          warranty: formData.warranty,
+          notes: formData.notes,
+          purchaseDate: formData.purchaseDate,
+          supplier: formData.supplier,
+          manufacturer: formData.manufacturer,
+          expiry_date: formData.expiry_date,
+          assetTag: formData.assetTag,
+          brand: formData.brand,
+          model: formData.model,
+          serialNumber: formData.serialNumber,
+        },
+      };
+
+      console.log('📦 Converted item to save:', itemToSave);
+      return itemToSave;
+    },
+    []
+  );
+
   // Handler for saving item in add/edit modal
-  const handleSaveItem = useCallback(() => {
-    if (modalState.isEditMode) {
-      // Update existing item
-      updateInventoryItem(modalState.formData as LocalInventoryItem);
-    } else {
-      // Add new item
-      addInventoryItem(modalState.formData as LocalInventoryItem);
+  const handleSaveItem = useCallback(async () => {
+    try {
+      console.log('🔄 Starting save process...');
+      console.log('📝 Form data:', modalState.formData);
+
+      const itemToSave = convertFormDataToItem({
+        ...modalState.formData,
+        name: modalState.formData.itemName,
+        category: modalState.formData.category,
+        quantity: modalState.formData.quantity,
+        location: modalState.formData.location,
+        manufacturer: modalState.formData.manufacturer,
+        supplier: modalState.formData.supplier,
+        expiry_date: modalState.formData.expiry_date,
+      });
+      console.log('💾 Item to save:', itemToSave);
+
+      if (modalState.isEditMode) {
+        // Update existing item
+        if (modalState.formData.id) {
+          console.log('✏️ Updating existing item...');
+          const updateResponse = await inventoryServiceFacade.updateItem(
+            modalState.formData.id,
+            itemToSave
+          );
+          console.log('✅ Update response:', updateResponse);
+
+          // Check for errors
+          if (updateResponse.error) {
+            throw new Error(`Update failed: ${updateResponse.error}`);
+          }
+
+          // Refresh the form data with the updated item
+          if (updateResponse.data) {
+            console.log('✅ Item updated successfully:', updateResponse.data);
+            const convertItemToFormData = (
+              item: InventoryItem
+            ): InventoryFormData => ({
+              itemName: item.name || item.item || '',
+              category: item.category || '',
+              id: item.id || '',
+              location: item.location || '',
+              createdAt:
+                (item.data as { purchaseDate?: string })?.purchaseDate ||
+                new Date().toISOString(),
+              supplier: item.supplier || '',
+              unit_cost: item.unit_cost || 0,
+              notes: (item.data as { notes?: string })?.notes || '',
+              updated_at:
+                (item.data as { lastServiced?: string })?.lastServiced ||
+                new Date().toISOString(),
+              status: item.status || '',
+              quantity: item.quantity || 1,
+              reorder_point: item.reorder_point || 0,
+              barcode: (item.data as { barcode?: string })?.barcode || '',
+              sku: (item.data as { sku?: string })?.sku || '',
+              description:
+                (item.data as { description?: string })?.description || '',
+              unitCost: item.unit_cost || 0,
+              minimumQuantity: 0,
+              maximumQuantity: 1000,
+            });
+            const updatedFormData = convertItemToFormData(updateResponse.data);
+            modalState.setFormData(updatedFormData);
+          } else {
+            throw new Error('Update succeeded but no data returned');
+          }
+        }
+      } else {
+        // Add new item
+        console.log('➕ Creating new item...');
+        const createResponse =
+          await inventoryServiceFacade.createItem(itemToSave);
+        console.log('✅ Create response:', createResponse);
+
+        // Check for errors
+        if (createResponse.error) {
+          throw new Error(`Create failed: ${createResponse.error}`);
+        }
+
+        if (!createResponse.data) {
+          throw new Error('Create succeeded but no data returned');
+        }
+      }
+
+      console.log('✅ Item saved successfully!');
+
+      // Refresh the inventory data to update tables and analytics
+      console.log('🔄 Refreshing inventory data...');
+      await refreshData();
+      console.log('✅ Inventory data refreshed!');
+
+      // Force a re-render of analytics by triggering a cache clear
+      console.log('🧹 Clearing analytics cache...');
+      inventoryServiceFacade.clearCache();
+      console.log('✅ Analytics cache cleared!');
+
+      // Don't close modal immediately - let user see the updated data
+      // modalState.closeAddModal();
+    } catch (error) {
+      console.error('❌ Failed to save item:', error);
+      // You could add error handling here (show toast, etc.)
     }
-    modalState.closeAddModal();
-  }, [modalState, updateInventoryItem, addInventoryItem]);
+  }, [modalState, convertFormDataToItem, refreshData]);
 
   // Handler for deleting an item
-  const handleDeleteItem = useCallback(
-    (itemId: string) => {
-      deleteInventoryItem(itemId);
-    },
-    [deleteInventoryItem]
-  );
+  const handleDeleteItem = useCallback(() => {}, []);
 
   // Handler for toggling favorite status
   const toggleFavorite = useCallback(
@@ -101,8 +240,35 @@ export const useInventoryModals = () => {
 
   // Handler for opening edit modal with item data
   const handleEditItem = useCallback(
-    (item: LocalInventoryItem) => {
-      modalState.openEditModal(item);
+    (item: InventoryItem) => {
+      const convertItemToFormData = (
+        item: InventoryItem
+      ): InventoryFormData => ({
+        itemName: item.name || item.item || '',
+        category: item.category || '',
+        id: item.id || '',
+        location: item.location || '',
+        createdAt:
+          (item.data as { purchaseDate?: string })?.purchaseDate ||
+          new Date().toISOString(),
+        supplier: item.supplier || '',
+        unit_cost: item.unit_cost || 0,
+        notes: (item.data as { notes?: string })?.notes || '',
+        updated_at:
+          (item.data as { lastServiced?: string })?.lastServiced ||
+          new Date().toISOString(),
+        status: item.status || '',
+        quantity: item.quantity || 1,
+        reorder_point: item.reorder_point || 0,
+        barcode: (item.data as { barcode?: string })?.barcode || '',
+        sku: (item.data as { sku?: string })?.sku || '',
+        description: (item.data as { description?: string })?.description || '',
+        unitCost: item.unit_cost || 0,
+        minimumQuantity: 0,
+        maximumQuantity: 1000,
+      });
+      const formData = convertItemToFormData(item);
+      modalState.openEditModal(formData);
     },
     [modalState]
   );
@@ -140,6 +306,7 @@ export const useInventoryModals = () => {
     handleDeleteItem,
     handleEditItem,
     handleAddItem,
+    openAddModal: handleAddItem, // Alias for compatibility
 
     // Track modal handlers
     handleTrackItem,

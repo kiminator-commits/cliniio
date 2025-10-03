@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Test outputs
+test-results/
+playwright-report/
+
+# Documentation
+docs/
+
+# Configuration files
+*.config.js
+*.config.ts
+vite.config.ts
+jest.config.js
+playwright.config.ts
+tailwind.config.js
+postcss.config.js
+
+# Generated files
+*.d.ts
+vite-env.d.ts
+src/types/supabase.ts
+src/types/database.types.ts
+
+# Database and migration files
+supabase/
+*.sql
+
+# Scripts and utilities
+scripts/
+k6/
+load-tests/
+
+# Other
+.git/
+.vercel/
+.github/
+.vscode/
+.husky/
+
+# Large files
+*.zip
+*.md
+*.txt
+*.log
+
+# Temporary files
+*.tmp
+*.temp 

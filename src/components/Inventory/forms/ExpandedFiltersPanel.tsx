@@ -10,8 +10,8 @@ interface ExpandedFiltersPanelProps {
     location: string;
     showFavoritesOnly?: boolean;
   };
-  setCategoryFilter: (v: string | undefined) => void;
-  setLocationFilter: (v: string | undefined) => void;
+  setCategoryFilter: (v: string) => void;
+  setLocationFilter: (v: string) => void;
   setSearchQuery: (v: string) => void;
   onToggleFavoritesFilter?: () => void;
 }
@@ -27,7 +27,10 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
   return (
     <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 flex flex-wrap gap-3">
       <div className="w-full">
-        <label htmlFor="search-input" className="block text-xs font-semibold text-gray-600 mb-1">
+        <label
+          htmlFor="search-input"
+          className="block text-xs font-semibold text-gray-600 mb-1"
+        >
           Search
         </label>
         <input
@@ -36,13 +39,16 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
           placeholder="Search inventory..."
           className="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={filters.searchQuery || ''}
-          onChange={e => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
       {activeTab === 'tools' && (
         <>
           <div>
-            <label htmlFor="item-select" className="block text-xs font-semibold text-gray-600 mb-1">
+            <label
+              htmlFor="item-select"
+              className="block text-xs font-semibold text-gray-600 mb-1"
+            >
               Item
             </label>
             <select id="item-select" className="form-select">
@@ -61,7 +67,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="category-select"
               className="form-select"
               value={filters.category || ''}
-              onChange={e => setCategoryFilter(e.target.value || undefined)}
+              onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="Tools">Tools</option>
@@ -78,7 +84,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="location-select"
               className="form-select"
               value={filters.location || ''}
-              onChange={e => setLocationFilter(e.target.value || undefined)}
+              onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="Storage Room">Storage Room</option>
@@ -136,7 +142,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="supply-category-select"
               className="form-select"
               value={filters.category || ''}
-              onChange={e => setCategoryFilter(e.target.value || undefined)}
+              onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="Supplies">Supplies</option>
@@ -153,7 +159,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="supply-location-select"
               className="form-select"
               value={filters.location || ''}
-              onChange={e => setLocationFilter(e.target.value || undefined)}
+              onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="Supply Room">Supply Room</option>
@@ -210,7 +216,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="equipment-category-select"
               className="form-select"
               value={filters.category || ''}
-              onChange={e => setCategoryFilter(e.target.value || undefined)}
+              onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="Equipment">Equipment</option>
@@ -227,7 +233,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="equipment-location-select"
               className="form-select"
               value={filters.location || ''}
-              onChange={e => setLocationFilter(e.target.value || undefined)}
+              onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="ICU">ICU</option>
@@ -285,7 +291,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="hardware-category-select"
               className="form-select"
               value={filters.category || ''}
-              onChange={e => setCategoryFilter(e.target.value || undefined)}
+              onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="Office Hardware">Office Hardware</option>
@@ -302,7 +308,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               id="hardware-location-select"
               className="form-select"
               value={filters.location || ''}
-              onChange={e => setLocationFilter(e.target.value || undefined)}
+              onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
               <option value="Admin Office">Admin Office</option>

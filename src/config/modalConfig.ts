@@ -1,4 +1,4 @@
-import { LocalInventoryItem } from '@/types/inventoryTypes';
+import { InventoryFormData } from '@/types/inventory';
 
 /**
  * Modal configuration types
@@ -165,14 +165,11 @@ export const ADD_EDIT_ITEM_SECTIONS: SectionConfig[] = [
         placeholder: 'Enter vendor name',
       },
       {
-        name: 'cost',
+        name: 'unitCost',
         label: 'Cost',
-        type: 'number',
-        required: false,
-        placeholder: 'Enter cost',
-        validation: {
-          min: 0,
-        },
+        type: 'text',
+        required: true,
+        placeholder: 'Enter cost (e.g., $25.99, 15.50)',
       },
       {
         name: 'warranty',
@@ -243,7 +240,7 @@ export const ADD_EDIT_ITEM_SECTIONS: SectionConfig[] = [
         name: 'quantity',
         label: 'Quantity',
         type: 'number',
-        required: false,
+        required: true,
         placeholder: 'Enter quantity',
         validation: {
           min: 0,
@@ -263,23 +260,29 @@ export const ADD_EDIT_ITEM_SECTIONS: SectionConfig[] = [
 /**
  * Helper function to get modal configuration by type
  */
-export const getModalConfig = (modalType: keyof typeof INVENTORY_MODAL_CONFIGS): ModalConfig => {
+export const getModalConfig = (
+  modalType: keyof typeof INVENTORY_MODAL_CONFIGS
+): ModalConfig => {
   return INVENTORY_MODAL_CONFIGS[modalType];
 };
 
 /**
  * Helper function to get section configuration by ID
  */
-export const getSectionConfig = (sectionId: string): SectionConfig | undefined => {
-  return ADD_EDIT_ITEM_SECTIONS.find(section => section.id === sectionId);
+export const getSectionConfig = (
+  sectionId: string
+): SectionConfig | undefined => {
+  return ADD_EDIT_ITEM_SECTIONS.find((section) => section.id === sectionId);
 };
 
 /**
  * Helper function to get field configuration by name
  */
-export const getFieldConfig = (fieldName: string): FormFieldConfig | undefined => {
+export const getFieldConfig = (
+  fieldName: string
+): FormFieldConfig | undefined => {
   for (const section of ADD_EDIT_ITEM_SECTIONS) {
-    const field = section.fields.find(f => f.name === fieldName);
+    const field = section.fields.find((f) => f.name === fieldName);
     if (field) return field;
   }
   return undefined;
@@ -288,30 +291,41 @@ export const getFieldConfig = (fieldName: string): FormFieldConfig | undefined =
 /**
  * Helper function to validate form data against field configurations
  */
-export const validateFormData = (formData: Partial<LocalInventoryItem>): Record<string, string> => {
+export const validateFormData = (
+  formData: InventoryFormData
+): Record<string, string> => {
   const errors: Record<string, string> = {};
 
   for (const section of ADD_EDIT_ITEM_SECTIONS) {
     for (const field of section.fields) {
-      if (field.required && !formData[field.name as keyof LocalInventoryItem]) {
+      if (field.required && !formData[field.name as keyof InventoryFormData]) {
         errors[field.name] = `${field.label} is required`;
       }
 
-      if (field.validation && formData[field.name as keyof LocalInventoryItem]) {
-        const value = formData[field.name as keyof LocalInventoryItem];
+      if (field.validation && formData[field.name as keyof InventoryFormData]) {
+        const value = formData[field.name as keyof InventoryFormData];
 
-        if (field.validation.min !== undefined && Number(value) < field.validation.min) {
-          errors[field.name] = `${field.label} must be at least ${field.validation.min}`;
+        if (
+          field.validation.min !== undefined &&
+          Number(value) < field.validation.min
+        ) {
+          errors[field.name] =
+            `${field.label} must be at least ${field.validation.min}`;
         }
 
-        if (field.validation.max !== undefined && Number(value) > field.validation.max) {
-          errors[field.name] = `${field.label} must be at most ${field.validation.max}`;
+        if (
+          field.validation.max !== undefined &&
+          Number(value) > field.validation.max
+        ) {
+          errors[field.name] =
+            `${field.label} must be at most ${field.validation.max}`;
         }
 
         if (field.validation.pattern && typeof value === 'string') {
           const regex = new RegExp(field.validation.pattern);
           if (!regex.test(value)) {
-            errors[field.name] = field.validation.message || `${field.label} format is invalid`;
+            errors[field.name] =
+              field.validation.message || `${field.label} format is invalid`;
           }
         }
       }

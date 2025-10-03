@@ -23,7 +23,7 @@ export const createScanModalSlice = (
     })),
   removeScannedItem: (id: string) =>
     set((state: ScanModalState) => ({
-      scannedItems: state.scannedItems.filter(item => item !== id),
+      scannedItems: state.scannedItems.filter((item) => item !== id),
     })),
   resetScannedItems: () => set(() => ({ scannedItems: [] })),
 });

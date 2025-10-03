@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useInventoryStore } from '@/store/useInventoryStore';
+import { useInventoryStore } from '../../store/useInventoryStore';
+import { InventoryFormData } from '../../types/inventory';
 
 /**
  * Hook to manage modal state for inventory modals
@@ -13,13 +14,17 @@ export const useModalState = () => {
     showUploadBarcodeModal,
     showScanModal,
 
-    // Modal toggle functions
-    toggleAddModal,
-    toggleTrackModal,
-    toggleUploadBarcodeModal,
-    setShowScanModal,
+    // Modal actions
+    openAddModal,
+    closeAddModal,
+    openTrackModal,
+    closeTrackModal,
+    openUploadBarcodeModal,
+    closeUploadBarcodeModal,
+    openScanModal,
+    closeScanModal,
 
-    // Form and edit mode states
+    // Form and edit mode states (from form slice)
     formData,
     setFormData,
     isEditMode,
@@ -27,63 +32,63 @@ export const useModalState = () => {
     expandedSections,
     setExpandedSections,
 
-    // Reset functions
-    resetFormData,
+    // Reset functions (from form slice)
+    resetForm,
   } = useInventoryStore();
 
   // Handler to open add modal in create mode
-  const openAddModal = useCallback(() => {
+  const handleOpenAddModal = useCallback(() => {
     setEditMode(false);
-    resetFormData();
-    toggleAddModal();
-  }, [setEditMode, resetFormData, toggleAddModal]);
+    resetForm();
+    openAddModal();
+  }, [setEditMode, resetForm, openAddModal]);
 
   // Handler to open add modal in edit mode
-  const openEditModal = useCallback(
-    (itemData: Record<string, unknown>) => {
+  const handleOpenEditModal = useCallback(
+    (itemData: InventoryFormData) => {
       setEditMode(true);
       setFormData(itemData);
-      toggleAddModal();
+      openAddModal();
     },
-    [setEditMode, setFormData, toggleAddModal]
+    [setEditMode, setFormData, openAddModal]
   );
 
   // Handler to close add/edit modal
-  const closeAddModal = useCallback(() => {
-    toggleAddModal();
+  const handleCloseAddModal = useCallback(() => {
+    closeAddModal();
     setEditMode(false);
-    resetFormData();
-  }, [toggleAddModal, setEditMode, resetFormData]);
+    resetForm();
+  }, [closeAddModal, setEditMode, resetForm]);
 
   // Handler to open track modal
-  const openTrackModal = useCallback(() => {
-    toggleTrackModal();
-  }, [toggleTrackModal]);
+  const handleOpenTrackModal = useCallback(() => {
+    openTrackModal();
+  }, [openTrackModal]);
 
   // Handler to close track modal
-  const closeTrackModal = useCallback(() => {
-    toggleTrackModal();
-  }, [toggleTrackModal]);
+  const handleCloseTrackModal = useCallback(() => {
+    closeTrackModal();
+  }, [closeTrackModal]);
 
   // Handler to open upload barcode modal
-  const openUploadBarcodeModal = useCallback(() => {
-    toggleUploadBarcodeModal();
-  }, [toggleUploadBarcodeModal]);
+  const handleOpenUploadBarcodeModal = useCallback(() => {
+    openUploadBarcodeModal();
+  }, [openUploadBarcodeModal]);
 
   // Handler to close upload barcode modal
-  const closeUploadBarcodeModal = useCallback(() => {
-    toggleUploadBarcodeModal();
-  }, [toggleUploadBarcodeModal]);
+  const handleCloseUploadBarcodeModal = useCallback(() => {
+    closeUploadBarcodeModal();
+  }, [closeUploadBarcodeModal]);
 
   // Handler to open scan modal
-  const openScanModal = useCallback(() => {
-    setShowScanModal(true);
-  }, [setShowScanModal]);
+  const handleOpenScanModal = useCallback(() => {
+    openScanModal();
+  }, [openScanModal]);
 
   // Handler to close scan modal
-  const closeScanModal = useCallback(() => {
-    setShowScanModal(false);
-  }, [setShowScanModal]);
+  const handleCloseScanModal = useCallback(() => {
+    closeScanModal();
+  }, [closeScanModal]);
 
   return {
     // Modal visibility states
@@ -98,17 +103,17 @@ export const useModalState = () => {
     expandedSections,
 
     // Modal open handlers
-    openAddModal,
-    openEditModal,
-    openTrackModal,
-    openUploadBarcodeModal,
-    openScanModal,
+    openAddModal: handleOpenAddModal,
+    openEditModal: handleOpenEditModal,
+    openTrackModal: handleOpenTrackModal,
+    openUploadBarcodeModal: handleOpenUploadBarcodeModal,
+    openScanModal: handleOpenScanModal,
 
     // Modal close handlers
-    closeAddModal,
-    closeTrackModal,
-    closeUploadBarcodeModal,
-    closeScanModal,
+    closeAddModal: handleCloseAddModal,
+    closeTrackModal: handleCloseTrackModal,
+    closeUploadBarcodeModal: handleCloseUploadBarcodeModal,
+    closeScanModal: handleCloseScanModal,
 
     // Form state setters (for use in modal content)
     setFormData,

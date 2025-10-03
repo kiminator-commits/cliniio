@@ -17,19 +17,19 @@ export const useUI = (initialState: Partial<UIState> = {}) => {
   });
 
   const setLoading = useCallback((isLoading: boolean) => {
-    setUIState(prev => ({ ...prev, isLoading }));
+    setUIState((prev) => ({ ...prev, isLoading }));
   }, []);
 
   const toggleModal = useCallback(() => {
-    setUIState(prev => ({ ...prev, isModalOpen: !prev.isModalOpen }));
+    setUIState((prev) => ({ ...prev, isModalOpen: !prev.isModalOpen }));
   }, []);
 
   const setActiveTab = useCallback((tab: string) => {
-    setUIState(prev => ({ ...prev, activeTab: tab }));
+    setUIState((prev) => ({ ...prev, activeTab: tab }));
   }, []);
 
   const toggleSidebar = useCallback(() => {
-    setUIState(prev => ({ ...prev, sidebarOpen: !prev.sidebarOpen }));
+    setUIState((prev) => ({ ...prev, sidebarOpen: !prev.sidebarOpen }));
   }, []);
 
   return {

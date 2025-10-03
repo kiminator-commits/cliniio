@@ -1,4 +1,5 @@
 import { getDefaultFormData } from '@/utils/inventoryHelpers';
+import { FormData, InventoryItem } from '@/types/inventoryTypes';
 
 export interface StoreFormData {
   item?: string;
@@ -37,10 +38,14 @@ export interface TransformedFormData {
  * @returns The appropriate ID value
  */
 export const resolveFormDataId = (storeFormData: StoreFormData): string => {
-  if ('toolId' in storeFormData && storeFormData.toolId) return storeFormData.toolId;
-  if ('supplyId' in storeFormData && storeFormData.supplyId) return storeFormData.supplyId;
-  if ('equipmentId' in storeFormData && storeFormData.equipmentId) return storeFormData.equipmentId;
-  if ('hardwareId' in storeFormData && storeFormData.hardwareId) return storeFormData.hardwareId;
+  if ('toolId' in storeFormData && storeFormData.toolId)
+    return storeFormData.toolId;
+  if ('supplyId' in storeFormData && storeFormData.supplyId)
+    return storeFormData.supplyId;
+  if ('equipmentId' in storeFormData && storeFormData.equipmentId)
+    return storeFormData.equipmentId;
+  if ('hardwareId' in storeFormData && storeFormData.hardwareId)
+    return storeFormData.hardwareId;
   return '';
 };
 
@@ -49,16 +54,84 @@ export const resolveFormDataId = (storeFormData: StoreFormData): string => {
  * @param storeFormData - Form data from store
  * @returns Transformed form data with all required properties
  */
-export const transformFormDataForModal = (storeFormData: StoreFormData): TransformedFormData => {
+export const transformFormDataForModal = (
+  storeFormData: Partial<InventoryItem> | FormData
+): TransformedFormData => {
   const defaultData = getDefaultFormData();
 
+  // Handle both FormData and Partial<InventoryItem> types
+  const itemName =
+    'itemName' in storeFormData
+      ? storeFormData.itemName
+      : storeFormData.name || storeFormData.item || '';
+  const category = storeFormData.category;
+  const id = storeFormData.id;
+  const location = storeFormData.location || '';
+  // Safely extract unit_cost with proper type checking
+  const unitCostValue = (storeFormData as { unit_cost?: unknown }).unit_cost;
+  const unitCost =
+    typeof unitCostValue === 'number'
+      ? unitCostValue.toString() || '0'
+      : unitCostValue || '0';
+
+  // Safely extract status
+  const status = (storeFormData as { status?: unknown }).status || '';
+
+  // Helper function to format dates for HTML date inputs
+  const formatDateForInput = (dateString?: string | null): string => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0]; // Convert to yyyy-MM-dd format
+    } catch (err) {
+      console.error(err);
+      return '';
+    }
+  };
+
   return {
-    ...defaultData,
-    itemName: storeFormData.item || defaultData.itemName,
-    category: storeFormData.category || defaultData.category,
-    id: resolveFormDataId(storeFormData),
-    location: storeFormData.location || defaultData.location,
-    cost: (storeFormData.cost || 0).toString(),
-    status: storeFormData.p2Status || defaultData.status,
+    itemName: String(itemName || defaultData.itemName || ''),
+    category: String(category || defaultData.category || ''),
+    id: String(id || defaultData.id || ''),
+    location: String(location || defaultData.location || ''),
+    purchaseDate: formatDateForInput(
+      (storeFormData as Record<string, unknown>)?.createdAt ||
+        defaultData.createdAt
+    ),
+    vendor: String(
+      (storeFormData as Record<string, unknown>)?.supplier ||
+        defaultData.supplier ||
+        ''
+    ),
+    cost: String(unitCost || defaultData.unitCost || 0),
+    warranty: String(
+      (storeFormData as Record<string, unknown>)?.warranty || ''
+    ),
+    maintenanceSchedule: String(
+      (storeFormData as Record<string, unknown>)?.maintenanceSchedule || ''
+    ),
+    lastServiced: formatDateForInput(
+      (storeFormData as Record<string, unknown>)?.lastServiced ||
+        defaultData.updated_at
+    ),
+    nextDue: String((storeFormData as Record<string, unknown>)?.nextDue || ''),
+    serviceProvider: String(
+      (storeFormData as Record<string, unknown>)?.serviceProvider || ''
+    ),
+    assignedTo: String(
+      (storeFormData as Record<string, unknown>)?.assignedTo || ''
+    ),
+    status: String(status || defaultData.status || ''),
+    quantity: String(
+      (storeFormData as Record<string, unknown>)?.quantity ||
+        defaultData.quantity ||
+        1
+    ),
+    notes: String(
+      (storeFormData as Record<string, unknown>)?.notes ||
+        defaultData.notes ||
+        ''
+    ),
   };
 };

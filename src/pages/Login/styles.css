@@ -14,3 +14,24 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Progress bar width classes */
+.progress-bar-25 {
+  width: 25%;
+}
+
+.progress-bar-50 {
+  width: 50%;
+}
+
+.progress-bar-75 {
+  width: 75%;
+}
+
+.progress-bar-100 {
+  width: 100%;
+}
+
+.progress-bar-0 {
+  width: 0%;
+}

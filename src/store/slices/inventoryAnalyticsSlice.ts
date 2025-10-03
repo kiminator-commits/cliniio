@@ -5,6 +5,7 @@ export interface InventoryAnalyticsState {
   analyticsData: {
     totalItems: number;
     lowStockItems: number;
+    outOfStockItems: number;
     expiredItems: number;
     categories: Record<string, number>;
     recentActivity: Array<{
@@ -32,11 +33,12 @@ export const createInventoryAnalyticsSlice: StateCreator<
   [],
   [],
   InventoryAnalyticsState
-> = set => ({
+> = (set) => ({
   // Analytics data
   analyticsData: {
     totalItems: 0,
     lowStockItems: 0,
+    outOfStockItems: 0,
     expiredItems: 0,
     categories: {},
     recentActivity: [],
@@ -46,14 +48,14 @@ export const createInventoryAnalyticsSlice: StateCreator<
   isLoadingAnalytics: false,
 
   // Analytics actions
-  setAnalyticsData: data => set({ analyticsData: data }),
-  setLoadingAnalytics: loading => set({ isLoadingAnalytics: loading }),
+  setAnalyticsData: (data) => set({ analyticsData: data }),
+  setLoadingAnalytics: (loading) => set({ isLoadingAnalytics: loading }),
   updateAnalytics: () => {
     // This would typically fetch analytics data from an API
     set(() => ({ isLoadingAnalytics: true }));
     // Simulate API call
     setTimeout(() => {
-      set(state => ({
+      set((state) => ({
         isLoadingAnalytics: false,
         analyticsData: {
           ...state.analyticsData,
@@ -69,6 +71,7 @@ export const createInventoryAnalyticsSlice: StateCreator<
       analyticsData: {
         totalItems: 0,
         lowStockItems: 0,
+        outOfStockItems: 0,
         expiredItems: 0,
         categories: {},
         recentActivity: [],

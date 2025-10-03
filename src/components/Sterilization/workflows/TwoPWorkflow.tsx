@@ -5,7 +5,10 @@ interface TwoPWorkflowProps {
   onStore: () => void;
 }
 
-export default function TwoPWorkflow({ scannedData, onStore }: TwoPWorkflowProps) {
+export default function TwoPWorkflow({
+  scannedData,
+  onStore,
+}: TwoPWorkflowProps) {
   return (
     <div>
       <p>This tool follows a 2-Phase workflow (Bath 1 & 2 only).</p>

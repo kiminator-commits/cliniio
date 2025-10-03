@@ -13,7 +13,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
 }) => {
   return (
     <div className="flex flex-wrap gap-2">
-      {categories.map(category => (
+      {categories.map((category) => (
         <button
           key={category}
           onClick={() => onSelect(category)}

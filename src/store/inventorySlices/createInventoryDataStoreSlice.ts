@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { LocalInventoryItem } from '@/types/inventoryTypes';
+import { LocalInventoryItem, ExpandedSections } from '@/types/inventoryTypes';
 import { getDefaultExpandedSections } from '@/utils/inventoryHelpers';
 
 export interface InventoryDataState {
@@ -11,11 +11,26 @@ export interface InventoryDataState {
 
   resetFormData: () => void;
 
-  favorites: string[];
-  setFavorites: (val: string[]) => void;
+  expandedSections: ExpandedSections;
+  setExpandedSections: (val: ExpandedSections) => void;
 
-  expandedSections: Record<string, boolean>;
-  setExpandedSections: (val: Record<string, boolean>) => void;
+  // Pagination state
+  itemsPerPage: number;
+  setItemsPerPage: (count: number) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  pagination: {
+    currentPage: number;
+    pageSize: number;
+  };
+
+  // Filter state
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  category: string;
+  setCategoryFilter: (category: string) => void;
+  location: string;
+  setLocationFilter: (location: string) => void;
 }
 
 export const createInventoryDataStoreSlice: StateCreator<
@@ -23,18 +38,37 @@ export const createInventoryDataStoreSlice: StateCreator<
   [],
   [],
   InventoryDataState
-> = set => ({
+> = (set) => ({
   formData: {},
-  setFormData: data => set({ formData: data }),
+  setFormData: (data) => set({ formData: data }),
 
   isEditMode: false,
-  setEditMode: val => set({ isEditMode: val }),
+  setEditMode: (val) => set({ isEditMode: val }),
 
   resetFormData: () => set({ formData: {} }),
 
-  favorites: [],
-  setFavorites: val => set({ favorites: val }),
+  expandedSections: getDefaultExpandedSections(),
+  setExpandedSections: (val) => set({ expandedSections: val }),
 
-  expandedSections: getDefaultExpandedSections() as unknown as Record<string, boolean>,
-  setExpandedSections: val => set({ expandedSections: val }),
+  // Pagination state
+  itemsPerPage: 3,
+  setItemsPerPage: (count: number) => set({ itemsPerPage: count }),
+  currentPage: 1,
+  setCurrentPage: (page: number) =>
+    set((state) => ({
+      currentPage: page,
+      pagination: { ...state.pagination, currentPage: page },
+    })),
+  pagination: {
+    currentPage: 1,
+    pageSize: 10,
+  },
+
+  // Filter state
+  searchQuery: '',
+  setSearchQuery: (value: string) => set({ searchQuery: value }),
+  category: '',
+  setCategoryFilter: (category: string) => set({ category }),
+  location: '',
+  setLocationFilter: (location: string) => set({ location }),
 });

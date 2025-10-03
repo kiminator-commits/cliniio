@@ -27,21 +27,30 @@ class UsageTrackingService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const data = JSON.parse(stored);
+        const data = JSON.parse(stored) as Record<string, unknown>;
         // Convert date strings back to Date objects
         const convertedData = Object.fromEntries(
-          Object.entries(data).map(([key, value]: [string, unknown]) => [
-            key,
-            {
-              ...value,
-              lastUsed: new Date((value as { lastUsed: string }).lastUsed),
-            },
-          ])
+          Object.entries(data).map(([key, value]) => {
+            const typedValue = value as { lastUsed: string } & Record<
+              string,
+              unknown
+            >;
+            return [
+              key,
+              {
+                ...typedValue,
+                lastUsed: new Date(typedValue.lastUsed),
+              },
+            ];
+          })
         );
-        this.usageData = new Map(Object.entries(convertedData));
+        this.usageData = new Map(
+          Object.entries(convertedData) as [string, UsageData][]
+        );
       }
-    } catch (error) {
-      console.warn('Failed to load usage data:', error);
+    } catch (err) {
+      console.error(err);
+      console.warn('Failed to load usage data:');
     }
   }
 
@@ -49,23 +58,27 @@ class UsageTrackingService {
     try {
       const data = Object.fromEntries(this.usageData);
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
-      console.warn('Failed to save usage data:', error);
+    } catch (err) {
+      console.error(err);
+      console.warn('Failed to save usage data:');
     }
   }
 
   private getOrCreateUsageData(itemId: string): UsageData {
-    if (!this.usageData.has(itemId)) {
-      this.usageData.set(itemId, {
+    const existing = this.usageData.get(itemId);
+    if (!existing) {
+      const newData: UsageData = {
         itemId,
         usageCount: 0,
         lastUsed: new Date(),
         searchCount: 0,
         favoriteCount: 0,
         trackCount: 0,
-      });
+      };
+      this.usageData.set(itemId, newData);
+      return newData;
     }
-    return this.usageData.get(itemId)!;
+    return existing;
   }
 
   // Track when an item is viewed/accessed
@@ -110,15 +123,18 @@ class UsageTrackingService {
     // Ensure lastUsed is a valid Date object
     let lastUsed: Date;
     try {
-      lastUsed = data.lastUsed instanceof Date ? data.lastUsed : new Date(data.lastUsed);
+      lastUsed =
+        data.lastUsed instanceof Date ? data.lastUsed : new Date(data.lastUsed);
       if (isNaN(lastUsed.getTime())) {
         lastUsed = new Date(); // Fallback to current date if invalid
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
       lastUsed = new Date(); // Fallback to current date if error
     }
 
-    const daysSinceLastUsed = (now.getTime() - lastUsed.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceLastUsed =
+      (now.getTime() - lastUsed.getTime()) / (1000 * 60 * 60 * 24);
 
     // Base score from usage count
     let score = data.usageCount * 10;
@@ -147,14 +163,38 @@ class UsageTrackingService {
 
   // Get smart ranking for a list of items
   getSmartRanking<
-    T extends { toolId?: string; supplyId?: string; equipmentId?: string; hardwareId?: string },
+    T extends {
+      toolId?: string;
+      supplyId?: string;
+      equipmentId?: string;
+      hardwareId?: string;
+      data?: Record<string, unknown>;
+    },
   >(items: T[]): T[] {
     return [...items].sort((a, b) => {
-      const aId = a.toolId || a.supplyId || a.equipmentId || a.hardwareId || '';
-      const bId = b.toolId || b.supplyId || b.equipmentId || b.hardwareId || '';
+      const aId =
+        a.toolId ||
+        a.supplyId ||
+        a.equipmentId ||
+        a.hardwareId ||
+        a.data?.toolId ||
+        a.data?.supplyId ||
+        a.data?.equipmentId ||
+        a.data?.hardwareId ||
+        '';
+      const bId =
+        b.toolId ||
+        b.supplyId ||
+        b.equipmentId ||
+        b.hardwareId ||
+        b.data?.toolId ||
+        b.data?.supplyId ||
+        b.data?.equipmentId ||
+        b.data?.hardwareId ||
+        '';
 
-      const aScore = this.calculateSmartScore(aId);
-      const bScore = this.calculateSmartScore(bId);
+      const aScore = this.calculateSmartScore(aId as string);
+      const bScore = this.calculateSmartScore(bId as string);
 
       return bScore - aScore; // Higher scores first
     });

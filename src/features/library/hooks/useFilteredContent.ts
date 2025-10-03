@@ -36,8 +36,10 @@ export const useFilteredContent = ({
   return useMemo(() => {
     const baseContent = aiSuggestionsActive ? getAiSuggestions() : content;
 
-    return baseContent.filter(item => {
-      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return baseContent.filter((item) => {
+      const matchesSearch = item.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
       // Handle favorites filter
       if (selectedCategory === 'Favorites') {
@@ -45,10 +47,12 @@ export const useFilteredContent = ({
       }
 
       // Handle other category filters
-      const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+      const matchesCategory =
+        selectedCategory === 'All' || item.category === selectedCategory;
 
       // Handle skill level filter
-      const matchesSkillLevel = selectedLevel === 'All' || item.level === selectedLevel;
+      const matchesSkillLevel =
+        selectedLevel === 'All' || item.level === selectedLevel;
 
       // Handle duration filter
       const matchesDuration =
@@ -70,10 +74,15 @@ export const useFilteredContent = ({
         })();
 
       // Handle new content filter
-      const matchesNewFilter = !filters.showNewOnly || isNewContent(item.publishedDate);
+      const matchesNewFilter =
+        !filters.showNewOnly || isNewContent(item.publishedDate);
 
       return (
-        matchesSearch && matchesCategory && matchesSkillLevel && matchesDuration && matchesNewFilter
+        matchesSearch &&
+        matchesCategory &&
+        matchesSkillLevel &&
+        matchesDuration &&
+        matchesNewFilter
       );
     });
   }, [

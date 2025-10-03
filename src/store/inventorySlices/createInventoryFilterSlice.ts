@@ -9,7 +9,7 @@ export type FilterState = {
   setLocationFilter: (location: string) => void;
 };
 
-export const createInventoryFilterSlice: StateCreator<FilterState> = set => ({
+export const createInventoryFilterSlice: StateCreator<FilterState> = (set) => ({
   searchQuery: '',
   setSearchQuery: (value: string) => set({ searchQuery: value }),
   category: '',

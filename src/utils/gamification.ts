@@ -43,7 +43,9 @@ export const getYearlyProgress = (): { current: number; total: number } => {
   const totalDays = Math.ceil(
     (endOfYear.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const daysPassed = Math.ceil((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+  const daysPassed = Math.ceil(
+    (now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   return {
     current: daysPassed,

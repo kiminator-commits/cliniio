@@ -3,7 +3,11 @@ import { useEffect } from 'react';
 export const useCleanup = (cleanupFn: () => void) => {
   useEffect(() => {
     return () => {
-      cleanupFn();
+      try {
+        cleanupFn();
+      } catch (error) {
+        console.error('Error in cleanup function:', error);
+      }
     };
   }, [cleanupFn]);
 };

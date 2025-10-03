@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import { Database } from '../types/database.types';
+import { getEnvVar } from '../lib/getEnv';
 
-const supabaseUrl = 'https://psqwgebhxfuzqqgdzcmm.supabase.co';
-const supabaseAnonKey =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzcXdnZWJoeGZ1enFxZ2R6Y21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2ODAzNDIsImV4cCI6MjA2NDI1NjM0Mn0.fIXLOK-TsgDtFo4Y483v4xVUH8msaESJm8_2rLw5sys';
+// Get environment variables with proper fallbacks
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', 'https://mock.supabase.co');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY', 'mock-anon-key');
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create Supabase client with fallback values for CI/testing
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);

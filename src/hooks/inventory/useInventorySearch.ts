@@ -1,6 +1,5 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { LocalInventoryItem } from '../../types/inventoryTypes';
-import { InventoryFilters } from './useInventoryFilters';
+import { useCallback } from 'react';
+import { InventoryItem } from '@/types/inventoryTypes';
 
 export interface SearchOptions {
   debounceMs?: number;
@@ -8,206 +7,214 @@ export interface SearchOptions {
   searchFields?: string[];
 }
 
-export interface SearchState {
-  searchTerm: string;
-  isSearching: boolean;
-  searchResults: LocalInventoryItem[];
-  totalResults: number;
-  searchTimestamp: Date | null;
-  searchError: string | null;
+export interface InventoryFilters {
+  category?: string;
+  location?: string;
+  status?: string;
+  priceRange?: { min: number; max: number };
+  quantityRange?: { min: number; max: number };
+  dateRange?: { start: Date; end: Date };
 }
 
-export interface UseInventorySearchProps {
-  data: LocalInventoryItem[];
-  filters: InventoryFilters;
-  searchOptions?: SearchOptions;
-  onSearchComplete?: (results: LocalInventoryItem[]) => void;
-}
+/**
+ * Hook for basic inventory search operations
+ * Handles text search, filtering, and basic search functionality
+ */
+export const useInventorySearch = () => {
+  // Helper functions for accessing item properties
+  const getItemDate = useCallback((item: InventoryItem): string => {
+    return (
+      item.last_updated ||
+      item.updated_at ||
+      (typeof item.data?.createdAt === 'string'
+        ? item.data.createdAt
+        : new Date().toISOString())
+    );
+  }, []);
 
-export const useInventorySearch = ({
-  data,
-  filters,
-  searchOptions = {},
-  onSearchComplete,
-}: UseInventorySearchProps) => {
-  const {
-    debounceMs = 300,
-    caseSensitive = false,
-    searchFields = ['item', 'category', 'location'],
-  } = searchOptions;
+  const getItemQuantity = useCallback((item: InventoryItem): number | null => {
+    return item.quantity;
+  }, []);
 
-  const [state, setState] = useState<SearchState>({
-    searchTerm: filters.searchQuery || '',
-    isSearching: false,
-    searchResults: [],
-    totalResults: 0,
-    searchTimestamp: null,
-    searchError: null,
-  });
-
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
-  const abortControllerRef = useRef<AbortController>();
-
-  // Core search function
+  // Basic search implementation
   const performSearch = useCallback(
     (
-      items: LocalInventoryItem[],
+      items: InventoryItem[],
       searchTerm: string,
-      currentFilters: InventoryFilters
-    ): LocalInventoryItem[] => {
-      let results = [...items];
+      filters: InventoryFilters = {}
+    ): InventoryItem[] => {
+      if (!searchTerm.trim() && Object.keys(filters).length === 0) {
+        return items;
+      }
 
-      // Apply text search
+      let results = items;
+
+      // Text search
       if (searchTerm.trim()) {
-        const searchLower = caseSensitive ? searchTerm : searchTerm.toLowerCase();
+        const searchLower = searchTerm.toLowerCase();
+        results = results.filter((item) => {
+          const searchableFields = [
+            item.name,
+            item.category,
+            item.location,
+            item.data?.description,
+            item.data?.barcode,
+          ].filter(Boolean);
 
-        results = results.filter(item => {
-          return searchFields.some(field => {
-            const value = item[field as keyof LocalInventoryItem];
-            if (typeof value === 'string') {
-              const itemValue = caseSensitive ? value : value.toLowerCase();
-              return itemValue.includes(searchLower);
-            }
-            return false;
+          return searchableFields.some((field) => {
+            if (typeof field !== 'string') return false;
+            const fieldLower = field.toLowerCase();
+            return fieldLower.includes(searchLower);
           });
         });
       }
 
-      // Apply category filter
-      if (currentFilters.category) {
-        results = results.filter(item => item.category === currentFilters.category);
+      // Apply filters
+      if (filters.category) {
+        results = results.filter((item) => item.category === filters.category);
       }
 
-      // Apply location filter
-      if (currentFilters.location) {
-        results = results.filter(item => item.location === currentFilters.location);
+      if (filters.location) {
+        results = results.filter((item) => item.location === filters.location);
       }
 
-      // Apply status filter
-      if (currentFilters.status) {
-        results = results.filter(item => {
-          const status =
-            (item as Record<string, unknown>).status || (item as Record<string, unknown>).p2Status;
-          return status === currentFilters.status;
-        });
+      if (filters.status) {
+        results = results.filter((item) => item.status === filters.status);
       }
 
-      // Apply price range filter
-      if (currentFilters.minPrice !== undefined) {
-        results = results.filter(item => (item.cost || 0) >= currentFilters.minPrice!);
-      }
-      if (currentFilters.maxPrice !== undefined) {
-        results = results.filter(item => (item.cost || 0) <= currentFilters.maxPrice!);
-      }
-
-      // Apply quantity range filter (for supplies)
-      if (currentFilters.minQuantity !== undefined) {
-        results = results.filter(item => {
-          const quantity = (item as Record<string, unknown>).quantity;
-          return quantity !== undefined && quantity >= currentFilters.minQuantity!;
-        });
-      }
-      if (currentFilters.maxQuantity !== undefined) {
-        results = results.filter(item => {
-          const quantity = (item as Record<string, unknown>).quantity;
-          return quantity !== undefined && quantity <= currentFilters.maxQuantity!;
-        });
+      if (filters.priceRange) {
+        if (filters.priceRange.min !== undefined) {
+          results = results.filter((item) => {
+            const cost = item.unit_cost || 0;
+            return cost >= filters.priceRange!.min!;
+          });
+        }
+        if (filters.priceRange.max !== undefined) {
+          results = results.filter((item) => {
+            const cost = item.unit_cost || 0;
+            return cost <= filters.priceRange!.max!;
+          });
+        }
       }
 
-      // Apply date range filter
-      if (currentFilters.dateCreated) {
-        results = results.filter(item => {
-          const itemDate = new Date(
-            (item as Record<string, unknown>).purchaseDate ||
-              (item as Record<string, unknown>).dateCreated
-          );
+      if (filters.quantityRange) {
+        if (filters.quantityRange.min !== undefined) {
+          results = results.filter((item) => {
+            const quantity = getItemQuantity(item);
+            return (
+              quantity !== null &&
+              quantity !== undefined &&
+              quantity >= filters.quantityRange!.min!
+            );
+          });
+        }
+        if (filters.quantityRange.max !== undefined) {
+          results = results.filter((item) => {
+            const quantity = getItemQuantity(item);
+            return (
+              quantity !== null &&
+              quantity !== undefined &&
+              quantity <= filters.quantityRange!.max!
+            );
+          });
+        }
+      }
+
+      // Date range filter
+      if (filters.dateRange) {
+        results = results.filter((item) => {
+          const itemDate = new Date(getItemDate(item));
           return (
-            itemDate >= currentFilters.dateCreated!.start &&
-            itemDate <= currentFilters.dateCreated!.end
+            itemDate >= filters.dateRange!.start &&
+            itemDate <= filters.dateRange!.end
           );
         });
       }
 
       return results;
     },
-    [caseSensitive, searchFields]
+    [getItemDate, getItemQuantity]
   );
 
-  // Debounced search function
-  const search = useCallback(
-    (searchTerm: string, options: { debounceMs?: number } = {}) => {
-      const { debounceMs: customDebounce = debounceMs } = options;
+  // Fuzzy search implementation
+  const performFuzzySearch = useCallback(
+    (items: InventoryItem[], searchTerm: string): InventoryItem[] => {
+      if (!searchTerm.trim()) return items;
 
-      // Clear existing timeout
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
+      const searchLower = searchTerm.toLowerCase();
 
-      // Abort previous search
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      return items.filter((item) => {
+        const searchableFields = [
+          item.name,
+          item.category,
+          item.location,
+          item.data?.description,
+          item.data?.barcode,
+        ].filter(Boolean);
 
-      // Create new abort controller
-      abortControllerRef.current = new AbortController();
+        return searchableFields.some((field) => {
+          if (typeof field !== 'string') return false;
+          const fieldLower = field.toLowerCase();
 
-      setState(prev => ({ ...prev, isSearching: true, searchError: null }));
+          // Exact match
+          if (fieldLower.includes(searchLower)) return true;
 
-      searchTimeoutRef.current = setTimeout(() => {
-        try {
-          const results = performSearch(data, searchTerm, filters);
-
-          setState(prev => ({
-            ...prev,
-            searchTerm,
-            searchResults: results,
-            totalResults: results.length,
-            isSearching: false,
-            searchTimestamp: new Date(),
-          }));
-
-          if (onSearchComplete) {
-            onSearchComplete(results);
-          }
-        } catch (error) {
-          setState(prev => ({
-            ...prev,
-            isSearching: false,
-            searchError: error instanceof Error ? error.message : 'Search failed',
-          }));
-        }
-      }, customDebounce);
+          // Partial word match
+          const searchWords = searchLower.split(' ');
+          return searchWords.every(
+            (word) =>
+              fieldLower.includes(word) ||
+              fieldLower
+                .split(' ')
+                .some(
+                  (fieldWord) =>
+                    fieldWord.startsWith(word) || fieldWord.endsWith(word)
+                )
+          );
+        });
+      });
     },
-    [data, filters, performSearch, debounceMs, onSearchComplete]
+    []
   );
 
-  // Update search when filters change
-  useEffect(() => {
-    search(filters.searchQuery || '');
-  }, [filters, search]);
+  // Search with highlighting
+  const performSearchWithHighlighting = useCallback(
+    (
+      items: InventoryItem[],
+      searchTerm: string,
+      filters: InventoryFilters = {}
+    ): Array<{ item: InventoryItem; highlights: string[] }> => {
+      const results = performSearch(items, searchTerm, filters);
+      const searchLower = searchTerm.toLowerCase();
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
+      return results.map((item) => {
+        const highlights: string[] = [];
+        const searchableFields = [
+          { field: item.name, name: 'name' },
+          { field: item.category, name: 'category' },
+          { field: item.location, name: 'location' },
+          { field: item.data?.description, name: 'description' },
+          { field: item.data?.barcode, name: 'barcode' },
+        ].filter((f) => f.field);
 
-  // Memoized search results
-  const searchResults = useMemo(() => state.searchResults, [state.searchResults]);
+        searchableFields.forEach(({ field, name }) => {
+          if (
+            typeof field === 'string' &&
+            field.toLowerCase().includes(searchLower)
+          ) {
+            highlights.push(`${name}: ${field}`);
+          }
+        });
+
+        return { item, highlights };
+      });
+    },
+    [performSearch]
+  );
 
   return {
-    search,
-    searchResults,
-    isSearching: state.isSearching,
-    totalResults: state.totalResults,
-    searchTimestamp: state.searchTimestamp,
-    searchError: state.searchError,
-    searchTerm: state.searchTerm,
+    performSearch,
+    performFuzzySearch,
+    performSearchWithHighlighting,
   };
 };

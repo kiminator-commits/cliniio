@@ -1,63 +1,89 @@
-import { LocalInventoryItem } from '@/types/inventoryTypes';
+import { InventoryItem } from '@/types/inventoryTypes';
 
 /**
  * Form utility functions for inventory management
  */
+
+interface FormDataFromItem {
+  item: string;
+  category: string | null;
+  location: string;
+  unit_cost: number | null;
+  toolId?: string;
+  supplyId?: string;
+  equipmentId?: string;
+  hardwareId?: string;
+  p2Status?: string;
+  quantity?: number;
+  status?: string;
+  expiration?: string;
+  lastServiced?: string;
+  warranty?: string;
+}
 
 /**
  * Creates form data from an inventory item
  * @param item - The inventory item to convert to form data
  * @returns Form data object
  */
-export const createFormDataFromItem = (item: LocalInventoryItem): Partial<LocalInventoryItem> => {
+export const createFormDataFromItem = (
+  item: InventoryItem
+): FormDataFromItem => {
   if ('toolId' in item) {
     return {
-      item: item.item,
+      item: item.item || '',
       category: item.category,
-      toolId: item.toolId,
-      location: item.location,
-      cost: item.cost,
-      p2Status: item.p2Status,
+      toolId: (item.data as Record<string, unknown>)?.toolId as string,
+      location: item.location || '',
+      unit_cost: item.unit_cost,
+      p2Status: (item.data as Record<string, unknown>)?.p2Status as string,
     };
   }
 
   if ('supplyId' in item) {
     return {
-      item: item.item,
+      item: item.item || '',
       category: item.category,
-      supplyId: item.supplyId,
-      location: item.location,
-      cost: item.cost,
-      quantity: item.quantity,
-      expiration: item.expiration,
+      supplyId: (item.data as Record<string, unknown>)?.supplyId as string,
+      location: item.location || '',
+      unit_cost: item.unit_cost,
+      quantity: item.quantity || undefined,
+      expiration: (item.data as Record<string, unknown>)?.expiration as string,
     };
   }
 
   if ('equipmentId' in item) {
     return {
-      item: item.item,
+      item: item.item || '',
       category: item.category,
-      equipmentId: item.equipmentId,
-      location: item.location,
-      cost: item.cost,
-      status: item.status,
-      lastServiced: item.lastServiced,
+      equipmentId: (item.data as Record<string, unknown>)
+        ?.equipmentId as string,
+      location: item.location || '',
+      unit_cost: item.unit_cost,
+      status: item.status ?? undefined,
+      lastServiced: (item.data as Record<string, unknown>)
+        ?.lastServiced as string,
     };
   }
 
   if ('hardwareId' in item) {
     return {
-      item: item.item,
+      item: item.item || '',
       category: item.category,
-      hardwareId: item.hardwareId,
-      location: item.location,
-      cost: item.cost,
-      status: item.status,
-      warranty: item.warranty,
+      hardwareId: (item.data as Record<string, unknown>)?.hardwareId as string,
+      location: item.location || '',
+      unit_cost: item.unit_cost,
+      status: item.status ?? undefined,
+      warranty: (item.data as Record<string, unknown>)?.warranty as string,
     };
   }
 
-  return {};
+  return {
+    item: item.item || '',
+    category: item.category,
+    location: item.location || '',
+    unit_cost: item.unit_cost,
+  };
 };
 
 /**
@@ -66,7 +92,7 @@ export const createFormDataFromItem = (item: LocalInventoryItem): Partial<LocalI
  * @returns Object with validation results
  */
 export const validateRequiredFields = (
-  formData: Partial<LocalInventoryItem>
+  formData: Partial<InventoryItem>
 ): {
   isValid: boolean;
   errors: Record<string, string>;
@@ -86,7 +112,7 @@ export const validateRequiredFields = (
   }
 
   // Validate ID based on category
-  const hasValidId = getItemId(formData);
+  const hasValidId = getItemId(formData as FormDataFromItem);
   if (!hasValidId) {
     errors.id = 'Item ID is required';
   }
@@ -102,11 +128,13 @@ export const validateRequiredFields = (
  * @param formData - The form data
  * @returns The ID value
  */
-export const getItemId = (formData: Partial<LocalInventoryItem>): string => {
+export const getItemId = (formData: FormDataFromItem): string => {
   if ('toolId' in formData && formData.toolId) return formData.toolId;
   if ('supplyId' in formData && formData.supplyId) return formData.supplyId;
-  if ('equipmentId' in formData && formData.equipmentId) return formData.equipmentId;
-  if ('hardwareId' in formData && formData.hardwareId) return formData.hardwareId;
+  if ('equipmentId' in formData && formData.equipmentId)
+    return formData.equipmentId;
+  if ('hardwareId' in formData && formData.hardwareId)
+    return formData.hardwareId;
   return '';
 };
 
@@ -116,7 +144,7 @@ export const getItemId = (formData: Partial<LocalInventoryItem>): string => {
  * @returns The item type
  */
 export const getItemType = (
-  formData: Partial<LocalInventoryItem>
+  formData: FormDataFromItem
 ): 'tool' | 'supply' | 'equipment' | 'hardware' | 'unknown' => {
   if ('toolId' in formData && formData.toolId) return 'tool';
   if ('supplyId' in formData && formData.supplyId) return 'supply';
@@ -130,44 +158,50 @@ export const getItemType = (
  * @param formData - The form data to format
  * @returns Formatted data for API
  */
-export const formatFormDataForSubmission = (formData: Partial<LocalInventoryItem>) => {
+export const formatFormDataForSubmission = (formData: FormDataFromItem) => {
   const itemType = getItemType(formData);
 
   const baseData = {
     name: formData.item || '',
     category: formData.category || '',
     location: formData.location || '',
-    cost: formData.cost || 0,
-    lastUpdated: new Date().toISOString(),
+    unit_cost: formData.unit_cost || 0,
+    updated_at: new Date().toISOString(),
   };
 
   switch (itemType) {
     case 'tool':
       return {
         ...baseData,
-        toolId: formData.toolId,
-        p2Status: formData.p2Status || 'available',
+        data: {
+          toolId: formData.toolId,
+          p2Status: formData.p2Status || 'available',
+        },
       };
     case 'supply':
       return {
         ...baseData,
-        supplyId: formData.supplyId,
         quantity: formData.quantity || 1,
-        expiration: formData.expiration || '',
+        data: {
+          supplyId: formData.supplyId,
+          expiration: formData.expiration || '',
+        },
       };
     case 'equipment':
       return {
         ...baseData,
-        equipmentId: formData.equipmentId,
-        status: formData.status || 'operational',
-        lastServiced: formData.lastServiced || '',
+        data: {
+          equipmentId: formData.equipmentId,
+          lastServiced: formData.lastServiced || '',
+        },
       };
     case 'hardware':
       return {
         ...baseData,
-        hardwareId: formData.hardwareId,
-        status: formData.status || 'active',
-        warranty: formData.warranty || '',
+        data: {
+          hardwareId: formData.hardwareId,
+          warranty: formData.warranty || '',
+        },
       };
     default:
       return baseData;
@@ -181,8 +215,8 @@ export const formatFormDataForSubmission = (formData: Partial<LocalInventoryItem
  * @returns True if data has been modified
  */
 export const isFormDataModified = (
-  currentData: Partial<LocalInventoryItem>,
-  originalData: Partial<LocalInventoryItem>
+  currentData: Partial<InventoryItem>,
+  originalData: Partial<InventoryItem>
 ): boolean => {
   const fields = [
     'item',
@@ -197,9 +231,9 @@ export const isFormDataModified = (
     'warranty',
   ];
 
-  return fields.some(field => {
-    const current = currentData[field as keyof LocalInventoryItem];
-    const original = originalData[field as keyof LocalInventoryItem];
+  return fields.some((field) => {
+    const current = currentData[field as keyof InventoryItem];
+    const original = originalData[field as keyof InventoryItem];
     return current !== original;
   });
 };
@@ -210,13 +244,13 @@ export const isFormDataModified = (
  * @returns Sanitized form data
  */
 export const sanitizeFormData = (
-  formData: Partial<LocalInventoryItem>
-): Partial<LocalInventoryItem> => {
-  const sanitized: Partial<LocalInventoryItem> = {};
+  formData: Partial<InventoryItem>
+): Partial<InventoryItem> => {
+  const sanitized: Partial<InventoryItem> = {};
 
   Object.entries(formData).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
-      sanitized[key as keyof LocalInventoryItem] = value;
+      (sanitized as Record<string, unknown>)[key] = value;
     }
   });
 

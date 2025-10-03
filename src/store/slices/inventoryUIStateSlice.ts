@@ -7,9 +7,11 @@ export interface InventoryUIState {
   setSelectedItemId: (id: string | null) => void;
 }
 
-export const createInventoryUIStateSlice: StateCreator<InventoryUIState> = set => ({
+export const createInventoryUIStateSlice: StateCreator<InventoryUIState> = (
+  set
+) => ({
   isAddModalOpen: false,
   selectedItemId: null,
-  setAddModalOpen: isOpen => set({ isAddModalOpen: isOpen }),
-  setSelectedItemId: id => set({ selectedItemId: id }),
+  setAddModalOpen: (isOpen) => set({ isAddModalOpen: isOpen }),
+  setSelectedItemId: (id) => set({ selectedItemId: id }),
 });

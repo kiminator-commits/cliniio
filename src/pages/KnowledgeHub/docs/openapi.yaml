@@ -1,0 +1,984 @@
+openapi: 3.0.3
+info:
+  title: KnowledgeHub API
+  description: |
+    Comprehensive API for managing educational content, courses, procedures, and learning pathways.
+
+    ## Features
+    - Content management (CRUD operations)
+    - Advanced search and filtering
+    - Role-based access control
+    - Rate limiting and caching
+    - Real-time updates
+    - Progress tracking
+
+    ## Authentication
+    This API uses JWT tokens for authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+
+    ## Rate Limiting
+    - **Standard requests**: 100 requests per minute
+    - **Burst requests**: 10 requests per second
+    - **Search requests**: 50 requests per minute
+
+    ## Error Handling
+    All errors follow a consistent format with appropriate HTTP status codes.
+  version: 1.0.0
+  contact:
+    name: KnowledgeHub API Support
+    email: support@knowledgehub.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.knowledgehub.com/v1
+    description: Production server
+  - url: https://staging-api.knowledgehub.com/v1
+    description: Staging server
+  - url: http://localhost:3001/api/knowledge-hub
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /content:
+    get:
+      summary: Fetch all content items
+      description: |
+        Retrieves a paginated list of all content items with optional filtering.
+        Supports advanced search, category filtering, and sorting.
+      operationId: fetchContent
+      parameters:
+        - name: page
+          in: query
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: category
+          in: query
+          description: Filter by content category
+          required: false
+          schema:
+            $ref: '#/components/schemas/ContentCategory'
+        - name: status
+          in: query
+          description: Filter by content status
+          required: false
+          schema:
+            $ref: '#/components/schemas/ContentStatus'
+        - name: search
+          in: query
+          description: Search term for title and description
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: department
+          in: query
+          description: Filter by department
+          required: false
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: Sort field
+          required: false
+          schema:
+            type: string
+            enum: [title, status, dueDate, progress, lastUpdated]
+            default: lastUpdated
+        - name: sortDirection
+          in: query
+          description: Sort direction
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: Successfully retrieved content items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContentResponse'
+              example:
+                data:
+                  - id: 'course-001'
+                    title: 'Infection Control Basics'
+                    category: 'Courses'
+                    status: 'In Progress'
+                    dueDate: '2024-02-15'
+                    progress: 65
+                    department: 'Nursing'
+                    lastUpdated: '2024-01-20'
+                    description: 'Essential infection control procedures for healthcare workers'
+                pagination:
+                  page: 1
+                  pageSize: 20
+                  total: 150
+                  totalPages: 8
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized - Invalid or missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+
+    post:
+      summary: Create new content item
+      description: |
+        Creates a new content item. Requires appropriate permissions.
+        All required fields must be provided and validated.
+      operationId: createContent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContentRequest'
+            example:
+              title: 'New Safety Protocol'
+              category: 'Procedures'
+              status: 'Not Started'
+              dueDate: '2024-03-01'
+              progress: 0
+              department: 'Safety'
+              description: 'Updated safety protocols for laboratory procedures'
+      responses:
+        '201':
+          description: Content item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+
+  /content/{contentId}:
+    get:
+      summary: Get content item by ID
+      description: Retrieves a specific content item by its unique identifier.
+      operationId: getContentById
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          description: Unique identifier of the content item
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-]+$'
+      responses:
+        '200':
+          description: Content item retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+        '404':
+          description: Content item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+
+    put:
+      summary: Update content item
+      description: |
+        Updates an existing content item. Only fields provided in the request will be updated.
+        Requires appropriate permissions for the content item.
+      operationId: updateContent
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          description: Unique identifier of the content item
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContentRequest'
+      responses:
+        '200':
+          description: Content item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: Content item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+
+    delete:
+      summary: Delete content item
+      description: |
+        Permanently deletes a content item. This action cannot be undone.
+        Requires appropriate permissions for the content item.
+      operationId: deleteContent
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          description: Unique identifier of the content item
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-]+$'
+      responses:
+        '204':
+          description: Content item deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: Content item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+
+  /content/{contentId}/status:
+    patch:
+      summary: Update content status
+      description: |
+        Updates the status of a content item. This is a specialized endpoint for status changes
+        that includes additional validation and progress tracking.
+      operationId: updateContentStatus
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          description: Unique identifier of the content item
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9-]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  $ref: '#/components/schemas/ContentStatus'
+                progress:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                  description: Progress percentage (0-100)
+            example:
+              status: 'Completed'
+              progress: 100
+      responses:
+        '200':
+          description: Content status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+        '400':
+          description: Invalid status or progress value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: Content item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+
+  /content/search:
+    get:
+      summary: Search content items
+      description: |
+        Advanced search functionality with full-text search capabilities.
+        Supports complex queries, filters, and relevance scoring.
+      operationId: searchContent
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - name: category
+          in: query
+          description: Filter by content category
+          required: false
+          schema:
+            $ref: '#/components/schemas/ContentCategory'
+        - name: status
+          in: query
+          description: Filter by content status
+          required: false
+          schema:
+            $ref: '#/components/schemas/ContentStatus'
+        - name: department
+          in: query
+          description: Filter by department
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+
+  /content/category/{category}:
+    get:
+      summary: Get content by category
+      description: Retrieves all content items for a specific category.
+      operationId: getContentByCategory
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: Content category
+          schema:
+            $ref: '#/components/schemas/ContentCategory'
+        - name: page
+          in: query
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Content items for category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContentResponse'
+        '400':
+          description: Invalid category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+
+  /stats:
+    get:
+      summary: Get content statistics
+      description: |
+        Retrieves comprehensive statistics about content items including totals,
+        category breakdowns, and status distributions.
+      operationId: getContentStats
+      responses:
+        '200':
+          description: Content statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentStats'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+
+  /health:
+    get:
+      summary: Health check
+      description: |
+        Checks the health status of the API service.
+        Returns service status and basic system information.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token for authentication. Include the token in the Authorization header.
+        Example: `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+  schemas:
+    ContentItem:
+      type: object
+      required:
+        - id
+        - title
+        - category
+        - status
+        - dueDate
+        - progress
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the content item
+          example: 'course-001'
+        title:
+          type: string
+          description: Title of the content item
+          maxLength: 200
+          example: 'Infection Control Basics'
+        category:
+          $ref: '#/components/schemas/ContentCategory'
+        status:
+          $ref: '#/components/schemas/ContentStatus'
+        dueDate:
+          type: string
+          format: date
+          description: Due date in YYYY-MM-DD format
+          example: '2024-02-15'
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Progress percentage (0-100)
+          example: 65
+        department:
+          type: string
+          description: Department associated with the content
+          example: 'Nursing'
+        lastUpdated:
+          type: string
+          format: date
+          description: Last update date in YYYY-MM-DD format
+          example: '2024-01-20'
+        description:
+          type: string
+          description: Detailed description of the content
+          maxLength: 2000
+          example: 'Essential infection control procedures for healthcare workers'
+
+    ContentCategory:
+      type: string
+      enum:
+        - Courses
+        - Procedures
+        - Policies
+        - Learning Pathways
+        - Advanced
+      description: Content category classification
+
+    ContentStatus:
+      type: string
+      enum:
+        - Not Started
+        - In Progress
+        - Completed
+      description: Current status of the content item
+
+    CreateContentRequest:
+      type: object
+      required:
+        - title
+        - category
+        - status
+        - dueDate
+        - progress
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          example: 'New Safety Protocol'
+        category:
+          $ref: '#/components/schemas/ContentCategory'
+        status:
+          $ref: '#/components/schemas/ContentStatus'
+        dueDate:
+          type: string
+          format: date
+          example: '2024-03-01'
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 0
+        department:
+          type: string
+          example: 'Safety'
+        description:
+          type: string
+          maxLength: 2000
+          example: 'Updated safety protocols for laboratory procedures'
+
+    UpdateContentRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        category:
+          $ref: '#/components/schemas/ContentCategory'
+        status:
+          $ref: '#/components/schemas/ContentStatus'
+        dueDate:
+          type: string
+          format: date
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        department:
+          type: string
+        description:
+          type: string
+          maxLength: 2000
+
+    PaginatedContentResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentItem'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    PaginationInfo:
+      type: object
+      required:
+        - page
+        - pageSize
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Current page number
+          example: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          description: Number of items per page
+          example: 20
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of items
+          example: 150
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+          example: 8
+
+    SearchResponse:
+      type: object
+      required:
+        - data
+        - pagination
+        - searchInfo
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentItem'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+        searchInfo:
+          type: object
+          required:
+            - query
+            - totalResults
+            - searchTime
+          properties:
+            query:
+              type: string
+              description: The search query that was executed
+              example: 'infection control'
+            totalResults:
+              type: integer
+              description: Total number of matching results
+              example: 25
+            searchTime:
+              type: number
+              format: float
+              description: Search execution time in milliseconds
+              example: 45.2
+
+    ContentStats:
+      type: object
+      required:
+        - total
+        - byCategory
+        - byStatus
+        - recentActivity
+      properties:
+        total:
+          type: integer
+          description: Total number of content items
+          example: 150
+        byCategory:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of items by category
+          example:
+            Courses: 45
+            Procedures: 30
+            Policies: 25
+            'Learning Pathways': 35
+            Advanced: 15
+        byStatus:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of items by status
+          example:
+            'Not Started': 60
+            'In Progress': 45
+            Completed: 45
+        recentActivity:
+          type: object
+          required:
+            - lastUpdated
+            - newItems
+            - completedItems
+          properties:
+            lastUpdated:
+              type: string
+              format: date-time
+              description: Timestamp of last activity
+              example: '2024-01-20T10:30:00Z'
+            newItems:
+              type: integer
+              description: Number of new items in the last 7 days
+              example: 5
+            completedItems:
+              type: integer
+              description: Number of completed items in the last 7 days
+              example: 12
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - version
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          description: Service health status
+          example: 'healthy'
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+          example: '2024-01-20T10:30:00Z'
+        version:
+          type: string
+          description: API version
+          example: '1.0.0'
+        uptime:
+          type: number
+          format: float
+          description: Service uptime in seconds
+          example: 86400.5
+        database:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [connected, disconnected]
+              example: 'connected'
+            responseTime:
+              type: number
+              format: float
+              description: Database response time in milliseconds
+              example: 15.2
+
+    # Error Schemas
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - details
+      properties:
+        error:
+          type: string
+          example: 'VALIDATION_ERROR'
+        message:
+          type: string
+          example: 'Invalid request data'
+        details:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: 'title'
+              message:
+                type: string
+                example: 'Title is required'
+
+    UnauthorizedError:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: 'UNAUTHORIZED'
+        message:
+          type: string
+          example: 'Invalid or missing authentication token'
+
+    ForbiddenError:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: 'FORBIDDEN'
+        message:
+          type: string
+          example: 'Insufficient permissions for this operation'
+
+    NotFoundError:
+      type: object
+      required:
+        - error
+        - message
+        - resource
+      properties:
+        error:
+          type: string
+          example: 'NOT_FOUND'
+        message:
+          type: string
+          example: 'Content item not found'
+        resource:
+          type: string
+          example: 'content'
+
+    RateLimitError:
+      type: object
+      required:
+        - error
+        - message
+        - retryAfter
+      properties:
+        error:
+          type: string
+          example: 'RATE_LIMIT_EXCEEDED'
+        message:
+          type: string
+          example: 'Rate limit exceeded. Please try again later.'
+        retryAfter:
+          type: integer
+          description: Seconds to wait before retrying
+          example: 60
+
+    ServerError:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: 'INTERNAL_SERVER_ERROR'
+        message:
+          type: string
+          example: 'An unexpected error occurred'
+
+tags:
+  - name: Content
+    description: Content management operations
+  - name: Search
+    description: Search and filtering operations
+  - name: Statistics
+    description: Analytics and statistics
+  - name: Health
+    description: Service health monitoring

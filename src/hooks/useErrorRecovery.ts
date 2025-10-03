@@ -19,8 +19,15 @@ export const useErrorRecovery = () => {
   };
 
   const triggerRetry = () => {
-    setRetryCount(prev => prev + 1);
+    setRetryCount((prev) => prev + 1);
   };
 
-  return { error, reportError, handleError, resetError, retryCount, triggerRetry };
+  return {
+    error,
+    reportError,
+    handleError,
+    resetError,
+    retryCount,
+    triggerRetry,
+  };
 };

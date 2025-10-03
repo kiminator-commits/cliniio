@@ -1,8 +1,24 @@
 import { create } from 'zustand';
-import { createInventoryDataSlice, InventoryDataState } from './slices/inventoryDataSlice';
-import { createInventoryUISlice, InventoryUIState } from './slices/inventoryUISlice';
-import { createInventoryModalSlice, InventoryModalState } from './slices/inventoryModalSlice';
-import { createInventoryFilterSlice, InventoryFilterState } from './slices/inventoryFilterSlice';
+import {
+  createInventoryDataSlice,
+  InventoryDataState,
+} from './slices/inventoryDataSlice';
+import {
+  createInventoryUISlice,
+  InventoryUIState,
+} from './slices/inventoryUISlice';
+import {
+  createInventoryModalSlice,
+  InventoryModalState,
+} from './slices/inventoryModalSlice';
+import {
+  createInventoryFilterSlice,
+  InventoryFilterState,
+} from './slices/inventoryFilterSlice';
+import {
+  createInventoryFormSlice,
+  InventoryFormState,
+} from './slices/inventoryFormSlice';
 import {
   createInventoryPaginationSlice,
   InventoryPaginationState,
@@ -16,6 +32,7 @@ type InventoryStore = InventoryDataState &
   InventoryUIState &
   InventoryModalState &
   InventoryFilterState &
+  InventoryFormState &
   InventoryPaginationState &
   InventoryAnalyticsState;
 
@@ -24,6 +41,7 @@ export const useInventoryStore = create<InventoryStore>()((...a) => ({
   ...createInventoryUISlice(...a),
   ...createInventoryModalSlice(...a),
   ...createInventoryFilterSlice(...a),
+  ...createInventoryFormSlice(...a),
   ...createInventoryPaginationSlice(...a),
   ...createInventoryAnalyticsSlice(...a),
 }));

@@ -1,13 +1,32 @@
 import React, { useState } from 'react';
-import {
-  useEnvironmentalCleanContext,
-  RoomStatusType,
-  Room,
-} from '../../contexts/EnvironmentalCleanContext';
 import UpdateRoomStatusModal from './UpdateRoomStatusModal';
 
+// Type definitions since context was removed
+type RoomStatusType =
+  | 'Available'
+  | 'Dirty'
+  | 'LowInventory'
+  | 'Biohazard'
+  | 'Theft'
+  | 'InProgress'
+  | 'Supervisor'
+  | 'Isolation'
+  | 'Quarantine'
+  | 'OutOfService'
+  | 'Unassigned';
+
+interface Room {
+  id: string;
+  name: string;
+  status: RoomStatusType;
+}
+
 const RoomStatusSummary: React.FC = () => {
-  const { rooms, updateRoomStatus } = useEnvironmentalCleanContext();
+  // Hardcoded empty data since context was removed
+  const rooms: Room[] = [];
+  const updateRoomStatus = () => {
+    // No-op since context was removed
+  };
   const [activeStatus, setActiveStatus] = useState<RoomStatusType | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
@@ -25,7 +44,7 @@ const RoomStatusSummary: React.FC = () => {
     Unassigned: 0,
   };
 
-  rooms.forEach(room => {
+  rooms.forEach((room) => {
     statusCounts[room.status]++;
   });
 
@@ -59,8 +78,8 @@ const RoomStatusSummary: React.FC = () => {
           <h3 className="text-md font-semibold mb-2">{activeStatus} Rooms</h3>
           <ul>
             {rooms
-              .filter(room => room.status === activeStatus)
-              .map(room => (
+              .filter((room) => room.status === activeStatus)
+              .map((room) => (
                 <li key={room.id} className="flex justify-between mb-2">
                   <span>{room.name}</span>
                   <button

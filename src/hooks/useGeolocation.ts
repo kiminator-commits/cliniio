@@ -19,7 +19,7 @@ export const useGeolocation = () => {
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: 'Geolocation is not supported by this browser.',
         isLoading: false,
@@ -27,10 +27,10 @@ export const useGeolocation = () => {
       return;
     }
 
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     navigator.geolocation.getCurrentPosition(
-      position => {
+      (position) => {
         setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -39,11 +39,12 @@ export const useGeolocation = () => {
           isLoading: false,
         });
       },
-      error => {
+      (error) => {
         let errorMessage = 'Unknown error occurred';
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. Please enable location services.';
+            errorMessage =
+              'Location access denied. Please enable location services.';
             break;
           case error.POSITION_UNAVAILABLE:
             errorMessage = 'Location information unavailable.';
@@ -52,7 +53,7 @@ export const useGeolocation = () => {
             errorMessage = 'Location request timed out.';
             break;
         }
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           error: errorMessage,
           isLoading: false,

@@ -74,7 +74,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
               type="text"
               placeholder="Search courses, procedures, policies..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#4ECDC4]/20 focus:border-[#4ECDC4] transition-all duration-200 shadow-sm"
               aria-label="Search content"
             />
@@ -96,7 +96,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Enhanced Filter Panel */}
         <motion.div
           initial={false}
-          animate={{ height: showFilters ? 'auto' : 0, opacity: showFilters ? 1 : 0 }}
+          animate={{
+            height: showFilters ? 'auto' : 0,
+            opacity: showFilters ? 1 : 0,
+          }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className="overflow-hidden"
         >
@@ -125,10 +128,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <select
                   id="category-filter"
                   value={selectedCategory}
-                  onChange={e => setSelectedCategory(e.target.value)}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
                 >
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <option key={category} value={category}>
                       {category === 'All'
                         ? 'All Categories'
@@ -149,10 +152,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <select
                   id="skill-level-filter"
                   value={selectedLevel}
-                  onChange={e => setSelectedLevel(e.target.value)}
+                  onChange={(e) => setSelectedLevel(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
                 >
-                  {skillLevels.map(level => (
+                  {skillLevels.map((level) => (
                     <option key={level} value={level}>
                       {level}
                     </option>
@@ -171,12 +174,17 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <select
                   id="duration-filter"
                   value={filters.timeline}
-                  onChange={e => setFilters({ ...filters, timeline: e.target.value })}
+                  onChange={(e) =>
+                    setFilters({ ...filters, timeline: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
                 >
                   <option value="">Any Duration</option>
-                  {timelines.map(time => (
-                    <option key={time} value={time.toLowerCase().replace(' ', '-')}>
+                  {timelines.map((time) => (
+                    <option
+                      key={time}
+                      value={time.toLowerCase().replace(' ', '-')}
+                    >
                       {time}
                     </option>
                   ))}
@@ -194,12 +202,17 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <select
                   id="status-filter"
                   value={filters.status}
-                  onChange={e => setFilters({ ...filters, status: e.target.value })}
+                  onChange={(e) =>
+                    setFilters({ ...filters, status: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
                 >
                   <option value="">All Status</option>
-                  {statuses.map(status => (
-                    <option key={status} value={status.toLowerCase().replace(' ', '-')}>
+                  {statuses.map((status) => (
+                    <option
+                      key={status}
+                      value={status.toLowerCase().replace(' ', '-')}
+                    >
                       {status}
                     </option>
                   ))}
@@ -218,12 +231,17 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                   <select
                     id="source-filter"
                     value={filters.source}
-                    onChange={e => setFilters({ ...filters, source: e.target.value })}
+                    onChange={(e) =>
+                      setFilters({ ...filters, source: e.target.value })
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
                   >
                     <option value="">All Sources</option>
-                    {sources.slice(1).map(source => (
-                      <option key={source} value={source.toLowerCase().replace(' ', '-')}>
+                    {sources.slice(1).map((source) => (
+                      <option
+                        key={source}
+                        value={source.toLowerCase().replace(' ', '-')}
+                      >
                         {source}
                       </option>
                     ))}
@@ -265,7 +283,9 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                           />
                         )}
                       </div>
-                      <span className={aiSuggestionsActive ? 'gradient-text' : ''}>
+                      <span
+                        className={aiSuggestionsActive ? 'gradient-text' : ''}
+                      >
                         {aiSuggestionsActive ? 'AI' : 'AI'}
                       </span>
                     </div>
@@ -278,7 +298,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-white rounded-lg shadow-xl border border-gray-200 text-xs text-gray-800 whitespace-nowrap z-50"
                       >
-                        Content is selected based on your role, experience, and performance data
+                        Content is selected based on your role, experience, and
+                        performance data
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-200"></div>
                       </motion.div>
                     )}
@@ -293,7 +314,9 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                     id="new-content-filter"
                     type="checkbox"
                     checked={filters.showNewOnly}
-                    onChange={e => setFilters({ ...filters, showNewOnly: e.target.checked })}
+                    onChange={(e) =>
+                      setFilters({ ...filters, showNewOnly: e.target.checked })
+                    }
                     className="h-4 w-4 text-[#4ECDC4] focus:ring-[#4ECDC4] border-gray-300 rounded"
                   />
                   <label

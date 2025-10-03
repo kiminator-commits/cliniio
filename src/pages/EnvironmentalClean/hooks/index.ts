@@ -1,6 +1,10 @@
 import { useState } from 'react';
 
-export function useRoomScanner({ onSuccess }) {
+export function useRoomScanner({
+  onSuccess,
+}: {
+  onSuccess: (roomId: string) => void;
+}) {
   const [isScanning, setIsScanning] = useState(false);
 
   const startScan = () => {

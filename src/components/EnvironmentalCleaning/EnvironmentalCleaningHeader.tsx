@@ -2,11 +2,11 @@ import React from 'react';
 import { HOME_UI_CONSTANTS } from '../../constants/homeUiConstants';
 import { HOME_SECTION_TITLES } from '@/pages/Home/constants/homeConstants';
 
-type EnvironmentalCleaningHeaderProps = {
+type EnvironmentalCleanHeaderProps = {
   isDrawerOpen: boolean;
 };
 
-const EnvironmentalCleaningHeader: React.FC<EnvironmentalCleaningHeaderProps> = ({
+const EnvironmentalCleanHeader: React.FC<EnvironmentalCleanHeaderProps> = ({
   isDrawerOpen,
 }) => {
   const marginLeft = isDrawerOpen
@@ -19,10 +19,12 @@ const EnvironmentalCleaningHeader: React.FC<EnvironmentalCleaningHeaderProps> = 
       style={{ marginLeft }}
     >
       <div className="flex items-center justify-between px-6 py-4">
-        <h1 className="text-2xl font-bold text-gray-800">{HOME_SECTION_TITLES.CLEANING}</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          {HOME_SECTION_TITLES.CLEANING}
+        </h1>
       </div>
     </div>
   );
 };
 
-export default EnvironmentalCleaningHeader;
+export default EnvironmentalCleanHeader;

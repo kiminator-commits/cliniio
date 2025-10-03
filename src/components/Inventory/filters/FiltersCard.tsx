@@ -7,7 +7,10 @@ interface FiltersCardProps {
   title?: string;
 }
 
-const FiltersCard: React.FC<FiltersCardProps> = ({ children, title = 'Filters' }) => {
+const FiltersCard: React.FC<FiltersCardProps> = ({
+  children,
+  title = 'Filters',
+}) => {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
       <div className="flex items-center justify-between mb-4">

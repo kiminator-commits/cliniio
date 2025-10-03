@@ -6,6 +6,7 @@ interface SortableTableHeaderProps {
   activeField: string | null;
   direction: 'asc' | 'desc';
   onSort: (field: string) => void;
+  scope?: string;
 }
 
 const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({
@@ -14,6 +15,7 @@ const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({
   activeField,
   direction,
   onSort,
+  scope,
 }) => {
   const handleSort = () => {
     onSort(field);
@@ -25,7 +27,7 @@ const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({
   };
 
   return (
-    <th style={{ cursor: 'pointer' }} onClick={handleSort}>
+    <th scope={scope} style={{ cursor: 'pointer' }} onClick={handleSort}>
       {label}
       {renderIndicator()}
     </th>

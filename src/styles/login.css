@@ -1,10 +1,8 @@
 /* Login page specific styles */
 .login-container {
-  padding: 1rem;
+  padding: 2rem;
   max-height: 100vh;
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -16,26 +14,4 @@
 .login-container {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
-  padding: 1rem;
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none !important;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.scrollbar-hide {
-  -ms-overflow-style: none !important; /* IE and Edge */
-  scrollbar-width: none !important; /* Firefox */
-}
-
-/* Ensure the class works on all scrollable elements */
-.scrollbar-hide * {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-.scrollbar-hide *::-webkit-scrollbar {
-  display: none !important;
 }

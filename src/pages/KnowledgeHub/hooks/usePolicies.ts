@@ -7,7 +7,11 @@ interface UsePoliciesProps {
   archived: Policy[];
 }
 
-export const usePolicies = ({ forReview, library, archived }: UsePoliciesProps) => {
+export const usePolicies = ({
+  forReview,
+  library,
+  archived,
+}: UsePoliciesProps) => {
   // State management
   const [activePolicyTab, setActivePolicyTab] = useState('forReview');
   const [policyCurrentPage, setPolicyCurrentPage] = useState(1);
@@ -20,7 +24,7 @@ export const usePolicies = ({ forReview, library, archived }: UsePoliciesProps) 
   // Derived state
   const uniquePolicyDomains = useMemo(() => {
     const domains = new Set<string>();
-    [...forReview, ...library, ...archived].forEach(policy => {
+    [...forReview, ...library, ...archived].forEach((policy) => {
       if (policy.domain) domains.add(policy.domain);
     });
     return Array.from(domains);
@@ -28,9 +32,9 @@ export const usePolicies = ({ forReview, library, archived }: UsePoliciesProps) 
 
   const uniquePolicyTypes = useMemo(() => {
     const types = new Set<string>();
-    [...forReview, ...library, ...archived].forEach(policy => {
+    [...forReview, ...library, ...archived].forEach((policy) => {
       if (policy.tags) {
-        policy.tags.forEach(tag => types.add(tag));
+        policy.tags.forEach((tag) => types.add(tag));
       }
     });
     return Array.from(types);
@@ -88,13 +92,16 @@ export const usePolicies = ({ forReview, library, archived }: UsePoliciesProps) 
         policies = forReview;
     }
 
-    return policies.filter(policy => {
+    return policies.filter((policy) => {
       const matchesSearch =
         policy.title.toLowerCase().includes(policySearchQuery.toLowerCase()) ||
         policy.domain.toLowerCase().includes(policySearchQuery.toLowerCase());
       const matchesDomain =
-        selectedPolicyDomain === 'All' || policy.domain === selectedPolicyDomain;
-      const matchesType = selectedPolicyType === 'All' || policy.tags?.includes(selectedPolicyType);
+        selectedPolicyDomain === 'All' ||
+        policy.domain === selectedPolicyDomain;
+      const matchesType =
+        selectedPolicyType === 'All' ||
+        policy.tags?.includes(selectedPolicyType);
       return matchesSearch && matchesDomain && matchesType;
     });
   };
@@ -135,6 +142,7 @@ export const usePolicies = ({ forReview, library, archived }: UsePoliciesProps) 
     uniquePolicyTypes,
     totalPolicyPages,
     getTagColor,
+    getFilteredPolicies,
     getPaginatedPolicies,
     handlePolicyClick,
     handleClosePolicyDetail,

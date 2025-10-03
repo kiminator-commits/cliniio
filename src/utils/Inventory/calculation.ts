@@ -3,16 +3,7 @@
  * Handles mathematical operations, statistics, and business calculations
  */
 
-export interface InventoryItem {
-  id?: string;
-  name: string;
-  quantity: number;
-  category: string;
-  status: string;
-  expiryDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { InventoryItem } from '../../types/inventoryTypes';
 
 export interface InventoryMetrics {
   totalItems: number;
@@ -62,14 +53,14 @@ export const calculateAverageQuantity = (items: InventoryItem[]): number => {
  * Counts items with low stock (quantity <= 10)
  */
 export const calculateLowStockItems = (items: InventoryItem[]): number => {
-  return items.filter(item => (item.quantity || 0) <= 10).length;
+  return items.filter((item) => (item.quantity || 0) <= 10).length;
 };
 
 /**
  * Counts items that are out of stock
  */
 export const calculateOutOfStockItems = (items: InventoryItem[]): number => {
-  return items.filter(item => (item.quantity || 0) === 0).length;
+  return items.filter((item) => (item.quantity || 0) === 0).length;
 };
 
 /**
@@ -77,7 +68,7 @@ export const calculateOutOfStockItems = (items: InventoryItem[]): number => {
  */
 export const calculateExpiredItems = (items: InventoryItem[]): number => {
   const now = new Date();
-  return items.filter(item => {
+  return items.filter((item) => {
     if (!item.expiryDate) return false;
     return new Date(item.expiryDate) < now;
   }).length;
@@ -91,9 +82,11 @@ export const calculateExpiringSoonItems = (
   daysThreshold: number = 30
 ): number => {
   const now = new Date();
-  const thresholdDate = new Date(now.getTime() + daysThreshold * 24 * 60 * 60 * 1000);
+  const thresholdDate = new Date(
+    now.getTime() + daysThreshold * 24 * 60 * 60 * 1000
+  );
 
-  return items.filter(item => {
+  return items.filter((item) => {
     if (!item.expiryDate) return false;
     const expiryDate = new Date(item.expiryDate);
     return expiryDate >= now && expiryDate <= thresholdDate;
@@ -103,10 +96,12 @@ export const calculateExpiringSoonItems = (
 /**
  * Calculates distribution of items by category
  */
-export const calculateCategoryDistribution = (items: InventoryItem[]): Record<string, number> => {
+export const calculateCategoryDistribution = (
+  items: InventoryItem[]
+): Record<string, number> => {
   const distribution: Record<string, number> = {};
 
-  items.forEach(item => {
+  items.forEach((item) => {
     const category = item.category || 'Uncategorized';
     distribution[category] = (distribution[category] || 0) + 1;
   });
@@ -117,10 +112,12 @@ export const calculateCategoryDistribution = (items: InventoryItem[]): Record<st
 /**
  * Calculates distribution of items by status
  */
-export const calculateStatusDistribution = (items: InventoryItem[]): Record<string, number> => {
+export const calculateStatusDistribution = (
+  items: InventoryItem[]
+): Record<string, number> => {
   const distribution: Record<string, number> = {};
 
-  items.forEach(item => {
+  items.forEach((item) => {
     const status = item.status || 'Unknown';
     distribution[status] = (distribution[status] || 0) + 1;
   });
@@ -152,8 +149,8 @@ export const calculateTurnoverRate = (
 export const calculateStockLevelTrends = (items: InventoryItem[]): number[] => {
   const categories = Object.keys(calculateCategoryDistribution(items));
 
-  return categories.map(category => {
-    const categoryItems = items.filter(item => item.category === category);
+  return categories.map((category) => {
+    const categoryItems = items.filter((item) => item.category === category);
     return calculateTotalQuantity(categoryItems);
   });
 };
@@ -161,12 +158,14 @@ export const calculateStockLevelTrends = (items: InventoryItem[]): number[] => {
 /**
  * Calculates category growth rates
  */
-export const calculateCategoryGrowth = (items: InventoryItem[]): Record<string, number> => {
+export const calculateCategoryGrowth = (
+  items: InventoryItem[]
+): Record<string, number> => {
   const distribution = calculateCategoryDistribution(items);
   const totalItems = calculateTotalItems(items);
   const growth: Record<string, number> = {};
 
-  Object.keys(distribution).forEach(category => {
+  Object.keys(distribution).forEach((category) => {
     growth[category] = (distribution[category] / totalItems) * 100;
   });
 
@@ -210,7 +209,9 @@ export const generateRecommendations = (items: InventoryItem[]): string[] => {
 /**
  * Calculates comprehensive inventory metrics
  */
-export const calculateInventoryMetrics = (items: InventoryItem[]): InventoryMetrics => {
+export const calculateInventoryMetrics = (
+  items: InventoryItem[]
+): InventoryMetrics => {
   return {
     totalItems: calculateTotalItems(items),
     totalQuantity: calculateTotalQuantity(items),
@@ -227,7 +228,9 @@ export const calculateInventoryMetrics = (items: InventoryItem[]): InventoryMetr
 /**
  * Calculates comprehensive inventory analytics
  */
-export const calculateInventoryAnalytics = (items: InventoryItem[]): InventoryAnalytics => {
+export const calculateInventoryAnalytics = (
+  items: InventoryItem[]
+): InventoryAnalytics => {
   const metrics = calculateInventoryMetrics(items);
 
   return {
@@ -250,7 +253,7 @@ export const calculateInventoryValue = (
 ): number => {
   return items.reduce((total, item) => {
     const price = priceMap[item.id || ''] || 0;
-    return total + item.quantity * price;
+    return total + (item.quantity || 0) * price;
   }, 0);
 };
 

@@ -18,8 +18,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [locationType, setLocationType] = useState<'room' | 'gps' | 'manual'>('room');
-  const { getCurrentLocation, latitude, longitude, accuracy, error, isLoading } = useGeolocation();
+  const [locationType, setLocationType] = useState<'room' | 'gps' | 'manual'>(
+    'room'
+  );
+  const { getCurrentLocation, latitude, longitude, accuracy, isLoading } =
+    useGeolocation();
   const { getActiveRooms } = useRoomStore();
   const rooms = getActiveRooms();
 
@@ -82,7 +85,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                 : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
             }`}
           >
-            <Icon path={mdiMapMarkerRadius} size={0.8} className="inline mr-1" />
+            <Icon
+              path={mdiMapMarkerRadius}
+              size={0.8}
+              className="inline mr-1"
+            />
             GPS
           </button>
           <button
@@ -109,27 +116,35 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               <span className={value ? 'text-gray-900' : 'text-gray-500'}>
                 {value || placeholder}
               </span>
-              <Icon path={mdiChevronDown} size={1} className="float-right mt-1" />
+              <Icon
+                path={mdiChevronDown}
+                size={1}
+                className="float-right mt-1"
+              />
             </button>
 
             {isOpen && (
               <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                 {rooms.length > 0 ? (
-                  rooms.map(room => (
+                  rooms.map((room) => (
                     <button
                       key={room.id}
                       type="button"
                       onClick={() => handleRoomSelect(room.name)}
                       className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
                     >
-                      <div className="font-medium text-gray-900">{room.name}</div>
+                      <div className="font-medium text-gray-900">
+                        {room.name}
+                      </div>
                       <div className="text-sm text-gray-500">
                         {room.department} • {room.floor}
                       </div>
                     </button>
                   ))
                 ) : (
-                  <div className="px-3 py-2 text-gray-500">No rooms available</div>
+                  <div className="px-3 py-2 text-gray-500">
+                    No rooms available
+                  </div>
                 )}
               </div>
             )}
@@ -142,12 +157,12 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               type="button"
               onClick={getCurrentLocation}
               disabled={isLoading}
-              className="w-full px-3 py-2 text-sm bg-green-100 text-green-700 border border-green-300 rounded-md hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+              className="w-full px-3 py-2 text-sm bg-green-100 text-green-700 border border-green-300 rounded-md hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {isLoading ? 'Getting location...' : 'Get Current Location'}
             </button>
 
-            {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded-md">{error}</div>}
+            {/* Error display removed to prevent text from appearing on page */}
 
             {latitude && longitude && (
               <div className="space-y-2">
@@ -181,7 +196,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
       {/* Display current value */}
       {value && (
-        <div className="mt-2 text-sm text-gray-600">Current location: {getDisplayValue()}</div>
+        <div className="mt-2 text-sm text-gray-600">
+          Current location: {getDisplayValue()}
+        </div>
       )}
     </div>
   );

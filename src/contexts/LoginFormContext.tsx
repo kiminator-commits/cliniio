@@ -1,18 +1,16 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { LoginFormData } from '../pages/Login/types';
 
-export interface LoginFormData {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-  rememberDevice: boolean;
-}
+export type { LoginFormData };
 
 interface LoginFormContextType {
   formData: LoginFormData;
   setFormData: React.Dispatch<React.SetStateAction<LoginFormData>>;
 }
 
-const LoginFormContext = createContext<LoginFormContextType | undefined>(undefined);
+const LoginFormContext = createContext<LoginFormContextType | undefined>(
+  undefined
+);
 
 export const LoginFormProvider = ({ children }: { children: ReactNode }) => {
   const [formData, setFormData] = useState<LoginFormData>({

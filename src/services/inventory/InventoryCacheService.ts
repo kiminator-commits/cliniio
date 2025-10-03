@@ -1,4 +1,4 @@
-import { InventoryDataResponse } from './InventoryDataService';
+import { InventoryResponse } from './InventoryServiceFacade';
 
 export interface CacheEntry<T> {
   data: T;
@@ -21,8 +21,8 @@ export interface InventoryCacheService {
   has(key: string): boolean;
 
   // Inventory-specific cache operations
-  getInventoryData(): InventoryDataResponse | null;
-  setInventoryData(data: InventoryDataResponse): void;
+  getInventoryData(): InventoryResponse | null;
+  setInventoryData(data: InventoryResponse): void;
   clearInventoryCache(): void;
   isInventoryDataStale(): boolean;
 
@@ -91,11 +91,11 @@ export class InventoryCacheServiceImpl implements InventoryCacheService {
     return this.cache.has(key) && !this.isEntryStale(key);
   }
 
-  getInventoryData(): InventoryDataResponse | null {
-    return this.get<InventoryDataResponse>('inventory_data');
+  getInventoryData(): InventoryResponse | null {
+    return this.get<InventoryResponse>('inventory_data');
   }
 
-  setInventoryData(data: InventoryDataResponse): void {
+  setInventoryData(data: InventoryResponse): void {
     this.set('inventory_data', data);
   }
 
@@ -116,7 +116,7 @@ export class InventoryCacheServiceImpl implements InventoryCacheService {
     newestEntry: number | null;
   } {
     const keys = Array.from(this.cache.keys());
-    const timestamps = keys.map(key => this.cache.get(key)?.timestamp || 0);
+    const timestamps = keys.map((key) => this.cache.get(key)?.timestamp || 0);
 
     return {
       size: this.cache.size,

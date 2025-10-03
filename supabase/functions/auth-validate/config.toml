@@ -1,0 +1,3 @@
+name = "auth-validate"
+main = "index.ts"
+runtime = "deno"

@@ -6,7 +6,7 @@ interface LearningProgressItem {
   dueDate?: string;
   progress?: number;
   department?: string;
-  lastUpdated?: string;
+  updated_at?: string;
   source?: string;
   description: string;
   level: string;
@@ -19,19 +19,35 @@ class LearningProgressService {
   private progressItems: Map<string, LearningProgressItem> = new Map();
 
   private constructor() {
-    // Load from localStorage on initialization
-    this.loadFromStorage();
+    try {
+      // Load from localStorage on initialization
+      this.loadFromStorage();
+    } catch (error) {
+      console.error('[LearningProgressService] Failed to initialize:', error);
+      // Continue with empty state if localStorage is not available
+    }
   }
 
-  public static getInstance(): LearningProgressService {
-    if (!LearningProgressService.instance) {
-      LearningProgressService.instance = new LearningProgressService();
+  public static getInstance(): LearningProgressService | null {
+    try {
+      if (!LearningProgressService.instance) {
+        LearningProgressService.instance = new LearningProgressService();
+      }
+      return LearningProgressService.instance;
+    } catch (error) {
+      console.error('[LearningProgressService] Failed to get instance:', error);
+      return null;
     }
-    return LearningProgressService.instance;
   }
 
   private loadFromStorage(): void {
     try {
+      // Check if localStorage is available
+      if (typeof window === 'undefined' || !window.localStorage) {
+        console.warn('[LearningProgressService] localStorage not available');
+        return;
+      }
+
       const stored = localStorage.getItem('learningProgress');
       if (stored) {
         const items = JSON.parse(stored);
@@ -41,16 +57,30 @@ class LearningProgressService {
         });
       }
     } catch (error) {
-      console.error('[LearningProgressService]', error);
+      console.error(
+        '[LearningProgressService] Failed to load from storage:',
+        error
+      );
     }
   }
 
   private saveToStorage(): void {
     try {
+      // Check if localStorage is available
+      if (typeof window === 'undefined' || !window.localStorage) {
+        console.warn(
+          '[LearningProgressService] localStorage not available for saving'
+        );
+        return;
+      }
+
       const items = Array.from(this.progressItems.values());
       localStorage.setItem('learningProgress', JSON.stringify(items));
     } catch (error) {
-      console.error('[LearningProgressService]', error);
+      console.error(
+        '[LearningProgressService] Failed to save to storage:',
+        error
+      );
     }
   }
 
@@ -58,7 +88,7 @@ class LearningProgressService {
     const progressItem: LearningProgressItem = {
       ...item,
       status: 'In Progress',
-      lastUpdated: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
     this.progressItems.set(item.id, progressItem);
     this.saveToStorage();
@@ -68,27 +98,34 @@ class LearningProgressService {
     const item = this.progressItems.get(itemId);
     if (item) {
       item.status = 'In Progress';
-      item.lastUpdated = new Date().toISOString();
+      item.updated_at = new Date().toISOString();
       this.saveToStorage();
     }
   }
 
-  public getItemStatus(itemId: string): 'Not Started' | 'In Progress' | 'Completed' {
+  public getItemStatus(
+    itemId: string
+  ): 'Not Started' | 'In Progress' | 'Completed' {
     const item = this.progressItems.get(itemId);
     return item ? item.status : 'Not Started';
   }
 
-  public updateItemStatus(itemId: string, status: 'In Progress' | 'Completed'): void {
+  public updateItemStatus(
+    itemId: string,
+    status: 'In Progress' | 'Completed'
+  ): void {
     const item = this.progressItems.get(itemId);
     if (item) {
       item.status = status;
-      item.lastUpdated = new Date().toISOString();
+      item.updated_at = new Date().toISOString();
       this.saveToStorage();
     }
   }
 
   public getItemsByCategory(category: string): LearningProgressItem[] {
-    return Array.from(this.progressItems.values()).filter(item => item.category === category);
+    return Array.from(this.progressItems.values()).filter(
+      (item) => item.category === category
+    );
   }
 
   public getAllProgressItems(): LearningProgressItem[] {
@@ -98,6 +135,10 @@ class LearningProgressService {
   public removeItem(itemId: string): void {
     this.progressItems.delete(itemId);
     this.saveToStorage();
+  }
+
+  public isInitialized(): boolean {
+    return this.progressItems !== undefined;
   }
 }
 

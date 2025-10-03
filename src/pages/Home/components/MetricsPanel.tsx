@@ -3,11 +3,10 @@ import clsx from 'clsx';
 import { PerformanceMetrics } from '@/components/PerformanceMetrics/PerformanceMetrics';
 import { HOME_UI_CONSTANTS } from '../../../constants/homeUiConstants';
 import { MIN_PANEL_WIDTH } from '../../../constants/layoutConstants';
+import { MetricsData } from '../../../types/homeTypes';
 
 interface MetricsPanelProps {
-  metrics: {
-    [key: string]: number | string;
-  };
+  metrics: MetricsData;
 }
 
 export function MetricsPanel({ metrics }: MetricsPanelProps) {

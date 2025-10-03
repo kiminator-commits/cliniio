@@ -1,0 +1,3 @@
+name = "auth-logout"
+main = "index.ts"
+runtime = "deno"

@@ -1,7 +1,7 @@
 // Image paths
 export const IMAGES = {
   LOGO: '/assets/images/logo.svg',
-  PLACEHOLDER: '/assets/images/placeholder.png',
+
   AVATAR: '/assets/images/avatar.png',
 } as const;
 

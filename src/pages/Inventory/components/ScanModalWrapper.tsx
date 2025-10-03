@@ -6,7 +6,8 @@ import { useInventoryStore } from '@/store/useInventoryStore';
 function ScanModalErrorFallback() {
   return (
     <div className="text-red-600 text-sm p-4">
-      ⚠️ Something went wrong loading the Scan Modal. Please refresh or try again later.
+      ⚠️ Something went wrong loading the Scan Modal. Please refresh or try
+      again later.
     </div>
   );
 }
@@ -24,15 +25,11 @@ const ScanModalWrapper: React.FC = () => {
     removeScannedItem,
   } = useInventoryStore();
 
-  // Local functions that were previously passed as props
-  const handleProcessScannedItems = () => {
-    // Implementation for processing scanned items
-    console.log('Processing scanned items...');
-  };
-
-  const handleOpenAddItemModalWithBarcode = (barcodeData?: string) => {
-    // Implementation for opening add item modal with barcode
-    console.log('Opening add item modal with barcode:', barcodeData);
+  // Handle closing the scan modal
+  const handleCloseScanModal = () => {
+    resetScannedItems();
+    setScanMode(null);
+    setShowScanModal(false);
   };
 
   if (!showScanModal) return null;
@@ -41,16 +38,12 @@ const ScanModalWrapper: React.FC = () => {
     <ScanInventoryModal
       scanMode={scanMode}
       scannedItems={scannedItems}
-      onClose={() => {
-        resetScannedItems();
-        setScanMode(null);
-        setShowScanModal(false);
-      }}
+      onClose={handleCloseScanModal}
       onSelectMode={setScanMode}
       onScan={addScannedItem}
-      onProcess={handleProcessScannedItems}
+      onProcess={() => {}} // This is now handled in ScanModalActions
       onClearScannedItems={resetScannedItems}
-      onOpenAddItemModal={handleOpenAddItemModalWithBarcode}
+      onOpenAddItemModal={() => {}} // This is now handled in ScanModalActions
       onRemoveScannedItem={removeScannedItem}
     />
   );

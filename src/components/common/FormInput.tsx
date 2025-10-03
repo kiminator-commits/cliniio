@@ -8,7 +8,13 @@ interface FormInputProps {
   placeholder?: string;
 }
 
-const FormInput: React.FC<FormInputProps> = ({ label, type, value, onChange, placeholder }) => (
+const FormInput: React.FC<FormInputProps> = ({
+  label,
+  type,
+  value,
+  onChange,
+  placeholder,
+}) => (
   <div className="mb-3">
     <label className="form-label">{label}</label>
     <input

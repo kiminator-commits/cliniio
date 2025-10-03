@@ -4,7 +4,9 @@ interface InventoryDashboardProps {
   InventoryAnalyticsComponent: () => JSX.Element;
 }
 
-const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ InventoryAnalyticsComponent }) => {
+const InventoryDashboard: React.FC<InventoryDashboardProps> = ({
+  InventoryAnalyticsComponent,
+}) => {
   return (
     <div>
       <h1>Inventory Dashboard Placeholder</h1>

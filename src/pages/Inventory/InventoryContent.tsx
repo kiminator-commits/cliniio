@@ -1,7 +1,9 @@
 import React from 'react';
 
 const InventoryContent: React.FC = () => {
-  return <>InventoryContent</>;
+  return (
+    <div>{/* Inventory content placeholder - workflow sessions removed */}</div>
+  );
 };
 
 export default InventoryContent;

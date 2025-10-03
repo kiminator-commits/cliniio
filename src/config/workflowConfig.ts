@@ -1,4 +1,10 @@
-import { mdiSpray, mdiWashingMachine, mdiAlertCircle, mdiFileDocument, mdiPackage } from '@mdi/js';
+import {
+  mdiSpray,
+  mdiWashingMachine,
+  mdiAlertCircle,
+  mdiFileDocument,
+  mdiPackage,
+} from '@mdi/js';
 
 /**
  * Configuration for each sterilization phase.
@@ -13,7 +19,13 @@ import { mdiSpray, mdiWashingMachine, mdiAlertCircle, mdiFileDocument, mdiPackag
  * This config powers both the timers and audit logging system.
  */
 
-export type WorkflowType = 'clean' | 'dirty' | 'damaged' | 'import' | 'packaging' | null;
+export type WorkflowType =
+  | 'clean'
+  | 'dirty'
+  | 'problem'
+  | 'import'
+  | 'packaging'
+  | null;
 
 export const workflowConfig = {
   clean: {
@@ -36,9 +48,9 @@ export const workflowConfig = {
     textColor: 'text-orange-800',
     isAvailable: true,
   },
-  damaged: {
-    title: 'Damaged Tool Workflow',
-    description: 'Tools that need repair or replacement',
+  problem: {
+    title: 'Tool Problem Workflow',
+    description: 'Tools that need attention or repair',
     icon: mdiAlertCircle,
     color: 'red',
     bgColor: 'bg-red-50',
@@ -81,10 +93,16 @@ const validatePhase = (
   name: string
 ) => {
   if (phase.duration <= 0) throw new Error(`${name} has invalid duration`);
-  if (phase.temperature !== undefined && (phase.temperature < 30 || phase.temperature > 150)) {
+  if (
+    phase.temperature !== undefined &&
+    (phase.temperature < 30 || phase.temperature > 150)
+  ) {
     throw new Error(`${name} has unsafe temperature`);
   }
-  if (phase.pressure !== undefined && (phase.pressure < 5 || phase.pressure > 30)) {
+  if (
+    phase.pressure !== undefined &&
+    (phase.pressure < 5 || phase.pressure > 30)
+  ) {
     throw new Error(`${name} has unsafe pressure`);
   }
 };
@@ -92,7 +110,7 @@ const validatePhase = (
 export const PHASE_CONFIG = {
   bath1: {
     name: 'Bath 1',
-    duration: 30,
+    duration: 1, // Changed to 1 minute for testing
     temperature: 60,
     requiresCI: false,
     requiresBI: false,
@@ -101,7 +119,7 @@ export const PHASE_CONFIG = {
   },
   bath2: {
     name: 'Bath 2',
-    duration: 30,
+    duration: 1, // Changed to 1 minute for testing
     temperature: 65,
     requiresCI: false,
     requiresBI: false,
@@ -110,7 +128,7 @@ export const PHASE_CONFIG = {
   },
   drying: {
     name: 'Drying',
-    duration: 60,
+    duration: 1, // Changed to 1 minute for testing
     requiresCI: false,
     requiresBI: false,
     requiresCiStrip: false,
@@ -118,7 +136,7 @@ export const PHASE_CONFIG = {
   },
   autoclave: {
     name: 'Autoclave',
-    duration: 48,
+    duration: 1, // Changed to 1 minute for testing
     temperature: 121,
     pressure: 15,
     requiresCI: true,
@@ -133,10 +151,22 @@ Object.entries(PHASE_CONFIG).forEach(([key, phase]) => {
 });
 
 export const sterilizationPhases = {
-  bath1: { label: 'Bath 1', duration: 1800 }, // 30 mins
-  bath2: { label: 'Bath 2', duration: 1800 },
-  drying: { label: 'Drying', duration: 3600 },
-  autoclave: { label: 'Autoclave', duration: 2880 }, // 48 mins
+  bath1: {
+    label: PHASE_CONFIG.bath1.name,
+    duration: PHASE_CONFIG.bath1.duration * 60,
+  },
+  bath2: {
+    label: PHASE_CONFIG.bath2.name,
+    duration: PHASE_CONFIG.bath2.duration * 60,
+  },
+  drying: {
+    label: PHASE_CONFIG.drying.name,
+    duration: PHASE_CONFIG.drying.duration * 60,
+  },
+  autoclave: {
+    label: PHASE_CONFIG.autoclave.name,
+    duration: PHASE_CONFIG.autoclave.duration * 60,
+  },
 };
 
 export type SterilizationPhaseId = keyof typeof sterilizationPhases;

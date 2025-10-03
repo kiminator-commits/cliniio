@@ -1,6 +1,6 @@
 import React from 'react';
 
-// TODO: Move to analytics/ - Analytics component for inventory data
+// Analytics component for inventory data
 
 const InventoryAnalytics: React.FC = () => {
   return (

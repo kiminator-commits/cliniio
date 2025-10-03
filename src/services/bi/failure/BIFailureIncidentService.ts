@@ -1,0 +1,508 @@
+import { supabase } from '@/lib/supabaseClient';
+import { BIFailureErrorHandler } from './BIFailureErrorHandler';
+import {
+  BIFailureValidationService,
+  CreateBIFailureParams,
+  ResolveBIFailureParams,
+} from './BIFailureValidationService';
+
+/**
+ * BI Failure Incident interface
+ */
+export interface BIFailureIncident {
+  id: string;
+  facility_id: string;
+  bi_test_result_id?: string;
+  incident_number: string;
+  failure_date: string;
+  detected_by_operator_id?: string;
+  affected_tools_count: number;
+  affected_batch_ids: string[];
+  failure_reason?: string;
+  severity_level: 'low' | 'medium' | 'high' | 'critical';
+  status: 'active' | 'in_resolution' | 'resolved' | 'closed';
+  resolution_deadline?: string;
+  estimated_impact?: string;
+  regulatory_notification_required: boolean;
+  regulatory_notification_sent: boolean;
+  regulatory_notification_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Row type for Supabase mapping
+type _BIFailureIncidentRow = {
+  id: string;
+  facility_id: string;
+  bi_test_result_id?: string | null;
+  incident_number: string;
+  failure_date: string;
+  detected_by_operator_id?: string | null;
+  affected_tools_count: number;
+  affected_batch_ids?: string[] | null;
+  failure_reason?: string | null;
+  severity_level: 'low' | 'medium' | 'high' | 'critical';
+  status: 'active' | 'in_resolution' | 'resolved' | 'closed';
+  resolution_deadline?: string | null;
+  estimated_impact?: string | null;
+  regulatory_notification_required: boolean;
+  regulatory_notification_sent: boolean;
+  regulatory_notification_date?: string | null;
+  created_at: string;
+  updated_at: string;
+  updated_by_operator_id?: string | null;
+  deleted_by_operator_id?: string | null;
+};
+
+/**
+ * Incident service for BI failure operations
+ */
+export class BIFailureIncidentService {
+  static async createIncident(
+    params: CreateBIFailureParams
+  ): Promise<BIFailureIncident> {
+    try {
+      BIFailureValidationService.validateCreateIncidentParams(params);
+      BIFailureValidationService.validateBusinessRules(params);
+
+      const result = await BIFailureErrorHandler.withRetry(async () => {
+        const { data, error } = await supabase
+          .from('bi_failure_incidents')
+          .insert({
+            facility_id: params.facility_id,
+            cycle_id: params.bi_test_result_id, // Map to cycle_id since bi_test_result_id doesn't exist
+            user_id: params.detected_by_operator_id,
+            incident_type: params.incident_type || 'bi_failure',
+            severity: params.severity || 'medium',
+            description: params.description || 'BI test failure incident',
+            failure_reason: params.failure_reason,
+            status: 'open',
+            detected_at: new Date().toISOString(),
+            metadata: {
+              affected_tools_count: params.affected_tools_count,
+              affected_batch_ids: params.affected_batch_ids,
+              notes: params.notes,
+            },
+          })
+          .select()
+          .single();
+        if (error) {
+          throw error;
+        }
+        if (!data) throw new Error('No data returned from incident creation');
+        return data;
+      }, 'create BI failure incident');
+
+      if (result && params.lastSuccessfulBIDate) {
+        try {
+          await this.identifyExposureWindowTools(
+            (result as { id: string }).id,
+            params.lastSuccessfulBIDate
+          );
+          console.log(
+            'Exposure window tools identified for incident:',
+            (result as { incident_number: string }).incident_number
+          );
+        } catch (exposureError) {
+          if (
+            !(global as { __TESTING__?: boolean }).__TESTING__ &&
+            process.env.NODE_ENV !== 'test'
+          ) {
+            console.error(
+              'Error identifying exposure window tools:',
+              exposureError
+            );
+          }
+        }
+      }
+
+      return {
+        ...(result as {
+          id: string;
+          incident_number: string;
+          facility_id: string;
+          bi_test_result_id: string;
+          detected_by_operator_id: string;
+          incident_type: string;
+          severity: string;
+          description: string;
+          immediate_actions: string[];
+          root_cause_analysis: string;
+          corrective_actions: string[];
+          preventive_measures: string[];
+          estimated_resolution_time: string;
+          priority: string;
+          status: string;
+          notes: string;
+          created_at: string;
+          updated_at: string;
+        }),
+        affected_batch_ids:
+          (result as { affected_batch_ids?: string[] }).affected_batch_ids ??
+          [],
+      };
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'create BI failure incident'
+      );
+    }
+  }
+
+  static async getActiveIncidents(
+    facilityId: string
+  ): Promise<BIFailureIncident[]> {
+    BIFailureValidationService.validateFacilityId(facilityId);
+
+    try {
+      const { data } = await BIFailureErrorHandler.withRetry(async () => {
+        const result = await supabase
+          .from('bi_failure_incidents')
+          .select('*')
+          .eq('facility_id', facilityId)
+          .in('status', ['active', 'in_resolution'])
+          .order('failure_date', { ascending: false });
+
+        if (result.error) {
+          throw result.error;
+        }
+
+        return result;
+      }, 'get active BI failure incidents');
+
+      return (data ?? []).map(
+        (item: {
+          id: string;
+          incident_number: string;
+          facility_id: string;
+          bi_test_result_id: string;
+          detected_by_operator_id: string;
+          incident_type: string;
+          severity: string;
+          description: string;
+          immediate_actions: string[];
+          root_cause_analysis: string;
+          corrective_actions: string[];
+          preventive_measures: string[];
+          estimated_resolution_time: string;
+          priority: string;
+          status: string;
+          notes: string;
+          created_at: string;
+          updated_at: string;
+          affected_batch_ids?: string[];
+        }) => ({
+          ...item,
+          affected_batch_ids: item.affected_batch_ids ?? [],
+        })
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'get active BI failure incidents'
+      );
+    }
+  }
+
+  static async getIncidentById(
+    incidentId: string,
+    facilityId: string
+  ): Promise<BIFailureIncident | null> {
+    BIFailureValidationService.validateIncidentId(incidentId);
+
+    try {
+      const { data } = await BIFailureErrorHandler.withRetry(async () => {
+        const result = await supabase
+          .from('bi_failure_incidents')
+          .select('*')
+          .eq('id', incidentId)
+          .eq('facility_id', facilityId)
+          .single();
+
+        if (result.error) {
+          if ((result.error as { code?: string }).code === 'PGRST116') {
+            return { data: null, error: null };
+          }
+          throw result.error;
+        }
+
+        return result;
+      }, 'get BI failure incident by ID');
+
+      return data
+        ? {
+            ...(data as {
+              id: string;
+              incident_number: string;
+              facility_id: string;
+              bi_test_result_id: string;
+              detected_by_operator_id: string;
+              incident_type: string;
+              severity: string;
+              description: string;
+              immediate_actions: string[];
+              root_cause_analysis: string;
+              corrective_actions: string[];
+              preventive_measures: string[];
+              estimated_resolution_time: string;
+              priority: string;
+              status: string;
+              notes: string;
+              created_at: string;
+              updated_at: string;
+            }),
+            affected_batch_ids:
+              (data as { affected_batch_ids?: string[] }).affected_batch_ids ??
+              [],
+          }
+        : null;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'get BI failure incident by ID'
+      );
+    }
+  }
+
+  static async resolveIncident(
+    params: ResolveBIFailureParams
+  ): Promise<boolean> {
+    BIFailureValidationService.validateResolveIncidentParams(params);
+
+    try {
+      const result = await BIFailureErrorHandler.withRetry(async () => {
+        const { data, error } = await supabase.rpc<
+          boolean,
+          {
+            p_incident_id: string;
+            p_resolved_by_operator_id: string;
+            p_resolution_notes: string;
+          }
+        >('resolve_bi_failure_incident', {
+          p_incident_id: params.incidentId,
+          p_resolved_by_operator_id: params.resolvedByOperatorId,
+          p_resolution_notes: params.resolutionNotes || '',
+        });
+        if (error) {
+          throw error;
+        }
+        return data;
+      }, 'resolve BI failure incident');
+
+      return result === true;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'resolve BI failure incident'
+      );
+    }
+  }
+
+  static async updateIncidentStatus(
+    incidentId: string,
+    facilityId: string,
+    status: BIFailureIncident['status'],
+    updatedByOperatorId?: string
+  ): Promise<boolean> {
+    BIFailureValidationService.validateIncidentId(incidentId);
+
+    try {
+      const { data } = await BIFailureErrorHandler.withRetry(async () => {
+        const result = await supabase
+          .from('bi_failure_incidents')
+          .update({
+            status,
+            updated_at: new Date().toISOString(),
+            ...(updatedByOperatorId && {
+              updated_by_operator_id: updatedByOperatorId,
+            }),
+          })
+          .eq('id', incidentId)
+          .eq('facility_id', facilityId)
+          .select('id')
+          .single();
+
+        if (result.error) {
+          throw result.error;
+        }
+
+        return result;
+      }, 'update incident status');
+
+      return !!data;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'update incident status'
+      );
+    }
+  }
+
+  static async deleteIncident(
+    incidentId: string,
+    facilityId: string,
+    deletedByOperatorId?: string
+  ): Promise<boolean> {
+    BIFailureValidationService.validateIncidentId(incidentId);
+
+    try {
+      const { data } = await BIFailureErrorHandler.withRetry(async () => {
+        const result = await supabase
+          .from('bi_failure_incidents')
+          .update({
+            status: 'closed',
+            updated_at: new Date().toISOString(),
+            ...(deletedByOperatorId && {
+              deleted_by_operator_id: deletedByOperatorId,
+            }),
+          })
+          .eq('id', incidentId)
+          .eq('facility_id', facilityId)
+          .select('id')
+          .single();
+
+        if (result.error) {
+          throw result.error;
+        }
+
+        return result;
+      }, 'delete BI failure incident');
+
+      return !!data;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'delete BI failure incident'
+      );
+    }
+  }
+
+  static async getIncidentHistory(
+    facilityId: string,
+    startDate?: string,
+    endDate?: string,
+    limit: number = 100
+  ): Promise<BIFailureIncident[]> {
+    BIFailureValidationService.validateFacilityId(facilityId);
+    if (startDate && endDate) {
+      BIFailureValidationService.validateDateRange(startDate, endDate);
+    }
+
+    try {
+      let query = supabase
+        .from('bi_failure_incidents')
+        .select('*')
+        .eq('facility_id', facilityId)
+        .order('failure_date', { ascending: false })
+        .limit(limit);
+
+      if (startDate) query = query.gte('failure_date', startDate);
+      if (endDate) query = query.lte('failure_date', endDate);
+
+      const { data } = await BIFailureErrorHandler.withRetry(async () => {
+        const result = await query;
+
+        if (result.error) {
+          throw result.error;
+        }
+
+        return result;
+      }, 'get incident history');
+
+      return (data ?? []).map(
+        (item: {
+          id: string;
+          incident_number: string;
+          facility_id: string;
+          bi_test_result_id: string;
+          detected_by_operator_id: string;
+          incident_type: string;
+          severity: string;
+          description: string;
+          immediate_actions: string[];
+          root_cause_analysis: string;
+          corrective_actions: string[];
+          preventive_measures: string[];
+          estimated_resolution_time: string;
+          priority: string;
+          status: string;
+          notes: string;
+          created_at: string;
+          updated_at: string;
+          affected_batch_ids?: string[];
+        }) => ({
+          ...item,
+          affected_batch_ids: item.affected_batch_ids ?? [],
+        })
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'get incident history'
+      );
+    }
+  }
+
+  private static async identifyExposureWindowTools(
+    incidentId: string,
+    lastSuccessfulBIDate: Date
+  ): Promise<number> {
+    try {
+      const { data, error } = await BIFailureErrorHandler.withRetry(
+        async () => {
+          return await supabase.rpc<
+            number,
+            { p_incident_id: string; p_last_successful_bi_date: string }
+          >('identify_exposure_window_tools', {
+            p_incident_id: incidentId,
+            p_last_successful_bi_date: lastSuccessfulBIDate.toISOString(),
+          });
+        },
+        'identify exposure window tools'
+      );
+
+      if (error) {
+        BIFailureErrorHandler.handleDatabaseError(
+          error,
+          'identify exposure window tools'
+        );
+      }
+
+      return data ?? 0;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'BIFailureError')
+        throw error;
+      BIFailureErrorHandler.handleUnexpectedError(
+        error,
+        'identify exposure window tools'
+      );
+    }
+  }
+
+  static async getCurrentFacilityId(): Promise<string> {
+    try {
+      const { FacilityService } = await import('@/services/facilityService');
+      return await FacilityService.getCurrentFacilityId();
+    } catch (error) {
+      console.error('Failed to get current facility ID:', error);
+      if (process.env.NODE_ENV === 'development') {
+        return '550e8400-e29b-41d4-a716-446655440000';
+      }
+      throw new Error('Failed to get current facility ID');
+    }
+  }
+}

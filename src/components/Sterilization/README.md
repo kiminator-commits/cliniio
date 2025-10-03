@@ -23,11 +23,13 @@ This module manages tool sterilization workflows including:
 
 ## State Management
 
-Zustand store split into:
+Zustand store simplified to 5 focused slices:
 
-- `timerSlice.ts`: Countdown control and pause/resume
-- `biTestSlice.ts`: Daily test tracking and validation
-- `toolCycleSlice.ts`: Tool status across phases
+- `biologicalIndicatorSlice.ts`: Comprehensive BI test tracking and validation
+- `toolManagementSlice.ts`: Tool lifecycle, workflow state, and batch tracking
+- `complianceSettingsSlice.ts`: Settings and enforcement rules
+- `sterilizationCycleSlice.ts`: Cycle management and phase tracking
+- `uiStateSlice.ts`: Modal visibility, workflow state, and scanner data
 
 ---
 

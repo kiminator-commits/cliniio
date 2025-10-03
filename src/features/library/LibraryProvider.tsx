@@ -5,7 +5,9 @@ interface LibraryContextValue {
   setActiveTab: (tab: string) => void;
 }
 
-const LibraryContext = createContext<LibraryContextValue | undefined>(undefined);
+const LibraryContext = createContext<LibraryContextValue | undefined>(
+  undefined
+);
 
 export const LibraryProvider = ({ children }: { children: ReactNode }) => {
   const [activeTab, setActiveTab] = useState<string>('favourites');
@@ -19,6 +21,7 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
 
 export const useLibrary = (): LibraryContextValue => {
   const context = useContext(LibraryContext);
-  if (!context) throw new Error('useLibrary must be used within a LibraryProvider');
+  if (!context)
+    throw new Error('useLibrary must be used within a LibraryProvider');
   return context;
 };

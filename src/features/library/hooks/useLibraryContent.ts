@@ -1,134 +1,31 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchLibraryContent } from '../services/libraryService';
 import { ContentItem } from '../libraryTypes';
 
-const mockContent: ContentItem[] = [
-  {
-    id: '1',
-    title: 'Advanced Sterilization Techniques',
-    category: 'Procedures',
-    description:
-      'Comprehensive guide to advanced sterilization methods and best practices for healthcare facilities',
-    level: 'Advanced',
-    duration: '90 min',
-    points: 75,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-12-15',
-  },
-  {
-    id: '2',
-    title: 'Autoclave Troubleshooting Guide',
-    category: 'Procedures',
-    description:
-      'Step-by-step troubleshooting procedures for common autoclave issues and maintenance',
-    level: 'Intermediate',
-    duration: '45 min',
-    points: 50,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-11-20',
-  },
-  {
-    id: '3',
-    title: 'Chemical Indicators Overview',
-    category: 'Courses',
-    description: 'Understanding chemical indicators and their role in sterilization validation',
-    level: 'Beginner',
-    duration: '30 min',
-    points: 35,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-10-10',
-  },
-  {
-    id: '4',
-    title: 'Infection Control Fundamentals',
-    category: 'Courses',
-    description: 'Essential principles of infection control and prevention in healthcare settings',
-    level: 'Beginner',
-    duration: '60 min',
-    points: 45,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-09-15',
-  },
-  {
-    id: '5',
-    title: 'Sterilization Equipment Maintenance',
-    category: 'Learning Pathways',
-    description:
-      'Complete pathway for maintaining and optimizing sterilization equipment performance',
-    level: 'Intermediate',
-    duration: '120 min',
-    points: 85,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-08-25',
-  },
-  {
-    id: '6',
-    title: 'Safety Data Sheet Management',
-    category: 'SDS Sheets',
-    description: 'Proper handling and documentation of safety data sheets for chemical safety',
-    level: 'Intermediate',
-    duration: '40 min',
-    points: 40,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-07-30',
-  },
-  {
-    id: '7',
-    title: 'Quality Assurance in Sterilization',
-    category: 'Policies',
-    description: 'Quality assurance protocols and standards for sterilization processes',
-    level: 'Advanced',
-    duration: '75 min',
-    points: 65,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-06-20',
-  },
-  {
-    id: '8',
-    title: 'Emergency Sterilization Procedures',
-    category: 'Procedures',
-    description: 'Emergency sterilization protocols for critical situations and equipment failures',
-    level: 'Advanced',
-    duration: '55 min',
-    points: 55,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-05-15',
-  },
-  {
-    id: '9',
-    title: 'Regulatory Compliance Training',
-    category: 'Courses',
-    description:
-      'Understanding and maintaining compliance with sterilization regulations and standards',
-    level: 'Intermediate',
-    duration: '90 min',
-    points: 70,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-04-10',
-  },
-  {
-    id: '10',
-    title: 'Sterilization Process Validation',
-    category: 'Learning Pathways',
-    description: 'Comprehensive validation procedures for sterilization processes and equipment',
-    level: 'Advanced',
-    duration: '150 min',
-    points: 95,
-    source: 'Cliniio',
-    status: 'Not Started',
-    publishedDate: '2024-03-25',
-  },
-];
-
 export const useLibraryContent = () => {
-  const content = useMemo(() => mockContent, []);
-  return { content };
+  const [content, setContent] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchLibraryContent();
+        setContent(data);
+      } catch (err) {
+        console.error('useLibraryContent: Error loading content:', err);
+        setError(
+          err instanceof Error ? err : new Error('Failed to load content')
+        );
+        setContent([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadContent();
+  }, []);
+
+  return { content, loading, error };
 };

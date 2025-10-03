@@ -21,6 +21,12 @@ export interface InventoryPaginationState {
   totalPages: number;
   startIndex: number;
   endIndex: number;
+
+  // Legacy compatibility
+  pagination: {
+    currentPage: number;
+    pageSize: number;
+  };
 }
 
 export const createInventoryPaginationSlice: StateCreator<
@@ -28,29 +34,29 @@ export const createInventoryPaginationSlice: StateCreator<
   [],
   [],
   InventoryPaginationState
-> = (set, get) => ({
+> = (set) => ({
   // Pagination state
   currentPage: 1,
   itemsPerPage: 10,
   totalItems: 0,
 
   // Pagination actions
-  setCurrentPage: page => set({ currentPage: page }),
-  setItemsPerPage: items => set({ itemsPerPage: items, currentPage: 1 }),
-  setTotalItems: total => set({ totalItems: total }),
+  setCurrentPage: (page) => set({ currentPage: page }),
+  setItemsPerPage: (items) => set({ itemsPerPage: items, currentPage: 1 }),
+  setTotalItems: (total) => set({ totalItems: total }),
 
   // Utility actions
   nextPage: () =>
-    set(state => {
+    set((state) => {
       const totalPages = Math.ceil(state.totalItems / state.itemsPerPage);
       return { currentPage: Math.min(state.currentPage + 1, totalPages) };
     }),
   previousPage: () =>
-    set(state => ({
+    set((state) => ({
       currentPage: Math.max(state.currentPage - 1, 1),
     })),
-  goToPage: page =>
-    set(state => {
+  goToPage: (page) =>
+    set((state) => {
       const totalPages = Math.ceil(state.totalItems / state.itemsPerPage);
       return { currentPage: Math.max(1, Math.min(page, totalPages)) };
     }),
@@ -58,12 +64,20 @@ export const createInventoryPaginationSlice: StateCreator<
 
   // Computed values
   get totalPages() {
-    return Math.ceil(get().totalItems / get().itemsPerPage);
+    return Math.ceil(this.totalItems / this.itemsPerPage);
   },
   get startIndex() {
-    return (get().currentPage - 1) * get().itemsPerPage;
+    return (this.currentPage - 1) * this.itemsPerPage;
   },
   get endIndex() {
-    return Math.min(get().startIndex + get().itemsPerPage, get().totalItems);
+    return Math.min(this.startIndex + this.itemsPerPage, this.totalItems);
+  },
+
+  // Legacy compatibility
+  get pagination() {
+    return {
+      currentPage: this.currentPage,
+      pageSize: this.itemsPerPage,
+    };
   },
 });

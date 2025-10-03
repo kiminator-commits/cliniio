@@ -20,6 +20,9 @@ const NavBar: React.FC<NavBarProps> = ({ className = '' }) => {
         <a href="/knowledge-hub" className="nav-link">
           Knowledge Hub
         </a>
+        <a href="/intelligence" className="nav-link">
+          Intelligence
+        </a>
         <a href="/settings" className="nav-link">
           Settings
         </a>

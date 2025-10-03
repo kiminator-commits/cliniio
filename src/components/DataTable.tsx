@@ -11,13 +11,17 @@ interface DataTableProps<T> {
   onDelete?: (id: string) => void;
 }
 
-const DataTable = <T extends { id: string }>({ items, columns, onDelete }: DataTableProps<T>) => {
+const DataTable = <T extends { id: string }>({
+  items,
+  columns,
+  onDelete,
+}: DataTableProps<T>) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full bg-white border rounded-lg">
         <thead>
           <tr className="bg-gray-50">
-            {columns.map(col => (
+            {columns.map((col) => (
               <th
                 key={String(col.accessor)}
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -41,10 +45,13 @@ const DataTable = <T extends { id: string }>({ items, columns, onDelete }: DataT
               </td>
             </tr>
           ) : (
-            items.map(item => (
+            items.map((item) => (
               <tr key={item.id}>
-                {columns.map(col => (
-                  <td key={String(col.accessor)} className="px-4 py-3 text-sm text-gray-900">
+                {columns.map((col) => (
+                  <td
+                    key={String(col.accessor)}
+                    className="px-4 py-3 text-sm text-gray-900"
+                  >
                     {String(item[col.accessor])}
                   </td>
                 ))}

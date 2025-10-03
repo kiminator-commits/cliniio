@@ -1,24 +1,55 @@
-import { toggleSection, handleFormChange } from '@/utils/inventoryHelpers';
-import { LocalInventoryItem } from '@/types/inventoryTypes';
+import { InventoryFormData } from '@/types/inventory';
 
-interface UseInventoryFormHandlersParams {
-  expandedSections: Record<string, boolean>;
-  setExpandedSections: (value: Record<string, boolean>) => void;
-  formData: Partial<LocalInventoryItem>;
-  setFormData: (value: Partial<LocalInventoryItem>) => void;
+interface UseInventoryFormHandlersProps {
+  formData: InventoryFormData;
+  setFormData: (data: InventoryFormData) => void;
+  mergeFormData: (data: Partial<InventoryFormData>) => void;
+  expandedSections: string[];
+  setExpandedSections: (sections: string[]) => void;
 }
 
-export function useInventoryFormHandlers({
+export const useInventoryFormHandlers = ({
   expandedSections,
   setExpandedSections,
-  formData,
-  setFormData,
-}: UseInventoryFormHandlersParams) {
-  return {
-    handleToggleSection: (section: keyof typeof expandedSections) =>
-      setExpandedSections(toggleSection(expandedSections, section)),
+  mergeFormData,
+}: UseInventoryFormHandlersProps) => {
+  // Debug logging removed for performance
 
-    handleFormChangeWrapper: (field: string, value: string) =>
-      setFormData(handleFormChange(formData, field as keyof typeof formData, value)),
+  const handleFormChangeWrapper = (
+    field: keyof InventoryFormData,
+    value: unknown
+  ) => {
+    console.log(
+      '🛠 handleFormChangeWrapper invoked. Field:',
+      field,
+      'Value:',
+      value,
+      'mergeFormData type:',
+      typeof mergeFormData
+    );
+
+    if (typeof mergeFormData !== 'function') {
+      console.error(
+        '❌ mergeFormData is not a function inside useInventoryFormHandlers!'
+      );
+      return;
+    }
+
+    if (field === 'category') {
+      mergeFormData({ category: value });
+    } else {
+      mergeFormData({ [field]: value });
+    }
   };
-}
+
+  return {
+    handleFormChangeWrapper,
+    handleToggleSection: (section: string) => {
+      setExpandedSections(
+        expandedSections.includes(section)
+          ? expandedSections.filter((s) => s !== section)
+          : [...expandedSections, section]
+      );
+    },
+  };
+};

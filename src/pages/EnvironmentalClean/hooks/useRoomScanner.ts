@@ -5,7 +5,10 @@ interface UseRoomScannerProps {
   onNotification: (message: string, type: string) => void;
 }
 
-export const useRoomScanner = ({ onSuccess, onNotification }: UseRoomScannerProps) => {
+export const useRoomScanner = ({
+  onSuccess,
+  onNotification,
+}: UseRoomScannerProps) => {
   const [isScanning, setIsScanning] = useState(false);
 
   /**

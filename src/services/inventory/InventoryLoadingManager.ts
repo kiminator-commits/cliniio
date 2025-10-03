@@ -45,7 +45,10 @@ export interface LoadingSummary {
 
 export interface InventoryLoadingManager {
   // Core loading management
-  startTask(operation: LoadingOperation, context?: Record<string, unknown>): string;
+  startTask(
+    operation: LoadingOperation,
+    context?: Record<string, unknown>
+  ): string;
   updateTask(taskId: string, updates: Partial<LoadingTask>): void;
   completeTask(taskId: string, result?: unknown): void;
   failTask(taskId: string, error: string): void;
@@ -98,7 +101,10 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
     }
   }
 
-  startTask(operation: LoadingOperation, context?: Record<string, unknown>): string {
+  startTask(
+    operation: LoadingOperation,
+    context?: Record<string, unknown>
+  ): string {
     const taskId = this.generateTaskId();
 
     const task: LoadingTask = {
@@ -167,15 +173,21 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
   }
 
   getActiveTasks(): LoadingTask[] {
-    return Array.from(this.tasks.values()).filter(task => task.state === 'loading');
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.state === 'loading'
+    );
   }
 
   getCompletedTasks(): LoadingTask[] {
-    return Array.from(this.tasks.values()).filter(task => task.state === 'success');
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.state === 'success'
+    );
   }
 
   getFailedTasks(): LoadingTask[] {
-    return Array.from(this.tasks.values()).filter(task => task.state === 'error');
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.state === 'error'
+    );
   }
 
   getAllTasks(): LoadingTask[] {
@@ -185,7 +197,7 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
   isLoading(operation?: LoadingOperation): boolean {
     const activeTasks = this.getActiveTasks();
     if (operation) {
-      return activeTasks.some(task => task.operation === operation);
+      return activeTasks.some((task) => task.operation === operation);
     }
     return activeTasks.length > 0;
   }
@@ -214,11 +226,11 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
       import: 0,
     };
 
-    allTasks.forEach(task => {
+    allTasks.forEach((task) => {
       byOperation[task.operation]++;
     });
 
-    const completedWithDuration = completedTasks.filter(task => task.endTime);
+    const completedWithDuration = completedTasks.filter((task) => task.endTime);
     const averageDuration =
       completedWithDuration.length > 0
         ? completedWithDuration.reduce((sum, task) => {
@@ -254,8 +266,8 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
   }
 
   clearCompletedTasks(): void {
-    const completedTaskIds = this.getCompletedTasks().map(task => task.id);
-    completedTaskIds.forEach(taskId => {
+    const completedTaskIds = this.getCompletedTasks().map((task) => task.id);
+    completedTaskIds.forEach((taskId) => {
       this.tasks.delete(taskId);
     });
   }
@@ -271,7 +283,10 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
     }
 
     // Create a new task with the same operation and context
-    const newTaskId = this.startTask(originalTask.operation, originalTask.context);
+    const newTaskId = this.startTask(
+      originalTask.operation,
+      originalTask.context
+    );
 
     // Copy relevant information from the original task
     const newTask = this.tasks.get(newTaskId);
@@ -311,14 +326,19 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
       this.completeTask(taskId, result);
       return result;
     } catch (error) {
-      this.failTask(taskId, error instanceof Error ? error.message : 'Operation failed');
+      this.failTask(
+        taskId,
+        error instanceof Error ? error.message : 'Operation failed'
+      );
       throw error;
     }
   }
 
   async withProgress<T>(
     operation: LoadingOperation,
-    asyncOperation: (updateProgress: (progress: number, message?: string) => void) => Promise<T>,
+    asyncOperation: (
+      updateProgress: (progress: number, message?: string) => void
+    ) => Promise<T>,
     context?: Record<string, unknown>
   ): Promise<T> {
     const taskId = this.startTask(operation, context);
@@ -332,7 +352,10 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
       this.completeTask(taskId, result);
       return result;
     } catch (error) {
-      this.failTask(taskId, error instanceof Error ? error.message : 'Operation failed');
+      this.failTask(
+        taskId,
+        error instanceof Error ? error.message : 'Operation failed'
+      );
       throw error;
     }
   }
@@ -359,7 +382,7 @@ export class InventoryLoadingManagerImpl implements InventoryLoadingManager {
       }
     });
 
-    tasksToRemove.forEach(taskId => {
+    tasksToRemove.forEach((taskId) => {
       this.tasks.delete(taskId);
     });
   }

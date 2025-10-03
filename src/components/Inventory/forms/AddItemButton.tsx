@@ -1,4 +1,4 @@
-// TODO: Move to forms/ - Button component for adding new items
+// Button component for adding new items
 import React, { useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
 
@@ -31,9 +31,13 @@ const AddItemButton: React.FC<AddItemButtonProps> = ({ onAdd }) => {
     handleClose();
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -41,7 +45,10 @@ const AddItemButton: React.FC<AddItemButtonProps> = ({ onAdd }) => {
 
   return (
     <>
-      <Button variant="success" onClick={handleShow} className="px-4 py-2">
+      <Button
+        onClick={handleShow}
+        className="px-4 py-2 bg-[#4ECDC4] hover:bg-[#3db8b0] text-white"
+      >
         Add Item
       </Button>
 
@@ -119,7 +126,10 @@ const AddItemButton: React.FC<AddItemButtonProps> = ({ onAdd }) => {
             <Button variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="success" type="submit">
+            <Button
+              className="bg-[#4ECDC4] hover:bg-[#3db8b0] text-white"
+              type="submit"
+            >
               Save Item
             </Button>
           </Modal.Footer>

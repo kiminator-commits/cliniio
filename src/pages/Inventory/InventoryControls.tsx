@@ -4,4 +4,4 @@ const InventoryControls: React.FC = () => {
   return <>Inventory Controls</>;
 };
 
-export default InventoryControls;
+export default React.memo(InventoryControls);

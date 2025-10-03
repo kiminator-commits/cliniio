@@ -7,13 +7,14 @@ interface DamagedWorkflowProps {
 }
 
 const DamagedWorkflow: React.FC<DamagedWorkflowProps> = ({ onClose }) => {
-  const { isScanning, scannedCode, scanResult, scanMessage, simulateScan } = useSterilizationScan();
+  const { isScanning, scannedCode, scanResult, scanMessage, simulateScan } =
+    useSterilizationScan();
 
   useEffect(() => {
-    simulateScan('damaged', onClose);
+    simulateScan('problem', onClose);
   }, [simulateScan, onClose]);
 
-  const config = workflowConfig['damaged'];
+  const config = workflowConfig['problem'];
 
   return (
     <div className="p-4">
@@ -22,11 +23,15 @@ const DamagedWorkflow: React.FC<DamagedWorkflowProps> = ({ onClose }) => {
       {isScanning ? (
         <p className="text-sm text-gray-600">Scanning...</p>
       ) : (
-        <p className={`text-sm ${scanResult === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+        <p
+          className={`text-sm ${scanResult === 'success' ? 'text-green-600' : 'text-red-600'}`}
+        >
           {scanMessage}
         </p>
       )}
-      {scannedCode && <p className="mt-2 text-xs text-gray-400">Code: {scannedCode}</p>}
+      {scannedCode && (
+        <p className="mt-2 text-xs text-gray-400">Code: {scannedCode}</p>
+      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@ export interface GamificationStats {
   level: number;
   rank: number;
   totalScore: number;
+  totalPoints?: number;
   stats: {
     toolsSterilized: number;
     inventoryChecks: number;
@@ -51,4 +52,37 @@ export interface MetricsData {
   costSavings: CostSavings;
   aiEfficiency: AiEfficiency;
   teamPerformance: TeamPerformance;
+}
+
+export interface HomeTask {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  points: number;
+  timeEstimate: string;
+  isCompleted: boolean;
+  completedAt: string | null;
+  pointsEarned: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HomePageData {
+  tasks: HomeTask[];
+  availablePoints: number;
+  completedTasksCount: number;
+  totalTasksCount: number;
+}
+
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  total: number;
+  hasMore: boolean;
+}
+
+export interface HomePageDataWithPagination extends HomePageData {
+  pagination: PaginationInfo;
 }

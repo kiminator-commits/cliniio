@@ -1,27 +1,11 @@
 import React from 'react';
-import { PageLayout } from '../../components/Layout/PageLayout';
-import InventoryLayout from './InventoryLayout';
-import InventoryDashboard from './InventoryDashboard';
-import { InventoryDashboardProvider } from './context/InventoryDashboardContext';
-import { InventoryDataProvider } from './providers/InventoryDataProvider';
+import { useInventoryPageSetup } from './hooks/useInventoryPageSetup';
 
-const Inventory: React.FC = () => {
-  try {
-    return (
-      <InventoryLayout>
-        <PageLayout>
-          <InventoryDataProvider>
-            <InventoryDashboardProvider>
-              <InventoryDashboard />
-            </InventoryDashboardProvider>
-          </InventoryDataProvider>
-        </PageLayout>
-      </InventoryLayout>
-    );
-  } catch (err) {
-    console.error('Inventory page render failed:', err);
-    return <div className="text-red-600 p-4">Error loading inventory page.</div>;
-  }
-};
-
-export default React.memo(Inventory);
+export default function InventoryPage() {
+  const { ProviderTree, PageContent } = useInventoryPageSetup();
+  return (
+    <ProviderTree>
+      <PageContent />
+    </ProviderTree>
+  );
+}

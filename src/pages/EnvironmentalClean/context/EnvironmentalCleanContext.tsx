@@ -1,18 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { RoomStatuses, RoomStatusOption, Notification } from '../models';
-import {
-  mdiCheckCircle,
-  mdiAccountGroup,
-  mdiBroom,
-  mdiBiohazard,
-  mdiPackageVariant,
-  mdiShieldAlert,
-  mdiWrench,
-  mdiOfficeBuilding,
-} from '@mdi/js';
+import { RoomStatusOption, Notification } from '../types';
+import { useStatusTypes } from '@/store/statusTypesStore';
 
 interface EnvironmentalCleanContextType {
-  roomStatuses: RoomStatuses;
+  roomStatuses: Record<string, string[]>;
   statusOptions: RoomStatusOption[];
   handleUpdateRoomStatus: (roomId: string, status: string) => void;
   handleStartWorkflow: () => void;
@@ -23,93 +14,62 @@ interface EnvironmentalCleanContextType {
   setShowStatusModal: (show: boolean) => void;
 }
 
-const defaultRoomStatuses: RoomStatuses = {
-  available: ['101', '102', '103'],
-  occupied: ['201', '202'],
-  dirty: ['301', '302', '303'],
-  biohazard: ['401'],
-  lowInventory: ['501', '502'],
-  theft: ['601'],
-  outOfOrder: ['701', '702'],
-  publicAreas: ['Lobby', 'Cafeteria', 'Waiting Room'],
-};
+const EnvironmentalCleanContext = createContext<
+  EnvironmentalCleanContextType | undefined
+>(undefined);
 
-const defaultStatusOptions = [
-  {
-    id: 'available' as RoomStatusType,
-    label: 'Available',
-    color: '#4ECDC4',
-    icon: mdiCheckCircle,
-  },
-  {
-    id: 'occupied' as RoomStatusType,
-    label: 'Occupied',
-    color: '#FF6B6B',
-    icon: mdiAccountGroup,
-  },
-  {
-    id: 'dirty' as RoomStatusType,
-    label: 'Dirty',
-    color: '#FFD93D',
-    icon: mdiBroom,
-  },
-  {
-    id: 'biohazard' as RoomStatusType,
-    label: 'Biohazard',
-    color: '#FF0000',
-    icon: mdiBiohazard,
-  },
-  {
-    id: 'lowInventory' as RoomStatusType,
-    label: 'Low Inventory',
-    color: '#FFA500',
-    icon: mdiPackageVariant,
-  },
-  {
-    id: 'theft' as RoomStatusType,
-    label: 'Theft',
-    color: '#800000',
-    icon: mdiShieldAlert,
-  },
-  {
-    id: 'outOfOrder' as RoomStatusType,
-    label: 'Out of Order',
-    color: '#808080',
-    icon: mdiWrench,
-  },
-  {
-    id: 'publicAreas' as RoomStatusType,
-    label: 'Public Areas',
-    color: '#4169E1',
-    icon: mdiOfficeBuilding,
-  },
-];
+export const EnvironmentalCleanProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const { getCoreStatusTypes, getPublishedStatusTypes } = useStatusTypes();
+  const [roomStatuses, setRoomStatuses] = useState<Record<string, string[]>>(
+    {}
+  );
 
-const EnvironmentalCleanContext = createContext<EnvironmentalCleanContextType | undefined>(
-  undefined
-);
-
-export const EnvironmentalCleanProvider = ({ children }: { children: ReactNode }) => {
-  const [roomStatuses, setRoomStatuses] = useState<RoomStatuses>(defaultRoomStatuses);
-  const [statusOptions] = useState<RoomStatusOption[]>(defaultStatusOptions);
+  // Get dynamic status options from the database
+  const statusOptions: RoomStatusOption[] = [
+    ...getCoreStatusTypes().map((status) => ({
+      key: status.name,
+      label: status.name,
+      icon: status.icon,
+      color: status.color,
+    })),
+    ...getPublishedStatusTypes().map((status) => ({
+      key: status.name,
+      label: status.name,
+      icon: status.icon,
+      color: status.color,
+    })),
+  ];
   const [notification, setNotification] = useState<Notification>({
-    show: false,
+    id: '',
     message: '',
     type: 'info',
+    timestamp: new Date().toISOString(),
   });
 
   const handleUpdateRoomStatus = (roomId: string, status: string) => {
-    setRoomStatuses(prev => ({ ...prev, [roomId]: status }));
+    setRoomStatuses((prev: Record<string, string[]>) => ({
+      ...prev,
+      [roomId]: [status],
+    }));
   };
 
   const handleStartWorkflow = () => {};
 
   const closeNotification = () => {
-    setNotification({ ...notification, show: false });
+    setNotification({ ...notification, id: '', message: '' });
   };
 
   const showNotification = (message: string, type: string) => {
-    setNotification({ show: true, message, type });
+    setNotification({
+      id: Date.now().toString(),
+      message,
+      type: type as 'success' | 'error' | 'warning' | 'info',
+      timestamp: new Date().toISOString(),
+    });
   };
 
   return (
@@ -134,7 +94,9 @@ export const EnvironmentalCleanProvider = ({ children }: { children: ReactNode }
 export const useEnvironmentalClean = () => {
   const context = useContext(EnvironmentalCleanContext);
   if (context === undefined) {
-    throw new Error('useEnvironmentalClean must be used within an EnvironmentalCleanProvider');
+    throw new Error(
+      'useEnvironmentalClean must be used within an EnvironmentalCleanProvider'
+    );
   }
   return context;
 };

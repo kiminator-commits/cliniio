@@ -1,0 +1,10 @@
+[functions.security-dashboard]
+verify_jwt = false
+import_map = "../auth-login/deno.json"
+
+[functions.security-dashboard.env]
+# Security dashboard configuration
+ENABLE_SECURITY_MONITORING = "true"
+DASHBOARD_REFRESH_INTERVAL = "30000"
+MAX_METRICS_HISTORY = "1000"
+MAX_ALERTS_HISTORY = "500"

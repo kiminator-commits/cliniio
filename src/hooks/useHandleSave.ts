@@ -1,15 +1,9 @@
 import { useCallback } from 'react';
-import {
-  LocalInventoryItem,
-  ToolItem,
-  SupplyItem,
-  EquipmentItem,
-  OfficeHardwareItem,
-} from '@/types/inventoryTypes';
-import { inventoryService } from '@/services/inventoryService';
+import { InventoryItem } from '@/types/inventoryTypes';
+import { InventoryServiceFacadeImpl } from '@/services/inventory/InventoryServiceFacade';
 
 interface UseHandleSaveArgs {
-  storeFormData: Partial<LocalInventoryItem>;
+  storeFormData: Partial<InventoryItem>;
   scanMode: 'add' | 'use' | null;
   scannedItems: string[];
   currentScannedItemIndex: number;
@@ -17,10 +11,12 @@ interface UseHandleSaveArgs {
   handleOpenAddItemModalWithBarcode: (barcodeData?: string) => void;
   resetScannedItems: () => void;
   setCurrentScannedItemIndex: (val: number) => void;
-  setLocalInventoryData: React.Dispatch<React.SetStateAction<ToolItem[]>>;
-  setLocalSuppliesData: React.Dispatch<React.SetStateAction<SupplyItem[]>>;
-  setLocalEquipmentData: React.Dispatch<React.SetStateAction<EquipmentItem[]>>;
-  setLocalOfficeHardwareData: React.Dispatch<React.SetStateAction<OfficeHardwareItem[]>>;
+  setLocalInventoryData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  setLocalSuppliesData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  setLocalEquipmentData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  setLocalOfficeHardwareData: React.Dispatch<
+    React.SetStateAction<InventoryItem[]>
+  >;
 }
 
 export function useHandleSave({
@@ -39,7 +35,7 @@ export function useHandleSave({
 }: UseHandleSaveArgs) {
   /**
    * Handles saving inventory data from the modal.
-   * - Validates required fields (`itemName`, `category`, `id`)
+   * - Validates required fields (`name`, `category`, `id`)
    * - Simulates save logic (mocked until Supabase is connected)
    * - Handles unexpected errors with fallback alert
    *
@@ -47,16 +43,16 @@ export function useHandleSave({
    */
   const handleSave = useCallback(async () => {
     try {
-      const getItemId = (data: Partial<LocalInventoryItem>): string => {
+      const getItemId = (data: Partial<InventoryItem>): string => {
         if ('toolId' in data && data.toolId) return data.toolId;
         if ('supplyId' in data && data.supplyId) return data.supplyId;
         if ('equipmentId' in data && data.equipmentId) return data.equipmentId;
         if ('hardwareId' in data && data.hardwareId) return data.hardwareId;
-        return '';
+        return data.id || '';
       };
 
       if (
-        !storeFormData.item?.trim() ||
+        !storeFormData.name?.trim() ||
         !storeFormData.category?.trim() ||
         !getItemId(storeFormData)?.trim()
       ) {
@@ -64,76 +60,105 @@ export function useHandleSave({
         return;
       }
 
-      const itemToSave = {
+      const itemToSave: InventoryItem = {
         id: getItemId(storeFormData),
-        name: storeFormData.item || '',
+        facility_id: 'unknown',
+        name: storeFormData.name || '',
+        quantity: storeFormData.quantity || 1,
+        data: {
+          toolId: 'toolId' in storeFormData ? storeFormData.toolId : undefined,
+          supplyId:
+            'supplyId' in storeFormData ? storeFormData.supplyId : undefined,
+          equipmentId:
+            'equipmentId' in storeFormData
+              ? storeFormData.equipmentId
+              : undefined,
+          hardwareId:
+            'hardwareId' in storeFormData
+              ? storeFormData.hardwareId
+              : undefined,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        reorder_point: null,
+        expiration_date: null,
+        unit_cost: storeFormData.unit_cost || 0,
         category: storeFormData.category || '',
-        location: storeFormData.location || '',
         status: 'Available',
-        lastUpdated: new Date().toISOString(),
-        toolId: 'toolId' in storeFormData ? storeFormData.toolId : undefined,
-        supplyId: 'supplyId' in storeFormData ? storeFormData.supplyId : undefined,
-        equipmentId: 'equipmentId' in storeFormData ? storeFormData.equipmentId : undefined,
-        hardwareId: 'hardwareId' in storeFormData ? storeFormData.hardwareId : undefined,
-      };
-
-      await inventoryService.addInventoryItem(itemToSave);
-
-      const newItem = {
-        item: storeFormData.item || '',
-        category: storeFormData.category || '',
         location: storeFormData.location || '',
-        cost: storeFormData.cost || 0,
       };
 
-      if (storeFormData.category === 'tools') {
-        setLocalInventoryData(prev => [
-          ...prev,
-          {
-            ...newItem,
+      const inventoryService = InventoryServiceFacadeImpl.getInstance();
+      await inventoryService.createItem(itemToSave);
+
+      const newItem: InventoryItem = {
+        id: getItemId(storeFormData),
+        facility_id: 'unknown',
+        name: storeFormData.name || '',
+        quantity: storeFormData.quantity || 1,
+        data: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        reorder_point: null,
+        expiration_date: null,
+        unit_cost: storeFormData.unit_cost || 0,
+        category: storeFormData.category || '',
+        status: 'Available',
+        location: storeFormData.location || '',
+      };
+
+      if (storeFormData.category === 'Tools') {
+        const toolItem: InventoryItem = {
+          ...newItem,
+          data: {
             toolId: 'toolId' in storeFormData ? storeFormData.toolId || '' : '',
             p2Status: 'clean',
           },
-        ]);
-      } else if (storeFormData.category === 'supplies') {
-        setLocalSuppliesData(prev => [
-          ...prev,
-          {
-            ...newItem,
-            supplyId: 'supplyId' in storeFormData ? storeFormData.supplyId || '' : '',
-            quantity: 1,
+        };
+        setLocalInventoryData((prev) => [...prev, toolItem]);
+      } else if (storeFormData.category === 'Supplies') {
+        const supplyItem: InventoryItem = {
+          ...newItem,
+          data: {
+            supplyId:
+              'supplyId' in storeFormData ? storeFormData.supplyId || '' : '',
             expiration: '',
           },
-        ]);
-      } else if (storeFormData.category === 'equipment') {
-        setLocalEquipmentData(prev => [
-          ...prev,
-          {
-            ...newItem,
-            equipmentId: 'equipmentId' in storeFormData ? storeFormData.equipmentId || '' : '',
-            status: 'operational',
+        };
+        setLocalSuppliesData((prev) => [...prev, supplyItem]);
+      } else if (storeFormData.category === 'Equipment') {
+        const equipmentItem: InventoryItem = {
+          ...newItem,
+          data: {
+            equipmentId:
+              'equipmentId' in storeFormData
+                ? storeFormData.equipmentId || ''
+                : '',
             lastServiced: '',
           },
-        ]);
-      } else if (storeFormData.category === 'officeHardware') {
-        setLocalOfficeHardwareData(prev => [
-          ...prev,
-          {
-            ...newItem,
-            hardwareId: 'hardwareId' in storeFormData ? storeFormData.hardwareId || '' : '',
-            status: 'active',
+        };
+        setLocalEquipmentData((prev) => [...prev, equipmentItem]);
+      } else if (storeFormData.category === 'Office Hardware') {
+        const hardwareItem: InventoryItem = {
+          ...newItem,
+          data: {
+            hardwareId:
+              'hardwareId' in storeFormData
+                ? storeFormData.hardwareId || ''
+                : '',
             warranty: '',
           },
-        ]);
+        };
+        setLocalOfficeHardwareData((prev) => [...prev, hardwareItem]);
       } else {
-        setLocalInventoryData(prev => [
-          ...prev,
-          {
-            ...newItem,
+        const defaultItem: InventoryItem = {
+          ...newItem,
+          data: {
             toolId: 'toolId' in storeFormData ? storeFormData.toolId || '' : '',
             p2Status: 'clean',
           },
-        ]);
+        };
+        setLocalInventoryData((prev) => [...prev, defaultItem]);
       }
 
       handleCloseAddModal();

@@ -61,9 +61,12 @@ const ContentGrid: React.FC<ContentGridProps> = ({
                 <Icon path={mdiStar} size={1.2} color="white" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">AI-Powered Recommendations</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  AI-Powered Recommendations
+                </h3>
                 <p className="text-gray-600">
-                  Personalized content suggestions based on your role and learning history
+                  Personalized content suggestions based on your role and
+                  learning history
                 </p>
               </div>
             </div>
@@ -73,7 +76,8 @@ const ContentGrid: React.FC<ContentGridProps> = ({
                   id: 'ai-1',
                   title: 'Infection Control Mastery',
                   category: 'Procedures',
-                  description: 'Advanced techniques for maintaining sterile environments',
+                  description:
+                    'Advanced techniques for maintaining sterile environments',
                   level: 'Advanced',
                   duration: '75 min',
                   points: 65,
@@ -96,7 +100,8 @@ const ContentGrid: React.FC<ContentGridProps> = ({
                   id: 'ai-2',
                   title: 'Patient Safety Leadership',
                   category: 'Learning Pathways',
-                  description: 'Develop leadership skills in patient safety protocols',
+                  description:
+                    'Develop leadership skills in patient safety protocols',
                   level: 'Advanced',
                   duration: '120 min',
                   points: 85,

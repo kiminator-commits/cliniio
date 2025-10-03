@@ -1,10 +1,10 @@
-import { InventoryDataResponse } from './InventoryDataService';
+import { InventoryResponse } from './InventoryServiceFacade';
 
 export interface SyncOperation {
   id: string;
   type: 'create' | 'update' | 'delete';
   entity: 'item' | 'category';
-  data: unknown;
+  _data: unknown;
   timestamp: number;
   retryCount: number;
   maxRetries: number;
@@ -21,7 +21,9 @@ export interface SyncStatus {
 export interface InventorySyncService {
   // Core sync operations
   sync(): Promise<void>;
-  queueOperation(operation: Omit<SyncOperation, 'id' | 'timestamp' | 'retryCount'>): void;
+  queueOperation(
+    operation: Omit<SyncOperation, 'id' | 'timestamp' | 'retryCount'>
+  ): void;
   processPendingOperations(): Promise<void>;
 
   // Status and monitoring
@@ -30,7 +32,7 @@ export interface InventorySyncService {
   setOnlineStatus(isOnline: boolean): void;
 
   // Data synchronization
-  syncInventoryData(data: InventoryDataResponse): Promise<void>;
+  syncInventoryData(data: InventoryResponse): Promise<void>;
   syncInventoryItem(item: unknown): Promise<void>;
   syncCategory(category: string): Promise<void>;
 
@@ -63,20 +65,22 @@ export class InventorySyncServiceImpl implements InventorySyncService {
     }
 
     this.syncStatus.syncInProgress = true;
-    this.syncStatus.error = null;
 
     try {
       await this.processPendingOperations();
       this.syncStatus.lastSyncTime = Date.now();
-    } catch (error) {
-      this.syncStatus.error = error instanceof Error ? error.message : 'Sync failed';
-      throw error;
+    } catch (err) {
+      console.error(err);
+      this.syncStatus.error = 'Sync failed';
+      throw new Error('Sync failed');
     } finally {
       this.syncStatus.syncInProgress = false;
     }
   }
 
-  queueOperation(operation: Omit<SyncOperation, 'id' | 'timestamp' | 'retryCount'>): void {
+  queueOperation(
+    operation: Omit<SyncOperation, 'id' | 'timestamp' | 'retryCount'>
+  ): void {
     const syncOperation: SyncOperation = {
       ...operation,
       id: this.generateOperationId(),
@@ -91,17 +95,39 @@ export class InventorySyncServiceImpl implements InventorySyncService {
   async processPendingOperations(): Promise<void> {
     const operationsToProcess = [...this.pendingOperations];
 
-    for (const operation of operationsToProcess) {
+    // Process operations concurrently for better performance
+    const operationPromises = operationsToProcess.map(async (operation) => {
       try {
         await this.processOperation(operation);
         this.removeOperation(operation.id);
+        return { success: true, operationId: operation.id };
       } catch (error) {
         operation.retryCount++;
         if (operation.retryCount >= operation.maxRetries) {
           this.removeOperation(operation.id);
-          console.error(`Operation failed after ${operation.maxRetries} retries:`, operation);
+          console.error(
+            `Operation failed after ${operation.maxRetries} retries:`,
+            operation
+          );
         }
+        return { success: false, operationId: operation.id, error };
       }
+    });
+
+    const results = await Promise.allSettled(operationPromises);
+
+    // Log any failures for debugging
+    const failures = results
+      .map((result, index) =>
+        result.status === 'rejected' ? operationsToProcess[index]?.id : null
+      )
+      .filter(Boolean);
+
+    if (failures.length > 0) {
+      console.warn(
+        `Sync: ${failures.length} operations failed to process:`,
+        failures
+      );
     }
   }
 
@@ -120,23 +146,20 @@ export class InventorySyncServiceImpl implements InventorySyncService {
     }
   }
 
-  async syncInventoryData(data: InventoryDataResponse): Promise<void> {
+  async syncInventoryData(_data: InventoryResponse): Promise<void> {
     // Implementation would depend on the backend API
     // For now, just simulate sync
-    await new Promise(resolve => setTimeout(resolve, 100));
-    console.log('Syncing inventory data:', data);
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  async syncInventoryItem(item: unknown): Promise<void> {
+  async syncInventoryItem(_item: unknown): Promise<void> {
     // Implementation would depend on the backend API
-    await new Promise(resolve => setTimeout(resolve, 50));
-    console.log('Syncing inventory item:', item);
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
-  async syncCategory(category: string): Promise<void> {
+  async syncCategory(_category: string): Promise<void> {
     // Implementation would depend on the backend API
-    await new Promise(resolve => setTimeout(resolve, 50));
-    console.log('Syncing category:', category);
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
   resolveConflicts(localData: unknown, remoteData: unknown): unknown {
@@ -154,13 +177,13 @@ export class InventorySyncServiceImpl implements InventorySyncService {
     const merged = new Map();
 
     // Add local data
-    localData.forEach(item => {
+    localData.forEach((item) => {
       const itemWithId = item as { id: string };
       merged.set(itemWithId.id, item);
     });
 
     // Merge with remote data, resolving conflicts
-    remoteData.forEach(item => {
+    remoteData.forEach((item) => {
       const itemWithId = item as { id: string };
       const existing = merged.get(itemWithId.id);
       if (existing) {
@@ -188,7 +211,7 @@ export class InventorySyncServiceImpl implements InventorySyncService {
         if (operation.entity === 'item') {
           await this.syncInventoryItem(operation.data);
         } else if (operation.entity === 'category') {
-          await this.syncCategory(operation.data);
+          await this.syncCategory(operation.data as string);
         }
         break;
       case 'update':
@@ -198,7 +221,6 @@ export class InventorySyncServiceImpl implements InventorySyncService {
         break;
       case 'delete':
         // Handle delete operations
-        console.log('Processing delete operation:', operation);
         break;
       default:
         throw new Error(`Unknown operation type: ${operation.type}`);
@@ -206,7 +228,9 @@ export class InventorySyncServiceImpl implements InventorySyncService {
   }
 
   private removeOperation(operationId: string): void {
-    this.pendingOperations = this.pendingOperations.filter(op => op.id !== operationId);
+    this.pendingOperations = this.pendingOperations.filter(
+      (op) => op.id !== operationId
+    );
     this.updatePendingOperationsCount();
   }
 

@@ -20,7 +20,7 @@ export function useInventoryScanModal() {
   }, []);
 
   const handleScanItem = useCallback((itemId: string) => {
-    setScannedItems(prev => [...prev, itemId]);
+    setScannedItems((prev) => [...prev, itemId]);
   }, []);
 
   return {

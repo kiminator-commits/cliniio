@@ -1,7 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useInventoryStore } from '@/store/useInventoryStore';
 import { useScanModalHandlers } from '@/hooks/useScanModalHandlers';
-import { createFormDataFromBarcode } from '@/utils/inventory/barcodeUtils';
+import {
+  createFormDataFromBarcode,
+  convertFormDataFromBarcodeToInventoryFormData,
+} from '@/utils/Inventory/barcodeUtils';
 
 /**
  * Hook to manage scan modal state and operations
@@ -25,9 +28,11 @@ export const useScanModalManagement = () => {
 
   // Function to handle opening Add Item modal with barcode data
   const handleOpenAddItemModalWithBarcode = useCallback(
-    (barcodeData?: string, handleShowAddModal: () => void) => {
+    (handleShowAddModal: () => void, barcodeData?: string) => {
       const formDataFromBarcode = createFormDataFromBarcode(barcodeData);
-      setFormData(formDataFromBarcode);
+      const inventoryFormData =
+        convertFormDataFromBarcodeToInventoryFormData(formDataFromBarcode);
+      setFormData(inventoryFormData);
       handleShowAddModal();
     },
     [setFormData]
@@ -42,7 +47,7 @@ export const useScanModalManagement = () => {
     resetScannedItems,
     handleCloseAddModal: () => {}, // This will be provided by parent
     handleOpenAddItemModalWithBarcode: (barcodeData?: string) =>
-      handleOpenAddItemModalWithBarcode(barcodeData, () => {}), // This will be provided by parent
+      handleOpenAddItemModalWithBarcode(() => {}, barcodeData), // This will be provided by parent
   });
 
   // Handler for scan button click

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { LocalInventoryItem } from '@/types/inventoryTypes';
-import { inventoryService } from '@/services/inventoryService';
+import { InventoryFormData } from '../../types/inventory';
+import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 import { useInventoryFormValidation } from './useInventoryFormValidation';
 
 interface UseInventoryFormSubmissionParams {
@@ -11,7 +11,7 @@ interface UseInventoryFormSubmissionParams {
 
 interface UseInventoryFormSubmissionReturn {
   isSubmitting: boolean;
-  submitForm: (formData: Partial<LocalInventoryItem>) => Promise<boolean>;
+  submitForm: (formData: Partial<InventoryFormData>) => Promise<boolean>;
   resetSubmission: () => void;
 }
 
@@ -24,7 +24,7 @@ export const useInventoryFormSubmission = ({
   const { validateForm, clearErrors } = useInventoryFormValidation();
 
   const submitForm = useCallback(
-    async (formData: Partial<LocalInventoryItem>): Promise<boolean> => {
+    async (formData: Partial<InventoryFormData>): Promise<boolean> => {
       setIsSubmitting(true);
       clearErrors();
 
@@ -36,27 +36,50 @@ export const useInventoryFormSubmission = ({
           return false;
         }
 
+        // Helper function to parse cost from text input
+        const parseCost = (costText?: string): number => {
+          if (!costText) return 0;
+          // Remove currency symbols and commas, then parse
+          const cleanCost = costText.replace(/[$,\s]/g, '');
+          const parsed = parseFloat(cleanCost);
+          return isNaN(parsed) ? 0 : parsed;
+        };
+
         // Prepare item data for submission
         const itemToSave = {
-          id: getItemId(formData),
-          name: formData.item || '',
-          category: formData.category || '',
-          location: formData.location || '',
-          status: 'Available',
-          lastUpdated: new Date().toISOString(),
-          toolId: 'toolId' in formData ? formData.toolId : undefined,
-          supplyId: 'supplyId' in formData ? formData.supplyId : undefined,
-          equipmentId: 'equipmentId' in formData ? formData.equipmentId : undefined,
-          hardwareId: 'hardwareId' in formData ? formData.hardwareId : undefined,
+          id: formData.id,
+          name: formData.itemName || null,
+          category: formData.category || null,
+          location: formData.location || undefined,
+          status: formData.status || undefined,
+          quantity: parseInt(formData.quantity?.toString() || '1') || 1,
+          unit_cost: parseCost(formData.unitCost?.toString()),
+          facility_id: 'unknown',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          reorder_point: null,
+          expiration_date: null,
+          data: {
+            warranty: formData.notes,
+            notes: formData.notes,
+            // Convert form date strings back to ISO format for storage
+            purchaseDate: formData.createdAt
+              ? new Date(formData.createdAt).toISOString()
+              : undefined,
+            lastServiced: formData.lastUpdated
+              ? new Date(String(formData.lastUpdated)).toISOString()
+              : undefined,
+          },
         };
 
         // Submit to service
-        await inventoryService.addInventoryItem(itemToSave);
+        await inventoryServiceFacade.createItem(itemToSave);
 
         onSuccess?.();
         return true;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to submit form';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to submit form';
         onError?.(errorMessage);
         return false;
       } finally {
@@ -76,13 +99,4 @@ export const useInventoryFormSubmission = ({
     submitForm,
     resetSubmission,
   };
-};
-
-// Helper function to get item ID from form data
-const getItemId = (formData: Partial<LocalInventoryItem>): string => {
-  if ('toolId' in formData && formData.toolId) return formData.toolId;
-  if ('supplyId' in formData && formData.supplyId) return formData.supplyId;
-  if ('equipmentId' in formData && formData.equipmentId) return formData.equipmentId;
-  if ('hardwareId' in formData && formData.hardwareId) return formData.hardwareId;
-  return '';
 };

@@ -3,41 +3,63 @@ import {
   createBiologicalIndicatorSlice,
   BiologicalIndicatorState,
 } from './slices/biologicalIndicatorSlice';
-import { createToolWorkflowSlice, ToolWorkflowState } from './slices/toolWorkflowSlice';
 import {
   createComplianceSettingsSlice,
   ComplianceSettingsState,
 } from './slices/complianceSettingsSlice';
-import { createBatchTrackingSlice, BatchTrackingState } from './slices/batchTrackingSlice';
-import {
-  createSterilizationCycleSlice,
-  SterilizationCycleState,
-} from './slices/sterilizationCycleSlice';
+import { createSterilizationCycleSlice } from './slices/sterilizationCycleSlice';
+import { SterilizationCycleState } from './slices/types/sterilizationCycleTypes';
 import { createUIStateSlice, UIState } from './slices/uiStateSlice';
-import { createWorkflowStateSlice, WorkflowState } from './slices/workflowStateSlice';
-import { createScannerStateSlice, ScannerState } from './slices/scannerStateSlice';
-import { createToolManagementSlice, ToolManagementState } from './slices/toolManagementSlice';
+import {
+  createToolManagementSlice,
+  ToolManagementState,
+} from './slices/toolManagementSlice';
+import {
+  createBatchManagementSlice,
+  BatchManagementState,
+} from './slices/batchManagementSlice';
+import { createBatchCodeSlice, BatchCodeState } from './slices/batchCodeSlice';
+import { createBatchSlice, BatchState } from './slices/batchSlice';
+import { createToolDataSlice, ToolDataState } from './slices/toolDataSlice';
+import {
+  createToolActionsSlice,
+  ToolActionsState,
+} from './slices/toolActionsSlice';
+import {
+  createPackagingSessionSlice,
+  PackagingSessionState,
+} from './slices/packagingSessionSlice';
 
-// Add additional slice interfaces as they're created
-
+// Consolidated store type with only the necessary slices
 type SterilizationStore = BiologicalIndicatorState &
-  ToolWorkflowState &
   ComplianceSettingsState &
-  BatchTrackingState &
   SterilizationCycleState &
   UIState &
-  WorkflowState &
-  ScannerState &
-  ToolManagementState;
+  ToolManagementState &
+  BatchManagementState &
+  BatchCodeState &
+  BatchState &
+  ToolDataState &
+  ToolActionsState &
+  PackagingSessionState;
 
 export const useSterilizationStore = create<SterilizationStore>()((...a) => ({
   ...createBiologicalIndicatorSlice(...a),
-  ...createToolWorkflowSlice(...a),
   ...createComplianceSettingsSlice(...a),
-  ...createBatchTrackingSlice(...a),
   ...createSterilizationCycleSlice(...a),
   ...createUIStateSlice(...a),
-  ...createWorkflowStateSlice(...a),
-  ...createScannerStateSlice(...a),
   ...createToolManagementSlice(...a),
+  ...createBatchManagementSlice(...a),
+  ...createBatchCodeSlice(...a),
+  ...createBatchSlice(...a),
+  ...createToolDataSlice(...a),
+  ...createToolActionsSlice(...a),
+  ...createPackagingSessionSlice(...a),
 }));
+
+// Re-export types for convenience
+export type {
+  SterilizationPhase,
+  SterilizationCycle,
+} from './slices/types/sterilizationCycleTypes';
+export type { BITestResult } from '../types/toolTypes';

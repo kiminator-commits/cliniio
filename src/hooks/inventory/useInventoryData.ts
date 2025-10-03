@@ -1,16 +1,12 @@
 import { useMemo } from 'react';
-import {
-  inventoryData as staticInventoryData,
-  suppliesData as staticSuppliesData,
-  equipmentData as staticEquipmentData,
-  officeHardwareData as staticOfficeHardwareData,
-} from '@/utils/Inventory/inventoryData';
+import { InventoryItem } from '../../types/inventoryTypes';
+import { useCentralizedInventoryData } from '../useCentralizedInventoryData';
 
 export interface InventoryData {
-  tools: typeof staticInventoryData;
-  supplies: typeof staticSuppliesData;
-  equipment: typeof staticEquipmentData;
-  officeHardware: typeof staticOfficeHardwareData;
+  tools: InventoryItem[];
+  supplies: InventoryItem[];
+  equipment: InventoryItem[];
+  officeHardware: InventoryItem[];
 }
 
 /**
@@ -18,13 +14,16 @@ export interface InventoryData {
  * @returns Memoized inventory data object
  */
 export const useInventoryData = (): InventoryData => {
+  const { inventoryData, suppliesData, equipmentData, officeHardwareData } =
+    useCentralizedInventoryData();
+
   return useMemo(
     () => ({
-      tools: staticInventoryData,
-      supplies: staticSuppliesData,
-      equipment: staticEquipmentData,
-      officeHardware: staticOfficeHardwareData,
+      tools: inventoryData,
+      supplies: suppliesData,
+      equipment: equipmentData,
+      officeHardware: officeHardwareData,
     }),
-    []
+    [inventoryData, suppliesData, equipmentData, officeHardwareData]
   );
 };

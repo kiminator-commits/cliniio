@@ -48,7 +48,8 @@ export function useScanModalHandlers({
     if (scanMode === 'add' && scannedItems.length > 0) {
       const currentItem = scannedItems[currentScannedItemIndex];
       const parts = currentItem.split('-');
-      const itemName = parts.length >= 3 ? parts.slice(2).join('-') : currentItem;
+      const itemName =
+        parts.length >= 3 ? parts.slice(2).join('-') : currentItem;
 
       return {
         current: currentScannedItemIndex + 1,

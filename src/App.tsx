@@ -1,56 +1,365 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import Sterilization from './pages/Sterilization';
-import Inventory from './pages/Inventory';
-import EnvironmentalClean from './pages/EnvironmentalClean/EnvironmentalCleanPage';
-import KnowledgeHub from './pages/KnowledgeHub';
-import Settings from './pages/Settings';
-import LibraryPage from './pages/library/page';
-import { UIProvider } from './contexts/UIContext';
-import { UserProvider } from './contexts/UserContext';
 
-function AppContainer() {
-  const location = useLocation();
-  const isLogin = location.pathname === '/login';
-  return (
-    <div
-      data-testid="app-container"
-      className={
-        isLogin
-          ? 'min-h-screen bg-background'
-          : 'min-h-screen bg-gradient-to-br from-blue-50 to-teal-50'
-      }
-    >
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/sterilization" element={<Sterilization />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/environmental-clean" element={<EnvironmentalClean />} />
-        <Route path="/knowledge-hub" element={<KnowledgeHub />} />
-        <Route path="/library" element={<LibraryPage />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </div>
-  );
+// ⚠️ TEMPORARY: force cleanup of stale realtime subscriptions
+// import '@/debug/runRealtimeCleanup';
+
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NavigationProvider } from './contexts/NavigationContext';
+import { UserProvider } from './contexts/UserContext';
+import { FacilityProvider } from './contexts/FacilityContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import GlobalBIFailureBanner from './components/Sterilization/GlobalBIFailureBanner';
+
+// CRITICAL: Import realtime auto-optimizer to prevent database overload
+import './services/_core/realtimeCompatibility';
+
+// Direct imports for pages
+import HomePage from './pages/Home';
+import SterilizationPage from './pages/Sterilization/Sterilization';
+import ScannerPage from './pages/Sterilization/ScannerPage';
+import InventoryPage from './pages/Inventory';
+import InventoryScannerPage from './pages/Inventory/ScannerPage';
+import EnvironmentalCleanPage from './pages/EnvironmentalClean/page';
+import EnvironmentalCleanScannerPage from './pages/EnvironmentalClean/ScannerPage';
+import KnowledgeHubPage from './pages/KnowledgeHub';
+import LibraryPage from './pages/library/page';
+
+import SettingsPage from './pages/Settings';
+import ContentBuilderPage from './pages/ContentBuilder';
+import LoginPage from './pages/Login';
+import IntelligencePage from './pages/Intelligence';
+
+// BEGIN PostgREST runtime guard (safe, no-UI side effects)
+interface ExtendedWindow extends Window {
+  __postgrestGuardInstalled?: boolean;
+  __postgrestGuardLogged?: boolean;
+  __facilityIdCache?: { id: string; timestamp: number };
 }
 
+// Cache for facility ID to avoid async calls in fetch guard
+let facilityIdCache: { id: string; timestamp: number } | null = null;
+const FACILITY_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function updateFacilityIdCache() {
+  try {
+    // Dynamic import to avoid circular dependencies
+    const { FacilityService } = await import('./services/facilityService');
+    const facilityId = await FacilityService.getCurrentFacilityId();
+    facilityIdCache = { id: facilityId, timestamp: Date.now() };
+  } catch (error) {
+    console.warn('Failed to update facility ID cache:', error);
+    // Keep existing cache if available, otherwise use development fallback
+    if (!facilityIdCache) {
+      facilityIdCache = {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        timestamp: Date.now(),
+      };
+    }
+  }
+}
+
+function getCurrentFacilityId(): string {
+  const now = Date.now();
+
+  // Return cached ID if still valid
+  if (
+    facilityIdCache &&
+    now - facilityIdCache.timestamp < FACILITY_CACHE_DURATION
+  ) {
+    return facilityIdCache.id;
+  }
+
+  // If cache is stale, trigger async update but return current cached value
+  if (facilityIdCache) {
+    updateFacilityIdCache(); // Fire and forget
+    return facilityIdCache.id;
+  }
+
+  // Do not fallback to dev facility ID in production
+  if (!facilityIdCache) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Using dev facility fallback in development mode');
+      return '550e8400-e29b-41d4-a716-446655440000';
+    }
+    throw new Error(
+      'Facility ID lookup failed — no fallback allowed in production.'
+    );
+  }
+
+  // This should never be reached due to the logic above, but TypeScript needs it
+  throw new Error('Unexpected state in getCurrentFacilityId');
+}
+
+function installPostgrestFetchGuard() {
+  const extWindow = window as ExtendedWindow;
+  if (typeof window === 'undefined' || extWindow.__postgrestGuardInstalled)
+    return;
+
+  // Check if fetch is available (for test environments)
+  if (typeof window.fetch === 'undefined') return;
+
+  extWindow.__postgrestGuardInstalled = true;
+
+  const SUPABASE_REST_MARKER = '.supabase.co/rest/v1/';
+  const nativeFetch = window.fetch.bind(window);
+
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    try {
+      let url = typeof input === 'string' ? input : (input as URL).toString();
+      if (url.includes(SUPABASE_REST_MARKER)) {
+        const u = new URL(url);
+
+        // Helper: strip a trailing ":1" token that some builders append to values
+        const stripTrailingColonOne = (val: string) =>
+          val.endsWith(':1') ? val.slice(0, -2) : val;
+
+        // 1) Pass 1 – normalize/clean each param
+        const pendingDeletes: string[] = [];
+        const pendingSets: Array<[string, string]> = [];
+        for (const [k, vRaw] of u.searchParams.entries()) {
+          const v = vRaw.trim();
+
+          // Remove any empty eq filter: key=eq. / eq / eq: / eq:. / .
+          if (
+            v === 'eq.' ||
+            v === 'eq' ||
+            v === 'eq:' ||
+            v === 'eq:.' ||
+            v === '.'
+          ) {
+            pendingDeletes.push(k);
+            continue;
+          }
+
+          // Fix facility_id special case eq.:1 → eq.<UUID>
+          if (
+            k === 'facility_id' &&
+            (v === 'eq.:1' || v === 'eq:1' || v === ':1' || v === 'eq.:')
+          ) {
+            const currentFacilityId = getCurrentFacilityId();
+            pendingSets.push(['facility_id', `eq.${currentFacilityId}`]);
+            continue;
+          }
+
+          // Generic fix: if any value ends with ":1", strip it (e.g., date=eq.2025-08-15:1)
+          const vStripped = stripTrailingColonOne(v);
+          if (vStripped !== v) {
+            pendingSets.push([k, vStripped]);
+            continue;
+          }
+
+          // Remove the illegal column-vs-column comparison
+          if (k === 'quantity' && v === 'lt.reorder_point') {
+            pendingDeletes.push(k);
+            continue;
+          }
+        }
+        pendingDeletes.forEach((k) => u.searchParams.delete(k));
+        pendingSets.forEach(([k, v]) => {
+          u.searchParams.set(k, v);
+        });
+
+        // 2) Belt-and-suspenders raw replacements for edge cases
+        // facility_id=eq.:1 → eq.<UUID>
+        if (u.search.includes('facility_id=eq.:1')) {
+          const currentFacilityId = getCurrentFacilityId();
+          u.search = u.search.replace(
+            'facility_id=eq.:1',
+            `facility_id=eq.${currentFacilityId}`
+          );
+        }
+        // Remove any lingering key=eq. pairs produced by odd joiners
+        u.search = u.search.replace(
+          /(^|&)([^=&]+)=eq\.(?=(&|$))/g,
+          (_m, p1) => {
+            // drop the whole pair
+            return p1 ? p1.slice(0, -1) : '';
+          }
+        );
+        // Strip trailing ":1" from any param value (ultra-safe catch-all)
+        u.search = u.search.replace(/(:1)(?=(&|$))/g, '');
+        // Remove literal quantity=lt.reorder_point if present
+        u.search = u.search.replace(
+          /(^|&)quantity=lt\.reorder_point(?=(&|$))/g,
+          (_m, p1) => (p1 ? p1.slice(0, -1) : '')
+        );
+
+        // 3) Deduplicate params
+        const deduped = new URL(u.toString());
+        const seen = new Map<string, string>();
+        for (const [k, v] of deduped.searchParams.entries()) seen.set(k, v);
+        deduped.search = '';
+        for (const [k, v] of seen.entries()) deduped.searchParams.append(k, v);
+
+        if (deduped.toString() !== url) {
+          if (!extWindow.__postgrestGuardLogged) {
+            extWindow.__postgrestGuardLogged = true;
+            console.info('🛡️ PostgREST guard rewrote URL:', {
+              from: url,
+              to: deduped.toString(),
+            });
+          }
+          url = deduped.toString();
+          input = url;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      // If anything goes wrong, fall through to native fetch untouched
+    }
+    return nativeFetch(input, init);
+  };
+}
+// END PostgREST runtime guard
+
+// Create a client
+const queryClient = new QueryClient();
+
 function App() {
+  // Initialize services and install guards once on client
+  React.useEffect(() => {
+    // Initialize inventory service facade
+    import('./services/inventory/InventoryServiceFacade').then(
+      ({ inventoryServiceFacade }) => {
+        inventoryServiceFacade.initialize().catch((error) => {
+          console.error(
+            'Failed to initialize inventory service facade:',
+            error
+          );
+        });
+      }
+    );
+
+    // Initialize facility ID cache for fetch guard
+    updateFacilityIdCache();
+
+    // Install PostgREST runtime guard
+    installPostgrestFetchGuard();
+  }, []);
+
   return (
-    <ErrorBoundary>
-      <UIProvider>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
         <UserProvider>
-          <Router>
-            <AppContainer />
-          </Router>
+          <FacilityProvider>
+            <Router>
+              <NavigationProvider>
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route
+                    path="/home"
+                    element={
+                      <ProtectedRoute>
+                        <HomePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/sterilization"
+                    element={
+                      <ProtectedRoute>
+                        <SterilizationPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/sterilization/scanner"
+                    element={
+                      <ProtectedRoute>
+                        <ScannerPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inventory"
+                    element={
+                      <ProtectedRoute>
+                        <InventoryPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inventory/scanner"
+                    element={
+                      <ProtectedRoute>
+                        <InventoryScannerPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/environmental-clean"
+                    element={
+                      <ProtectedRoute>
+                        <EnvironmentalCleanPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/environmental-clean/scanner"
+                    element={
+                      <ProtectedRoute>
+                        <EnvironmentalCleanScannerPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/knowledge-hub"
+                    element={
+                      <ProtectedRoute>
+                        <KnowledgeHubPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/library"
+                    element={
+                      <ProtectedRoute>
+                        <LibraryPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/intelligence"
+                    element={
+                      <ProtectedRoute>
+                        <IntelligencePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <SettingsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/content-builder"
+                    element={
+                      <ProtectedRoute>
+                        <ContentBuilderPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/" element={<Navigate to="/home" replace />} />
+                </Routes>
+              </NavigationProvider>
+            </Router>
+          </FacilityProvider>
         </UserProvider>
-      </UIProvider>
-    </ErrorBoundary>
+        <GlobalBIFailureBanner />
+      </ErrorBoundary>
+    </QueryClientProvider>
   );
 }
 

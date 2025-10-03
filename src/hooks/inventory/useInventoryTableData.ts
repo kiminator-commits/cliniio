@@ -1,61 +1,54 @@
 import { useInventoryDashboardContext } from '@/hooks/inventory/useInventoryDashboardContext';
 import { useInventoryStore } from '@/store/useInventoryStore';
-import { useFilteredInventoryData } from '@/hooks/useFilteredInventoryData';
 import { useAddModalHandlers } from '@/hooks/useAddModalHandlers';
-import {
-  inventoryData as staticInventoryData,
-  suppliesData as staticSuppliesData,
-  equipmentData as staticEquipmentData,
-  officeHardwareData as staticOfficeHardwareData,
-} from '@/utils/Inventory/inventoryData';
+import { InventoryFormData } from '@/types/inventory';
+import { useInventoryDataAccess } from '@/hooks/inventory/useInventoryDataAccess';
 
 export const useInventoryTableData = () => {
   const context = useInventoryDashboardContext();
 
-  const {
-    showTrackedOnly,
-    showFavoritesOnly,
-    handleToggleTrackedFilter,
-    handleToggleFavoritesFilter,
-    handleShowAddModal,
-    handleToggleFavorite,
-  } = context;
+  const { handleShowAddModal } = context;
 
   // Get all values from store
   const {
     activeTab,
     showFilters,
-    setShowFilters,
-    setSearchQuery,
-    setCategoryFilter,
-    setLocationFilter,
     itemsPerPage,
     setItemsPerPage,
     setEditMode,
-    resetFormData,
+    resetForm,
     setExpandedSections,
     setFormData,
-    toggleAddModal,
+    openAddModal,
   } = useInventoryStore();
 
   // Get the edit handler from useAddModalHandlers
   const { handleEditClick } = useAddModalHandlers({
-    toggleAddModal,
+    openAddModal,
+    closeAddModal: () => {}, // Mock function since not available
     setEditMode,
-    resetFormData,
-    setExpandedSections,
-    setFormData,
+    resetForm,
+    setExpandedSections: setExpandedSections as (
+      sections: Record<string, boolean>
+    ) => void,
+    setFormData: (data: InventoryFormData) => setFormData(data),
   });
 
-  // Get filtered data from hook
-  const { filteredData, filteredSuppliesData, filteredEquipmentData, filteredOfficeHardwareData } =
-    useFilteredInventoryData({
-      searchQuery: '',
-      localInventoryData: staticInventoryData,
-      localSuppliesData: staticSuppliesData,
-      localEquipmentData: staticEquipmentData,
-      localOfficeHardwareData: staticOfficeHardwareData,
-    });
+  // Get data from centralized inventory system
+  const { getAllItems } = useInventoryDataAccess();
+  const allItems = getAllItems();
+
+  // Filter data by category for current tab count calculation
+  const filteredData = allItems.filter((item) => item.category === 'Tools');
+  const filteredSuppliesData = allItems.filter(
+    (item) => item.category === 'Supplies'
+  );
+  const filteredEquipmentData = allItems.filter(
+    (item) => item.category === 'Equipment'
+  );
+  const filteredOfficeHardwareData = allItems.filter(
+    (item) => item.category === 'Office Hardware'
+  );
 
   // Calculate current tab count
   const currentTabCount =
@@ -69,47 +62,23 @@ export const useInventoryTableData = () => {
             ? filteredOfficeHardwareData.length
             : 0;
 
-  // Compatible filters object
-  const compatibleFilters = {
-    searchQuery: '',
-    category: '',
-    location: '',
-    showTrackedOnly,
-    showFavoritesOnly,
-  };
-
   return {
     // Data
-    filteredData,
-    filteredSuppliesData,
-    filteredEquipmentData,
-    filteredOfficeHardwareData,
     currentTabCount,
-    compatibleFilters,
 
     // UI State
     activeTab,
     showFilters,
     itemsPerPage,
-    showTrackedOnly,
-    showFavoritesOnly,
 
     // Actions
     handleShowAddModal,
     handleEditClick,
-    handleToggleTrackedFilter,
-    handleToggleFavoritesFilter,
     handleDeleteItem: () => {
       // Implementation would depend on your delete logic
-      console.log('Delete item');
     },
-    handleToggleFavorite,
 
     // Store setters
-    setShowFilters,
-    setSearchQuery,
-    setCategoryFilter,
-    setLocationFilter,
     setItemsPerPage,
   };
 };

@@ -13,5 +13,5 @@ export const securityChecklist = [
 
 export const printSecurityChecklist = () => {
   console.log('[Security Audit Checklist]');
-  securityChecklist.forEach(item => console.log(item));
+  securityChecklist.forEach((item) => console.log(item));
 };

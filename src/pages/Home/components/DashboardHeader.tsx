@@ -15,7 +15,8 @@ export function DashboardHeader({
   setShowLeaderboardModal,
   setShowChallengeModal,
 }: DashboardHeaderProps) {
-  const { navBarMarginLeft, navBarMarginTop } = calculateNavBarMargins(drawerOpen);
+  const { navBarMarginLeft, navBarMarginTop } =
+    calculateNavBarMargins(drawerOpen);
 
   return (
     <div style={{ marginLeft: navBarMarginLeft, marginTop: navBarMarginTop }}>

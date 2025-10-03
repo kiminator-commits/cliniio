@@ -1,0 +1,16 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+
+node_modules/
+.vercel/
+.turbo/
+dist/
+.next/
+.cache/
+.git/
+*.log
+coverage/
+out/
+build/
+.vscode/
+.env
+.env.*

@@ -1,0 +1,18 @@
+[functions.auth-login]
+verify_jwt = false
+import_map = "./deno.json"
+
+[functions.auth-login.env]
+# Rate limiting configuration
+RATE_LIMIT_MAX_EMAIL = "5"
+RATE_LIMIT_MAX_IP = "10"
+RATE_LIMIT_WINDOW = "15"
+RATE_LIMIT_LOCKOUT = "30"
+RATE_LIMIT_DELAY = "60"
+
+# Redis configuration (optional)
+REDIS_URL = "redis://localhost:6379"
+
+# Security settings
+ENABLE_THREAT_DETECTION = "true"
+LOG_SECURITY_EVENTS = "true"

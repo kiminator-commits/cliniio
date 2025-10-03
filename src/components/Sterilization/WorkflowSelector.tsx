@@ -1,32 +1,28 @@
 import React from 'react';
-import { WorkflowType } from '@/types/sterilizationTypes';
+import { SCANNER_WORKFLOWS } from '../../config/scannerWorkflowConfig';
+import { WorkflowCard } from './WorkflowCard';
 
 interface WorkflowSelectorProps {
-  workflows: WorkflowType[];
-  selectedWorkflow: WorkflowType | null;
-  onSelect: (workflow: WorkflowType) => void;
+  onWorkflowSelect: (workflowId: string) => void;
 }
 
-const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
-  workflows,
-  selectedWorkflow,
-  onSelect,
+export const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
+  onWorkflowSelect,
 }) => {
   return (
-    <div className="grid grid-cols-2 gap-2">
-      {workflows.map(workflow => (
-        <button
-          key={workflow}
-          onClick={() => onSelect(workflow)}
-          className={`px-4 py-2 border rounded ${
-            selectedWorkflow === workflow ? 'bg-blue-600 text-white' : 'bg-white text-gray-800'
-          }`}
-        >
-          {workflow}
-        </button>
-      ))}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium text-gray-800 mb-4">
+        Select Workflow
+      </h3>
+      <div className="space-y-3">
+        {SCANNER_WORKFLOWS.map((workflow) => (
+          <WorkflowCard
+            key={workflow.id}
+            workflow={workflow}
+            onClick={onWorkflowSelect}
+          />
+        ))}
+      </div>
     </div>
   );
 };
-
-export default React.memo(WorkflowSelector);

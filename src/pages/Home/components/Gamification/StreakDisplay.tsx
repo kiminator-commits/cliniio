@@ -5,5 +5,9 @@ type Props = {
 };
 
 export const StreakDisplay = ({ streakCount }: Props) => {
-  return <div className="text-sm text-orange-500 font-medium">🔥 {streakCount}-day streak</div>;
+  return (
+    <div className="text-sm text-orange-500 font-medium">
+      🔥 {streakCount}-day streak
+    </div>
+  );
 };

@@ -7,6 +7,7 @@ import { useInventoryStore } from '../../../store/useInventoryStore';
 export const useInventoryState = () => {
   const {
     // UI State
+    activeTab,
     setActiveTab,
     showTrackedOnly,
     setShowTrackedOnly,
@@ -18,21 +19,32 @@ export const useInventoryState = () => {
     setSearchQuery,
 
     // Data State
+    items,
+    categories,
+    analyticsData,
+    isLoading,
+    isCategoriesLoading,
+    isLoadingAnalytics,
+    totalItems,
     formData,
     setFormData,
+    mergeFormData,
+    isEditMode,
     setEditMode,
-    resetFormData,
+    resetForm,
     favorites,
     setFavorites,
     expandedSections,
     setExpandedSections,
 
     // Modal State
-    toggleAddModal,
+    openAddModal,
+    closeAddModal,
   } = useInventoryStore();
 
   return {
     // UI State
+    activeTab,
     setActiveTab,
     showTrackedOnly,
     setShowTrackedOnly,
@@ -44,16 +56,26 @@ export const useInventoryState = () => {
     setSearchQuery,
 
     // Data State
+    items,
+    categories,
+    analyticsData,
+    isLoading,
+    isCategoriesLoading,
+    isLoadingAnalytics,
+    totalItems,
     formData,
     setFormData,
+    mergeFormData,
+    isEditMode,
     setEditMode,
-    resetFormData,
+    resetFormData: resetForm,
     favorites,
     setFavorites,
     expandedSections,
     setExpandedSections,
 
     // Modal State
-    toggleAddModal,
+    openAddModal,
+    closeAddModal,
   };
 };

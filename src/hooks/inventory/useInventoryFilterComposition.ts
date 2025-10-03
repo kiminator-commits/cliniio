@@ -3,7 +3,7 @@ import { LocalInventoryItem } from '../../types/inventoryTypes';
 import { useInventoryFilters, InventoryFilters } from './useInventoryFilters';
 import { useInventorySearch } from './useInventorySearch';
 import { useInventorySorting, SortConfig } from './useInventorySorting';
-import { filterInventoryData } from '../../utils/inventory/filterUtils';
+import { filterInventoryData } from '../../utils/Inventory/filterUtils';
 
 export interface UseInventoryFilterCompositionProps {
   data: LocalInventoryItem[];
@@ -35,20 +35,16 @@ export const useInventoryFilterComposition = ({
     return filterInventoryData(data, filters, activeTab, favorites);
   }, [data, filters, activeTab, favorites]);
 
-  const {
-    searchResults: searchFilteredData,
-    isSearching,
-    totalResults,
-    searchError,
-  } = useInventorySearch({
-    data: searchData,
-    filters,
-    searchOptions: {
-      debounceMs: 300,
-      caseSensitive: false,
-      searchFields: ['item', 'category', 'location'],
-    },
-  });
+  const searchOperations = useInventorySearch();
+
+  // Use the search operations to get filtered data
+  const searchFilteredData = useMemo(() => {
+    return searchOperations.performSearch(
+      searchData,
+      filters.searchQuery || '',
+      filters
+    );
+  }, [searchOperations, searchData, filters]);
 
   // Initialize sorting with search results
   const {
@@ -83,7 +79,12 @@ export const useInventoryFilterComposition = ({
       searchReduction: filteredItems - searchFilteredItems,
       totalReduction: totalItems - finalItems,
     };
-  }, [data.length, searchData.length, searchFilteredData.length, finalData.length]);
+  }, [
+    data.length,
+    searchData.length,
+    searchFilteredData.length,
+    finalData.length,
+  ]);
 
   // Combined actions
   const combinedActions = useMemo(
@@ -155,9 +156,6 @@ export const useInventoryFilterComposition = ({
     // State
     filters,
     finalData,
-    isSearching,
-    searchError,
-    totalResults,
     filterStats,
     sortConfig,
 
@@ -167,9 +165,6 @@ export const useInventoryFilterComposition = ({
     // Individual hook states (for advanced usage)
     searchState: {
       searchFilteredData,
-      isSearching,
-      totalResults,
-      searchError,
     },
 
     sortState: {

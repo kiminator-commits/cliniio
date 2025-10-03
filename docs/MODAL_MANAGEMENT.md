@@ -160,7 +160,7 @@ const handleAddClick = () => {
 };
 
 // Open edit modal with item data
-const handleEditClick = item => {
+const handleEditClick = (item) => {
   openEditModal(item);
 };
 ```

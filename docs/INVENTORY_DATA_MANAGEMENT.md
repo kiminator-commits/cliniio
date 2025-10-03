@@ -37,7 +37,10 @@ interface InventoryDataService {
 
   // CRUD operations
   addInventoryItem(item: InventoryItem): Promise<InventoryItem>;
-  updateInventoryItem(id: string, item: Partial<InventoryItem>): Promise<InventoryItem>;
+  updateInventoryItem(
+    id: string,
+    item: Partial<InventoryItem>
+  ): Promise<InventoryItem>;
   deleteInventoryItem(id: string): Promise<void>;
   addCategory(category: string): Promise<string>;
   deleteCategory(category: string): Promise<void>;
@@ -83,10 +86,22 @@ interface UseInventoryDataManagerReturn {
   getCategories: () => string[];
 
   // Filtered data methods
-  getFilteredTools: (searchQuery: string, filters?: any) => LocalInventoryItem[];
-  getFilteredSupplies: (searchQuery: string, filters?: any) => LocalInventoryItem[];
-  getFilteredEquipment: (searchQuery: string, filters?: any) => LocalInventoryItem[];
-  getFilteredOfficeHardware: (searchQuery: string, filters?: any) => LocalInventoryItem[];
+  getFilteredTools: (
+    searchQuery: string,
+    filters?: any
+  ) => LocalInventoryItem[];
+  getFilteredSupplies: (
+    searchQuery: string,
+    filters?: any
+  ) => LocalInventoryItem[];
+  getFilteredEquipment: (
+    searchQuery: string,
+    filters?: any
+  ) => LocalInventoryItem[];
+  getFilteredOfficeHardware: (
+    searchQuery: string,
+    filters?: any
+  ) => LocalInventoryItem[];
 
   // CRUD operations
   addItem: (item: InventoryItem) => Promise<void>;
@@ -147,7 +162,8 @@ try {
   setData(response);
   setError(response.error);
 } catch (err) {
-  const errorMessage = err instanceof Error ? err.message : 'Failed to fetch inventory data';
+  const errorMessage =
+    err instanceof Error ? err.message : 'Failed to fetch inventory data';
   setError(errorMessage);
 
   // Return cached data if available, otherwise return static data

@@ -1,37 +1,27 @@
-import { supabase } from '../lib/supabaseClient';
-import { useInventoryStore } from '../store/useInventoryStore';
+import { useInventoryStore } from '../store/inventoryStore';
 
 export const categoryService = {
   async fetchCategories(): Promise<string[]> {
-    const setCategoriesLoading = useInventoryStore.getState().setCategoriesLoading;
+    const setCategoriesLoading =
+      useInventoryStore.getState().setCategoriesLoading;
     setCategoriesLoading(true);
 
     try {
-      const { data, error } = await supabase.from('categories').select('*');
-      if (error) {
-        console.error('Error fetching categories:', error);
-        return [];
-      }
-      return data.map((row: { name: string }) => row.name);
+      // Mock implementation - replace with actual data source
+      return ['Electronics', 'Furniture', 'Office Supplies'];
     } finally {
       setCategoriesLoading(false);
     }
   },
 
   async addCategory(category: string): Promise<string> {
-    const { error } = await supabase.from('categories').insert([{ name: category }]);
-    if (error) {
-      console.error('Error adding category:', error);
-      throw error;
-    }
+    // Mock implementation - replace with actual data source
+    console.log('Adding category:', category);
     return category;
   },
 
   async deleteCategory(category: string): Promise<void> {
-    const { error } = await supabase.from('categories').delete().eq('name', category);
-    if (error) {
-      console.error('Error deleting category:', error);
-      throw error;
-    }
+    // Mock implementation - replace with actual data source
+    console.log('Deleting category:', category);
   },
 };

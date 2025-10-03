@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
 import Icon from '@mdi/react';
 import { mdiClose, mdiCheckCircle } from '@mdi/js';
-import { InventoryItem } from '../../types/inventoryTypes';
-import { getSupplyStatusBadge } from '@/utils/inventory/statusUtils';
+import { InventoryItem } from '../../../types/inventoryTypes';
+import { getSupplyStatusBadge } from '@/utils/Inventory/statusUtils';
 
 interface TrackItemsModalProps {
   isOpen: boolean;
   onClose: () => void;
   items: InventoryItem[];
-  onTrack: (itemId: number, isTracked: boolean) => void;
+  onTrack: (itemId: string, isTracked: boolean) => void;
 }
 
-const TrackItemsModal: React.FC<TrackItemsModalProps> = ({ isOpen, onClose, items, onTrack }) => {
-  const [trackedItems, setTrackedItems] = useState<number[]>([]);
+const TrackItemsModal: React.FC<TrackItemsModalProps> = ({
+  isOpen,
+  onClose,
+  items,
+  onTrack,
+}) => {
+  const [trackedItems, setTrackedItems] = useState<string[]>([]);
 
-  const handleTrackItem = (itemId: number) => {
+  const handleTrackItem = (itemId: string) => {
     const isTracked = trackedItems.includes(itemId);
     if (isTracked) {
-      setTrackedItems(trackedItems.filter(id => id !== itemId));
+      setTrackedItems(trackedItems.filter((id) => id !== itemId));
     } else {
       setTrackedItems([...trackedItems, itemId]);
     }
@@ -31,7 +36,10 @@ const TrackItemsModal: React.FC<TrackItemsModalProps> = ({ isOpen, onClose, item
       <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Track Items</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
             <Icon path={mdiClose} size={1.2} />
           </button>
         </div>
@@ -39,8 +47,8 @@ const TrackItemsModal: React.FC<TrackItemsModalProps> = ({ isOpen, onClose, item
         <div className="space-y-4">
           <div className="bg-gray-50 p-4 rounded-lg">
             <p className="text-sm text-gray-600">
-              Select items to track. Tracked items will be monitored for maintenance, usage, and
-              status updates.
+              Select items to track. Tracked items will be monitored for
+              maintenance, usage, and status updates.
             </p>
           </div>
 
@@ -60,16 +68,20 @@ const TrackItemsModal: React.FC<TrackItemsModalProps> = ({ isOpen, onClose, item
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {items.map(item => (
+                {items.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                      <div className="text-sm text-gray-500">{item.toolId}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {(item as { data?: { toolId?: string } }).data?.toolId}
+                      </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getSupplyStatusBadge(
-                          item.status
+                          item.status || ''
                         )}`}
                       >
                         {item.status}

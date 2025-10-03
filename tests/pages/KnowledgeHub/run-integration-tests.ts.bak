@@ -1,0 +1,282 @@
+#!/usr/bin/env node
+
+/**
+ * KnowledgeHub Integration Test Runner
+ *
+ * This script runs comprehensive integration tests for the KnowledgeHub store
+ * with real API integration, performance testing, and error handling.
+ */
+
+import { execSync } from 'child_process';
+
+// Test configuration
+
+// Colors for console output
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+};
+
+// Utility functions
+function log(message, color = colors.reset) {
+  // console.log(`${color}${message}${colors.reset}`);
+}
+
+function logHeader(message) {
+  log(`\n${'='.repeat(60)}`, colors.cyan);
+  log(`  ${message}`, colors.bright + colors.cyan);
+  log(`${'='.repeat(60)}`, colors.cyan);
+}
+
+function logSection(message) {
+  log(`\n${'-'.repeat(40)}`, colors.blue);
+  log(`  ${message}`, colors.bright + colors.blue);
+  log(`${'-'.repeat(40)}`, colors.blue);
+}
+
+function logSuccess(message) {
+  log(`✓ ${message}`, colors.green);
+}
+
+function logError(message) {
+  log(`✗ ${message}`, colors.red);
+}
+
+function logWarning(message) {
+  log(`⚠ ${message}`, colors.yellow);
+}
+
+function logInfo(message) {
+  log(`ℹ ${message}`, colors.blue);
+}
+
+// Test runner functions
+function runUnitTests() {
+  logSection('Running Unit Tests');
+
+  try {
+    const command = `npx jest --testPathPattern="src/pages/KnowledgeHub/__tests__/.*\\.test\\.(ts|tsx)$" --testNamePattern="(should|test)" --verbose --passWithNoTests`;
+
+    logInfo('Executing unit tests...');
+    execSync(command, { stdio: 'inherit' });
+    logSuccess('Unit tests completed successfully');
+    return true;
+  } catch {
+    logError('Unit tests failed');
+    return false;
+  }
+}
+
+function runIntegrationTests() {
+  logSection('Running Integration Tests');
+
+  try {
+    const command = `npx jest --testPathPattern="src/pages/KnowledgeHub/__tests__/.*\\.integration\\.test\\.(ts|tsx)$" --verbose --testTimeout=30000`;
+
+    logInfo('Executing integration tests...');
+    execSync(command, { stdio: 'inherit' });
+    logSuccess('Integration tests completed successfully');
+    return true;
+  } catch {
+    logError('Integration tests failed');
+    return false;
+  }
+}
+
+function runPerformanceTests() {
+  logSection('Running Performance Tests');
+
+  try {
+    const command = `npx jest --testPathPattern="src/pages/KnowledgeHub/__tests__/.*\\.performance\\.test\\.(ts|tsx)$" --verbose --testTimeout=60000`;
+
+    logInfo('Executing performance tests...');
+    execSync(command, { stdio: 'inherit' });
+    logSuccess('Performance tests completed successfully');
+    return true;
+  } catch {
+    logError('Performance tests failed');
+    return false;
+  }
+}
+
+function runApiServiceTests() {
+  logSection('Running API Service Tests');
+
+  try {
+    const command = `npx jest --testPathPattern="src/pages/KnowledgeHub/__tests__/knowledgeHubApiService\\.test\\.ts" --verbose`;
+
+    logInfo('Executing API service tests...');
+    execSync(command, { stdio: 'inherit' });
+    logSuccess('API service tests completed successfully');
+    return true;
+  } catch {
+    logError('API service tests failed');
+    return false;
+  }
+}
+
+function runCoverageReport() {
+  logSection('Generating Coverage Report');
+
+  try {
+    const command = `npx jest --testPathPattern="src/pages/KnowledgeHub/__tests__/.*\\.test\\.(ts|tsx)$" --coverage --coverageReporters=text --coverageReporters=lcov --coverageDirectory=coverage/knowledgeHub`;
+
+    logInfo('Generating coverage report...');
+    execSync(command, { stdio: 'inherit' });
+    logSuccess('Coverage report generated successfully');
+    return true;
+  } catch {
+    logError('Coverage report generation failed');
+    return false;
+  }
+}
+
+function runAllTests() {
+  logSection('Running All KnowledgeHub Tests');
+
+  const results = {
+    unit: false,
+    integration: false,
+    performance: false,
+    api: false,
+    coverage: false,
+  };
+
+  // Run all test suites
+  results.unit = runUnitTests();
+  results.integration = runIntegrationTests();
+  results.performance = runPerformanceTests();
+  results.api = runApiServiceTests();
+  results.coverage = runCoverageReport();
+
+  // Summary
+  logSection('Test Results Summary');
+
+  const totalTests = Object.keys(results).length;
+  const passedTests = Object.values(results).filter(Boolean).length;
+
+  logInfo(`Total test suites: ${totalTests}`);
+  logInfo(`Passed: ${passedTests}`);
+  logInfo(`Failed: ${totalTests - passedTests}`);
+
+  if (passedTests === totalTests) {
+    logSuccess('All test suites passed! 🎉');
+    return true;
+  } else {
+    logError('Some test suites failed! ❌');
+    return false;
+  }
+}
+
+function runSpecificTest(testName) {
+  logSection(`Running Specific Test: ${testName}`);
+
+  try {
+    const command = `npx jest --testPathPattern="src/pages/KnowledgeHub/__tests__/${testName}" --verbose`;
+
+    logInfo(`Executing ${testName}...`);
+    execSync(command, { stdio: 'inherit' });
+    logSuccess(`${testName} completed successfully`);
+    return true;
+  } catch {
+    logError(`${testName} failed`);
+    return false;
+  }
+}
+
+function runTestsInWatchMode() {
+  logSection('Running Tests in Watch Mode');
+
+  try {
+    const command = `npx jest --testPathPattern="src/pages/KnowledgeHub/__tests__/.*\\.test\\.(ts|tsx)$" --watch --verbose`;
+
+    logInfo('Starting tests in watch mode...');
+    execSync(command, { stdio: 'inherit' });
+    return true;
+  } catch {
+    logError('Watch mode failed');
+    return false;
+  }
+}
+
+// Main execution
+function main() {
+  const args = process.argv.slice(2);
+  const command = args[0];
+
+  logHeader('KnowledgeHub Integration Test Runner');
+
+  switch (command) {
+    case 'unit':
+      runUnitTests();
+      break;
+
+    case 'integration':
+      runIntegrationTests();
+      break;
+
+    case 'performance':
+      runPerformanceTests();
+      break;
+
+    case 'api':
+      runApiServiceTests();
+      break;
+
+    case 'coverage':
+      runCoverageReport();
+      break;
+
+    case 'watch':
+      runTestsInWatchMode();
+      break;
+
+    case 'specific':
+      if (args[1]) {
+        runSpecificTest(args[1]);
+      } else {
+        logError('Please specify a test file name');
+        process.exit(1);
+      }
+      break;
+
+    case 'all':
+    default: {
+      const success = runAllTests();
+      process.exit(success ? 0 : 1);
+    }
+  }
+}
+
+// Handle process termination
+process.on('SIGINT', () => {
+  logWarning('\nTest execution interrupted by user');
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  logWarning('\nTest execution terminated');
+  process.exit(0);
+});
+
+// Run the main function
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  runUnitTests,
+  runIntegrationTests,
+  runPerformanceTests,
+  runApiServiceTests,
+  runCoverageReport,
+  runAllTests,
+  runSpecificTest,
+  runTestsInWatchMode,
+};

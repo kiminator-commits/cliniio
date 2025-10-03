@@ -11,13 +11,13 @@ interface InventoryModalStore {
   setShowScanModal: (show: boolean) => void;
 }
 
-export const useInventoryModalStore = create<InventoryModalStore>(set => ({
+export const useInventoryModalStore = create<InventoryModalStore>((set) => ({
   showAddModal: false,
   showEditModal: false,
   showTrackModal: false,
   showScanModal: false,
-  setShowAddModal: show => set({ showAddModal: show }),
-  setShowEditModal: show => set({ showEditModal: show }),
-  setShowTrackModal: show => set({ showTrackModal: show }),
-  setShowScanModal: show => set({ showScanModal: show }),
+  setShowAddModal: (show) => set({ showAddModal: show }),
+  setShowEditModal: (show) => set({ showEditModal: show }),
+  setShowTrackModal: (show) => set({ showTrackModal: show }),
+  setShowScanModal: (show) => set({ showScanModal: show }),
 }));

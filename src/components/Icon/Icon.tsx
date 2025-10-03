@@ -8,9 +8,11 @@ interface IconProps {
   className?: string;
 }
 
-export const Icon: React.FC<IconProps> = ({
+const Icon: React.FC<IconProps> = ({
   path,
   size = 24,
   color = 'currentColor',
   className,
 }) => <MdiIcon path={path} size={size} color={color} className={className} />;
+
+export default Icon;

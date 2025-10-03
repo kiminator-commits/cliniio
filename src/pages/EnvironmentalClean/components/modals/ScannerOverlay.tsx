@@ -28,7 +28,11 @@ const ScannerOverlay: React.FC<ScannerOverlayProps> = ({ isScanning }) => {
           >
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-[#5b5b5b] flex items-center">
-                <Icon path={mdiBarcode} size={1} className="text-[#4ECDC4] mr-2" />
+                <Icon
+                  path={mdiBarcode}
+                  size={1}
+                  className="text-[#4ECDC4] mr-2"
+                />
                 Scanning Room Barcode
               </h3>
             </div>

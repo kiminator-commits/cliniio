@@ -64,14 +64,22 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
 }) => {
   return (
     <motion.div
+      role="region"
+      aria-labelledby="library-filters-heading"
       initial={false}
-      animate={{ height: showFilters ? 'auto' : 0, opacity: showFilters ? 1 : 0 }}
+      animate={{
+        height: showFilters ? 'auto' : 0,
+        opacity: showFilters ? 1 : 0,
+      }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
       className="overflow-hidden"
     >
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <h3
+            id="library-filters-heading"
+            className="text-lg font-semibold text-gray-900 flex items-center gap-2"
+          >
             <Icon path={mdiFilter} size={1} className="text-[#4ECDC4]" />
             Refine Your Search
           </h3>
@@ -93,11 +101,12 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
             </label>
             <select
               id="category-filter"
+              aria-label="Category"
               value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
+              onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
             >
-              {categories.map(category => (
+              {categories.map((category) => (
                 <option key={category} value={category}>
                   {category === 'All'
                     ? 'All Categories'
@@ -117,11 +126,12 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
             </label>
             <select
               id="skill-level-filter"
+              aria-label="Skill Level"
               value={selectedLevel}
-              onChange={e => setSelectedLevel(e.target.value)}
+              onChange={(e) => setSelectedLevel(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
             >
-              {skillLevels.map(level => (
+              {skillLevels.map((level) => (
                 <option key={level} value={level}>
                   {level}
                 </option>
@@ -139,12 +149,15 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
             </label>
             <select
               id="duration-filter"
+              aria-label="Duration"
               value={filters.timeline}
-              onChange={e => setFilters({ ...filters, timeline: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, timeline: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
             >
               <option value="">Any Duration</option>
-              {timelines.map(time => (
+              {timelines.map((time) => (
                 <option key={time} value={time.toLowerCase().replace(' ', '-')}>
                   {time}
                 </option>
@@ -154,18 +167,27 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
 
           {/* Status Filter */}
           <div>
-            <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="status-filter"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Status
             </label>
             <select
               id="status-filter"
+              aria-label="Status"
               value={filters.status}
-              onChange={e => setFilters({ ...filters, status: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, status: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
             >
               <option value="">All Status</option>
-              {statuses.map(status => (
-                <option key={status} value={status.toLowerCase().replace(' ', '-')}>
+              {statuses.map((status) => (
+                <option
+                  key={status}
+                  value={status.toLowerCase().replace(' ', '-')}
+                >
                   {status}
                 </option>
               ))}
@@ -174,19 +196,28 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
 
           {/* Source Filter */}
           <div>
-            <label htmlFor="source-filter" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="source-filter"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Source
             </label>
             <div className="flex gap-2">
               <select
                 id="source-filter"
+                aria-label="Source"
                 value={filters.source}
-                onChange={e => setFilters({ ...filters, source: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, source: e.target.value })
+                }
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] transition-colors duration-200"
               >
                 <option value="">All Sources</option>
-                {sources.slice(1).map(source => (
-                  <option key={source} value={source.toLowerCase().replace(' ', '-')}>
+                {sources.slice(1).map((source) => (
+                  <option
+                    key={source}
+                    value={source.toLowerCase().replace(' ', '-')}
+                  >
                     {source}
                   </option>
                 ))}
@@ -241,7 +272,8 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
                     exit={{ opacity: 0, y: 10 }}
                     className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-white rounded-lg shadow-xl border border-gray-200 text-xs text-gray-800 whitespace-nowrap z-50"
                   >
-                    Content is selected based on your role, experience, and performance data
+                    Content is selected based on your role, experience, and
+                    performance data
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-200"></div>
                   </motion.div>
                 )}
@@ -256,7 +288,9 @@ const LibraryFilters: React.FC<LibraryFiltersProps> = ({
                 id="new-content-filter"
                 type="checkbox"
                 checked={filters.showNewOnly}
-                onChange={e => setFilters({ ...filters, showNewOnly: e.target.checked })}
+                onChange={(e) =>
+                  setFilters({ ...filters, showNewOnly: e.target.checked })
+                }
                 className="h-4 w-4 text-[#4ECDC4] focus:ring-[#4ECDC4] border-gray-300 rounded"
               />
               <label

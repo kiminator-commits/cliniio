@@ -3,16 +3,7 @@
  * Handles text formatting, date formatting, and display transformations
  */
 
-export interface InventoryItem {
-  id?: string;
-  name: string;
-  quantity: number;
-  category: string;
-  status: string;
-  expiryDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { InventoryItem } from '../../types/inventoryTypes';
 
 export interface FormattingOptions {
   dateFormat?: 'short' | 'long' | 'relative';
@@ -24,7 +15,7 @@ export interface FormattingOptions {
  * Formats a date string for display
  */
 export const formatDate = (
-  dateString: string | undefined,
+  dateString: string | undefined | null,
   format: 'short' | 'long' | 'relative' = 'short'
 ): string => {
   if (!dateString) return 'N/A';
@@ -70,18 +61,19 @@ export const formatRelativeDate = (date: Date): string => {
  * Formats a number for display
  */
 export const formatNumber = (
-  number: number,
+  number: number | undefined,
   format: 'default' | 'compact' | 'currency' = 'default'
 ): string => {
-  if (isNaN(number)) return 'N/A';
+  const num = number || 0;
+  if (isNaN(num)) return 'N/A';
 
   switch (format) {
     case 'compact':
-      return formatCompactNumber(number);
+      return formatCompactNumber(num);
     case 'currency':
-      return formatCurrency(number);
+      return formatCurrency(num);
     default:
-      return number.toLocaleString();
+      return num.toLocaleString();
   }
 };
 
@@ -118,7 +110,9 @@ export const formatText = (
     case 'title':
       return text
         .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
         .join(' ');
     case 'upper':
       return text.toUpperCase();
@@ -161,21 +155,26 @@ export const formatStatus = (status: string): string => {
 /**
  * Formats quantity with appropriate units
  */
-export const formatQuantity = (quantity: number): string => {
-  if (quantity === 0) return '0';
-  if (quantity === 1) return '1 item';
-  return `${formatNumber(quantity)} items`;
+export const formatQuantity = (quantity: number | undefined): string => {
+  const qty = quantity || 0;
+  if (qty === 0) return '0';
+  if (qty === 1) return '1 item';
+  return `${formatNumber(qty)} items`;
 };
 
 /**
  * Formats expiry date with warning indicators
  */
-export const formatExpiryDate = (expiryDate: string | undefined): string => {
+export const formatExpiryDate = (
+  expiryDate: string | undefined | null
+): string => {
   if (!expiryDate) return 'No expiry date';
 
   const date = new Date(expiryDate);
   const now = new Date();
-  const diffInDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const diffInDays = Math.ceil(
+    (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   if (diffInDays < 0) {
     return `${formatDate(expiryDate)} (Expired)`;
@@ -195,27 +194,31 @@ export const formatExpiryDate = (expiryDate: string | undefined): string => {
 /**
  * Formats inventory item for table display
  */
-export const formatItemForTable = (item: InventoryItem): Record<string, string> => {
+export const formatItemForTable = (
+  item: InventoryItem
+): Record<string, string> => {
   return {
-    name: formatItemName(item.name),
-    quantity: formatQuantity(item.quantity),
-    category: formatCategory(item.category),
-    status: formatStatus(item.status),
+    name: formatItemName(item.name || ''),
+    quantity: formatQuantity(item.quantity || 0),
+    category: formatCategory(item.category || ''),
+    status: formatStatus(item.status || ''),
     expiryDate: formatExpiryDate(item.expiryDate),
-    createdAt: formatDate(item.createdAt),
-    updatedAt: formatDate(item.updatedAt),
+    createdAt: formatDate(item.data?.createdAt as string),
+    updatedAt: formatDate(item.data?.updatedAt as string),
   };
 };
 
 /**
  * Formats inventory item for card display
  */
-export const formatItemForCard = (item: InventoryItem): Record<string, string> => {
+export const formatItemForCard = (
+  item: InventoryItem
+): Record<string, string> => {
   return {
-    name: formatItemName(item.name),
-    quantity: formatNumber(item.quantity),
-    category: formatCategory(item.category),
-    status: formatStatus(item.status),
+    name: formatItemName(item.name || ''),
+    quantity: formatNumber(item.quantity || 0),
+    category: formatCategory(item.category || ''),
+    status: formatStatus(item.status || ''),
     expiryDate: formatExpiryDate(item.expiryDate),
   };
 };
@@ -223,7 +226,9 @@ export const formatItemForCard = (item: InventoryItem): Record<string, string> =
 /**
  * Formats inventory metrics for display
  */
-export const formatMetrics = (metrics: Record<string, number>): Record<string, string> => {
+export const formatMetrics = (
+  metrics: Record<string, number>
+): Record<string, string> => {
   const formatted: Record<string, string> = {};
 
   Object.entries(metrics).forEach(([key, value]) => {
@@ -271,7 +276,10 @@ export const formatDuration = (milliseconds: number): string => {
 /**
  * Formats percentage for display
  */
-export const formatPercentage = (value: number, decimals: number = 1): string => {
+export const formatPercentage = (
+  value: number,
+  decimals: number = 1
+): string => {
   if (isNaN(value)) return 'N/A';
   return `${value.toFixed(decimals)}%`;
 };
@@ -306,7 +314,9 @@ export const formatEmail = (email: string, mask: boolean = false): string => {
   if (localPart.length <= 2) return email;
 
   const maskedLocal =
-    localPart.charAt(0) + '*'.repeat(localPart.length - 2) + localPart.charAt(localPart.length - 1);
+    localPart.charAt(0) +
+    '*'.repeat(localPart.length - 2) +
+    localPart.charAt(localPart.length - 1);
 
   return `${maskedLocal}@${domain}`;
 };

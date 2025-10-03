@@ -1,5 +1,8 @@
 import { HOME_UI_CONSTANTS } from '../constants/homeUiConstants';
 import clsx from 'clsx';
+import { Task } from '@/types/task';
+
+export type TaskStatus = 'pending' | 'completed';
 
 export const calculateNavBarMargins = (drawerOpen: boolean) => {
   // Menu icon width + desired gap (12px + 60px)
@@ -26,3 +29,10 @@ export function getTaskCardClass() {
 export function getLeaderboardSectionClass() {
   return clsx(HOME_UI_CONSTANTS.sectionBox, 'mb-4', 'lg:col-span-6');
 }
+
+export const filterTasksByStatus = (
+  tasks: Task[],
+  status: TaskStatus
+): Task[] => {
+  return tasks.filter((task) => task.completed === (status === 'completed'));
+};

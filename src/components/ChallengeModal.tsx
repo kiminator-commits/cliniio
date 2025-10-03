@@ -12,8 +12,15 @@ import {
   mdiCheckCircleOutline,
 } from '@mdi/js';
 import { HOME_SECTION_TITLES } from '@/pages/Home/constants/homeConstants';
+import { challengeService } from '@/services/challengeService';
 
-export type ChallengeCategory = 'knowledge' | 'process' | 'quality' | 'collaboration' | 'daily';
+export type ChallengeCategory =
+  | 'knowledge'
+  | 'process'
+  | 'quality'
+  | 'collaboration'
+  | 'daily'
+  | 'team';
 export type ChallengeDifficulty = 'easy' | 'medium' | 'hard';
 export type ChallengeStatus = 'pending' | 'completed' | 'all';
 
@@ -66,104 +73,43 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
   onClose,
   onChallengeComplete,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<ChallengeCategory | 'all'>('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<ChallengeDifficulty | 'all'>('all');
-  const [selectedStatus, setSelectedStatus] = useState<ChallengeStatus>('pending');
-  const [sampleChallenges, setSampleChallenges] = useState<Challenge[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<
+    ChallengeCategory | 'all'
+  >('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<
+    ChallengeDifficulty | 'all'
+  >('all');
+  const [selectedStatus, setSelectedStatus] =
+    useState<ChallengeStatus>('pending');
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load and generate challenges based on real work data
+  // Load challenges from Supabase
   useEffect(() => {
-    const generateChallenges = async () => {
+    const loadChallenges = async () => {
       try {
-        // Generate challenges based on real work data
-        const newChallenges: Challenge[] = [
-          {
-            id: '1',
-            title: 'Complete Daily Tasks',
-            description: 'Complete all assigned tasks for the day',
-            category: 'daily' as ChallengeCategory,
-            difficulty: 'easy',
-            points: 50,
-            timeEstimate: '2 hours',
-            completed: false,
-          },
-          {
-            id: '2',
-            title: 'Team Collaboration',
-            description: 'Participate in team meetings and discussions',
-            category: 'team' as ChallengeCategory,
-            difficulty: 'medium',
-            points: 100,
-            timeEstimate: '4 hours',
-            completed: false,
-          },
-          {
-            id: 'challenge-001',
-            title: 'Sterilization Sprint',
-            description: 'Complete sterilization for 10 tools',
-            category: 'process',
-            difficulty: 'easy',
-            points: 50,
-            timeEstimate: '5 minutes',
-            completed: false,
-          },
-          {
-            id: 'challenge-002',
-            title: 'Inventory Master',
-            description: 'Update inventory counts for 5 high-priority items',
-            category: 'quality',
-            difficulty: 'medium',
-            points: 75,
-            timeEstimate: '10 minutes',
-            completed: false,
-          },
-          {
-            id: 'challenge-003',
-            title: 'Deep Clean Champion',
-            description: 'Complete a thorough cleaning of the sterilization area',
-            category: 'collaboration',
-            difficulty: 'easy',
-            points: 50,
-            timeEstimate: '5 minutes',
-            completed: false,
-          },
-          {
-            id: 'challenge-004',
-            title: 'Process Optimization',
-            description: 'Identify and implement one process improvement',
-            category: 'process',
-            difficulty: 'hard',
-            points: 100,
-            timeEstimate: '15 minutes',
-            completed: false,
-          },
-        ];
-
-        // Check localStorage for completed challenges
-        const storedChallenges = localStorage.getItem('completedChallenges');
-        if (storedChallenges) {
-          const completedIds = JSON.parse(storedChallenges);
-          newChallenges.forEach(challenge => {
-            if (completedIds.includes(challenge.id)) {
-              challenge.completed = true;
-            }
-          });
-        }
-
-        setSampleChallenges(newChallenges);
+        setLoading(true);
+        const fetchedChallenges = await challengeService.fetchChallenges();
+        setChallenges(fetchedChallenges);
       } catch (error) {
-        console.error('Error generating challenges:', error);
+        console.error('Error loading challenges:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    generateChallenges();
+    loadChallenges();
   }, []);
 
   const categories = [
     { id: 'knowledge', icon: mdiLightbulbOutline, label: 'Knowledge' },
     { id: 'process', icon: mdiCogOutline, label: 'Process' },
     { id: 'quality', icon: mdiShieldCheckOutline, label: 'Quality' },
-    { id: 'collaboration', icon: mdiAccountGroupOutline, label: 'Collaboration' },
+    {
+      id: 'collaboration',
+      icon: mdiAccountGroupOutline,
+      label: 'Collaboration',
+    },
     { id: 'daily', icon: mdiClockOutline, label: 'Daily' },
     { id: 'team', icon: mdiAccountGroupOutline, label: 'Team' },
   ];
@@ -174,10 +120,12 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
     { id: 'hard', label: 'Hard', color: 'text-red-500' },
   ];
 
-  const filteredChallenges = sampleChallenges.filter(challenge => {
-    const matchesCategory = selectedCategory === 'all' || challenge.category === selectedCategory;
+  const filteredChallenges = challenges.filter((challenge) => {
+    const matchesCategory =
+      selectedCategory === 'all' || challenge.category === selectedCategory;
     const matchesDifficulty =
-      selectedDifficulty === 'all' || challenge.difficulty === selectedDifficulty;
+      selectedDifficulty === 'all' ||
+      challenge.difficulty === selectedDifficulty;
     const matchesStatus =
       selectedStatus === 'all' ||
       (selectedStatus === 'pending' && !challenge.completed) ||
@@ -185,19 +133,30 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
     return matchesCategory && matchesDifficulty && matchesStatus;
   });
 
-  const handleCompleteChallenge = (challenge: Challenge) => {
-    // Update challenge completion status
-    const updatedChallenges = sampleChallenges.map(c =>
-      c.id === challenge.id ? { ...c, completed: true } : c
-    );
-    setSampleChallenges(updatedChallenges);
+  const handleCompleteChallenge = async (challenge: Challenge) => {
+    try {
+      // Complete the challenge in Supabase
+      const success = await challengeService.completeChallenge({
+        challenge_id: challenge.id,
+        points_earned: challenge.points,
+      });
 
-    // Store completed challenge in localStorage
-    const completedIds = updatedChallenges.filter(c => c.completed).map(c => c.id);
-    localStorage.setItem('completedChallenges', JSON.stringify(completedIds));
+      if (success) {
+        // Update local state
+        setChallenges((prev) =>
+          prev.map((c) =>
+            c.id === challenge.id ? { ...c, completed: true } : c
+          )
+        );
 
-    // Add points to total score
-    onChallengeComplete(challenge.points);
+        // Call the callback to update points
+        onChallengeComplete(challenge.points);
+      } else {
+        console.error('Failed to complete challenge');
+      }
+    } catch (error) {
+      console.error('Error completing challenge:', error);
+    }
   };
 
   return (
@@ -215,7 +174,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
             className="bg-white p-4 rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto scrollbar-hide"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
@@ -226,7 +185,10 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
                   {HOME_SECTION_TITLES.CHALLENGES}
                 </h2>
               </div>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <Icon path={mdiClose} size={0.9} />
               </button>
             </div>
@@ -235,14 +197,20 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
             <div className="mb-4 flex gap-3">
               {/* Categories */}
               <div className="flex-1">
-                <h3 className="text-xs font-semibold text-gray-500 mb-2">Category</h3>
+                <h3 className="text-xs font-semibold text-gray-500 mb-2">
+                  Category
+                </h3>
                 <select
                   value={selectedCategory}
-                  onChange={e => setSelectedCategory(e.target.value as ChallengeCategory | 'all')}
+                  onChange={(e) =>
+                    setSelectedCategory(
+                      e.target.value as ChallengeCategory | 'all'
+                    )
+                  }
                   className="w-full px-2 py-1.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent text-sm"
                 >
                   <option value="all">All Categories</option>
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.label}
                     </option>
@@ -252,16 +220,20 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
 
               {/* Difficulty Filter */}
               <div className="flex-1">
-                <h3 className="text-xs font-semibold text-gray-500 mb-2">Difficulty</h3>
+                <h3 className="text-xs font-semibold text-gray-500 mb-2">
+                  Difficulty
+                </h3>
                 <select
                   value={selectedDifficulty}
-                  onChange={e =>
-                    setSelectedDifficulty(e.target.value as ChallengeDifficulty | 'all')
+                  onChange={(e) =>
+                    setSelectedDifficulty(
+                      e.target.value as ChallengeDifficulty | 'all'
+                    )
                   }
                   className="w-full px-2 py-1.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent text-sm"
                 >
                   <option value="all">All Difficulties</option>
-                  {difficulties.map(difficulty => (
+                  {difficulties.map((difficulty) => (
                     <option key={difficulty.id} value={difficulty.id}>
                       {difficulty.label}
                     </option>
@@ -271,10 +243,14 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
 
               {/* Status Filter */}
               <div className="flex-1">
-                <h3 className="text-xs font-semibold text-gray-500 mb-2">Status</h3>
+                <h3 className="text-xs font-semibold text-gray-500 mb-2">
+                  Status
+                </h3>
                 <select
                   value={selectedStatus}
-                  onChange={e => setSelectedStatus(e.target.value as ChallengeStatus)}
+                  onChange={(e) =>
+                    setSelectedStatus(e.target.value as ChallengeStatus)
+                  }
                   className="w-full px-2 py-1.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-transparent text-sm"
                 >
                   <option value="all">All Challenges</option>
@@ -286,61 +262,79 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
 
             {/* Challenge Cards */}
             <div className="space-y-3">
-              {filteredChallenges.map(challenge => (
-                <div
-                  key={challenge.id}
-                  className={`p-3 rounded-lg border ${
-                    challenge.completed
-                      ? 'bg-gray-50 border-gray-200'
-                      : 'bg-white border-gray-200 hover:border-[#4ECDC4]'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs font-medium ${
-                            categoryColors[challenge.category]
-                          }`}
-                        >
-                          {challenge.category}
-                        </span>
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs font-medium ${
-                            difficultyColors[challenge.difficulty]
-                          }`}
-                        >
-                          {challenge.difficulty}
-                        </span>
-                        <span className="text-xs text-gray-500">{challenge.timeEstimate}</span>
-                      </div>
-                      <h3 className="text-sm font-semibold text-gray-800 mb-0.5">
-                        {challenge.title}
-                      </h3>
-                      <p className="text-xs text-gray-600 mb-2">{challenge.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-[#4ECDC4]">
-                          {challenge.points} points
-                        </span>
-                        {!challenge.completed && (
-                          <button
-                            onClick={() => handleCompleteChallenge(challenge)}
-                            className="px-3 py-1 bg-[#4ECDC4] text-white text-xs rounded-lg hover:bg-[#38b2ac] transition-colors"
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500">Loading challenges...</div>
+                </div>
+              ) : filteredChallenges.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500">No challenges available</div>
+                </div>
+              ) : (
+                filteredChallenges.map((challenge) => (
+                  <div
+                    key={challenge.id}
+                    className={`p-3 rounded-lg border ${
+                      challenge.completed
+                        ? 'bg-gray-50 border-gray-200'
+                        : 'bg-white border-gray-200 hover:border-[#4ECDC4]'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              categoryColors[challenge.category]
+                            }`}
                           >
-                            Complete
-                          </button>
-                        )}
-                        {challenge.completed && (
-                          <span className="flex items-center text-xs text-green-600">
-                            <Icon path={mdiCheckCircleOutline} size={0.8} className="mr-1" />
-                            Completed
+                            {challenge.category}
                           </span>
-                        )}
+                          <span
+                            className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              difficultyColors[challenge.difficulty]
+                            }`}
+                          >
+                            {challenge.difficulty}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {challenge.timeEstimate}
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-semibold text-gray-800 mb-0.5">
+                          {challenge.title}
+                        </h3>
+                        <p className="text-xs text-gray-600 mb-2">
+                          {challenge.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-[#4ECDC4]">
+                            {challenge.points} points
+                          </span>
+                          {!challenge.completed && (
+                            <button
+                              onClick={() => handleCompleteChallenge(challenge)}
+                              className="px-3 py-1 bg-[#4ECDC4] text-white text-xs rounded-lg hover:bg-[#38b2ac] transition-colors"
+                            >
+                              Complete
+                            </button>
+                          )}
+                          {challenge.completed && (
+                            <span className="flex items-center text-xs text-green-600">
+                              <Icon
+                                path={mdiCheckCircleOutline}
+                                size={0.8}
+                                className="mr-1"
+                              />
+                              Completed
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </motion.div>
         </motion.div>

@@ -1,192 +1,166 @@
-import React, { useState, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaUser, FaLock } from 'react-icons/fa';
-import { useUI } from '../../contexts/UIContext';
-import { submitLoginForm } from '../../services/api';
+import React from 'react';
+import { useLoginForm } from './hooks/useLoginForm';
+import { useLoginStore } from '@/stores/useLoginStore';
+import LoginHeader from './LoginHeader';
+import LoginFooter from './LoginFooter';
+import EmailField from './components/EmailField';
+import PasswordField from './components/PasswordField';
+import CheckboxFields from './components/CheckboxFields';
+import OtpField from './components/OtpField';
+import LoginProgressIndicator from './components/LoginProgressIndicator';
+import LoadingIndicator from './components/LoadingIndicator';
+import SecurityWarnings from './components/SecurityWarnings';
+import OfflineWarning from './components/OfflineWarning';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
-import { LOGIN_LABELS } from '../../constants/loginConstants';
-import SocialLoginButtons from '../../components/SocialLoginButtons';
-import './styles.css';
-
-interface LoginFormData {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-  rememberDevice: boolean;
-}
 
 const LoginForm: React.FC = () => {
-  const navigate = useNavigate();
-  const { setLoading } = useUI();
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
-    rememberMe: false,
-    rememberDevice: false,
-  });
+  const {
+    formData,
+    errors,
+    loading,
+    loadingStep,
+    handleChange,
+    handleSubmit,
+    handleForgotPassword,
+  } = useLoginForm();
+  
+  const { csrfToken, isSecureMode } = useLoginStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      await submitLoginForm(formData);
-      navigate('/home');
-    } catch (error) {
-      console.error('Login failed:', error);
-    } finally {
-      setLoading(false);
+    // Basic validation
+    if (!formData.email.trim()) {
+      return;
     }
-  };
+    if (!formData.password.trim()) {
+      return;
+    }
 
-  const handleForgotPassword = () => {
-    // Implement the forgot password logic here
-    console.log('Forgot Password clicked');
+    // Sanitize inputs
+    const sanitizedEmail = formData.email.trim().toLowerCase();
+    const sanitizedPassword = formData.password;
+
+    // Secure CSRF token validation
+    const validateCsrfToken = () => {
+      if (!isSecureMode) return true; // Skip validation in non-secure mode
+      return !!csrfToken && csrfToken.length > 0;
+    };
+    
+    const logSecurityEvent = (event: string, user: string, reason?: string) => {
+      console.log(
+        `[SECURITY] ${event} for user: ${user}`,
+        reason ? `Reason: ${reason}` : ''
+      );
+    };
+
+    await handleSubmit(
+      sanitizedEmail,
+      sanitizedPassword,
+      validateCsrfToken,
+      logSecurityEvent
+    );
   };
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:p-4 focus:bg-white focus:text-black"
-        >
-          Skip to main content
-        </a>
-        <div
-          id="main-content"
-          className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg"
-        >
-          <div>
-            <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-500">
-              Welcome to Cliniio
-            </h1>
-            <p className="mt-2 text-center text-sm text-gray-600">Sign in to your account</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <LoginHeader />
 
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
-              <div>
-                <span id="emailHelp" className="sr-only">
-                  Enter your email address.
-                </span>
-                <label htmlFor="email" className="sr-only">
-                  {LOGIN_LABELS.email}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaUser className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    aria-label="Email address"
-                    aria-describedby="emailHelp"
-                    className="appearance-none rounded-lg relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="Email address"
-                    value={formData.email}
-                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-              </div>
-              <p className="text-red-500 text-sm mt-2">Please enter a valid email address.</p>
-              <div>
-                <span id="passwordHelp" className="sr-only">
-                  Enter your account password.
-                </span>
-                <label htmlFor="password" className="sr-only">
-                  {LOGIN_LABELS.password}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaLock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    aria-label="Password"
-                    aria-describedby="passwordHelp"
-                    className="appearance-none rounded-lg relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                  />
-                </div>
-                <div className="text-green-500 text-sm mt-2">Password strength: Good</div>
-                <p className="text-red-500 text-sm mt-2">Password must be at least 8 characters.</p>
-              </div>
+          <form className="mt-8 space-y-6" onSubmit={handleFormSubmit}>
+            {/* Hidden CSRF token field for secure authentication */}
+            {isSecureMode && csrfToken && (
+              <input
+                type="hidden"
+                name="csrfToken"
+                value={csrfToken}
+              />
+            )}
+            
+            <div className="space-y-4">
+              <EmailField
+                formData={formData}
+                handleChange={handleChange}
+                disabled={loading}
+              />
+
+              <PasswordField
+                formData={formData}
+                handleChange={handleChange}
+                disabled={loading}
+              />
+
+              <CheckboxFields
+                formData={formData}
+                handleChange={handleChange}
+                disabled={loading}
+              />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col space-y-2">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    aria-label={LOGIN_LABELS.rememberMe}
-                    className="h-4 w-4 text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                    {LOGIN_LABELS.rememberMe}
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    id="remember-device"
-                    name="remember-device"
-                    type="checkbox"
-                    aria-label={LOGIN_LABELS.rememberDevice}
-                    className="h-4 w-4 text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-device" className="ml-2 block text-sm text-gray-900">
-                    {LOGIN_LABELS.rememberDevice}
-                  </label>
+            {formData.stage === 'otp' && (
+              <OtpField
+                formData={formData}
+                handleChange={handleChange}
+                disabled={loading}
+              />
+            )}
+
+            <SecurityWarnings />
+            <OfflineWarning />
+
+            {errors.submit && (
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">
+                      {errors.submit}
+                    </h3>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#2dd4bf] hover:bg-[#14b8a6] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-[#2dd4bf] transition-colors duration-200"
+                disabled={loading}
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#4ECDC4] hover:bg-[#3db8b0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4ECDC4] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
-                {LOGIN_LABELS.submit}
+                {loading ? (
+                  <LoadingIndicator
+                    loading={loading}
+                    loadingStep={loadingStep}
+                  />
+                ) : (
+                  'Sign in'
+                )}
               </button>
             </div>
 
+            {loading && loadingStep && (
+              <LoginProgressIndicator
+                loading={loading}
+                loadingStep={loadingStep}
+              />
+            )}
+
             <div className="text-center">
-              <div className="mt-4 text-center flex items-center justify-center">
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-sm text-[#4ECDC4] hover:text-[#45b7af] cursor-pointer focus:outline-none"
-                >
-                  Forgot Password?
-                </button>
-                <span className="mx-2 text-gray-400">|</span>
-                <button
-                  type="button"
-                  onClick={() => navigate('/home')}
-                  className="text-sm text-[#4ECDC4] hover:text-[#45b7af] cursor-pointer focus:outline-none"
-                >
-                  Skip Login
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
+              >
+                Forgot your password?
+              </button>
             </div>
           </form>
 
-          <SocialLoginButtons />
+          <LoginFooter />
         </div>
       </div>
     </ErrorBoundary>
   );
 };
 
-export default memo(LoginForm);
+export default LoginForm;

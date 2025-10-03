@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
 import {
   toggleFavorite,
-  handleFormChange,
-  toggleSection,
-  getFormDataFromItem,
   resetAddModalState,
+  getFormDataFromItem,
+  toggleSection,
+  handleFormChange,
 } from '../utils/inventoryHelpers';
+import { InventoryItem, ExpandedSections } from '../types/inventoryTypes';
+import { InventoryFormData } from '../types/inventory';
 
 interface InventoryState {
   // Search and filter state
@@ -16,7 +18,7 @@ interface InventoryState {
   locationFilter: string;
   setLocationFilter: (filter: string) => void;
   showTrackedOnly: boolean;
-  setShowTrackedOnly: (show: boolean) => void;
+  setShowTrackedOnly: React.Dispatch<React.SetStateAction<boolean>>;
 
   // Tab and modal state
   activeTab: string;
@@ -38,7 +40,7 @@ interface InventoryState {
   activeFilter: string;
   setActiveFilter: (filter: string) => void;
   favorites: Set<string>;
-  setFavorites: (favorites: Set<string>) => void;
+  setFavorites: React.Dispatch<React.SetStateAction<Set<string>>>;
 
   // Pagination and filter display state
   itemsPerPage: number;
@@ -47,26 +49,26 @@ interface InventoryState {
   setShowFilters: (show: boolean) => void;
 
   // Add modal section states
-  expandedSections: Record<string, boolean>;
-  setExpandedSections: (sections: Record<string, boolean>) => void;
+  expandedSections: ExpandedSections;
+  setExpandedSections: React.Dispatch<React.SetStateAction<ExpandedSections>>;
 
   // Form state for add/edit modal
-  formData: Record<string, unknown>;
-  setFormData: (data: Record<string, unknown>) => void;
+  formData: InventoryFormData;
+  setFormData: React.Dispatch<React.SetStateAction<InventoryFormData>>;
 
   // Edit mode state
   isEditMode: boolean;
-  setIsEditMode: (mode: boolean) => void;
+  setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
 
   // Inventory data state
-  inventoryData: unknown[];
-  setInventoryData: (data: unknown[]) => void;
-  suppliesData: unknown[];
-  setSuppliesData: (data: unknown[]) => void;
-  equipmentData: unknown[];
-  setEquipmentData: (data: unknown[]) => void;
-  officeHardwareData: unknown[];
-  setOfficeHardwareData: (data: unknown[]) => void;
+  inventoryData: InventoryItem[];
+  setInventoryData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  suppliesData: InventoryItem[];
+  setSuppliesData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  equipmentData: InventoryItem[];
+  setEquipmentData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  officeHardwareData: InventoryItem[];
+  setOfficeHardwareData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
 }
 
 export const useInventoryActions = (state: InventoryState) => {
@@ -88,30 +90,39 @@ export const useInventoryActions = (state: InventoryState) => {
   } = state;
 
   // Mock data and filtered data
-  const mockTools: unknown[] = [];
-  const filteredTools: unknown[] = [];
+  const mockTools: InventoryItem[] = [];
+  const filteredTools: InventoryItem[] = [];
 
   // Event handlers
   const handleToggleFavorite = useCallback(
     (toolId: string) => {
-      setFavorites(prev => toggleFavorite(prev, toolId));
+      setFavorites((prev) => toggleFavorite(prev, toolId));
     },
     [setFavorites]
   );
 
-  const handleCategoryChange = useCallback((setActiveTab: (tab: string) => void, tab: string) => {
-    setActiveTab(tab);
-  }, []);
+  const handleCategoryChange = useCallback(
+    (setActiveTab: (tab: string) => void, tab: string) => {
+      setActiveTab(tab);
+    },
+    []
+  );
 
   const handleCloseAddModal = useCallback(() => {
     setShowAddModal(false);
     if (state.isEditMode) {
       setIsEditMode(false);
-      setFormData({});
+      setFormData({} as InventoryFormData);
     } else {
-      resetAddModalState(setFormData, setExpandedSections);
+      resetAddModalState(setFormData, setIsEditMode, setExpandedSections);
     }
-  }, [setShowAddModal, state.isEditMode, setIsEditMode, setFormData, setExpandedSections]);
+  }, [
+    setShowAddModal,
+    state.isEditMode,
+    setIsEditMode,
+    setFormData,
+    setExpandedSections,
+  ]);
 
   const handleShowAddModal = useCallback(() => {
     setShowAddModal(true);
@@ -119,12 +130,16 @@ export const useInventoryActions = (state: InventoryState) => {
 
   const handleCloseTrackModal = useCallback(() => {
     setShowTrackModal(false);
-    setFormData({});
+    setFormData({} as InventoryFormData);
   }, [setShowTrackModal, setFormData]);
 
   const handleEditClick = useCallback(
-    (item: unknown) => {
-      setFormData(getFormDataFromItem(item));
+    (item: InventoryItem) => {
+      const formData = getFormDataFromItem(item);
+      setFormData({
+        ...formData,
+        itemName: formData.itemName || '',
+      });
       setIsEditMode(true);
       setShowAddModal(true);
     },
@@ -142,32 +157,29 @@ export const useInventoryActions = (state: InventoryState) => {
     if (!state.deletingItem) return;
 
     const item = state.deletingItem as Record<string, unknown>;
-    const itemId = item.toolId || item.supplyId || item.equipmentId || item.hardwareId;
+    const itemData = item.data as Record<string, unknown> | undefined;
+    const itemId =
+      itemData?.toolId ||
+      itemData?.supplyId ||
+      itemData?.equipmentId ||
+      itemData?.hardwareId;
 
     if (itemId) {
-      if (item.toolId) {
-        setInventoryData(prev =>
-          (prev as unknown[]).filter(
-            (i: unknown) => (i as Record<string, unknown>).toolId !== itemId
-          )
+      if (itemData?.toolId) {
+        setInventoryData((prev) =>
+          prev.filter((i: InventoryItem) => i.data?.toolId !== itemId)
         );
-      } else if (item.supplyId) {
-        setSuppliesData(prev =>
-          (prev as unknown[]).filter(
-            (i: unknown) => (i as Record<string, unknown>).supplyId !== itemId
-          )
+      } else if (itemData?.supplyId) {
+        setSuppliesData((prev) =>
+          prev.filter((i: InventoryItem) => i.data?.supplyId !== itemId)
         );
-      } else if (item.equipmentId) {
-        setEquipmentData(prev =>
-          (prev as unknown[]).filter(
-            (i: unknown) => (i as Record<string, unknown>).equipmentId !== itemId
-          )
+      } else if (itemData?.equipmentId) {
+        setEquipmentData((prev) =>
+          prev.filter((i: InventoryItem) => i.data?.equipmentId !== itemId)
         );
-      } else if (item.hardwareId) {
-        setOfficeHardwareData(prev =>
-          (prev as unknown[]).filter(
-            (i: unknown) => (i as Record<string, unknown>).hardwareId !== itemId
-          )
+      } else if (itemData?.hardwareId) {
+        setOfficeHardwareData((prev) =>
+          prev.filter((i: InventoryItem) => i.data?.hardwareId !== itemId)
         );
       }
     }
@@ -182,7 +194,7 @@ export const useInventoryActions = (state: InventoryState) => {
   ]);
 
   const handleToggleTrackedFilter = useCallback(() => {
-    setShowTrackedOnly(prev => !prev);
+    setShowTrackedOnly((prev) => !prev);
   }, [setShowTrackedOnly]);
 
   const handleSetCategoryFilter = useCallback(
@@ -200,15 +212,15 @@ export const useInventoryActions = (state: InventoryState) => {
   );
 
   const handleToggleSectionWrapper = useCallback(
-    (section: string) => {
-      setExpandedSections(prev => toggleSection(prev, section));
+    (section: keyof ExpandedSections) => {
+      setExpandedSections((prev) => toggleSection(prev, section));
     },
     [setExpandedSections]
   );
 
   const handleFormChangeWrapper = useCallback(
-    (field: string, value: unknown) => {
-      setFormData(prev => handleFormChange(prev, field, value));
+    (field: keyof InventoryFormData, value: string) => {
+      setFormData((prev) => handleFormChange(prev, field, value));
     },
     [setFormData]
   );

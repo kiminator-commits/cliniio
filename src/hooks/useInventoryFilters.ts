@@ -26,7 +26,7 @@ export const useInventoryFilters = ({
 
   const handleFilterChange = useCallback(
     (filterKey: keyof InventoryFilters, value: string | boolean) => {
-      setSelectedFilters(prev => ({
+      setSelectedFilters((prev) => ({
         ...prev,
         [filterKey]: value,
       }));

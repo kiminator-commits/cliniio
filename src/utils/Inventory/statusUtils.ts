@@ -44,7 +44,12 @@ export type EquipmentStatus =
   | 'active'
   | 'inactive';
 
-export type SupplyStatus = 'in-stock' | 'low-stock' | 'out-of-stock' | 'available' | 'in-use';
+export type SupplyStatus =
+  | 'in-stock'
+  | 'low-stock'
+  | 'out-of-stock'
+  | 'available'
+  | 'in-use';
 
 /**
  * Get CSS classes for status badge styling
@@ -285,9 +290,14 @@ export const getEquipmentStatusBadge = (status: string): string => {
  */
 export const isAvailableStatus = (status: string): boolean => {
   const normalizedStatus = status.toLowerCase();
-  return ['complete', 'available', 'clean', 'operational', 'active', 'in-stock'].includes(
-    normalizedStatus
-  );
+  return [
+    'complete',
+    'available',
+    'clean',
+    'operational',
+    'active',
+    'in-stock',
+  ].includes(normalizedStatus);
 };
 
 /**
@@ -297,7 +307,11 @@ export const isAvailableStatus = (status: string): boolean => {
  */
 export const isMaintenanceStatus = (status: string): boolean => {
   const normalizedStatus = status.toLowerCase();
-  return ['maintenance', 'damaged', 'failed', 'out-of-service', 'out-of-stock'].includes(
-    normalizedStatus
-  );
+  return [
+    'maintenance',
+    'damaged',
+    'failed',
+    'out-of-service',
+    'out-of-stock',
+  ].includes(normalizedStatus);
 };

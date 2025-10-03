@@ -1,24 +1,28 @@
 import { useMemo } from 'react';
 import { filterInventoryBySearch } from '@/utils/inventoryHelpers';
-import {
-  InventoryFilter,
-  ToolItem,
-  SupplyItem,
-  EquipmentItem,
-  OfficeHardwareItem,
-} from '@/types/inventoryTypes';
+import { InventoryFilter, InventoryItem } from '@/types/inventoryTypes';
 
 interface InventoryDatasets {
-  inventoryData: ToolItem[];
-  suppliesData: SupplyItem[];
-  equipmentData: EquipmentItem[];
-  officeHardwareData: OfficeHardwareItem[];
+  inventoryData: InventoryItem[];
+  suppliesData: InventoryItem[];
+  equipmentData: InventoryItem[];
+  officeHardwareData: InventoryItem[];
 }
 
-export function useInventoryFilterData(filters: InventoryFilter, datasets: InventoryDatasets) {
+// Type for searchable inventory items (converts null/unknown to string for search)
+type SearchableInventoryItem = {
+  [K in keyof InventoryItem]: InventoryItem[K] extends string | number | boolean
+    ? InventoryItem[K]
+    : string | number | boolean;
+};
+
+export function useInventoryFilterData(
+  filters: InventoryFilter,
+  datasets: InventoryDatasets
+) {
   const filteredData = useMemo(() => {
     return filterInventoryBySearch(
-      datasets.inventoryData,
+      datasets.inventoryData as unknown as SearchableInventoryItem[],
       ['item', 'category', 'toolId', 'location', 'p2Status'],
       filters.searchQuery || ''
     );
@@ -26,7 +30,7 @@ export function useInventoryFilterData(filters: InventoryFilter, datasets: Inven
 
   const filteredSuppliesData = useMemo(() => {
     return filterInventoryBySearch(
-      datasets.suppliesData,
+      datasets.suppliesData as unknown as SearchableInventoryItem[],
       ['item', 'category', 'supplyId', 'location', 'expiration'],
       filters.searchQuery || ''
     );
@@ -34,7 +38,7 @@ export function useInventoryFilterData(filters: InventoryFilter, datasets: Inven
 
   const filteredEquipmentData = useMemo(() => {
     return filterInventoryBySearch(
-      datasets.equipmentData,
+      datasets.equipmentData as unknown as SearchableInventoryItem[],
       ['item', 'category', 'equipmentId', 'location', 'status', 'lastServiced'],
       filters.searchQuery || ''
     );
@@ -42,7 +46,7 @@ export function useInventoryFilterData(filters: InventoryFilter, datasets: Inven
 
   const filteredOfficeHardwareData = useMemo(() => {
     return filterInventoryBySearch(
-      datasets.officeHardwareData,
+      datasets.officeHardwareData as unknown as SearchableInventoryItem[],
       ['item', 'category', 'hardwareId', 'location', 'status', 'warranty'],
       filters.searchQuery || ''
     );

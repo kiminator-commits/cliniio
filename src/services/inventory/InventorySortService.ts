@@ -4,6 +4,7 @@ import {
   SupplyItem,
   EquipmentItem,
   OfficeHardwareItem,
+  getItemStatus,
 } from '@/types/inventoryTypes';
 
 export type SortDirection = 'asc' | 'desc';
@@ -29,23 +30,50 @@ export interface InventorySortService {
   // Core sorting methods
   sortItems(items: LocalInventoryItem[], criteria: SortCriteria): SortResult;
   sortTools(tools: ToolItem[], criteria: SortCriteria): SortResult<ToolItem>;
-  sortSupplies(supplies: SupplyItem[], criteria: SortCriteria): SortResult<SupplyItem>;
-  sortEquipment(equipment: EquipmentItem[], criteria: SortCriteria): SortResult<EquipmentItem>;
+  sortSupplies(
+    supplies: SupplyItem[],
+    criteria: SortCriteria
+  ): SortResult<SupplyItem>;
+  sortEquipment(
+    equipment: EquipmentItem[],
+    criteria: SortCriteria
+  ): SortResult<EquipmentItem>;
   sortOfficeHardware(
     hardware: OfficeHardwareItem[],
     criteria: SortCriteria
   ): SortResult<OfficeHardwareItem>;
 
   // Multi-field sorting
-  sortByMultipleFields(items: LocalInventoryItem[], criteria: SortCriteria[]): SortResult;
+  sortByMultipleFields(
+    items: LocalInventoryItem[],
+    criteria: SortCriteria[]
+  ): SortResult;
 
   // Predefined sort configurations
-  sortByName(items: LocalInventoryItem[], direction?: SortDirection): SortResult;
-  sortByCategory(items: LocalInventoryItem[], direction?: SortDirection): SortResult;
-  sortByLocation(items: LocalInventoryItem[], direction?: SortDirection): SortResult;
-  sortByStatus(items: LocalInventoryItem[], direction?: SortDirection): SortResult;
-  sortByDate(items: LocalInventoryItem[], direction?: SortDirection): SortResult;
-  sortByQuantity(items: LocalInventoryItem[], direction?: SortDirection): SortResult;
+  sortByName(
+    items: LocalInventoryItem[],
+    direction?: SortDirection
+  ): SortResult;
+  sortByCategory(
+    items: LocalInventoryItem[],
+    direction?: SortDirection
+  ): SortResult;
+  sortByLocation(
+    items: LocalInventoryItem[],
+    direction?: SortDirection
+  ): SortResult;
+  sortByStatus(
+    items: LocalInventoryItem[],
+    direction?: SortDirection
+  ): SortResult;
+  sortByDate(
+    items: LocalInventoryItem[],
+    direction?: SortDirection
+  ): SortResult;
+  sortByQuantity(
+    items: LocalInventoryItem[],
+    direction?: SortDirection
+  ): SortResult;
 
   // Custom sorting
   sortByCustomField<T extends LocalInventoryItem>(
@@ -57,39 +85,71 @@ export interface InventorySortService {
 
   // Sort utilities
   getAvailableSortFields(): SortField[];
-  validateSortCriteria(criteria: SortCriteria): { isValid: boolean; errors: string[] };
+  validateSortCriteria(criteria: SortCriteria): {
+    isValid: boolean;
+    errors: string[];
+  };
   toggleSortDirection(currentDirection: SortDirection): SortDirection;
 }
 
 export class InventorySortServiceImpl implements InventorySortService {
   private readonly defaultSortFields: SortField[] = [
-    { key: 'name', label: 'Name', type: 'string', getValue: item => item.item },
-    { key: 'category', label: 'Category', type: 'string', getValue: item => item.category },
-    { key: 'location', label: 'Location', type: 'string', getValue: item => item.location },
-    { key: 'status', label: 'Status', type: 'string', getValue: item => this.getItemStatus(item) },
-    { key: 'date', label: 'Date', type: 'date', getValue: item => this.getItemDate(item) },
+    {
+      key: 'name',
+      label: 'Name',
+      type: 'string',
+      getValue: (item) => item.item,
+    },
+    {
+      key: 'category',
+      label: 'Category',
+      type: 'string',
+      getValue: (item) => item.category,
+    },
+    {
+      key: 'location',
+      label: 'Location',
+      type: 'string',
+      getValue: (item) => item.location,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'string',
+      getValue: (item) => this.getItemStatus(item),
+    },
+    {
+      key: 'date',
+      label: 'Date',
+      type: 'date',
+      getValue: (item) => this.getItemDate(item),
+    },
     {
       key: 'quantity',
       label: 'Quantity',
       type: 'number',
-      getValue: item => this.getItemQuantity(item),
+      getValue: (item) => this.getItemQuantity(item),
     },
     {
       key: 'tracked',
       label: 'Tracked',
       type: 'boolean',
-      getValue: item => this.isItemTracked(item),
+      getValue: (item) => this.isItemTracked(item),
     },
     {
       key: 'favorite',
       label: 'Favorite',
       type: 'boolean',
-      getValue: item => this.isItemFavorite(item),
+      getValue: (item) => this.isItemFavorite(item),
     },
   ];
 
   sortItems(items: LocalInventoryItem[], criteria: SortCriteria): SortResult {
-    const sortedItems = this.sortByCustomField(items, criteria.field, criteria.direction);
+    const sortedItems = this.sortByCustomField(
+      items,
+      criteria.field,
+      criteria.direction
+    );
 
     return {
       items: sortedItems.items,
@@ -110,7 +170,10 @@ export class InventorySortServiceImpl implements InventorySortService {
     };
   }
 
-  sortSupplies(supplies: SupplyItem[], criteria: SortCriteria): SortResult<SupplyItem> {
+  sortSupplies(
+    supplies: SupplyItem[],
+    criteria: SortCriteria
+  ): SortResult<SupplyItem> {
     const sortedSupplies = this.sortByCustomField(
       supplies,
       criteria.field,
@@ -123,7 +186,10 @@ export class InventorySortServiceImpl implements InventorySortService {
     };
   }
 
-  sortEquipment(equipment: EquipmentItem[], criteria: SortCriteria): SortResult<EquipmentItem> {
+  sortEquipment(
+    equipment: EquipmentItem[],
+    criteria: SortCriteria
+  ): SortResult<EquipmentItem> {
     const sortedEquipment = this.sortByCustomField(
       equipment,
       criteria.field,
@@ -152,7 +218,10 @@ export class InventorySortServiceImpl implements InventorySortService {
     };
   }
 
-  sortByMultipleFields(items: LocalInventoryItem[], criteria: SortCriteria[]): SortResult {
+  sortByMultipleFields(
+    items: LocalInventoryItem[],
+    criteria: SortCriteria[]
+  ): SortResult {
     let sortedItems = [...items];
 
     for (const sortCriteria of criteria) {
@@ -170,28 +239,67 @@ export class InventorySortServiceImpl implements InventorySortService {
     };
   }
 
-  sortByName(items: LocalInventoryItem[], direction: SortDirection = 'asc'): SortResult {
-    return this.sortByCustomField(items, 'name', direction, item => item.item);
+  sortByName(
+    items: LocalInventoryItem[],
+    direction: SortDirection = 'asc'
+  ): SortResult {
+    return this.sortByCustomField(
+      items,
+      'name',
+      direction,
+      (item) => item.item
+    );
   }
 
-  sortByCategory(items: LocalInventoryItem[], direction: SortDirection = 'asc'): SortResult {
-    return this.sortByCustomField(items, 'category', direction, item => item.category);
+  sortByCategory(
+    items: LocalInventoryItem[],
+    direction: SortDirection = 'asc'
+  ): SortResult {
+    return this.sortByCustomField(
+      items,
+      'category',
+      direction,
+      (item) => item.category
+    );
   }
 
-  sortByLocation(items: LocalInventoryItem[], direction: SortDirection = 'asc'): SortResult {
-    return this.sortByCustomField(items, 'location', direction, item => item.location);
+  sortByLocation(
+    items: LocalInventoryItem[],
+    direction: SortDirection = 'asc'
+  ): SortResult {
+    return this.sortByCustomField(
+      items,
+      'location',
+      direction,
+      (item) => item.location
+    );
   }
 
-  sortByStatus(items: LocalInventoryItem[], direction: SortDirection = 'asc'): SortResult {
-    return this.sortByCustomField(items, 'status', direction, item => this.getItemStatus(item));
+  sortByStatus(
+    items: LocalInventoryItem[],
+    direction: SortDirection = 'asc'
+  ): SortResult {
+    return this.sortByCustomField(items, 'status', direction, (item) =>
+      this.getItemStatus(item)
+    );
   }
 
-  sortByDate(items: LocalInventoryItem[], direction: SortDirection = 'asc'): SortResult {
-    return this.sortByCustomField(items, 'date', direction, item => this.getItemDate(item));
+  sortByDate(
+    items: LocalInventoryItem[],
+    direction: SortDirection = 'asc'
+  ): SortResult {
+    return this.sortByCustomField(items, 'date', direction, (item) =>
+      this.getItemDate(item)
+    );
   }
 
-  sortByQuantity(items: LocalInventoryItem[], direction: SortDirection = 'asc'): SortResult {
-    return this.sortByCustomField(items, 'quantity', direction, item => this.getItemQuantity(item));
+  sortByQuantity(
+    items: LocalInventoryItem[],
+    direction: SortDirection = 'asc'
+  ): SortResult {
+    return this.sortByCustomField(items, 'quantity', direction, (item) =>
+      this.getItemQuantity(item)
+    );
   }
 
   sortByCustomField<T extends LocalInventoryItem>(
@@ -217,7 +325,10 @@ export class InventorySortServiceImpl implements InventorySortService {
     return [...this.defaultSortFields];
   }
 
-  validateSortCriteria(criteria: SortCriteria): { isValid: boolean; errors: string[] } {
+  validateSortCriteria(criteria: SortCriteria): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (!criteria.field) {
@@ -228,7 +339,7 @@ export class InventorySortServiceImpl implements InventorySortService {
       errors.push('Sort direction must be "asc" or "desc"');
     }
 
-    const availableFields = this.defaultSortFields.map(field => field.key);
+    const availableFields = this.defaultSortFields.map((field) => field.key);
     if (criteria.field && !availableFields.includes(criteria.field)) {
       errors.push(`Invalid sort field: ${criteria.field}`);
     }
@@ -291,26 +402,21 @@ export class InventorySortServiceImpl implements InventorySortService {
   }
 
   private getItemStatus(item: LocalInventoryItem): string {
-    if ('p2Status' in item) return item.p2Status || '';
-    if ('status' in item) return item.status || '';
-    if ('quantity' in item) return item.quantity?.toString() || '';
-    if ('expiration' in item) return item.expiration || '';
-    if ('warranty' in item) return item.warranty || '';
-    return '';
+    return getItemStatus(item);
   }
 
   private getItemDate(item: LocalInventoryItem): Date | null {
     if ('lastUpdated' in item && item.lastUpdated) {
-      return new Date(item.lastUpdated);
+      return new Date(item.lastUpdated as string);
     }
-    if ('updatedAt' in item && item.updatedAt) {
-      return new Date(item.updatedAt);
+    if ('updatedAt' in item && item.data?.updatedAt) {
+      return new Date(item.data.updatedAt as string);
     }
-    if ('expiration' in item && item.expiration) {
-      return new Date(item.expiration);
+    if ('expiration' in item && item.data?.expiration) {
+      return new Date(item.data.expiration as string);
     }
-    if ('lastServiced' in item && item.lastServiced) {
-      return new Date(item.lastServiced);
+    if ('lastServiced' in item && item.data?.lastServiced) {
+      return new Date(item.data.lastServiced as string);
     }
     return null;
   }
@@ -323,10 +429,10 @@ export class InventorySortServiceImpl implements InventorySortService {
   }
 
   private isItemTracked(item: LocalInventoryItem): boolean {
-    return 'tracked' in item ? item.tracked : false;
+    return 'tracked' in item ? Boolean(item.data?.tracked) : false;
   }
 
   private isItemFavorite(item: LocalInventoryItem): boolean {
-    return 'favorite' in item ? item.favorite : false;
+    return 'favorite' in item ? Boolean(item.data?.favorite) : false;
   }
 }

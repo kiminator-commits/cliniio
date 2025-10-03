@@ -1,8 +1,15 @@
 export const ErrorFallback = () => {
   return (
-    <div className="p-6 bg-red-100 text-red-800 rounded-lg shadow text-center">
-      <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-      <p className="text-sm">Please refresh the page or contact support if the issue persists.</p>
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        >
+          Refresh Page
+        </button>
+      </div>
     </div>
   );
 };

@@ -1,22 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
-import { InventoryFilter } from '../../types/inventoryTypes';
+import { useState, useMemo, useEffect } from 'react';
+import { InventoryFilters as BaseInventoryFilters } from '@/types/inventoryServiceTypes';
 
-export interface InventoryFilters extends InventoryFilter {
-  searchQuery: string;
-  category: string;
-  location: string;
-  showTrackedOnly?: boolean;
-  showFavoritesOnly?: boolean;
-  minPrice?: number;
-  maxPrice?: number;
-  minQuantity?: number;
-  maxQuantity?: number;
-  status?: string;
-  dateCreated?: {
-    start: Date;
-    end: Date;
-  };
-}
+// Use the base interface directly since no additional properties are needed
+export type InventoryFilters = BaseInventoryFilters;
 
 export interface UseInventoryFiltersProps {
   initialFilters?: Partial<InventoryFilters>;
@@ -45,8 +31,8 @@ export const useInventoryFilters = ({
     searchQuery: '',
     category: '',
     location: '',
-    showTrackedOnly: false,
-    showFavoritesOnly: false,
+    tracked: false,
+    favorite: false,
     ...initialFilters,
   });
 
@@ -54,39 +40,42 @@ export const useInventoryFilters = ({
   const actions: FilterActions = useMemo(
     () => ({
       setSearchQuery: (query: string) => {
-        setFilters(prev => ({ ...prev, searchQuery: query }));
+        setFilters((prev) => ({ ...prev, searchQuery: query }));
       },
 
       setCategory: (category: string) => {
-        setFilters(prev => ({ ...prev, category }));
+        setFilters((prev) => ({ ...prev, category }));
       },
 
       setLocation: (location: string) => {
-        setFilters(prev => ({ ...prev, location }));
+        setFilters((prev) => ({ ...prev, location }));
       },
 
       setStatus: (status: string) => {
-        setFilters(prev => ({ ...prev, status }));
+        setFilters((prev) => ({ ...prev, status }));
       },
 
       setPriceRange: (min: number, max: number) => {
-        setFilters(prev => ({ ...prev, minPrice: min, maxPrice: max }));
+        setFilters((prev) => ({ ...prev, minPrice: min, maxPrice: max }));
       },
 
-      setQuantityRange: (min: number, max: number) => {
-        setFilters(prev => ({ ...prev, minQuantity: min, maxQuantity: max }));
+      setQuantityRange: (min: number) => {
+        setFilters((prev) => ({ ...prev, reorder_point: min }));
       },
 
       setDateRange: (start: Date, end: Date) => {
-        setFilters(prev => ({ ...prev, dateCreated: { start, end } }));
+        setFilters((prev) => ({
+          ...prev,
+          createdAt: { start: start.toISOString(), end: end.toISOString() },
+        }));
       },
 
       toggleTrackedOnly: () => {
-        setFilters(prev => ({ ...prev, showTrackedOnly: !prev.showTrackedOnly }));
+        setFilters((prev) => ({ ...prev, tracked: !prev.tracked }));
       },
 
       toggleFavoritesOnly: () => {
-        setFilters(prev => ({ ...prev, showFavoritesOnly: !prev.showFavoritesOnly }));
+        setFilters((prev) => ({ ...prev, favorite: !prev.favorite }));
       },
 
       resetFilters: () => {
@@ -94,13 +83,13 @@ export const useInventoryFilters = ({
           searchQuery: '',
           category: '',
           location: '',
-          showTrackedOnly: false,
-          showFavoritesOnly: false,
+          tracked: false,
+          favorite: false,
         });
       },
 
       applyFilters: (newFilters: Partial<InventoryFilters>) => {
-        setFilters(prev => ({ ...prev, ...newFilters }));
+        setFilters((prev) => ({ ...prev, ...newFilters }));
       },
     }),
     []

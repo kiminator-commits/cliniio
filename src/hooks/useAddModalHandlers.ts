@@ -1,93 +1,147 @@
 import { useCallback } from 'react';
-import { getDefaultExpandedSections, getFormDataFromItem } from '@/utils/inventoryHelpers';
-import { LocalInventoryItem } from '@/types/inventoryTypes';
+import {
+  getDefaultExpandedSections,
+  getFormDataFromItem,
+} from '@/utils/inventoryHelpers';
+import { LocalInventoryItem, ExpandedSections } from '@/types/inventoryTypes';
+import { InventoryFormData } from '@/types/inventory';
 
 interface UseAddModalHandlersParams {
-  toggleAddModal: () => void;
+  openAddModal: () => void;
+  closeAddModal: () => void;
   setEditMode: (value: boolean) => void;
-  resetFormData: () => void;
-  setExpandedSections: (sections: Record<string, boolean>) => void;
-  setFormData: (data: Partial<LocalInventoryItem>) => void;
+  resetForm: () => void;
+  setExpandedSections: (sections: ExpandedSections) => void;
+  setFormData: (data: InventoryFormData) => void;
 }
 
 export function useAddModalHandlers({
-  toggleAddModal,
+  openAddModal,
+  closeAddModal,
   setEditMode,
-  resetFormData,
+  resetForm,
   setExpandedSections,
   setFormData,
 }: UseAddModalHandlersParams) {
   const handleShowAddModal = useCallback(() => {
-    toggleAddModal();
+    openAddModal();
     setEditMode(false);
-    setExpandedSections(getDefaultExpandedSections() as unknown as Record<string, boolean>);
-  }, [toggleAddModal, setEditMode, setExpandedSections]);
+    setExpandedSections(getDefaultExpandedSections());
+  }, [openAddModal, setEditMode, setExpandedSections]);
 
   const handleCloseAddModal = useCallback(() => {
-    toggleAddModal();
-    resetFormData();
-    setExpandedSections(getDefaultExpandedSections() as unknown as Record<string, boolean>);
-  }, [toggleAddModal, resetFormData, setExpandedSections]);
+    closeAddModal();
+    resetForm();
+    setExpandedSections(getDefaultExpandedSections());
+  }, [closeAddModal, resetForm, setExpandedSections]);
 
   const handleEditClick = useCallback(
     (item: Record<string, unknown>) => {
       let localItem: LocalInventoryItem;
+      const itemData = item.data as Record<string, unknown> | undefined;
 
-      if (item.toolId) {
+      if (itemData?.toolId) {
         localItem = {
-          item: item.item as string,
-          category: item.category as string,
-          location: item.location as string,
-          cost: 0,
-          toolId: item.toolId as string,
-          p2Status: 'available',
-        };
-      } else if (item.supplyId) {
-        localItem = {
-          item: item.item as string,
-          category: item.category as string,
-          location: item.location as string,
-          cost: 0,
-          supplyId: item.supplyId as string,
+          id: (item.id as string) || '',
+          facility_id: 'unknown',
+          name: item.item as string,
           quantity: 1,
-          expiration: '',
-        };
-      } else if (item.equipmentId) {
-        localItem = {
-          item: item.item as string,
+          data: {
+            toolId: itemData.toolId as string,
+            p2Status: 'available',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          reorder_point: null,
+          expiration_date: null,
+          unit_cost: 0,
           category: item.category as string,
-          location: item.location as string,
-          cost: 0,
-          equipmentId: item.equipmentId as string,
           status: 'active',
-          lastServiced: '',
+          location: item.location as string,
         };
-      } else if (item.hardwareId) {
+      } else if (itemData?.supplyId) {
         localItem = {
-          item: item.item as string,
+          id: (item.id as string) || '',
+          facility_id: 'unknown',
+          name: item.item as string,
+          quantity: 1,
+          data: {
+            supplyId: itemData.supplyId as string,
+            expiration: '',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          reorder_point: null,
+          expiration_date: null,
+          unit_cost: 0,
           category: item.category as string,
-          location: item.location as string,
-          cost: 0,
-          hardwareId: item.hardwareId as string,
           status: 'active',
-          warranty: '',
+          location: item.location as string,
+        };
+      } else if (itemData?.equipmentId) {
+        localItem = {
+          id: (item.id as string) || '',
+          facility_id: 'unknown',
+          name: item.item as string,
+          quantity: 1,
+          data: {
+            equipmentId: itemData.equipmentId as string,
+            lastServiced: '',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          reorder_point: null,
+          expiration_date: null,
+          unit_cost: 0,
+          category: item.category as string,
+          status: 'active',
+          location: item.location as string,
+        };
+      } else if (itemData?.hardwareId) {
+        localItem = {
+          id: (item.id as string) || '',
+          facility_id: 'unknown',
+          name: item.item as string,
+          quantity: 1,
+          data: {
+            hardwareId: itemData.hardwareId as string,
+            warranty: '',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          reorder_point: null,
+          expiration_date: null,
+          unit_cost: 0,
+          category: item.category as string,
+          status: 'active',
+          location: item.location as string,
         };
       } else {
         localItem = {
-          item: item.item as string,
+          id: (item.id as string) || '',
+          facility_id: 'unknown',
+          name: item.item as string,
+          quantity: 1,
+          data: {
+            toolId: '',
+            p2Status: 'available',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          reorder_point: null,
+          expiration_date: null,
+          unit_cost: 0,
           category: item.category as string,
+          status: 'active',
           location: item.location as string,
-          cost: 0,
-          toolId: '',
-          p2Status: 'available',
         };
       }
 
-      setFormData(getFormDataFromItem(localItem) as unknown as Partial<LocalInventoryItem>);
+      setFormData(getFormDataFromItem(localItem));
       setEditMode(true);
-      toggleAddModal();
+      openAddModal();
     },
-    [setFormData, setEditMode, toggleAddModal]
+    [setFormData, setEditMode, openAddModal]
   );
 
   return {

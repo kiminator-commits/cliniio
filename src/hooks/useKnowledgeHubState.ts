@@ -1,6 +1,10 @@
 import { useState } from 'react';
 
-export type KnowledgeHubTab = 'courses' | 'policies' | 'procedures' | 'learning-paths';
+export type KnowledgeHubTab =
+  | 'courses'
+  | 'policies'
+  | 'procedures'
+  | 'learning-paths';
 
 export function useKnowledgeHubState() {
   const [activeTab, setActiveTab] = useState<KnowledgeHubTab>('courses');

@@ -76,7 +76,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Email <span aria-hidden="true">*</span>
         </label>
         <input
@@ -85,11 +88,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
           type="email"
           required
           value={formState.email}
-          onChange={e => {
+          onChange={(e) => {
             onEmailChange(e.target.value);
             validateEmail(e.target.value);
           }}
-          onBlur={e => validateEmail(e.target.value)}
+          onBlur={(e) => validateEmail(e.target.value)}
           onKeyDown={handleKeyDown}
           className={`w-full px-3 py-2 border ${formState.emailError ? 'border-red-500' : 'border-gray-300'} bg-white text-black rounded focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] text-base`}
           placeholder="your@email.com"
@@ -100,14 +103,22 @@ const LoginForm: React.FC<LoginFormProps> = ({
           tabIndex={0}
         />
         {formState.emailError && (
-          <p id="email-error" className="text-red-600 text-sm mt-1" role="alert" aria-live="polite">
+          <p
+            id="email-error"
+            className="text-red-600 text-sm mt-1"
+            role="alert"
+            aria-live="polite"
+          >
             {formState.emailError}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Password <span aria-hidden="true">*</span>
         </label>
         <div className="relative">
@@ -117,25 +128,29 @@ const LoginForm: React.FC<LoginFormProps> = ({
             type={formState.showPassword ? 'text' : 'password'}
             required
             value={formState.password}
-            onChange={e => {
+            onChange={(e) => {
               onPasswordChange(e.target.value);
               validatePassword(e.target.value);
             }}
-            onBlur={e => validatePassword(e.target.value)}
+            onBlur={(e) => validatePassword(e.target.value)}
             onKeyDown={handleKeyDown}
             className={`w-full px-3 py-2 border ${formState.passwordError ? 'border-red-500' : 'border-gray-300'} bg-white text-black rounded focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] text-base pr-10`}
             placeholder="••••••••"
             aria-label="Password"
             aria-required="true"
             aria-invalid={!!formState.passwordError}
-            aria-describedby={formState.passwordError ? 'password-error' : undefined}
+            aria-describedby={
+              formState.passwordError ? 'password-error' : undefined
+            }
             tabIndex={0}
           />
           <button
             type="button"
             onClick={onShowPasswordToggle}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] rounded p-1"
-            aria-label={formState.showPassword ? 'Hide password' : 'Show password'}
+            aria-label={
+              formState.showPassword ? 'Hide password' : 'Show password'
+            }
             tabIndex={0}
           >
             {formState.showPassword ? 'Hide' : 'Show'}
@@ -177,7 +192,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
         >
           {formState.loading ? (
             <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
                 <circle
                   className="opacity-25"
                   cx="12"

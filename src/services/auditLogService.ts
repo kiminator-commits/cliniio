@@ -1,7 +1,20 @@
-import { supabase } from '@/lib/supabaseClient';
-import { SterilizationEvent } from '@/utils/auditLogger';
+export const insertSterilizationLog = async (event: {
+  event: string;
+  data: Record<string, unknown>;
+  timestamp: string;
+  userId: string;
+}) => {
+  // Mock implementation - replace with actual audit logging
+  console.log('Sterilization log:', event);
+};
 
-export const insertSterilizationLog = async (event: SterilizationEvent) => {
-  const { error } = await supabase.from('sterilization_logs').insert([event]);
-  if (error) console.error('Failed to insert audit log:', error);
+export const sendAuditLog = async (auditEvent: {
+  module: string;
+  timestamp: string;
+  action: string;
+  item?: Record<string, unknown>;
+}) => {
+  // Mock implementation - replace with actual audit logging
+  console.log('Audit log:', auditEvent);
+  return { success: true };
 };

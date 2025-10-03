@@ -1,0 +1,72 @@
+/* Tooltip styles for tracking button */
+.tooltipContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipContent {
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: #374151;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+  z-index: 1000;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.tooltipContainer:hover .tooltipContent {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltipArrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid white;
+}
+
+.tooltipArrow::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #d1d5db;
+  z-index: -1;
+}
+
+/* Focus styles for accessibility */
+.tooltipContainer:focus-within .tooltipContent {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tooltipContent {
+    font-size: 0.7rem;
+    padding: 6px 10px;
+  }
+}

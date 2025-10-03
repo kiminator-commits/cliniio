@@ -1,16 +1,16 @@
 import { DataSourceConfig, InventoryDataAdapter } from './InventoryDataAdapter';
-import { StaticDataAdapter } from './StaticDataAdapter';
+import { getSupabaseAdapter } from './SupabaseAdapterLoader';
+
 import { LocalStorageAdapter } from './LocalStorageAdapter';
 
 export interface AdapterFactoryConfig {
-  defaultAdapter: 'static' | 'localStorage' | 'api' | 'supabase';
+  defaultAdapter: 'localStorage' | 'api' | 'supabase';
   adapters: {
-    static?: DataSourceConfig;
     localStorage?: DataSourceConfig;
     api?: DataSourceConfig;
     supabase?: DataSourceConfig;
   };
-  fallbackAdapter?: 'static' | 'localStorage';
+  fallbackAdapter?: 'localStorage' | 'supabase';
 }
 
 export interface AdapterRegistry {
@@ -19,7 +19,10 @@ export interface AdapterRegistry {
 
 export interface InventoryAdapterFactory {
   // Factory methods
-  createAdapter(type: string, config?: DataSourceConfig): Promise<InventoryDataAdapter>;
+  createAdapter(
+    type: string,
+    config?: DataSourceConfig
+  ): Promise<InventoryDataAdapter>;
   getAdapter(type: string): InventoryDataAdapter | null;
   registerAdapter(type: string, adapter: InventoryDataAdapter): void;
   unregisterAdapter(type: string): void;
@@ -41,14 +44,16 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
 
   constructor(config: AdapterFactoryConfig) {
     this.config = {
-      defaultAdapter: 'static',
-      adapters: {},
-      fallbackAdapter: 'static',
-      ...config,
+      defaultAdapter: config.defaultAdapter || 'localStorage',
+      adapters: { ...config.adapters },
+      fallbackAdapter: config.fallbackAdapter || 'supabase',
     };
   }
 
-  async createAdapter(type: string, config?: DataSourceConfig): Promise<InventoryDataAdapter> {
+  async createAdapter(
+    type: string,
+    config?: DataSourceConfig
+  ): Promise<InventoryDataAdapter> {
     // Check if adapter already exists in registry
     if (this.registry[type]) {
       return this.registry[type];
@@ -57,18 +62,38 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
     let adapter: InventoryDataAdapter;
 
     switch (type) {
-      case 'static':
-        adapter = new StaticDataAdapter(config || this.config.adapters.static);
+      case 'static': {
+        const { StaticDataAdapter } = await import('./StaticDataAdapter');
+        adapter = new StaticDataAdapter(config || { type: 'static' });
         break;
-      case 'localStorage':
-        adapter = new LocalStorageAdapter(config || this.config.adapters.localStorage);
+      }
+      case 'localStorage': {
+        adapter = new LocalStorageAdapter(
+          config || this.config.adapters.localStorage
+        );
         break;
-      case 'api':
-        // TODO: Implement API adapter
-        throw new Error('API adapter not yet implemented');
-      case 'supabase':
-        // TODO: Implement Supabase adapter
-        throw new Error('Supabase adapter not yet implemented');
+      }
+      case 'api': {
+        const { ApiAdapter, isApiAdapterConfig } = await import('./ApiAdapter');
+        const apiConfig = config || this.config.adapters.api;
+        if (!apiConfig) {
+          throw new Error('API adapter configuration is required');
+        }
+        if (!isApiAdapterConfig(apiConfig)) {
+          throw new Error('API adapter requires baseUrl configuration');
+        }
+        adapter = new ApiAdapter(apiConfig);
+        break;
+      }
+      case 'supabase': {
+        const { SupabaseAdapter } = await getSupabaseAdapter();
+        const supabaseConfig = config || this.config.adapters.supabase;
+        if (!supabaseConfig) {
+          throw new Error('Supabase adapter configuration is required');
+        }
+        adapter = new SupabaseAdapter(supabaseConfig);
+        break;
+      }
       default:
         throw new Error(`Unknown adapter type: ${type}`);
     }
@@ -117,8 +142,11 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
       const adapter = await this.createAdapter(this.config.defaultAdapter);
       this.defaultAdapter = adapter;
       return adapter;
-    } catch (error) {
-      console.error(`Failed to initialize default adapter (${this.config.defaultAdapter}):`, error);
+    } catch (err) {
+      console.error(err);
+      console.error(
+        `Failed to initialize default adapter (${this.config.defaultAdapter}):`
+      );
 
       // Try fallback adapter
       if (
@@ -126,7 +154,9 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
         this.config.fallbackAdapter !== this.config.defaultAdapter
       ) {
         try {
-          const fallbackAdapter = await this.createAdapter(this.config.fallbackAdapter);
+          const fallbackAdapter = await this.createAdapter(
+            this.config.fallbackAdapter
+          );
           this.defaultAdapter = fallbackAdapter;
           return fallbackAdapter;
         } catch (fallbackError) {
@@ -138,7 +168,7 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
         }
       }
 
-      throw error;
+      throw new Error('No available adapters could be initialized');
     }
   }
 
@@ -162,12 +192,12 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
   // Utility methods for adapter switching
   async switchDefaultAdapter(type: string): Promise<InventoryDataAdapter> {
     // Validate adapter type
-    if (!['static', 'localStorage', 'api', 'supabase'].includes(type)) {
+    if (!['localStorage', 'api', 'supabase'].includes(type)) {
       throw new Error(`Invalid adapter type: ${type}`);
     }
 
     // Update config
-    this.config.defaultAdapter = type as 'static' | 'localStorage' | 'api' | 'supabase';
+    this.config.defaultAdapter = type as 'localStorage' | 'api' | 'supabase';
 
     // Clear current default
     this.defaultAdapter = null;
@@ -180,9 +210,10 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
     // Try to get the default adapter
     try {
       return await this.initializeDefaultAdapter();
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
       // If default fails, try to find any available adapter
-      const availableTypes = ['static', 'localStorage'];
+      const availableTypes = ['supabase', 'localStorage'];
 
       for (const type of availableTypes) {
         try {
@@ -200,7 +231,7 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
 
   // Cleanup method
   async cleanup(): Promise<void> {
-    const cleanupPromises = Object.values(this.registry).map(adapter =>
+    const cleanupPromises = Object.values(this.registry).map((adapter) =>
       adapter.disconnect().catch(console.error)
     );
 
@@ -212,10 +243,10 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
 
 // Default factory instance
 export const inventoryAdapterFactory = new InventoryAdapterFactoryImpl({
-  defaultAdapter: 'static',
+  defaultAdapter: 'supabase',
   adapters: {
-    static: { type: 'static' },
+    supabase: { type: 'supabase' },
     localStorage: { type: 'localStorage' },
   },
-  fallbackAdapter: 'static',
+  fallbackAdapter: 'localStorage',
 });

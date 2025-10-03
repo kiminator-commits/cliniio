@@ -1,4 +1,4 @@
-// TODO: Move to modals/ - Modal for editing existing inventory items
+// Modal for editing existing inventory items
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 
@@ -18,7 +18,12 @@ interface EditItemModalProps {
   onSave: (updatedItem: Item) => void;
 }
 
-const EditItemModal: React.FC<EditItemModalProps> = ({ show, onHide, item, onSave }) => {
+const EditItemModal: React.FC<EditItemModalProps> = ({
+  show,
+  onHide,
+  item,
+  onSave,
+}) => {
   const [formData, setFormData] = useState<Omit<Item, 'id'>>({
     name: '',
     category: '',
@@ -30,14 +35,25 @@ const EditItemModal: React.FC<EditItemModalProps> = ({ show, onHide, item, onSav
   // Update form data when item changes
   useEffect(() => {
     if (item) {
-      const { name, category, toolId, location, p2Status } = item;
-      setFormData({ name, category, toolId, location, p2Status });
+      const { name, category, location } = item;
+      setFormData({
+        name,
+        category,
+        toolId: (item as { data?: { toolId?: string } }).data?.toolId || '',
+        location,
+        p2Status:
+          (item as { data?: { p2Status?: string } }).data?.p2Status || '',
+      });
     }
   }, [item]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -48,7 +64,11 @@ const EditItemModal: React.FC<EditItemModalProps> = ({ show, onHide, item, onSav
     if (item) {
       onSave({
         ...item,
-        ...formData,
+        name: formData.name,
+        category: formData.category,
+        location: formData.location,
+        toolId: formData.toolId,
+        p2Status: formData.p2Status,
       });
     }
   };

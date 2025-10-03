@@ -1,4 +1,4 @@
-import { Task } from '../types/task';
+import { Task } from '../store/homeStore';
 
 export const sampleTasks: Task[] = [
   {
@@ -14,7 +14,8 @@ export const sampleTasks: Task[] = [
   },
   {
     id: '2',
-    title: 'Environmental Cleaning Standards: Update cleaning checklists and logs',
+    title:
+      'Environmental Cleaning Standards: Update cleaning checklists and logs',
     completed: false,
     points: 93,
     type: 'Required Task',

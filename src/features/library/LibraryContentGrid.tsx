@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
-import ContentCard from './components/ContentCard';
+const ContentCard = React.lazy(() => import('./components/ContentCard'));
 
 interface ContentItem {
   id: string;
@@ -35,26 +35,33 @@ const LibraryContentGrid: React.FC<LibraryContentGridProps> = ({
   handleToggleFavorite,
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {filteredContent.map((item, index) => (
-        <motion.div
-          key={item.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-        >
-          <ContentCard
-            item={item}
-            status={getItemStatus(item.id)}
-            onActionClick={() => handleAddToList(item)}
-            isFavorite={favorites.has(item.id)}
-            onToggleFavorite={() => handleToggleFavorite(item.id)}
-            isAiSuggestion={false}
-            index={index}
-          />
-        </motion.div>
-      ))}
-    </div>
+    <section
+      role="list"
+      aria-label="Library content list"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      <Suspense fallback={<div>Loading...</div>}>
+        {filteredContent.map((item, index) => (
+          <motion.div
+            key={item.id}
+            role="listitem"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+          >
+            <ContentCard
+              item={item}
+              status={getItemStatus(item.id)}
+              onActionClick={() => handleAddToList(item)}
+              isFavorite={favorites.has(item.id)}
+              onToggleFavorite={() => handleToggleFavorite(item.id)}
+              isAiSuggestion={false}
+              index={index}
+            />
+          </motion.div>
+        ))}
+      </Suspense>
+    </section>
   );
 };
 

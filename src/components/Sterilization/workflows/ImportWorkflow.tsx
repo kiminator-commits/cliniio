@@ -7,7 +7,8 @@ interface ImportWorkflowProps {
 }
 
 const ImportWorkflow: React.FC<ImportWorkflowProps> = ({ onClose }) => {
-  const { isScanning, scanResult, scanMessage, simulateScan } = useSterilizationScan();
+  const { isScanning, scanResult, scanMessage, simulateScan } =
+    useSterilizationScan();
 
   useEffect(() => {
     simulateScan('import', onClose);
@@ -22,7 +23,9 @@ const ImportWorkflow: React.FC<ImportWorkflowProps> = ({ onClose }) => {
       {isScanning ? (
         <p className="text-sm text-gray-600">Capturing...</p>
       ) : (
-        <p className={`text-sm ${scanResult === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+        <p
+          className={`text-sm ${scanResult === 'success' ? 'text-green-600' : 'text-red-600'}`}
+        >
           {scanMessage}
         </p>
       )}

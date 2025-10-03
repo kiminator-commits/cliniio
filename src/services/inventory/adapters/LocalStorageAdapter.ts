@@ -1,10 +1,20 @@
-import { InventoryItem, LocalInventoryItem } from '@/types/inventoryTypes';
-import { InventoryDataResponse } from '../InventoryDataService';
+import { InventoryItem } from '../../../types/inventoryTypes';
+import { InventoryResponse } from '../types/inventoryServiceTypes';
 import {
   BaseInventoryDataAdapter,
   DataSourceConfig,
   AdapterCapabilities,
 } from './InventoryDataAdapter';
+
+interface LocalStorageInventoryData {
+  tools: InventoryItem[];
+  supplies: InventoryItem[];
+  equipment: InventoryItem[];
+  officeHardware: InventoryItem[];
+  categories: string[];
+  isLoading: boolean;
+  error: string | null;
+}
 
 const STORAGE_KEYS = {
   INVENTORY_DATA: 'inventory_data',
@@ -61,14 +71,21 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     return this.isInitialized && !!this.storage;
   }
 
-  async fetchAllInventoryData(): Promise<InventoryDataResponse> {
+  async fetchAllInventoryData(): Promise<InventoryResponse> {
     this.validateInitialization();
 
     const data = this.getInventoryDataFromStorage();
+    const allItems: InventoryItem[] = [];
+
+    allItems.push(...data.tools);
+    allItems.push(...data.supplies);
+    allItems.push(...data.equipment);
+    allItems.push(...data.officeHardware);
+
     return {
-      ...data,
-      isLoading: false,
+      data: allItems,
       error: null,
+      count: allItems.length,
     };
   }
 
@@ -97,18 +114,22 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     this.validateInitialization();
 
     const data = this.getInventoryDataFromStorage();
-    const newItem = { ...item, id: this.generateId(), createdAt: new Date().toISOString() };
+    const newItem = {
+      ...item,
+      id: this.generateId(),
+      createdAt: new Date().toISOString(),
+    };
 
     // Add to appropriate category
-    const category = newItem.category.toLowerCase();
+    const category = (newItem.category || '').toLowerCase();
     if (category.includes('tool') || category.includes('instrument')) {
-      data.tools.push(newItem as LocalInventoryItem);
+      data.tools.push(newItem);
     } else if (category.includes('supply') || category.includes('consumable')) {
-      data.supplies.push(newItem as LocalInventoryItem);
+      data.supplies.push(newItem);
     } else if (category.includes('equipment') || category.includes('device')) {
-      data.equipment.push(newItem as LocalInventoryItem);
+      data.equipment.push(newItem);
     } else {
-      data.officeHardware.push(newItem as LocalInventoryItem);
+      data.officeHardware.push(newItem);
     }
 
     this.saveInventoryDataToStorage(data);
@@ -118,18 +139,28 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     return newItem;
   }
 
-  async updateInventoryItem(id: string, item: Partial<InventoryItem>): Promise<InventoryItem> {
+  async updateInventoryItem(
+    id: string,
+    item: Partial<InventoryItem>
+  ): Promise<InventoryItem> {
     this.validateInitialization();
 
     const data = this.getInventoryDataFromStorage();
     const updatedItem = { ...item, id, lastUpdated: new Date().toISOString() };
 
     // Find and update item in appropriate category
-    const categories = [data.tools, data.supplies, data.equipment, data.officeHardware];
+    const categories = [
+      data.tools,
+      data.supplies,
+      data.equipment,
+      data.officeHardware,
+    ];
     let found = false;
 
     for (const category of categories) {
-      const index = category.findIndex(catItem => this.getItemId(catItem) === id);
+      const index = category.findIndex(
+        (catItem: InventoryItem) => this.getItemId(catItem) === id
+      );
       if (index !== -1) {
         category[index] = { ...category[index], ...updatedItem };
         found = true;
@@ -152,11 +183,18 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     this.validateInitialization();
 
     const data = this.getInventoryDataFromStorage();
-    const categories = [data.tools, data.supplies, data.equipment, data.officeHardware];
+    const categories = [
+      data.tools,
+      data.supplies,
+      data.equipment,
+      data.officeHardware,
+    ];
     let found = false;
 
     for (const category of categories) {
-      const index = category.findIndex(catItem => this.getItemId(catItem) === id);
+      const index = category.findIndex(
+        (catItem: InventoryItem) => this.getItemId(catItem) === id
+      );
       if (index !== -1) {
         category.splice(index, 1);
         found = true;
@@ -200,7 +238,7 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     }
   }
 
-  private getInventoryDataFromStorage(): InventoryDataResponse {
+  private getInventoryDataFromStorage(): LocalStorageInventoryData {
     const data = this.storage.getItem(STORAGE_KEYS.INVENTORY_DATA);
     if (data) {
       return JSON.parse(data);
@@ -217,7 +255,7 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     };
   }
 
-  private saveInventoryDataToStorage(data: InventoryDataResponse): void {
+  private saveInventoryDataToStorage(data: LocalStorageInventoryData): void {
     this.storage.setItem(STORAGE_KEYS.INVENTORY_DATA, JSON.stringify(data));
   }
 
@@ -233,16 +271,19 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
 
   private updateLastSyncTime(): void {
     this.lastSyncTime = new Date();
-    this.storage.setItem(STORAGE_KEYS.LAST_SYNC, this.lastSyncTime.toISOString());
+    this.storage.setItem(
+      STORAGE_KEYS.LAST_SYNC,
+      this.lastSyncTime.toISOString()
+    );
   }
 
-  private setPendingChanges(): void {
+  protected setPendingChanges(): void {
     this.pendingChanges = true;
     this.storage.setItem(STORAGE_KEYS.PENDING_CHANGES, JSON.stringify(true));
   }
 
   private async initializeDefaultData(): Promise<void> {
-    const defaultData: InventoryDataResponse = {
+    const defaultData: LocalStorageInventoryData = {
       tools: [],
       supplies: [],
       equipment: [],
@@ -253,7 +294,10 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     };
 
     this.saveInventoryDataToStorage(defaultData);
-    this.storage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(this.getDefaultCategories()));
+    this.storage.setItem(
+      STORAGE_KEYS.CATEGORIES,
+      JSON.stringify(this.getDefaultCategories())
+    );
     this.storage.setItem(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
     this.storage.setItem(STORAGE_KEYS.PENDING_CHANGES, JSON.stringify(false));
   }
@@ -262,12 +306,22 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     return `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private getItemId(item: LocalInventoryItem): string {
-    if ('toolId' in item) return item.toolId;
-    if ('supplyId' in item) return item.supplyId;
-    if ('equipmentId' in item) return item.equipmentId;
-    if ('hardwareId' in item) return item.hardwareId;
-    return item.id || item.item || '';
+  private getItemId(item: InventoryItem): string {
+    return (
+      (item.data?.toolId && typeof item.data.toolId === 'string'
+        ? item.data.toolId
+        : '') ||
+      (item.data?.supplyId && typeof item.data.supplyId === 'string'
+        ? item.data.supplyId
+        : '') ||
+      (item.data?.equipmentId && typeof item.data.equipmentId === 'string'
+        ? item.data.equipmentId
+        : '') ||
+      (item.data?.hardwareId && typeof item.data.hardwareId === 'string'
+        ? item.data.hardwareId
+        : '') ||
+      item.id
+    );
   }
 
   private getDefaultCategories(): string[] {

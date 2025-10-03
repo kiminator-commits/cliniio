@@ -1,0 +1,79 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+
+// Mock all the complex dependencies
+jest.mock('../context', () => ({
+  ContentBuilderProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="content-builder-provider">{children}</div>,
+  useContentBuilder: () => ({
+    state: {
+      selectedContentType: 'course',
+      activeTab: 'content',
+      courseStep: 1,
+      courseData: {
+        title: '',
+        description: '',
+        objectives: [''],
+        prerequisites: [''],
+        modules: [],
+        assessments: [],
+        settings: {
+          difficulty: 'beginner',
+          estimatedDuration: 0,
+          tags: '',
+          allowRetakes: true,
+          certificateOnCompletion: true,
+        },
+      },
+    },
+  }),
+}));
+
+jest.mock('../hooks', () => ({
+  useContentBuilderActions: () => ({
+    setSelectedContentType: jest.fn(),
+  }),
+}));
+
+jest.mock('../constants', () => ({
+  contentTypes: [
+    { id: 'course', label: 'Course', icon: 'mdiSchool', description: 'Create interactive courses' },
+    { id: 'policy', label: 'Policy', icon: 'mdiFileDocument', description: 'Create policy documents' },
+    { id: 'procedure', label: 'Procedure', icon: 'mdiClipboardList', description: 'Create procedures' },
+  ],
+}));
+
+jest.mock('react-router-dom', () => ({
+  useNavigate: () => jest.fn(),
+  BrowserRouter: ({ children }: { children: React.ReactNode }) => <div data-testid="browser-router">{children}</div>,
+}));
+
+jest.mock('@mdi/react', () => ({
+  __esModule: true,
+  default: ({ path, size, className }: any) => <span data-testid="icon" data-path={path} data-size={size} className={className} />,
+}));
+
+jest.mock('@mdi/js', () => ({
+  mdiArrowLeft: 'mdiArrowLeft',
+}));
+
+// Import the component after mocking
+const ContentBuilder = require('../index').default;
+
+describe('ContentBuilder', () => {
+  it('renders without crashing', () => {
+    render(<ContentBuilder />);
+    expect(screen.getByTestId('content-builder-provider')).toBeInTheDocument();
+  });
+
+  it('displays content types in sidebar', () => {
+    render(<ContentBuilder />);
+    expect(screen.getByText('Course')).toBeInTheDocument();
+    expect(screen.getByText('Policy')).toBeInTheDocument();
+    expect(screen.getByText('Procedure')).toBeInTheDocument();
+  });
+
+  it('shows course builder by default', () => {
+    render(<ContentBuilder />);
+    expect(screen.getByText('Course Builder')).toBeInTheDocument();
+  });
+});

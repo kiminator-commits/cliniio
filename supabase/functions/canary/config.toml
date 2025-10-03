@@ -1,0 +1,2 @@
+[functions.canary]
+verify_jwt = false

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TaskSummary } from '../../types/EnvironmentalCleaningTypes';
+import { TaskSummary } from '../../pages/EnvironmentalClean/models';
 
 type TaskSummaryCardProps = {
   tasks: TaskSummary;

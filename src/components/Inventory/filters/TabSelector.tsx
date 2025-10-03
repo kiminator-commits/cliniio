@@ -1,14 +1,22 @@
 import React from 'react';
-import { TabType } from '../../pages/Inventory/types';
+import { TabType } from '@/types/inventory';
 import Icon from '@mdi/react';
-import { mdiTools, mdiPackageVariant, mdiMedicalBag, mdiDesktopTower } from '@mdi/js';
+import {
+  mdiTools,
+  mdiPackageVariant,
+  mdiMedicalBag,
+  mdiDesktopTower,
+} from '@mdi/js';
 
 interface TabSelectorProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
 }
 
-const TabSelector: React.FC<TabSelectorProps> = ({ activeTab, onTabChange }) => {
+const TabSelector: React.FC<TabSelectorProps> = ({
+  activeTab,
+  onTabChange,
+}) => {
   const tabs: { id: TabType; icon: string; label: string }[] = [
     { id: 'tools', icon: mdiTools, label: 'Tools' },
     { id: 'supplies', icon: mdiPackageVariant, label: 'Supplies' },
@@ -18,7 +26,7 @@ const TabSelector: React.FC<TabSelectorProps> = ({ activeTab, onTabChange }) => 
 
   return (
     <div className="flex space-x-4 mb-6">
-      {tabs.map(tab => (
+      {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}

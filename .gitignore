@@ -29,4 +29,35 @@ dist-ssr
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local 
+.env.production.local
+
+# GitHub Workflows (disabled to prevent VS Code interference)
+.github/workflows/ 
+.vercel
+
+# Test artifacts and coverage
+coverage/
+test-results/
+test-output.txt
+playwright-report/
+k6/
+k6.zip
+__tests__/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Git status files
+tatus
+tatus --porcelain
+
+# Load test artifacts
+load-tests/*.log
+load-tests/results/
+
+# Temporary files
+*.tmp
+*.temp
+checkpoint_*.sql
+how origin

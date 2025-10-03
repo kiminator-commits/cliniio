@@ -1,9 +1,12 @@
 import { ChangeEvent } from 'react';
-import { FormControlElement } from 'react-bootstrap';
 
+export type FormControlElement =
+  | HTMLInputElement
+  | HTMLTextAreaElement
+  | HTMLSelectElement;
 export type FormControlChangeEvent = ChangeEvent<FormControlElement>;
 
-export type FormControlChangeHandler = (e: FormControlChangeEvent) => void;
+export type FormControlChangeHandler = (event: FormControlChangeEvent) => void;
 
 export type StatusType =
   | 'In Stock'

@@ -1,12 +1,10 @@
-// TODO: Move to forms/ - Category management component
+// Category management component
 import React, { useState } from 'react';
 import { useInventoryStore } from '../../../store/useInventoryStore';
 
 const CategoryManagement: React.FC = () => {
-  const categories = useInventoryStore(state => state.categories);
-  const addCategory = useInventoryStore(state => state.addCategory);
-  const removeCategory = useInventoryStore(state => state.removeCategory);
-  const isCategoriesLoading = useInventoryStore(state => state.isCategoriesLoading);
+  const { categories, addCategory, removeCategory, isCategoriesLoading } =
+    useInventoryStore();
   const [newCategory, setNewCategory] = useState('');
 
   const handleAdd = () => {
@@ -17,7 +15,14 @@ const CategoryManagement: React.FC = () => {
   };
 
   if (isCategoriesLoading) {
-    return <div className="p-4 text-center">Loading categories...</div>;
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading categories...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -29,15 +34,19 @@ const CategoryManagement: React.FC = () => {
           className="form-control"
           placeholder="New category"
           value={newCategory}
-          onChange={e => setNewCategory(e.target.value)}
+          onChange={(e) => setNewCategory(e.target.value)}
           aria-label="New Category Name"
         />
-        <button className="btn btn-primary ms-2" onClick={handleAdd} aria-label="Add Category">
+        <button
+          className="btn btn-primary ms-2"
+          onClick={handleAdd}
+          aria-label="Add Category"
+        >
           Add
         </button>
       </div>
       <ul className="list-group">
-        {categories.map(category => (
+        {categories.map((category) => (
           <li
             key={category}
             className="list-group-item d-flex justify-content-between align-items-center"

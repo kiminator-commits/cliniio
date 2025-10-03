@@ -1,8 +1,6 @@
 import React from 'react';
 
-interface LibraryModalManagerProps {
-  // Props will be added when modals are implemented
-}
+type LibraryModalManagerProps = object;
 
 const LibraryModalManager: React.FC<LibraryModalManagerProps> = () => {
   // This component will manage all library-related modals

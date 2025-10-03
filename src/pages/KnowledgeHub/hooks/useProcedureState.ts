@@ -10,8 +10,11 @@ export const useProcedureState = () => {
     try {
       // Implementation would go here
       setLoading(false);
+      setError(null); // Clear any previous error on success
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to create procedure'));
+      setError(
+        err instanceof Error ? err : new Error('Failed to create procedure')
+      );
       setLoading(false);
     }
   };
@@ -22,8 +25,11 @@ export const useProcedureState = () => {
     try {
       // Implementation would go here
       setLoading(false);
+      setError(null); // Clear any previous error on success
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to update procedure'));
+      setError(
+        err instanceof Error ? err : new Error('Failed to update procedure')
+      );
       setLoading(false);
     }
   };
@@ -34,8 +40,11 @@ export const useProcedureState = () => {
     try {
       // Implementation would go here
       setLoading(false);
+      setError(null); // Clear any previous error on success
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to archive procedure'));
+      setError(
+        err instanceof Error ? err : new Error('Failed to archive procedure')
+      );
       setLoading(false);
     }
   };
@@ -46,8 +55,11 @@ export const useProcedureState = () => {
     try {
       // Implementation would go here
       setLoading(false);
+      setError(null); // Clear any previous error on success
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to review procedure'));
+      setError(
+        err instanceof Error ? err : new Error('Failed to review procedure')
+      );
       setLoading(false);
     }
   };
@@ -58,8 +70,11 @@ export const useProcedureState = () => {
     try {
       // Implementation would go here
       setLoading(false);
+      setError(null); // Clear any previous error on success
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to assign procedure'));
+      setError(
+        err instanceof Error ? err : new Error('Failed to assign procedure')
+      );
       setLoading(false);
     }
   };

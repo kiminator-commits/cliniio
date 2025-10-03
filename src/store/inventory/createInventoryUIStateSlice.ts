@@ -12,9 +12,9 @@ export const createInventoryUIStateSlice: StateCreator<
   [],
   [],
   InventoryUIStateSlice
-> = set => ({
+> = (set) => ({
   isAddItemModalOpen: false,
   isEditMode: false,
-  setAddItemModalOpen: open => set({ isAddItemModalOpen: open }),
-  setEditMode: editMode => set({ isEditMode: editMode }),
+  setAddItemModalOpen: (open) => set({ isAddItemModalOpen: open }),
+  setEditMode: (editMode) => set({ isEditMode: editMode }),
 });

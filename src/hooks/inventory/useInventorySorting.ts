@@ -2,7 +2,11 @@ import { useState, useCallback, useMemo } from 'react';
 import { LocalInventoryItem } from '../../types/inventoryTypes';
 
 export type SortDirection = 'asc' | 'desc';
-export type SortableField = keyof LocalInventoryItem | 'cost' | 'quantity' | 'status';
+export type SortableField =
+  | keyof LocalInventoryItem
+  | 'cost'
+  | 'quantity'
+  | 'status';
 
 export interface SortConfig {
   field: SortableField;
@@ -28,7 +32,11 @@ export const useInventorySorting = ({
   sortOptions = {},
   onSortChange,
 }: UseInventorySortingProps) => {
-  const { multiSort = false, caseSensitive = false, nullsFirst = false } = sortOptions;
+  const {
+    multiSort = false,
+    caseSensitive = false,
+    nullsFirst = false,
+  } = sortOptions;
 
   const [sortConfig, setSortConfig] = useState<SortConfig>(initialSort);
   const [multiSortConfigs, setMultiSortConfigs] = useState<SortConfig[]>([]);
@@ -38,18 +46,23 @@ export const useInventorySorting = ({
     (item: LocalInventoryItem, field: SortableField): unknown => {
       switch (field) {
         case 'cost':
-          return item.cost || 0;
+          return item.unit_cost || 0;
         case 'quantity':
-          return (item as Record<string, unknown>).quantity || 0;
+          return item.quantity || 0;
         case 'status':
           return (
-            (item as Record<string, unknown>).status ||
-            (item as Record<string, unknown>).p2Status ||
+            item.status ||
+            item.p2_status ||
+            (typeof item.data?.p2Status === 'string'
+              ? item.data.p2Status
+              : '') ||
             ''
           );
         default: {
           const value = item[field as keyof LocalInventoryItem];
-          return typeof value === 'string' && !caseSensitive ? value.toLowerCase() : value;
+          return typeof value === 'string' && !caseSensitive
+            ? value.toLowerCase()
+            : value;
         }
       }
     },
@@ -122,14 +135,23 @@ export const useInventorySorting = ({
     }
 
     return dataCopy;
-  }, [data, sortConfig, multiSortConfigs, multiSort, getSortValue, compareValues]);
+  }, [
+    data,
+    sortConfig,
+    multiSortConfigs,
+    multiSort,
+    getSortValue,
+    compareValues,
+  ]);
 
   // Sort by single field
   const sortBy = useCallback(
     (field: SortableField, direction?: SortDirection) => {
       const newDirection =
         direction ||
-        (sortConfig.field === field && sortConfig.direction === 'asc' ? 'desc' : 'asc');
+        (sortConfig.field === field && sortConfig.direction === 'asc'
+          ? 'desc'
+          : 'asc');
 
       const newSortConfig = { field, direction: newDirection };
       setSortConfig(newSortConfig);
@@ -151,9 +173,9 @@ export const useInventorySorting = ({
     (field: SortableField, direction: SortDirection = 'asc') => {
       if (!multiSort) return;
 
-      setMultiSortConfigs(prev => {
+      setMultiSortConfigs((prev) => {
         // Remove existing sort for this field
-        const filtered = prev.filter(config => config.field !== field);
+        const filtered = prev.filter((config) => config.field !== field);
         // Add new sort criteria
         return [...filtered, { field, direction }];
       });
@@ -166,7 +188,9 @@ export const useInventorySorting = ({
     (field: SortableField) => {
       if (!multiSort) return;
 
-      setMultiSortConfigs(prev => prev.filter(config => config.field !== field));
+      setMultiSortConfigs((prev) =>
+        prev.filter((config) => config.field !== field)
+      );
     },
     [multiSort]
   );
@@ -189,7 +213,7 @@ export const useInventorySorting = ({
   const isFieldSorted = useCallback(
     (field: SortableField): SortDirection | null => {
       if (multiSort) {
-        const config = multiSortConfigs.find(c => c.field === field);
+        const config = multiSortConfigs.find((c) => c.field === field);
         return config ? config.direction : null;
       }
       return sortConfig.field === field ? sortConfig.direction : null;

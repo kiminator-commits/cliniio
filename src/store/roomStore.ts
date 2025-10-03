@@ -6,6 +6,7 @@ export interface Room {
   name: string;
   department: string;
   floor: string;
+  barcode?: string; // Add barcode field for scanning
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -18,68 +19,50 @@ interface RoomStore {
   deleteRoom: (id: string) => void;
   getActiveRooms: () => Room[];
   getRoomsByDepartment: (department: string) => Room[];
+  getRoomByBarcode: (barcode: string) => Room | undefined; // Add method to find room by barcode
 }
 
 export const useRoomStore = create<RoomStore>()(
   persist(
     (set, get) => ({
-      rooms: [
-        {
-          id: '1',
-          name: 'Operating Room 1',
-          department: 'Surgery',
-          floor: '2nd Floor',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          name: 'ICU Room 101',
-          department: 'Intensive Care',
-          floor: '3rd Floor',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: '3',
-          name: 'Supply Room A',
-          department: 'Logistics',
-          floor: '1st Floor',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ],
-      addRoom: roomData => {
+      rooms: [],
+      addRoom: (roomData) => {
         const newRoom: Room = {
           ...roomData,
           id: Date.now().toString(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        set(state => ({
+        set((state) => ({
           rooms: [...state.rooms, newRoom],
         }));
       },
       updateRoom: (id, updates) => {
-        set(state => ({
-          rooms: state.rooms.map(room =>
-            room.id === id ? { ...room, ...updates, updatedAt: new Date().toISOString() } : room
+        set((state) => ({
+          rooms: state.rooms.map((room) =>
+            room.id === id
+              ? { ...room, ...updates, updatedAt: new Date().toISOString() }
+              : room
           ),
         }));
       },
-      deleteRoom: id => {
-        set(state => ({
-          rooms: state.rooms.filter(room => room.id !== id),
+      deleteRoom: (id) => {
+        set((state) => ({
+          rooms: state.rooms.filter((room) => room.id !== id),
         }));
       },
       getActiveRooms: () => {
-        return get().rooms.filter(room => room.isActive);
+        return get().rooms.filter((room) => room.isActive);
       },
-      getRoomsByDepartment: department => {
-        return get().rooms.filter(room => room.department === department && room.isActive);
+      getRoomsByDepartment: (department) => {
+        return get().rooms.filter(
+          (room) => room.department === department && room.isActive
+        );
+      },
+      getRoomByBarcode: (barcode: string) => {
+        return get().rooms.find(
+          (room) => room.barcode === barcode && room.isActive
+        );
       },
     }),
     {

@@ -1,5 +1,5 @@
-import { InventoryItem } from '@/types/inventoryTypes';
-import { InventoryDataResponse } from '../InventoryDataService';
+import { InventoryItem } from '../../../types/inventoryTypes';
+import { InventoryResponse } from '../InventoryServiceFacade';
 
 export interface DataSourceConfig {
   type: 'static' | 'api' | 'localStorage' | 'indexedDB' | 'supabase';
@@ -33,13 +33,16 @@ export interface InventoryDataAdapter {
   getMetadata(): AdapterMetadata;
 
   // Data access methods
-  fetchAllInventoryData(): Promise<InventoryDataResponse>;
+  fetchAllInventoryData(): Promise<InventoryResponse>;
   fetchInventoryItems(): Promise<InventoryItem[]>;
   fetchCategories(): Promise<string[]>;
 
   // CRUD operations
   addInventoryItem(item: InventoryItem): Promise<InventoryItem>;
-  updateInventoryItem(id: string, item: Partial<InventoryItem>): Promise<InventoryItem>;
+  updateInventoryItem(
+    id: string,
+    item: Partial<InventoryItem>
+  ): Promise<InventoryItem>;
   deleteInventoryItem(id: string): Promise<void>;
   addCategory(category: string): Promise<string>;
   deleteCategory(category: string): Promise<void>;
@@ -72,7 +75,10 @@ export abstract class BaseInventoryDataAdapter implements InventoryDataAdapter {
   protected lastSyncTime: Date | null = null;
   protected pendingChanges = false;
 
-  constructor(config: DataSourceConfig, metadata: Omit<AdapterMetadata, 'config'>) {
+  constructor(
+    config: DataSourceConfig,
+    metadata: Omit<AdapterMetadata, 'config'>
+  ) {
     this.config = config;
     this.metadata = {
       ...metadata,
@@ -82,11 +88,14 @@ export abstract class BaseInventoryDataAdapter implements InventoryDataAdapter {
 
   abstract initialize(): Promise<void>;
   abstract isConnected(): boolean;
-  abstract fetchAllInventoryData(): Promise<InventoryDataResponse>;
+  abstract fetchAllInventoryData(): Promise<InventoryResponse>;
   abstract fetchInventoryItems(): Promise<InventoryItem[]>;
   abstract fetchCategories(): Promise<string[]>;
   abstract addInventoryItem(item: InventoryItem): Promise<InventoryItem>;
-  abstract updateInventoryItem(id: string, item: Partial<InventoryItem>): Promise<InventoryItem>;
+  abstract updateInventoryItem(
+    id: string,
+    item: Partial<InventoryItem>
+  ): Promise<InventoryItem>;
   abstract deleteInventoryItem(id: string): Promise<void>;
   abstract addCategory(category: string): Promise<string>;
   abstract deleteCategory(category: string): Promise<void>;
@@ -178,7 +187,9 @@ export abstract class BaseInventoryDataAdapter implements InventoryDataAdapter {
 
   protected validateInitialization(): void {
     if (!this.isInitialized) {
-      throw new Error(`Adapter ${this.metadata.name} is not initialized. Call initialize() first.`);
+      throw new Error(
+        `Adapter ${this.metadata.name} is not initialized. Call initialize() first.`
+      );
     }
   }
 }

@@ -1,13 +1,17 @@
-export const Logger = {
-  log: (message: string, ...optionalParams: unknown[]) => {
-    if (import.meta.env.VITE_APP_ENV !== 'production') {
-      console.log(message, ...optionalParams);
+export const logger = {
+  info: (...args: unknown[]) => {
+    if (import.meta.env.DEV) {
+      console.info('[Cliniio]', ...args);
     }
   },
-  error: (message: string, ...optionalParams: unknown[]) => {
-    console.error(message, ...optionalParams);
+  error: (...args: unknown[]) => {
+    if (import.meta.env.DEV) {
+      console.error('[Cliniio]', ...args);
+    }
   },
-  warn: (message: string, ...optionalParams: unknown[]) => {
-    console.warn(message, ...optionalParams);
+  warn: (...args: unknown[]) => {
+    if (import.meta.env.DEV) {
+      console.warn('[Cliniio]', ...args);
+    }
   },
 };

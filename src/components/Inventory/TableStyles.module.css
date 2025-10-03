@@ -1,0 +1,223 @@
+/* Table Styles */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.875rem;
+}
+
+.tableHeader {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tableHeaderCell {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #6b7280 !important;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.tableRow {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s ease;
+}
+
+.tableRow:hover {
+  background-color: #f9fafb;
+}
+
+.tableRow:focus-within {
+  background-color: #eff6ff;
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+.tableCell {
+  padding: 12px 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.tableCell:first-child {
+  padding-left: 20px;
+}
+
+.tableCell:last-child {
+  padding-right: 12px;
+}
+
+/* Action buttons */
+.actionGroup {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  min-width: 60px;
+  height: 32px;
+}
+
+.actionButton:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.actionButton:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.actionButton:active {
+  background: #f3f4f6;
+  transform: translateY(1px);
+}
+
+.editButton {
+  color: #059669;
+  border-color: #10b981;
+}
+
+.editButton:hover {
+  background: #ecfdf5;
+  border-color: #059669;
+  color: #047857;
+}
+
+.deleteButton {
+  color: #dc2626;
+  border-color: #ef4444;
+}
+
+.deleteButton:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #b91c1c;
+}
+
+.trackButton {
+  color: #7c3aed;
+  border-color: #8b5cf6;
+  padding: 6px;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.trackButton:hover {
+  background: #faf5ff;
+  border-color: #7c3aed;
+  color: #6d28d9;
+}
+
+.trackButton.tracked {
+  background: #7c3aed;
+  color: white;
+  border-color: #7c3aed;
+}
+
+.trackButton.tracked:hover {
+  background: #6d28d9;
+  border-color: #6d28d9;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tableContainer {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .tableHeaderCell,
+  .tableCell {
+    padding: 8px 12px;
+  }
+
+  .actionGroup {
+    gap: 4px;
+  }
+
+  .actionButton {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    min-width: 50px;
+    height: 28px;
+  }
+}
+
+/* Virtualization Styles */
+.virtualizedList {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.virtualizedOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.virtualizedOverlay > * {
+  pointer-events: auto;
+}
+
+.virtualizedBody {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+}
+
+.virtualizedRow {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s ease;
+  background: white;
+}
+
+.virtualizedRow:hover {
+  background-color: #f9fafb;
+}
+
+.virtualizedRow:focus-within {
+  background-color: #eff6ff;
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}

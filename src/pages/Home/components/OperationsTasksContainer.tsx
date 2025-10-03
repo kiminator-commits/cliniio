@@ -2,16 +2,9 @@ import React from 'react';
 import clsx from 'clsx';
 import Icon from '@mdi/react';
 import { mdiClipboardText, mdiFilter } from '@mdi/js';
-import { TasksList } from '@/components/TasksList';
+import { Task } from '@/store/homeStore';
 import { HOME_UI_CONSTANTS } from '@/constants/homeUiConstants';
-
-interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  points: number;
-  completed: boolean;
-}
+import { TasksList } from '@/components/TasksList';
 
 type Props = {
   tasks: Task[];
@@ -19,7 +12,6 @@ type Props = {
   storeShowFilters: boolean;
   setStoreShowFilters: (val: boolean) => void;
   handleTaskComplete: (id: string) => void;
-  handleRefresh: () => void;
 };
 
 export const OperationsTasksContainer = ({
@@ -28,7 +20,6 @@ export const OperationsTasksContainer = ({
   storeShowFilters,
   setStoreShowFilters,
   handleTaskComplete,
-  handleRefresh,
 }: Props) => {
   return (
     <div
@@ -42,12 +33,23 @@ export const OperationsTasksContainer = ({
         `border-opacity-${HOME_UI_CONSTANTS.COLORS.BORDER_OPACITY}`
       )}
     >
-      <div className="flex items-center justify-between mb-6" style={{ marginTop: '12px' }}>
+      <div
+        className="flex items-center justify-between mb-6"
+        style={{ marginTop: '12px' }}
+      >
         <div className="flex items-center gap-2">
-          <span className={`bg-${HOME_UI_CONSTANTS.COLORS.PRIMARY_BG} rounded-md p-1`}>
-            <Icon path={mdiClipboardText} size={1} color={HOME_UI_CONSTANTS.COLORS.PRIMARY} />
+          <span
+            className={`bg-${HOME_UI_CONSTANTS.COLORS.PRIMARY_BG} rounded-md p-1`}
+          >
+            <Icon
+              path={mdiClipboardText}
+              size={1}
+              color={HOME_UI_CONSTANTS.COLORS.PRIMARY}
+            />
           </span>
-          <h2 className={`text-lg font-semibold text-[${HOME_UI_CONSTANTS.COLORS.TEXT_PRIMARY}]`}>
+          <h2
+            className={`text-lg font-semibold text-[${HOME_UI_CONSTANTS.COLORS.TEXT_PRIMARY}]`}
+          >
             Daily Operations Tasks
           </h2>
         </div>
@@ -91,12 +93,7 @@ export const OperationsTasksContainer = ({
         </div>
       )}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <TasksList
-          tasks={tasks}
-          onTaskComplete={handleTaskComplete}
-          onRefresh={handleRefresh}
-          showFilters={storeShowFilters}
-        />
+        <TasksList tasks={tasks} onTaskComplete={handleTaskComplete} />
       </div>
     </div>
   );

@@ -22,12 +22,20 @@ export const TimeSavedCard: React.FC<TimeSavedCardProps> = ({ data }) => {
       </div>
       <div className="flex flex-col gap-2 mt-2">
         <div className="flex justify-between items-center">
-          <span className="text-gray-500 text-xs text-left">Time Saved (Day)</span>
-          <span className="text-base text-blue-900 text-right">{data.daily} hrs</span>
+          <span className="text-gray-500 text-xs text-left">
+            Time Saved (Day)
+          </span>
+          <span className="text-base text-blue-900 text-right">
+            {data.daily} hrs
+          </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-gray-500 text-xs text-left">Time Saved (Month)</span>
-          <span className="text-base text-blue-900 text-right">{data.monthly} hrs</span>
+          <span className="text-gray-500 text-xs text-left">
+            Time Saved (Month)
+          </span>
+          <span className="text-base text-blue-900 text-right">
+            {data.monthly} hrs
+          </span>
         </div>
       </div>
     </div>

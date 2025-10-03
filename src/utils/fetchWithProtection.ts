@@ -1,5 +1,3 @@
-import { logError } from './errorLogger';
-
 interface FetchOptions extends RequestInit {
   retries?: number;
   retryDelay?: number;
@@ -21,10 +19,10 @@ export const fetchWithProtection = async (
       return response;
     } catch (err) {
       if (process.env.NODE_ENV !== 'test') {
-        logError(err, 'fetchWithProtection');
+        console.error('fetchWithProtection error:', err);
       }
       if (attempt === retries) throw err;
-      if (retryDelay) await new Promise(res => setTimeout(res, retryDelay));
+      if (retryDelay) await new Promise((res) => setTimeout(res, retryDelay));
     }
   }
 

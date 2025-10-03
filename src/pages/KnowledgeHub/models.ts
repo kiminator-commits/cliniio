@@ -2,6 +2,7 @@
 export interface Course {
   id: string;
   title: string;
+  description?: string;
   domain: string;
   contentType?: string;
   tags?: string[];

@@ -1,116 +1,154 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import TableRow from './TableRow';
+import TableHeader from './TableHeader';
+import TablePagination from './TablePagination';
+import VirtualizedInventoryTable from './VirtualizedInventoryTable';
+import { InventoryItem } from '@/types/inventoryTypes';
+import { useInventoryStore } from '@/store/useInventoryStore';
+import styles from './TableStyles.module.css';
 
 interface BaseInventoryTableProps {
-  data: Record<string, unknown>[];
+  data: InventoryItem[];
   columns: string[];
-  onEdit: (item: Record<string, unknown>) => void;
-  onDelete?: (item: Record<string, unknown>) => void;
+  onEdit: (item: InventoryItem) => void;
+  onDelete?: (item: InventoryItem) => void;
+  onToggleFavorite?: (itemId: string) => void;
   showTrackedOnly?: boolean;
+  showFavoritesOnly?: boolean;
   itemsPerPage?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
+  activeTab: string;
 }
 
-const BaseInventoryTable: React.FC<BaseInventoryTableProps> = ({
-  data,
-  columns,
-  onEdit,
-  onDelete,
-  showTrackedOnly = false,
-  itemsPerPage = 3,
-  currentPage = 1,
-  onPageChange,
-}) => {
-  const visibleData = showTrackedOnly ? data.filter(item => item.tracked) : data;
+const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
+  ({
+    data,
+    columns,
+    onEdit,
+    onDelete,
+    onToggleFavorite,
+    showTrackedOnly = false,
+    showFavoritesOnly = false,
+    itemsPerPage = 3,
+    currentPage = 1,
+    onPageChange,
+    activeTab,
+  }) => {
+    // Use virtualization for large datasets (more than 50 items)
+    const shouldUseVirtualization = data.length > 50;
 
-  // Calculate pagination
-  const totalPages = Math.max(1, Math.ceil(visibleData.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedData = visibleData.slice(startIndex, endIndex);
+    // Get favorites and tracking functions from store
+    const { favorites, trackedItems, toggleTrackedItem } = useInventoryStore();
 
-  return (
-    <div className="flex flex-col">
-      <div>
-        <table className="min-w-full text-sm border border-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
-              {columns.map(col => (
-                <th key={col} className="py-1 px-2 text-left font-semibold text-gray-600 border-b">
-                  {col}
-                </th>
-              ))}
-              <th className="py-1 px-2 text-left font-semibold text-gray-600 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.map((item, idx) => (
-              <tr key={item.id || idx} className="border-b">
-                {columns.map(colKey => (
-                  <td key={colKey} className="py-1 px-2 text-gray-800">
-                    {item[colKey]}
-                  </td>
-                ))}
-                <td className="py-1 px-2">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => onEdit(item)}
-                      className="text-violet-500 text-xs px-2 py-0.5 hover:bg-violet-50 flex items-center"
-                    >
-                      <svg
-                        className="inline-block mr-1"
-                        width="12"
-                        height="12"
-                        fill="currentColor"
-                        viewBox="0 0 16 16"
-                      >
-                        <path d="M15.502 1.94a1.5 1.5 0 0 1 0 2.12l-1.439 1.439-2.12-2.12 1.439-1.439a1.5 1.5 0 0 1 2.12 0zm-2.561 2.561-9.193 9.193a.5.5 0 0 0-.121.196l-1 3a.5.5 0 0 0 .633.633l3-1a.5.5 0 0 0 .196-.12l9.193-9.194-2.12-2.12z" />
-                      </svg>
-                      Edit
-                    </button>
-                    {onDelete && (
-                      <button
-                        onClick={() => onDelete(item)}
-                        className="text-red-500 hover:text-red-700 transition-colors p-3"
-                        aria-label="Delete item"
-                      >
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    // Memoize filtered and paginated data to prevent unnecessary re-renders
+    const { totalPages, paginatedData } = useMemo(() => {
+      let filtered = data;
 
-      {/* Pagination Controls */}
-      {onPageChange && (
-        <div className="flex justify-center items-center mt-4 gap-4">
-          <button
-            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 border rounded-md disabled:opacity-50 bg-gray-100 hover:bg-gray-200"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 border rounded-md disabled:opacity-50 bg-gray-100 hover:bg-gray-200"
-          >
-            Next
-          </button>
+      // Filter by tracked items if showTrackedOnly is true
+      if (showTrackedOnly) {
+        filtered = filtered.filter((item: InventoryItem) =>
+          trackedItems.has(item.id)
+        );
+      }
+
+      // Filter by favorites if showFavoritesOnly is true
+      if (showFavoritesOnly) {
+        filtered = filtered.filter((item: InventoryItem) =>
+          favorites.includes(item.id)
+        );
+      }
+
+      const total = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginated = filtered.slice(startIndex, endIndex);
+
+      return { totalPages: total, paginatedData: paginated };
+    }, [
+      data,
+      showTrackedOnly,
+      showFavoritesOnly,
+      favorites,
+      trackedItems,
+      itemsPerPage,
+      currentPage,
+    ]);
+
+    // Handle tracking toggle
+    const handleTrackToggle = (item: InventoryItem) => {
+      toggleTrackedItem(item.id, 'Current User'); // You can replace 'Current User' with actual user info
+    };
+
+    // Check if item is tracked
+    const isItemTracked = (itemId: string) => trackedItems.has(itemId);
+
+    // If using virtualization, render the virtualized table
+    if (shouldUseVirtualization) {
+      return (
+        <div className={styles.tableContainer}>
+          <VirtualizedInventoryTable
+            data={paginatedData}
+            columns={columns}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onToggleFavorite={onToggleFavorite}
+            onTrackToggle={handleTrackToggle}
+            isTracked={isItemTracked}
+            activeTab={activeTab}
+            itemHeight={80}
+            maxHeight={600}
+          />
+          {/* Pagination Controls */}
+          {onPageChange && (
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+            />
+          )}
         </div>
-      )}
-    </div>
-  );
-};
+      );
+    }
+
+    return (
+      <div className={styles.tableContainer}>
+        <div className={styles.tableWrapper}>
+          <table
+            className={styles.table}
+            role="table"
+            aria-label="Inventory items table"
+          >
+            <TableHeader columns={columns} activeTab={activeTab} />
+            <tbody>
+              {paginatedData.map((item: InventoryItem) => (
+                <TableRow
+                  key={item.id}
+                  item={item}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onToggleFavorite={onToggleFavorite}
+                  onTrackToggle={handleTrackToggle}
+                  isTracked={isItemTracked(item.id)}
+                  activeTab={activeTab}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Pagination Controls */}
+        {onPageChange && (
+          <TablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        )}
+      </div>
+    );
+  }
+);
+
+BaseInventoryTable.displayName = 'BaseInventoryTable';
 
 export default BaseInventoryTable;

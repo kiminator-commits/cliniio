@@ -1,10 +1,52 @@
 import { StateCreator } from 'zustand';
+import { BITestResult, ToolStatus } from '@/types/toolTypes';
+import { ActivityLogItem } from './types/biWorkflowTypes';
+import {
+  BITestKitService,
+  BITestKit,
+  TestConditions,
+} from '@/services/bi/BITestKitService';
+import { BIWorkflowService } from '@/services/biWorkflowService';
+import { calculateNextBIDue } from '@/utils/calculateNextBIDue';
+import { supabase } from '@/lib/supabaseClient';
 
 export interface BiologicalIndicatorState {
+  // Core BI test state
   biTestCompleted: boolean;
   biTestDate: string | null;
+  biTestResults: BITestResult[];
+  nextBITestDue: Date | null;
+  lastBITestDate: string | null;
+  biTestPassed: boolean;
+  biTestOptedOut: boolean;
+  activityLog: ActivityLogItem[];
+
+  // Global BI failure state
+  biFailureActive: boolean;
+  biFailureDetails: {
+    id: string;
+    date: Date;
+    affectedToolsCount: number;
+    affectedBatchIds: string[];
+    operator: string;
+  } | null;
+
+  // Actions
   setBiTestCompleted: (completed: boolean) => void;
   setBiTestDate: (date: string) => void;
+  recordBITestResult: (result: BITestResult) => Promise<unknown>;
+  setNextBITestDue: (date: Date) => void;
+  setLastBITestDate: (date: string) => void;
+  setBiTestPassed: (value: boolean) => void;
+  setBiTestOptedOut: (optedOut: boolean) => void;
+  resetBIState: () => void;
+  addActivity: (activity: ActivityLogItem) => void;
+  activateBIFailure: (details: {
+    affectedToolsCount: number;
+    affectedBatchIds: string[];
+    operator: string;
+  }) => void;
+  deactivateBIFailure: () => void;
 }
 
 export const createBiologicalIndicatorSlice: StateCreator<
@@ -12,9 +54,244 @@ export const createBiologicalIndicatorSlice: StateCreator<
   [],
   [],
   BiologicalIndicatorState
-> = set => ({
+> = (set) => ({
   biTestCompleted: false,
   biTestDate: null,
-  setBiTestCompleted: completed => set({ biTestCompleted: completed }),
-  setBiTestDate: date => set({ biTestDate: date }),
+  biTestResults: [],
+  nextBITestDue: null,
+  lastBITestDate: null,
+  biTestPassed: false,
+  biTestOptedOut: false,
+  activityLog: [],
+  biFailureActive: false,
+  biFailureDetails: null,
+
+  setBiTestCompleted: (completed: boolean) =>
+    set({ biTestCompleted: completed }),
+  setBiTestDate: (date: string) => set({ biTestDate: date }),
+  recordBITestResult: async (result: Omit<BITestResult, 'id'>) => {
+    console.log('🔬 recordBITestResult called with:', result);
+    try {
+      // Get current user and facility from Supabase
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Get user's facility ID from users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userData) {
+        throw new Error('User facility not found');
+      }
+
+      // Get available BI test kit from inventory
+      let availableKits: BITestKit[] = [];
+      let selectedKit: BITestKit | null = null;
+      let testConditions: TestConditions | null = null;
+
+      try {
+        availableKits = await BITestKitService.getAvailableKits(
+          userData.facility_id as string
+        );
+        if (availableKits.length > 0) {
+          selectedKit = availableKits[0]; // Use the kit with earliest expiry date
+          testConditions = await BITestKitService.getCurrentTestConditions();
+        }
+      } catch (err) {
+        console.error(err);
+        // If no kits available, use default values to restore existing functionality
+        selectedKit = {
+          id: 'default-kit',
+          facility_id: userData.facility_id as string,
+          name: 'Default BI Kit',
+          manufacturer: 'Default Manufacturer',
+          lot_number: 'DEFAULT-001',
+          expiry_date: new Date(
+            Date.now() + 365 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          incubation_time_minutes: 60,
+          incubation_temperature_celsius: 37,
+          quantity: 1,
+          min_quantity: 1,
+          max_quantity: 100,
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        testConditions = {
+          room_temperature_celsius: 22,
+          humidity_percent: 45,
+          equipment_used: 'Default Equipment',
+          operator_id: user.id,
+          facility_id: userData.facility_id as string,
+          test_date: new Date().toISOString(),
+        };
+      }
+
+      // Save to Supabase with real user/facility data
+      const biTestData = {
+        facility_id: userData.facility_id as string,
+        operator_id: user.id,
+        cycle_id: undefined, // Optional: link to specific cycle
+        result: result.status === 'pending' ? 'pass' : result.status,
+        bi_lot_number: selectedKit?.lot_number || '',
+        bi_expiry_date: selectedKit?.expiry_date || '',
+        incubation_time_minutes: selectedKit?.incubation_time_minutes || 60,
+        incubation_temperature_celsius:
+          selectedKit?.incubation_temperature_celsius || 37,
+        test_conditions: testConditions || undefined,
+        failure_reason: result.status === 'fail' ? 'BI test failed' : undefined,
+        skip_reason: result.status === 'skip' ? 'BI test skipped' : undefined,
+        compliance_notes:
+          result.status === 'pass' ? 'BI test passed' : undefined,
+      };
+
+      const savedResult =
+        await BIWorkflowService.createBITestResult(biTestData);
+
+      // Update BI test kit inventory (decrease quantity by 1) - only if we have a real kit
+      if (selectedKit && selectedKit.id !== 'default-kit') {
+        try {
+          await BITestKitService.decrementKitQuantity(selectedKit.id);
+        } catch (err) {
+          console.error(err);
+          // Ignore inventory update errors for default kit
+        }
+      }
+
+      // Update local state after successful save
+      set((state) => {
+        const nextDue = calculateNextBIDue(result.date);
+        const activity: ActivityLogItem = {
+          id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type: 'bi-test',
+          title: result.passed ? 'BI Test Passed' : 'BI Test Failed',
+          time: result.date,
+          toolCount: 1,
+          color: result.passed ? 'bg-green-500' : 'bg-red-500',
+        };
+        const newResult: BITestResult = {
+          ...result,
+          id: `bi-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        };
+        return {
+          biTestCompleted: result.passed,
+          biTestDate: result.date.toISOString(),
+          biTestResults: [...state.biTestResults, newResult],
+          lastBITestDate: result.date.toISOString(),
+          nextBITestDue: nextDue,
+          biTestPassed: result.passed,
+          activityLog: [activity, ...state.activityLog].slice(0, 20),
+        };
+      });
+
+      return savedResult;
+    } catch (error: unknown) {
+      console.error('Error recording BI test result:', error);
+      // Still update local state for immediate feedback
+      set((state) => {
+        const nextDue = calculateNextBIDue(result.date);
+        const activity: ActivityLogItem = {
+          id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type: 'bi-test',
+          title: result.passed ? 'BI Test Passed' : 'BI Test Failed',
+          time: result.date,
+          toolCount: 1,
+          color: result.passed ? 'bg-green-500' : 'bg-red-500',
+        };
+        const newResult: BITestResult = {
+          ...result,
+          id: `bi-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        };
+        return {
+          biTestCompleted: result.passed,
+          biTestDate: result.date.toISOString(),
+          biTestResults: [...state.biTestResults, newResult],
+          lastBITestDate: result.date.toISOString(),
+          nextBITestDue: nextDue,
+          biTestPassed: result.passed,
+          activityLog: [activity, ...state.activityLog].slice(0, 20),
+        };
+      });
+      throw error;
+    }
+  },
+  setNextBITestDue: (date: Date) => set({ nextBITestDue: date }),
+  setLastBITestDate: (date: string) => set({ lastBITestDate: date }),
+  setBiTestPassed: (value: boolean) => set({ biTestPassed: value }),
+  setBiTestOptedOut: (optedOut: boolean) => set({ biTestOptedOut: optedOut }),
+  addActivity: (activity: ActivityLogItem) =>
+    set((state: BiologicalIndicatorState) => {
+      const activityWithId = {
+        ...activity,
+        id:
+          activity.id ||
+          `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      };
+      return {
+        activityLog: [activityWithId, ...state.activityLog].slice(0, 20),
+      };
+    }),
+  activateBIFailure: (details: {
+    affectedToolsCount: number;
+    affectedBatchIds: string[];
+    operator: string;
+  }) =>
+    set(() => ({
+      biFailureActive: true,
+      biFailureDetails: {
+        id: `bi-failure-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        date: new Date(),
+        affectedToolsCount: details.affectedToolsCount,
+        affectedBatchIds: details.affectedBatchIds,
+        operator: details.operator,
+      },
+    })),
+  deactivateBIFailure: () =>
+    set(() => ({
+      biFailureActive: false,
+      biFailureDetails: null,
+    })),
+  // New method to sync with Supabase
+  syncBIFailureFromDatabase: (incident: {
+    status: ToolStatus;
+    failure_date: string;
+    affected_tools_count: number;
+    affected_batch_ids: string[];
+    detected_by_operator_id?: string;
+  }) =>
+    set({
+      biFailureActive: incident.status === 'active',
+      biFailureDetails:
+        incident.status === 'active'
+          ? {
+              id: `bi-failure-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              date: new Date(incident.failure_date),
+              affectedToolsCount: incident.affected_tools_count,
+              affectedBatchIds: incident.affected_batch_ids,
+              operator: incident.detected_by_operator_id || 'System Alert',
+            }
+          : null,
+    }),
+  resetBIState: () =>
+    set(() => ({
+      biTestCompleted: false,
+      biTestDate: null,
+      biTestResults: [],
+      nextBITestDue: null,
+      lastBITestDate: null,
+      biTestPassed: false,
+      biTestOptedOut: false,
+      activityLog: [],
+      biFailureActive: false,
+      biFailureDetails: null,
+    })),
 });

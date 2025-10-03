@@ -15,6 +15,8 @@ export interface ContentItem {
   duration: string;
   points: number;
   publishedDate?: string;
+  isRepeat?: boolean;
+  data?: Record<string, unknown>;
 }
 
 export interface LibraryItem {

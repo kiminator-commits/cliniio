@@ -1,12 +1,4 @@
-import { RoomStatusType } from './utils';
-
-export interface Room {
-  id: string;
-  name: string;
-  status: RoomStatusType;
-  lastCleaned?: string;
-  notes?: string;
-}
+import { RoomStatusType, Room } from '../pages/EnvironmentalClean/models';
 
 export interface EnvironmentalCleanContextType {
   rooms: Room[];

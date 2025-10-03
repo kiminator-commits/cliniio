@@ -8,8 +8,8 @@ import {
   SupplyItem,
   EquipmentItem,
   OfficeHardwareItem,
-  FormData,
   ExpandedSections,
+  InventoryItem,
 } from '../../../types/inventoryTypes';
 
 interface InventoryContentProps {
@@ -26,26 +26,14 @@ interface InventoryContentProps {
   isEditMode: boolean;
 
   // Form state
-  formData: FormData;
+  formData: Partial<InventoryItem>;
   expandedSections: ExpandedSections;
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  activeFilter: string;
-  setActiveFilter: (filter: string) => void;
-  favorites: string[];
 
   // Data
   filteredData: ToolItem[];
   filteredSuppliesData: SupplyItem[];
   filteredEquipmentData: EquipmentItem[];
   filteredOfficeHardwareData: OfficeHardwareItem[];
-  filteredTools: {
-    id: string;
-    name: string;
-    barcode: string;
-    currentPhase: string;
-    category: string;
-  }[];
 
   // Actions
   handleToggleTrackedFilter: () => void;
@@ -54,14 +42,12 @@ interface InventoryContentProps {
   handleToggleSectionWrapper: (section: string) => void;
   handleFormChangeWrapper: (field: string, value: unknown) => void;
   handleCloseAddModal: () => void;
-  handleDeleteItem: (item: unknown) => void;
+  handleDeleteItem: (item: InventoryItem) => void;
   handleToggleFavorite: (itemId: string) => void;
-  getStatusBadge: (status: string) => React.ReactNode;
-  getStatusText: (status: string) => string;
 
   // Table state
   activeTab: string;
-  handleEditItem: (item: unknown) => void;
+  handleEditItem: (item: InventoryItem) => void;
 }
 
 const InventoryContent: React.FC<InventoryContentProps> = ({
@@ -75,35 +61,27 @@ const InventoryContent: React.FC<InventoryContentProps> = ({
   setShowFilters,
 
   // Modal state
-  isEditMode,
+  isEditMode: _isEditMode,
 
   // Form state
-  formData,
-  expandedSections,
-  searchTerm,
-  setSearchTerm,
-  activeFilter,
-  setActiveFilter,
-  favorites,
+  formData: _formData,
+  expandedSections: _expandedSections,
 
   // Data
   filteredData,
   filteredSuppliesData,
   filteredEquipmentData,
   filteredOfficeHardwareData,
-  filteredTools,
 
   // Actions
   handleToggleTrackedFilter,
   handleSetCategoryFilter,
   handleSetLocationFilter,
-  handleToggleSectionWrapper,
-  handleFormChangeWrapper,
-  handleCloseAddModal,
+  handleToggleSectionWrapper: _handleToggleSectionWrapper,
+  handleFormChangeWrapper: _handleFormChangeWrapper,
+  handleCloseAddModal: _handleCloseAddModal,
   handleDeleteItem,
   handleToggleFavorite,
-  getStatusBadge,
-  getStatusText,
 
   // Table state
   activeTab,
@@ -134,8 +112,8 @@ const InventoryContent: React.FC<InventoryContentProps> = ({
             category: categoryFilter,
             location: locationFilter,
           }}
-          setCategoryFilter={v => handleSetCategoryFilter(v || '')}
-          setLocationFilter={v => handleSetLocationFilter(v || '')}
+          setCategoryFilter={(v) => handleSetCategoryFilter(v || '')}
+          setLocationFilter={(v) => handleSetLocationFilter(v || '')}
           setSearchQuery={setSearchQuery}
         />
       )}
@@ -154,23 +132,7 @@ const InventoryContent: React.FC<InventoryContentProps> = ({
       />
 
       {/* Modals */}
-      <InventoryModals
-        formData={formData}
-        isEditMode={isEditMode}
-        expandedSections={expandedSections}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
-        favorites={new Set(favorites)}
-        filteredTools={filteredTools}
-        handleCloseAddModal={handleCloseAddModal}
-        toggleSection={handleToggleSectionWrapper}
-        handleFormChange={handleFormChangeWrapper}
-        toggleFavorite={handleToggleFavorite}
-        getStatusBadge={phase => getStatusBadge(phase)?.toString() || ''}
-        getStatusText={getStatusText}
-      />
+      <InventoryModals />
     </>
   );
 };
