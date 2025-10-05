@@ -8,12 +8,18 @@ import type {
 } from '../../../../types/learningAITypes';
 import type { Json } from '../../../../types/database.types';
 import { SUPABASE_ERROR_CODES, QUERY_LIMITS } from '../learningAIConfig';
-import { getCurrentTimestamp, transformSettingsData, transformUserProfileData } from '../../../learningAI/learningAIUtils';
+import {
+  getCurrentTimestamp,
+  transformSettingsData,
+  transformUserProfileData,
+} from '../../../learningAI/learningAIUtils';
 
 /**
  * Load AI settings for the facility
  */
-export async function loadLearningAISettings(facilityId: string): Promise<LearningAISettings | null> {
+export async function loadLearningAISettings(
+  facilityId: string
+): Promise<LearningAISettings | null> {
   try {
     const { data, error } = await supabase
       .from('learning_ai_settings')

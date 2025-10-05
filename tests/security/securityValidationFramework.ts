@@ -192,7 +192,7 @@ class SecurityValidationFramework {
     const results: ValidationResult[] = [];
 
     // Run all enabled validation rules
-    for (const rule of this.rules.filter(r => r.enabled)) {
+    for (const rule of this.rules.filter((r) => r.enabled)) {
       try {
         const result = await rule.validator();
         results.push(result);
@@ -208,15 +208,27 @@ class SecurityValidationFramework {
 
     // Calculate overall metrics
     const totalRules = results.length;
-    const passedRules = results.filter(r => r.passed).length;
+    const passedRules = results.filter((r) => r.passed).length;
     const failedRules = totalRules - passedRules;
-    const criticalFailures = results.filter(r => !r.passed && this.getRuleSeverity(r) === 'critical').length;
-    const highFailures = results.filter(r => !r.passed && this.getRuleSeverity(r) === 'high').length;
-    const mediumFailures = results.filter(r => !r.passed && this.getRuleSeverity(r) === 'medium').length;
-    const lowFailures = results.filter(r => !r.passed && this.getRuleSeverity(r) === 'low').length;
+    const criticalFailures = results.filter(
+      (r) => !r.passed && this.getRuleSeverity(r) === 'critical'
+    ).length;
+    const highFailures = results.filter(
+      (r) => !r.passed && this.getRuleSeverity(r) === 'high'
+    ).length;
+    const mediumFailures = results.filter(
+      (r) => !r.passed && this.getRuleSeverity(r) === 'medium'
+    ).length;
+    const lowFailures = results.filter(
+      (r) => !r.passed && this.getRuleSeverity(r) === 'low'
+    ).length;
 
     const overallScore = totalRules > 0 ? (passedRules / totalRules) * 100 : 0;
-    const summary = this.generateSummary(overallScore, criticalFailures, highFailures);
+    const summary = this.generateSummary(
+      overallScore,
+      criticalFailures,
+      highFailures
+    );
     const recommendations = this.generateRecommendations(results);
 
     const report: SecurityValidationReport = {
@@ -248,17 +260,20 @@ class SecurityValidationFramework {
     const hasSpecialChars = true;
     const hasPasswordHistory = false;
 
-    const score = (hasMinLength ? 25 : 0) + 
-                  (hasUppercase ? 25 : 0) + 
-                  (hasNumbers ? 25 : 0) + 
-                  (hasSpecialChars ? 25 : 0);
+    const score =
+      (hasMinLength ? 25 : 0) +
+      (hasUppercase ? 25 : 0) +
+      (hasNumbers ? 25 : 0) +
+      (hasSpecialChars ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Password policy is strong' : 'Password policy needs improvement',
+      message: passed
+        ? 'Password policy is strong'
+        : 'Password policy needs improvement',
       details: {
         minLength: hasMinLength,
         uppercase: hasUppercase,
@@ -266,7 +281,9 @@ class SecurityValidationFramework {
         specialChars: hasSpecialChars,
         passwordHistory: hasPasswordHistory,
       },
-      recommendations: hasPasswordHistory ? [] : ['Implement password history to prevent reuse'],
+      recommendations: hasPasswordHistory
+        ? []
+        : ['Implement password history to prevent reuse'],
     };
   }
 
@@ -277,17 +294,20 @@ class SecurityValidationFramework {
     const lockoutDuration = 30; // minutes
     const progressiveLockout = true;
 
-    const score = (hasLockout ? 40 : 0) + 
-                  (maxAttempts <= 5 ? 20 : 10) + 
-                  (lockoutDuration >= 30 ? 20 : 10) + 
-                  (progressiveLockout ? 20 : 0);
+    const score =
+      (hasLockout ? 40 : 0) +
+      (maxAttempts <= 5 ? 20 : 10) +
+      (lockoutDuration >= 30 ? 20 : 10) +
+      (progressiveLockout ? 20 : 0);
 
     const passed = score >= 80;
 
     return {
       passed,
       score,
-      message: passed ? 'Account lockout is properly configured' : 'Account lockout needs improvement',
+      message: passed
+        ? 'Account lockout is properly configured'
+        : 'Account lockout needs improvement',
       details: {
         lockoutEnabled: hasLockout,
         maxAttempts,
@@ -305,17 +325,20 @@ class SecurityValidationFramework {
     const secureCookies = true;
     const sessionInvalidation = true;
 
-    const score = (secureTokens ? 25 : 0) + 
-                  (sessionTimeout <= 60 ? 25 : 10) + 
-                  (secureCookies ? 25 : 0) + 
-                  (sessionInvalidation ? 25 : 0);
+    const score =
+      (secureTokens ? 25 : 0) +
+      (sessionTimeout <= 60 ? 25 : 10) +
+      (secureCookies ? 25 : 0) +
+      (sessionInvalidation ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Session management is secure' : 'Session management needs improvement',
+      message: passed
+        ? 'Session management is secure'
+        : 'Session management needs improvement',
       details: {
         secureTokens,
         sessionTimeout,
@@ -333,17 +356,20 @@ class SecurityValidationFramework {
     const sameSiteCookies = true;
     const doubleSubmitCookie = false;
 
-    const score = (csrfTokens ? 40 : 0) + 
-                  (originValidation ? 30 : 0) + 
-                  (sameSiteCookies ? 20 : 0) + 
-                  (doubleSubmitCookie ? 10 : 0);
+    const score =
+      (csrfTokens ? 40 : 0) +
+      (originValidation ? 30 : 0) +
+      (sameSiteCookies ? 20 : 0) +
+      (doubleSubmitCookie ? 10 : 0);
 
     const passed = score >= 70;
 
     return {
       passed,
       score,
-      message: passed ? 'CSRF protection is implemented' : 'CSRF protection needs improvement',
+      message: passed
+        ? 'CSRF protection is implemented'
+        : 'CSRF protection needs improvement',
       details: {
         csrfTokens,
         originValidation,
@@ -361,17 +387,20 @@ class SecurityValidationFramework {
     const distributedRateLimiting = true;
     const progressiveDelays = true;
 
-    const score = (ipRateLimiting ? 25 : 0) + 
-                  (userRateLimiting ? 25 : 0) + 
-                  (distributedRateLimiting ? 25 : 0) + 
-                  (progressiveDelays ? 25 : 0);
+    const score =
+      (ipRateLimiting ? 25 : 0) +
+      (userRateLimiting ? 25 : 0) +
+      (distributedRateLimiting ? 25 : 0) +
+      (progressiveDelays ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Rate limiting is properly implemented' : 'Rate limiting needs improvement',
+      message: passed
+        ? 'Rate limiting is properly implemented'
+        : 'Rate limiting needs improvement',
       details: {
         ipRateLimiting,
         userRateLimiting,
@@ -389,24 +418,29 @@ class SecurityValidationFramework {
     const lengthLimits = true;
     const specialCharSanitization = true;
 
-    const score = (emailValidation ? 25 : 0) + 
-                  (passwordValidation ? 25 : 0) + 
-                  (lengthLimits ? 25 : 0) + 
-                  (specialCharSanitization ? 25 : 0);
+    const score =
+      (emailValidation ? 25 : 0) +
+      (passwordValidation ? 25 : 0) +
+      (lengthLimits ? 25 : 0) +
+      (specialCharSanitization ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Input validation is comprehensive' : 'Input validation needs improvement',
+      message: passed
+        ? 'Input validation is comprehensive'
+        : 'Input validation needs improvement',
       details: {
         emailValidation,
         passwordValidation,
         lengthLimits,
         specialCharSanitization,
       },
-      recommendations: passed ? [] : ['Implement comprehensive input validation'],
+      recommendations: passed
+        ? []
+        : ['Implement comprehensive input validation'],
     };
   }
 
@@ -417,17 +451,20 @@ class SecurityValidationFramework {
     const secureCookies = true;
     const sslTlsValidation = true;
 
-    const score = (httpsEnforcement ? 25 : 0) + 
-                  (hstsHeaders ? 25 : 0) + 
-                  (secureCookies ? 25 : 0) + 
-                  (sslTlsValidation ? 25 : 0);
+    const score =
+      (httpsEnforcement ? 25 : 0) +
+      (hstsHeaders ? 25 : 0) +
+      (secureCookies ? 25 : 0) +
+      (sslTlsValidation ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Secure communication is properly configured' : 'Secure communication needs improvement',
+      message: passed
+        ? 'Secure communication is properly configured'
+        : 'Secure communication needs improvement',
       details: {
         httpsEnforcement,
         hstsHeaders,
@@ -445,17 +482,20 @@ class SecurityValidationFramework {
     const serverSideLogging = true;
     const errorHandlingMiddleware = true;
 
-    const score = (errorSanitization ? 25 : 0) + 
-                  (genericErrorResponses ? 25 : 0) + 
-                  (serverSideLogging ? 25 : 0) + 
-                  (errorHandlingMiddleware ? 25 : 0);
+    const score =
+      (errorSanitization ? 25 : 0) +
+      (genericErrorResponses ? 25 : 0) +
+      (serverSideLogging ? 25 : 0) +
+      (errorHandlingMiddleware ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Error handling is secure' : 'Error handling needs improvement',
+      message: passed
+        ? 'Error handling is secure'
+        : 'Error handling needs improvement',
       details: {
         errorSanitization,
         genericErrorResponses,
@@ -474,18 +514,21 @@ class SecurityValidationFramework {
     const sessionEvents = true;
     const logIntegrity = true;
 
-    const score = (authenticationAttempts ? 20 : 0) + 
-                  (successfulLogins ? 20 : 0) + 
-                  (failedLogins ? 20 : 0) + 
-                  (sessionEvents ? 20 : 0) + 
-                  (logIntegrity ? 20 : 0);
+    const score =
+      (authenticationAttempts ? 20 : 0) +
+      (successfulLogins ? 20 : 0) +
+      (failedLogins ? 20 : 0) +
+      (sessionEvents ? 20 : 0) +
+      (logIntegrity ? 20 : 0);
 
     const passed = score >= 80;
 
     return {
       passed,
       score,
-      message: passed ? 'Audit logging is comprehensive' : 'Audit logging needs improvement',
+      message: passed
+        ? 'Audit logging is comprehensive'
+        : 'Audit logging needs improvement',
       details: {
         authenticationAttempts,
         successfulLogins,
@@ -504,17 +547,20 @@ class SecurityValidationFramework {
     const expirationHandling = true;
     const refreshMechanism = true;
 
-    const score = (secureGeneration ? 25 : 0) + 
-                  (properSigning ? 25 : 0) + 
-                  (expirationHandling ? 25 : 0) + 
-                  (refreshMechanism ? 25 : 0);
+    const score =
+      (secureGeneration ? 25 : 0) +
+      (properSigning ? 25 : 0) +
+      (expirationHandling ? 25 : 0) +
+      (refreshMechanism ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Token security is properly implemented' : 'Token security needs improvement',
+      message: passed
+        ? 'Token security is properly implemented'
+        : 'Token security needs improvement',
       details: {
         secureGeneration,
         properSigning,
@@ -532,17 +578,20 @@ class SecurityValidationFramework {
     const resourceAuthorization = true;
     const adminProtection = true;
 
-    const score = (roleBasedAccess ? 25 : 0) + 
-                  (permissionChecks ? 25 : 0) + 
-                  (resourceAuthorization ? 25 : 0) + 
-                  (adminProtection ? 25 : 0);
+    const score =
+      (roleBasedAccess ? 25 : 0) +
+      (permissionChecks ? 25 : 0) +
+      (resourceAuthorization ? 25 : 0) +
+      (adminProtection ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Authorization is properly implemented' : 'Authorization needs improvement',
+      message: passed
+        ? 'Authorization is properly implemented'
+        : 'Authorization needs improvement',
       details: {
         roleBasedAccess,
         permissionChecks,
@@ -560,17 +609,20 @@ class SecurityValidationFramework {
     const secureStorage = true;
     const dataMinimization = true;
 
-    const score = (passwordHashing ? 25 : 0) + 
-                  (dataEncryption ? 25 : 0) + 
-                  (secureStorage ? 25 : 0) + 
-                  (dataMinimization ? 25 : 0);
+    const score =
+      (passwordHashing ? 25 : 0) +
+      (dataEncryption ? 25 : 0) +
+      (secureStorage ? 25 : 0) +
+      (dataMinimization ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Data protection is properly implemented' : 'Data protection needs improvement',
+      message: passed
+        ? 'Data protection is properly implemented'
+        : 'Data protection needs improvement',
       details: {
         passwordHashing,
         dataEncryption,
@@ -588,24 +640,29 @@ class SecurityValidationFramework {
     const botDetection = true;
     const anomalyDetection = true;
 
-    const score = (suspiciousActivityDetection ? 25 : 0) + 
-                  (ipBlacklisting ? 25 : 0) + 
-                  (botDetection ? 25 : 0) + 
-                  (anomalyDetection ? 25 : 0);
+    const score =
+      (suspiciousActivityDetection ? 25 : 0) +
+      (ipBlacklisting ? 25 : 0) +
+      (botDetection ? 25 : 0) +
+      (anomalyDetection ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Threat detection is properly implemented' : 'Threat detection needs improvement',
+      message: passed
+        ? 'Threat detection is properly implemented'
+        : 'Threat detection needs improvement',
       details: {
         suspiciousActivityDetection,
         ipBlacklisting,
         botDetection,
         anomalyDetection,
       },
-      recommendations: passed ? [] : ['Implement threat detection capabilities'],
+      recommendations: passed
+        ? []
+        : ['Implement threat detection capabilities'],
     };
   }
 
@@ -616,17 +673,20 @@ class SecurityValidationFramework {
     const xContentTypeOptions = true;
     const strictTransportSecurity = true;
 
-    const score = (contentSecurityPolicy ? 25 : 0) + 
-                  (xFrameOptions ? 25 : 0) + 
-                  (xContentTypeOptions ? 25 : 0) + 
-                  (strictTransportSecurity ? 25 : 0);
+    const score =
+      (contentSecurityPolicy ? 25 : 0) +
+      (xFrameOptions ? 25 : 0) +
+      (xContentTypeOptions ? 25 : 0) +
+      (strictTransportSecurity ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Security headers are properly implemented' : 'Security headers need improvement',
+      message: passed
+        ? 'Security headers are properly implemented'
+        : 'Security headers need improvement',
       details: {
         contentSecurityPolicy,
         xFrameOptions,
@@ -644,17 +704,20 @@ class SecurityValidationFramework {
     const secureDependencies = true;
     const regularUpdates = true;
 
-    const score = (dependencyScanning ? 25 : 0) + 
-                  (vulnerabilityMonitoring ? 25 : 0) + 
-                  (secureDependencies ? 25 : 0) + 
-                  (regularUpdates ? 25 : 0);
+    const score =
+      (dependencyScanning ? 25 : 0) +
+      (vulnerabilityMonitoring ? 25 : 0) +
+      (secureDependencies ? 25 : 0) +
+      (regularUpdates ? 25 : 0);
 
     const passed = score >= 75;
 
     return {
       passed,
       score,
-      message: passed ? 'Dependency security is properly managed' : 'Dependency security needs improvement',
+      message: passed
+        ? 'Dependency security is properly managed'
+        : 'Dependency security needs improvement',
       details: {
         dependencyScanning,
         vulnerabilityMonitoring,
@@ -671,7 +734,11 @@ class SecurityValidationFramework {
     return 'medium'; // Simplified for this example
   }
 
-  private generateSummary(overallScore: number, _criticalFailures: number, _highFailures: number): string {
+  private generateSummary(
+    overallScore: number,
+    _criticalFailures: number,
+    _highFailures: number
+  ): string {
     if (overallScore >= 90) {
       return 'Excellent security posture with minimal issues';
     } else if (overallScore >= 75) {
@@ -685,9 +752,9 @@ class SecurityValidationFramework {
 
   private generateRecommendations(results: ValidationResult[]): string[] {
     const recommendations: string[] = [];
-    
-    const failedResults = results.filter(r => !r.passed);
-    
+
+    const failedResults = results.filter((r) => !r.passed);
+
     if (failedResults.length > 0) {
       recommendations.push('Address all failed validation rules');
       recommendations.push('Implement comprehensive security testing');
@@ -707,14 +774,14 @@ class SecurityValidationFramework {
   }
 
   enableRule(ruleId: string): void {
-    const rule = this.rules.find(r => r.id === ruleId);
+    const rule = this.rules.find((r) => r.id === ruleId);
     if (rule) {
       rule.enabled = true;
     }
   }
 
   disableRule(ruleId: string): void {
-    const rule = this.rules.find(r => r.id === ruleId);
+    const rule = this.rules.find((r) => r.id === ruleId);
     if (rule) {
       rule.enabled = false;
     }
@@ -769,4 +836,9 @@ describe('Security Validation Framework', () => {
   });
 });
 
-export { SecurityValidationFramework, type SecurityValidationRule, type ValidationResult, type SecurityValidationReport };
+export {
+  SecurityValidationFramework,
+  type SecurityValidationRule,
+  type ValidationResult,
+  type SecurityValidationReport,
+};

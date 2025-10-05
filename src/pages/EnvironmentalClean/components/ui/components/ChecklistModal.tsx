@@ -26,10 +26,18 @@ interface ChecklistModalProps {
   onAdjustQuantity: (itemId: string, quantity: number) => void;
   onViewSDS: (sds: unknown) => void;
   onAddStolenItem: () => void;
-  onUpdateStolenItem: (index: number, field: string, value: string | number) => void;
+  onUpdateStolenItem: (
+    index: number,
+    field: string,
+    value: string | number
+  ) => void;
   onClearStolenItems: () => void;
   onAddPrnItem: () => void;
-  onUpdatePrnItem: (index: number, field: string, value: string | number) => void;
+  onUpdatePrnItem: (
+    index: number,
+    field: string,
+    value: string | number
+  ) => void;
   onClearPrnItems: () => void;
   onNotesChange: (notes: string) => void;
   onClearNotes: () => void;
@@ -103,9 +111,7 @@ export const ChecklistModal: React.FC<ChecklistModalProps> = ({
                 <h3 className="text-lg font-medium text-gray-800 mb-1">
                   {checklist.title}
                 </h3>
-                <p className="text-sm text-gray-600">
-                  {checklist.description}
-                </p>
+                <p className="text-sm text-gray-600">{checklist.description}</p>
               </div>
             ))}
           {selectedCategory &&

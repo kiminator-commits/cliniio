@@ -5,7 +5,8 @@ import {
   BITestResult,
   ActivityLogItem,
 } from '@/store/slices/types/biWorkflowTypes';
-import { UnifiedAIService } from '@/services/ai/UnifiedAIService';
+import { UnifiedAIService as _UnifiedAIService } from '@/services/ai/UnifiedAIService';
+import { useCentralizedInventoryData } from '@/hooks/useCentralizedInventoryData';
 
 // Define types locally since we're migrating away from vercelAIService
 interface AnalyticsInsight {
@@ -51,7 +52,12 @@ export const useAnalyticsData = () => {
     nextBITestDue,
     activityLog,
     availableTools,
+    loadBITestResults,
+    loadBIFailureIncidents,
   } = useSterilizationStore();
+
+  // Get inventory data to ensure tool counts match inventory page
+  const { tools: inventoryTools } = useCentralizedInventoryData();
 
   // AI-powered analytics state
   const [aiInsights, setAiInsights] = useState<AnalyticsInsight[]>([]);
@@ -60,19 +66,67 @@ export const useAnalyticsData = () => {
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiGenerationAttempted, setAiGenerationAttempted] = useState(false);
 
-  // Check if data is still loading (not if it's empty)
-  const isLoading = !availableTools;
+  // Check if inventory data is available - don't wait for sterilization tools
+  const isLoading = !inventoryTools || inventoryTools.length === 0;
+
+  // Manual refresh function for debugging
+  const refreshBIResults = useCallback(async () => {
+    try {
+      console.log('🔄 Manually refreshing BI results...');
+      const facilityId = '550e8400-e29b-41d4-a716-446655440000'; // Default facility
+      await loadBITestResults(facilityId);
+      await loadBIFailureIncidents(facilityId);
+      console.log('✅ BI results refreshed successfully');
+    } catch (error) {
+      console.error('❌ Failed to refresh BI results:', error);
+    }
+  }, [loadBITestResults, loadBIFailureIncidents]);
+
+  // Load BI test results from database when analytics loads
+  useEffect(() => {
+    const loadBIActivities = async () => {
+      try {
+        const facilityId = '550e8400-e29b-41d4-a716-446655440000'; // Default facility
+        await loadBITestResults(facilityId);
+        await loadBIFailureIncidents(facilityId);
+      } catch (error) {
+        console.error('Failed to load BI activities:', error);
+      }
+    };
+
+    // Initial load
+    loadBIActivities();
+
+    // Set up daily refresh at midnight
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+
+    const dailyRefreshTimer = setTimeout(() => {
+      // Refresh at midnight
+      loadBIActivities();
+
+      // Then refresh every 24 hours
+      setInterval(loadBIActivities, 24 * 60 * 60 * 1000);
+    }, msUntilMidnight);
+
+    // Cleanup timer on unmount
+    return () => clearTimeout(dailyRefreshTimer);
+  }, [loadBITestResults, loadBIFailureIncidents]);
 
   // Memoize additional metrics calculations
   const additionalMetrics = useMemo(() => {
+    // Total Tools: Use inventory data to match inventory page count
+    const totalTools = inventoryTools.length;
+
     if (isLoading) {
-      return { totalTools: 0, activeTools: 0, completedToday: 0 };
+      return { totalTools, activeTools: 0, completedToday: 0 };
     }
 
-    // Total Tools: All tools in the inventory
-    const totalTools = availableTools.length;
-
-    // In Cycle: All tools that are currently in any timer phase
+    // In Cycle: All tools that are currently in any timer phase (from sterilization data)
     const inCycleTools = availableTools.filter(
       (tool: Tool) =>
         tool.currentPhase &&
@@ -91,10 +145,24 @@ export const useAnalyticsData = () => {
     }).length;
 
     return { totalTools, activeTools: inCycleTools, completedToday };
-  }, [availableTools, isLoading]);
+  }, [availableTools, inventoryTools, isLoading]);
 
   // Memoize recent BI test results filtering and sorting
   const recentBITests = useMemo(() => {
+    console.log('🔍 recentBITests filter:', {
+      isLoading,
+      biTestResultsLength: biTestResults?.length || 0,
+      biTestResults:
+        biTestResults?.length > 0
+          ? biTestResults.slice(0, 3).map((t) => ({
+              status: t.status,
+              date: t.date,
+              passed: t.passed,
+              id: t.id,
+            }))
+          : 'none',
+    });
+
     if (isLoading || !biTestResults || biTestResults.length === 0) {
       return [];
     }
@@ -104,11 +172,13 @@ export const useAnalyticsData = () => {
         // 7-day rolling window for recent tests
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        return result.date >= sevenDaysAgo;
+        // Convert test_date string to Date for comparison
+        const testDate = new Date(result.test_date);
+        return testDate >= sevenDaysAgo;
       })
       .sort(
         (a: BITestResult, b: BITestResult) =>
-          b.date.getTime() - a.date.getTime()
+          new Date(b.test_date).getTime() - new Date(a.test_date).getTime()
       ) // Sort by most recent first
       .slice(0, 5); // Limit to 5 most recent tests for UI performance
   }, [biTestResults, isLoading]);
@@ -119,112 +189,32 @@ export const useAnalyticsData = () => {
       return [];
     }
 
-    return activityLog
-      .map((item: ActivityLogItem) => {
-        const formattedTime = formatTimeAgo(item.time);
-        return {
-          id: item.id,
-          type: item.type,
-          title: item.title,
-          description: item.data?.description,
-          time: formattedTime,
-          toolCount: item.toolCount,
-          color: item.color,
-          operatorId: item.operatorId,
-          metadata: item.metadata,
-        } as FormattedActivityItem;
-      })
-      .slice(0, 10);
+    return activityLog.map((item: ActivityLogItem) => {
+      const formattedTime = formatTimeAgo(item.time);
+      return {
+        id: item.id,
+        type: item.type,
+        title: item.title,
+        description: item.data?.description,
+        time: formattedTime,
+        toolCount: item.toolCount,
+        color: item.color,
+        operatorId: item.operatorId,
+        metadata: item.metadata,
+      } as FormattedActivityItem;
+    });
+    // Remove limit to show all activities (component will handle scrolling)
   }, [activityLog, isLoading]);
 
-  // AI insights generation
+  // AI insights generation - DISABLED due to OpenAI API issues
   const generateAIInsights = useCallback(async () => {
-    // Prevent multiple simultaneous calls
-    if (isAiLoading || aiGenerationAttempted) {
-      return;
-    }
-
-    setIsAiLoading(true);
-    setAiError(null);
+    // Skip AI generation to prevent blocking page load
+    setAiInsights([]);
+    setAiForecasts([]);
+    setIsAiLoading(false);
     setAiGenerationAttempted(true);
-
-    try {
-      // Generate analytics insights using UnifiedAIService
-      const insightsPrompt = `Analyze the following sterilization data and provide insights:
-        - Available Tools: ${availableTools?.length || 0} tools
-        - BI Test Results: ${biTestResults?.length || 0} results
-        - Activity Log: ${activityLog?.length || 0} entries
-        
-        Please provide analytics insights including trends, anomalies, predictions, and recommendations.`;
-      
-      const insightsResponse = await UnifiedAIService.askAI(insightsPrompt, 'sterilization analytics');
-      
-      // Parse the response into insights format
-      const insights: AnalyticsInsight[] = [
-        {
-          type: 'trend',
-          title: 'Sterilization Trend Analysis',
-          description: insightsResponse,
-          confidence: 0.85,
-          actionable: true,
-          priority: 'medium'
-        }
-      ];
-      setAiInsights(insights);
-
-      // Generate forecasts using UnifiedAIService
-      const forecastsPrompt = `Based on the sterilization data, provide forecasts for:
-        - Total Tools: ${availableTools?.length || 0}
-        - BI Test Results: ${biTestResults?.length || 0}
-        - Activity Log: ${activityLog?.length || 0}
-        
-        Please provide cycle forecasts and predictions.`;
-      
-      const _forecastsResponse = await UnifiedAIService.askAI(forecastsPrompt, 'sterilization forecasting');
-      
-      // Parse the response into forecasts format
-      const forecasts: ForecastPrediction[] = [
-        {
-          metric: 'Cycle Efficiency',
-          currentValue: 85,
-          predictedValue: 88,
-          timeframe: 'Next 30 days',
-          confidence: 0.80,
-          factors: ['Tool availability', 'BI test results'],
-          recommendations: ['Optimize cycle timing', 'Monitor BI indicators']
-        }
-      ];
-      setAiForecasts(forecasts);
-    } catch (error) {
-      console.warn('AI insights generation failed (non-blocking):', error);
-      // Set a user-friendly error message based on the error type
-      if (error instanceof Error) {
-        if (error.message.includes('timed out')) {
-          setAiError(
-            'AI insights are taking longer than expected. Please try again later.'
-          );
-        } else if (error.message.includes('Rate limit')) {
-          setAiError('AI service is temporarily busy. Please try again later.');
-        } else {
-          setAiError(
-            'AI insights temporarily unavailable. Using standard analytics.'
-          );
-        }
-      } else {
-        setAiError(
-          'AI insights temporarily unavailable. Using standard analytics.'
-        );
-      }
-    } finally {
-      setIsAiLoading(false);
-    }
-  }, [
-    availableTools,
-    biTestResults,
-    activityLog,
-    aiGenerationAttempted,
-    isAiLoading,
-  ]);
+    setAiError(null);
+  }, []);
 
   // Generate AI insights when data is available - but don't block the page
   useEffect(() => {
@@ -281,6 +271,7 @@ export const useAnalyticsData = () => {
     additionalMetrics,
     recentBITests,
     nextBITestDue,
+    refreshBIResults, // Expose manual refresh function
     recentActivities,
     aiInsights,
     aiForecasts,

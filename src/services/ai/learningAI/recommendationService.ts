@@ -3,7 +3,12 @@ import { LearningAIModelProvider } from '../../learningAI/LearningAIModelProvide
 import type { PersonalizedRecommendationResult } from '../../../types/learningAITypes';
 import type { Json } from '../../../types/database.types';
 import type { PersonalizedRecommendationRow } from '../../../types/learningAITypes';
-import { calculateProcessingTime, formatRecommendationReasoning, parseRecommendationReasoning, getCurrentTimestamp } from '../../learningAI/learningAIUtils';
+import {
+  calculateProcessingTime,
+  formatRecommendationReasoning,
+  parseRecommendationReasoning,
+  getCurrentTimestamp,
+} from '../../learningAI/learningAIUtils';
 
 export class RecommendationService {
   private facilityId: string;
@@ -49,7 +54,9 @@ export class RecommendationService {
         facility_id: result.facility_id,
         user_id: result.user_id,
         recommended_content: result.recommended_content as Json,
-        recommendation_reasoning: formatRecommendationReasoning(result.recommendation_reasoning),
+        recommendation_reasoning: formatRecommendationReasoning(
+          result.recommendation_reasoning
+        ),
         confidence_scores: result.confidence_scores as Json,
         learning_path_suggestions: result.learning_path_suggestions as Json,
         skill_development_areas: result.skill_development_areas as Json,
@@ -85,7 +92,9 @@ export class RecommendationService {
         facility_id: resultData.facility_id ?? '',
         user_id: resultData.user_id ?? '',
         recommended_content: (resultData.recommended_content as string[]) ?? [],
-        recommendation_reasoning: parseRecommendationReasoning(resultData.recommendation_reasoning),
+        recommendation_reasoning: parseRecommendationReasoning(
+          resultData.recommendation_reasoning
+        ),
         confidence_scores: (resultData.confidence_scores as number[]) ?? [],
         learning_path_suggestions:
           (resultData.learning_path_suggestions as string[]) ?? [],

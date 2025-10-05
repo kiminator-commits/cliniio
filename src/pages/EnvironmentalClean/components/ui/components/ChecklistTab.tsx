@@ -91,9 +91,7 @@ export const ChecklistTab: React.FC<ChecklistTabProps> = ({
                 )}
                 {getChecklistsForCategory(selectedCategory.id).length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    <p>
-                      No published checklists available for this category.
-                    </p>
+                    <p>No published checklists available for this category.</p>
                     <p className="text-sm mt-1">
                       Create and publish checklists in Settings to see them
                       here.

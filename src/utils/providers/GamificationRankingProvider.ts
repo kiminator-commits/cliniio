@@ -24,10 +24,7 @@ export class GamificationRankingProvider {
   /**
    * Calculate user rank among facility users
    */
-  async calculateUserRank(
-    userId: string,
-    facilityId: string
-  ): Promise<number> {
+  async calculateUserRank(userId: string, facilityId: string): Promise<number> {
     try {
       // Get all users in facility and their points
       const { data: users } = await supabase
@@ -145,7 +142,7 @@ export class GamificationRankingProvider {
         (a, b) => (b.total_points || 0) - (a.total_points || 0)
       );
 
-      const userIndex = sortedUsers.findIndex(u => u.id === userId);
+      const userIndex = sortedUsers.findIndex((u) => u.id === userId);
       const userRank = userIndex + 1;
       const totalUsers = users.length;
       const percentile = ((totalUsers - userRank + 1) / totalUsers) * 100;
@@ -221,7 +218,7 @@ export class GamificationRankingProvider {
       };
     }
 
-    const points = rankings.map(r => r.points).sort((a, b) => a - b);
+    const points = rankings.map((r) => r.points).sort((a, b) => a - b);
     const totalUsers = rankings.length;
     const averagePoints = points.reduce((sum, p) => sum + p, 0) / totalUsers;
     const medianPoints = points[Math.floor(totalUsers / 2)];
@@ -238,8 +235,10 @@ export class GamificationRankingProvider {
       { min: 5001, max: Infinity, label: '5000+' },
     ];
 
-    const distribution = ranges.map(range => {
-      const count = points.filter(p => p >= range.min && p <= range.max).length;
+    const distribution = ranges.map((range) => {
+      const count = points.filter(
+        (p) => p >= range.min && p <= range.max
+      ).length;
       return {
         range: range.label,
         count,
@@ -280,11 +279,13 @@ export class GamificationRankingProvider {
       trend: 'up' | 'down' | 'stable';
     }> = [];
 
-    currentRankings.forEach(current => {
-      const previous = previousRankings.find(p => p.userId === current.userId);
+    currentRankings.forEach((current) => {
+      const previous = previousRankings.find(
+        (p) => p.userId === current.userId
+      );
       const previousRank = previous?.rank || currentRankings.length + 1;
       const rankChange = previousRank - current.rank; // Positive means improvement
-      
+
       let trend: 'up' | 'down' | 'stable' = 'stable';
       if (rankChange > 0) trend = 'up';
       else if (rankChange < 0) trend = 'down';
@@ -299,7 +300,9 @@ export class GamificationRankingProvider {
       });
     });
 
-    return trends.sort((a, b) => Math.abs(b.rankChange) - Math.abs(a.rankChange));
+    return trends.sort(
+      (a, b) => Math.abs(b.rankChange) - Math.abs(a.rankChange)
+    );
   }
 
   /**
@@ -428,7 +431,10 @@ export class GamificationRankingProvider {
       errors.push('Points cannot be negative');
     }
 
-    if (ranking.level !== undefined && (ranking.level < 1 || ranking.level > 100)) {
+    if (
+      ranking.level !== undefined &&
+      (ranking.level < 1 || ranking.level > 100)
+    ) {
       errors.push('Level must be between 1 and 100');
     }
 
@@ -455,7 +461,7 @@ export class GamificationRankingProvider {
   } {
     try {
       const rankings = JSON.parse(jsonData) as UserRanking[];
-      
+
       if (!Array.isArray(rankings)) {
         return {
           success: false,

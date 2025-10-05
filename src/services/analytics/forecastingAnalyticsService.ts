@@ -53,7 +53,9 @@ export class ForecastingAnalyticsService {
   async getToolReplacementForecast(
     filters: AnalyticsFilters = {}
   ): Promise<ToolReplacementForecast[]> {
-    return ToolReplacementForecastService.getInstance().getToolReplacementForecast(filters);
+    return ToolReplacementForecastService.getInstance().getToolReplacementForecast(
+      filters
+    );
   }
 
   /**
@@ -63,7 +65,9 @@ export class ForecastingAnalyticsService {
   async getAutoclaveCapacityForecast(
     filters: AnalyticsFilters = {}
   ): Promise<AutoclaveCapacityForecast[]> {
-    return AutoclaveCapacityForecastService.getInstance().getAutoclaveCapacityForecast(filters);
+    return AutoclaveCapacityForecastService.getInstance().getAutoclaveCapacityForecast(
+      filters
+    );
   }
 
   /**
@@ -73,7 +77,9 @@ export class ForecastingAnalyticsService {
   async getInventoryInflationForecast(
     filters: AnalyticsFilters = {}
   ): Promise<InventoryInflationForecast[]> {
-    return InventoryInflationForecastService.getInstance().getInventoryInflationForecast(filters);
+    return InventoryInflationForecastService.getInstance().getInventoryInflationForecast(
+      filters
+    );
   }
 
   /**
@@ -83,7 +89,9 @@ export class ForecastingAnalyticsService {
   async getClinicalStaffingForecast(
     filters: AnalyticsFilters = {}
   ): Promise<ClinicalStaffingForecast[]> {
-    return ClinicalStaffingForecastService.getInstance().getClinicalStaffingForecast(filters);
+    return ClinicalStaffingForecastService.getInstance().getClinicalStaffingForecast(
+      filters
+    );
   }
 
   /**
@@ -93,7 +101,9 @@ export class ForecastingAnalyticsService {
   async getAdminStaffingForecast(
     filters: AnalyticsFilters = {}
   ): Promise<AdminStaffingForecast[]> {
-    return AdminStaffingForecastService.getInstance().getAdminStaffingForecast(filters);
+    return AdminStaffingForecastService.getInstance().getAdminStaffingForecast(
+      filters
+    );
   }
 
   /**
@@ -113,7 +123,9 @@ export class ForecastingAnalyticsService {
   async getSupplyDepletionForecast(
     filters: AnalyticsFilters = {}
   ): Promise<SupplyDepletionForecast[]> {
-    return SupplyDepletionForecastService.getInstance().getSupplyDepletionForecast(filters);
+    return SupplyDepletionForecastService.getInstance().getSupplyDepletionForecast(
+      filters
+    );
   }
 
   /**
@@ -123,9 +135,10 @@ export class ForecastingAnalyticsService {
   async getToolTurnoverUtilization(
     filters: AnalyticsFilters = {}
   ): Promise<ToolTurnoverUtilization[]> {
-    return SterilizationMetricsService.getInstance().getToolTurnoverUtilization(filters);
+    return SterilizationMetricsService.getInstance().getToolTurnoverUtilization(
+      filters
+    );
   }
-
 
   /**
    * 🚨 Audit Risk Score
@@ -144,7 +157,9 @@ export class ForecastingAnalyticsService {
   async getTrainingKnowledgeGaps(
     filters: AnalyticsFilters = {}
   ): Promise<TrainingKnowledgeGaps | null> {
-    return AuditRiskForecastService.getInstance().getTrainingKnowledgeGaps(filters);
+    return AuditRiskForecastService.getInstance().getTrainingKnowledgeGaps(
+      filters
+    );
   }
 
   /**
@@ -154,9 +169,10 @@ export class ForecastingAnalyticsService {
   async getEfficiencyROITracker(
     filters: AnalyticsFilters = {}
   ): Promise<EfficiencyROITracker | null> {
-    return EfficiencyRoiForecastService.getInstance().getEfficiencyROITracker(filters);
+    return EfficiencyRoiForecastService.getInstance().getEfficiencyROITracker(
+      filters
+    );
   }
-
 
   /**
    * 🧠 Get comprehensive intelligence summary
@@ -203,7 +219,9 @@ export class ForecastingAnalyticsService {
         this.getAuditRiskScore(filters),
         this.getTrainingKnowledgeGaps(filters),
         this.getEfficiencyROITracker(filters),
-        SterilizationMetricsService.getInstance().getSterilizationMetrics(filters),
+        SterilizationMetricsService.getInstance().getSterilizationMetrics(
+          filters
+        ),
         SterilizationMetricsService.getInstance().getInventoryMetrics(filters),
       ]);
 

@@ -49,6 +49,7 @@ export interface TeamPerformance {
 
 export interface MetricsData {
   timeSaved: TimeSaved;
+  aiTimeSaved: TimeSaved; // Add AI-specific time savings
   costSavings: CostSavings;
   aiEfficiency: AiEfficiency;
   teamPerformance: TeamPerformance;

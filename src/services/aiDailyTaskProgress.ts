@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import { getCurrentUserIdWithFallback } from '../utils/authUtils';
+import { gamificationService } from './gamificationService';
 
 export interface OperationalGap {
   id: string;
@@ -147,21 +148,101 @@ export async function getFacilityDailyTasks(
 }
 
 /**
- * Mark a daily task as completed
+ * Mark a daily task as completed and award points
  */
 export async function completeDailyTask(
   taskId: string,
   userId: string
 ): Promise<void> {
-  const { error } = await supabase
-    .from('home_daily_operations_tasks')
-    .update({
-      completed: true,
-      status: 'completed',
-      completed_by: userId,
-      completed_at: new Date().toISOString(),
-    })
-    .eq('id', taskId);
+  try {
+    // First, get the task details to retrieve points
+    const { data: taskData, error: taskError } = await supabase
+      .from('home_daily_operations_tasks')
+      .select('points, facility_id, title, category')
+      .eq('id', taskId)
+      .single();
 
-  if (error) throw error;
+    if (taskError || !taskData) {
+      throw new Error(
+        `Task not found: ${taskError?.message || 'Unknown error'}`
+      );
+    }
+
+    const pointsToAward = taskData.points || 0;
+
+    // Update the task as completed
+    const { error: updateError } = await supabase
+      .from('home_daily_operations_tasks')
+      .update({
+        completed: true,
+        status: 'completed',
+        completed_by: userId,
+        completed_at: new Date().toISOString(),
+      })
+      .eq('id', taskId);
+
+    if (updateError) {
+      throw new Error(`Failed to complete task: ${updateError.message}`);
+    }
+
+    // Award points by creating a completion record in the gamification system
+    if (pointsToAward > 0) {
+      const { error: completionError } = await supabase
+        .from('home_challenge_completions')
+        .insert({
+          challenge_id: taskId, // Use task ID as challenge ID for daily tasks
+          user_id: userId,
+          facility_id: taskData.facility_id,
+          points_earned: pointsToAward,
+          completion_type: 'daily_task', // Distinguish from regular challenges
+          task_title: taskData.title,
+          task_category: taskData.category,
+        });
+
+      if (completionError) {
+        console.error(
+          'Failed to award points for task completion:',
+          completionError
+        );
+        // Don't throw error here - task is still completed, just points weren't awarded
+      } else {
+        console.log(
+          `Awarded ${pointsToAward} points for completing task: ${taskData.title}`
+        );
+
+        // Update gamification data and check for level progression
+        try {
+          const progression = await gamificationService.updateGamificationData({
+            userId,
+            facilityId: taskData.facility_id,
+            pointsEarned: pointsToAward,
+            taskTitle: taskData.title,
+            taskCategory: taskData.category,
+          });
+
+          // Check if user leveled up
+          const leveledUp = progression.currentLevel > 1; // Simple check for now
+          if (leveledUp) {
+            console.log(
+              `🎉 Level up! User ${userId} reached level ${progression.currentLevel}`
+            );
+            // TODO: Add level up notification/celebration
+          }
+
+          console.log('Gamification updated:', {
+            level: progression.currentLevel,
+            totalPoints: progression.totalPoints,
+            rank: progression.rank,
+            pointsToNextLevel: progression.pointsToNextLevel,
+          });
+        } catch (gamificationError) {
+          console.error('Error updating gamification data:', gamificationError);
+          // Don't throw error - task completion is still successful
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error completing daily task:', error);
+    throw error;
+  }
 }

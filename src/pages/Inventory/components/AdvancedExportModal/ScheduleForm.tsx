@@ -49,9 +49,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
 
   return (
     <div className="mb-6 p-4 border border-gray-200 rounded-lg">
-      <h4 className="font-medium text-gray-900 mb-4">
-        Create New Schedule
-      </h4>
+      <h4 className="font-medium text-gray-900 mb-4">Create New Schedule</h4>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>

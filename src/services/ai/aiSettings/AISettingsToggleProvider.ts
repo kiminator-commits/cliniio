@@ -21,7 +21,11 @@ export class AISettingsToggleProvider {
     enabled: boolean
   ): UnifiedAISettings {
     const updatedSettings = { ...settings };
-    this.setNestedValue(updatedSettings as Record<string, unknown>, featurePath, enabled);
+    this.setNestedValue(
+      updatedSettings as Record<string, unknown>,
+      featurePath,
+      enabled
+    );
     return updatedSettings;
   }
 
@@ -31,9 +35,13 @@ export class AISettingsToggleProvider {
     featureToggles: Record<string, boolean>
   ): UnifiedAISettings {
     const updatedSettings = { ...settings };
-    
+
     Object.entries(featureToggles).forEach(([featurePath, enabled]) => {
-      this.setNestedValue(updatedSettings as Record<string, unknown>, featurePath, enabled);
+      this.setNestedValue(
+        updatedSettings as Record<string, unknown>,
+        featurePath,
+        enabled
+      );
     });
 
     return updatedSettings;
@@ -45,10 +53,13 @@ export class AISettingsToggleProvider {
     category: keyof UnifiedAISettings
   ): UnifiedAISettings {
     const updatedSettings = { ...settings };
-    
-    if (typeof updatedSettings[category] === 'object' && updatedSettings[category] !== null) {
+
+    if (
+      typeof updatedSettings[category] === 'object' &&
+      updatedSettings[category] !== null
+    ) {
       const categoryObj = updatedSettings[category] as Record<string, boolean>;
-      Object.keys(categoryObj).forEach(key => {
+      Object.keys(categoryObj).forEach((key) => {
         categoryObj[key] = true;
       });
     }
@@ -62,10 +73,13 @@ export class AISettingsToggleProvider {
     category: keyof UnifiedAISettings
   ): UnifiedAISettings {
     const updatedSettings = { ...settings };
-    
-    if (typeof updatedSettings[category] === 'object' && updatedSettings[category] !== null) {
+
+    if (
+      typeof updatedSettings[category] === 'object' &&
+      updatedSettings[category] !== null
+    ) {
       const categoryObj = updatedSettings[category] as Record<string, boolean>;
-      Object.keys(categoryObj).forEach(key => {
+      Object.keys(categoryObj).forEach((key) => {
         categoryObj[key] = false;
       });
     }
@@ -258,7 +272,11 @@ export class AISettingsToggleProvider {
       );
   }
 
-  private setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
+  private setNestedValue(
+    obj: Record<string, unknown>,
+    path: string,
+    value: unknown
+  ): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
     const target = keys.reduce(

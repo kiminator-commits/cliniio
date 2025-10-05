@@ -19,7 +19,9 @@ export class BISeasonalAnalysisProvider {
   /**
    * Analyze seasonal patterns for a facility
    */
-  static async analyzeSeasonalPatterns(facilityId: string): Promise<SeasonalPattern[]> {
+  static async analyzeSeasonalPatterns(
+    facilityId: string
+  ): Promise<SeasonalPattern[]> {
     try {
       const { data: incidents, error } = await supabase
         .from('bi_failure_incidents')
@@ -64,7 +66,9 @@ export class BISeasonalAnalysisProvider {
   /**
    * Group incidents by season
    */
-  static groupIncidentsBySeason(incidents: BIIncident[]): { [key: string]: { count: number; days: number } } {
+  static groupIncidentsBySeason(incidents: BIIncident[]): {
+    [key: string]: { count: number; days: number };
+  } {
     const seasonalData: { [key: string]: { count: number; days: number } } = {
       Spring: { count: 0, days: 92 },
       Summer: { count: 0, days: 92 },
@@ -97,7 +101,11 @@ export class BISeasonalAnalysisProvider {
   /**
    * Describe seasonal pattern
    */
-  static describeSeasonalPattern(season: string, rate: number, count: number): string {
+  static describeSeasonalPattern(
+    season: string,
+    rate: number,
+    count: number
+  ): string {
     if (rate > 0.5)
       return `High incident rate during ${season} (${count} incidents)`;
     if (rate > 0.2)
@@ -108,7 +116,9 @@ export class BISeasonalAnalysisProvider {
   /**
    * Analyze monthly patterns
    */
-  static async analyzeMonthlyPatterns(facilityId: string): Promise<SeasonalPattern[]> {
+  static async analyzeMonthlyPatterns(
+    facilityId: string
+  ): Promise<SeasonalPattern[]> {
     try {
       const { data: incidents, error } = await supabase
         .from('bi_failure_incidents')
@@ -129,8 +139,18 @@ export class BISeasonalAnalysisProvider {
       const patterns: SeasonalPattern[] = [];
 
       const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
       ];
 
       for (const [monthKey, count] of Object.entries(monthlyData)) {
@@ -158,7 +178,9 @@ export class BISeasonalAnalysisProvider {
   /**
    * Group incidents by month
    */
-  private static groupIncidentsByMonth(incidents: Array<Record<string, unknown> & { created_at: string }>): { [key: string]: number } {
+  private static groupIncidentsByMonth(
+    incidents: Array<Record<string, unknown> & { created_at: string }>
+  ): { [key: string]: number } {
     const monthlyData: { [key: string]: number } = {};
 
     incidents.forEach((incident) => {
@@ -181,7 +203,11 @@ export class BISeasonalAnalysisProvider {
   /**
    * Describe monthly pattern
    */
-  private static describeMonthlyPattern(monthName: string, rate: number, count: number): string {
+  private static describeMonthlyPattern(
+    monthName: string,
+    rate: number,
+    count: number
+  ): string {
     if (rate > 0.5)
       return `High incident rate in ${monthName} (${count} incidents)`;
     if (rate > 0.2)
@@ -192,7 +218,9 @@ export class BISeasonalAnalysisProvider {
   /**
    * Analyze day-of-week patterns
    */
-  static async analyzeDayOfWeekPatterns(facilityId: string): Promise<SeasonalPattern[]> {
+  static async analyzeDayOfWeekPatterns(
+    facilityId: string
+  ): Promise<SeasonalPattern[]> {
     try {
       const { data: incidents, error } = await supabase
         .from('bi_failure_incidents')
@@ -212,13 +240,24 @@ export class BISeasonalAnalysisProvider {
       );
       const patterns: SeasonalPattern[] = [];
 
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
 
       for (const [dayIndex, count] of Object.entries(dayOfWeekData)) {
         const dayName = dayNames[parseInt(dayIndex)];
         const daysInPeriod = 90 / 7; // Approximate days per day of week in 90 days
         const rate = count / daysInPeriod;
-        const confidence = this.calculateSeasonalConfidence(count, daysInPeriod);
+        const confidence = this.calculateSeasonalConfidence(
+          count,
+          daysInPeriod
+        );
 
         patterns.push({
           period: dayName,
@@ -238,13 +277,16 @@ export class BISeasonalAnalysisProvider {
   /**
    * Group incidents by day of week
    */
-  private static groupIncidentsByDayOfWeek(incidents: Array<Record<string, unknown> & { created_at: string }>): { [key: string]: number } {
+  private static groupIncidentsByDayOfWeek(
+    incidents: Array<Record<string, unknown> & { created_at: string }>
+  ): { [key: string]: number } {
     const dayOfWeekData: { [key: string]: number } = {};
 
     incidents.forEach((incident) => {
       const date = new Date(incident.created_at as string);
       const dayOfWeek = date.getDay();
-      dayOfWeekData[dayOfWeek.toString()] = (dayOfWeekData[dayOfWeek.toString()] || 0) + 1;
+      dayOfWeekData[dayOfWeek.toString()] =
+        (dayOfWeekData[dayOfWeek.toString()] || 0) + 1;
     });
 
     return dayOfWeekData;
@@ -253,7 +295,11 @@ export class BISeasonalAnalysisProvider {
   /**
    * Describe day-of-week pattern
    */
-  private static describeDayOfWeekPattern(dayName: string, rate: number, count: number): string {
+  private static describeDayOfWeekPattern(
+    dayName: string,
+    rate: number,
+    count: number
+  ): string {
     if (rate > 0.5)
       return `High incident rate on ${dayName}s (${count} incidents)`;
     if (rate > 0.2)

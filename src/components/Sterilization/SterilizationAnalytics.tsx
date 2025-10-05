@@ -47,18 +47,20 @@ const AnalyticsLoadingFallback = () => (
  * @returns {JSX.Element} Analytics dashboard with KPI cards and detailed metrics
  */
 const SterilizationAnalytics: React.FC = () => {
-  const [shouldLoadAnalytics, setShouldLoadAnalytics] = useState(false);
+  const [shouldLoadAnalytics, setShouldLoadAnalytics] = useState(true); // Start loading immediately
 
   // Initialize sterilization store data
   const { isLoading: isInitializing, error: initError } =
     useSterilizationInitialization();
 
+  // Always call hooks in the same order
   const {
     stats,
     additionalMetrics,
     recentBITests,
     nextBITestDue,
     recentActivities,
+    refreshBIResults,
   } = useAnalyticsData();
 
   // Defer analytics loading to prevent blocking initial page render
@@ -70,8 +72,8 @@ const SterilizationAnalytics: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Show loading state only if we're actually loading data
-  if (!shouldLoadAnalytics || isInitializing) {
+  // Show loading state if still initializing or not ready to load analytics
+  if (isInitializing || !shouldLoadAnalytics) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
@@ -162,7 +164,7 @@ const SterilizationAnalytics: React.FC = () => {
         />
 
         <KPICard
-          title="Avg Cycle Time"
+          title="Tool Turnaround Time"
           value={`${Math.round(stats.averageCycleTime)} min`}
           icon={mdiClock}
           iconBgColor="bg-purple-500"
@@ -171,7 +173,7 @@ const SterilizationAnalytics: React.FC = () => {
           borderColor="purple-200"
           textColor="text-purple-600"
           valueColor="text-purple-800"
-          trend={{ direction: 'down', value: '-8% this month' }}
+          trend={{ direction: 'down', value: 'Target: <60 min' }}
         />
 
         <KPICard
@@ -197,6 +199,7 @@ const SterilizationAnalytics: React.FC = () => {
           <LazyBITestResults
             recentTests={recentBITests}
             nextTestDue={nextBITestDue}
+            refreshBIResults={refreshBIResults}
           />
         </Suspense>
         <Suspense fallback={<AnalyticsLoadingFallback />}>

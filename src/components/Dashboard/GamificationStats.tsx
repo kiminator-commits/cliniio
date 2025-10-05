@@ -2,6 +2,19 @@ import { FaFire, FaChartLine, FaTrophy } from 'react-icons/fa';
 import { HOME_SECTION_TITLES } from '@/pages/Home/constants/homeConstants';
 import { PointsDisplay } from '@/pages/Home/components/Gamification/PointsDisplay';
 import { StreakDisplay } from '@/pages/Home/components/Gamification/StreakDisplay';
+import React, {
+  useState as _useState,
+  useEffect as _useEffect,
+  useRef as _useRef,
+} from 'react';
+
+// Hardened level component with bounds checking
+const SlotMachineLevel = ({ level }: { level: number }) => {
+  // Hardened value with bounds checking
+  const safeLevel = Math.max(1, level || 1);
+
+  return <span className="text-xl font-bold text-[#4ECDC4]">{safeLevel}</span>;
+};
 
 interface GamificationData {
   streak: number;
@@ -71,9 +84,7 @@ export const GamificationStats = ({
           <div className="ml-2">
             <h2 className="text-sm font-semibold text-[#1e293b]">Level</h2>
             <div className="flex items-baseline">
-              <span className="text-xl font-bold text-[#4ECDC4]">
-                {gamificationData.level}
-              </span>
+              <SlotMachineLevel level={gamificationData.level} />
               <div className="ml-2 px-2 py-0.5 bg-blue-100 rounded-full">
                 <span className="text-xs font-semibold text-blue-600">
                   Top {gamificationData.rank}%

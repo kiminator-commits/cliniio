@@ -27,7 +27,9 @@ export class KnowledgeHubSupabaseService {
 
   // Fetch all content
   async fetchContent(): Promise<ContentItem[]> {
-    console.warn('KnowledgeHubSupabaseService.fetchContent() is deprecated. Use KnowledgeHubService.getAllContent() instead.');
+    console.warn(
+      'KnowledgeHubSupabaseService.fetchContent() is deprecated. Use KnowledgeHubService.getAllContent() instead.'
+    );
     return this.fetchProvider.fetchContent();
   }
 
@@ -60,7 +62,10 @@ export class KnowledgeHubSupabaseService {
       department?: string;
     }
   ): Promise<ContentItem[]> {
-    const searchResult = await this.searchProvider.searchContent(query, filters);
+    const searchResult = await this.searchProvider.searchContent(
+      query,
+      filters
+    );
     return searchResult.content;
   }
 

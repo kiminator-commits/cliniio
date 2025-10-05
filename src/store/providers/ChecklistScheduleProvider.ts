@@ -1,8 +1,22 @@
 import { Checklist } from './ChecklistDataProvider';
 
 export interface ScheduleConfig {
-  frequency: 'daily' | 'per_patient' | 'weekly' | 'bi_weekly' | 'monthly' | 'quarterly' | 'custom';
-  day?: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+  frequency:
+    | 'daily'
+    | 'per_patient'
+    | 'weekly'
+    | 'bi_weekly'
+    | 'monthly'
+    | 'quarterly'
+    | 'custom';
+  day?:
+    | 'monday'
+    | 'tuesday'
+    | 'wednesday'
+    | 'thursday'
+    | 'friday'
+    | 'saturday'
+    | 'sunday';
   time?: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   points: number;
@@ -93,11 +107,17 @@ export class ChecklistScheduleProvider {
     const scheduledChecklists = checklists.filter((c) => c.autoSchedule);
 
     scheduledChecklists.forEach((checklist) => {
-      const tasks = this.generateTasksForChecklist(checklist, startDate, endDate);
+      const tasks = this.generateTasksForChecklist(
+        checklist,
+        startDate,
+        endDate
+      );
       scheduledTasks.push(...tasks);
     });
 
-    return scheduledTasks.sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime());
+    return scheduledTasks.sort(
+      (a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime()
+    );
   }
 
   /**
@@ -114,7 +134,7 @@ export class ChecklistScheduleProvider {
     while (currentDate <= endDate) {
       if (this.shouldScheduleOnDate(checklist, currentDate)) {
         const scheduledTime = this.getScheduledTime(checklist, currentDate);
-        
+
         tasks.push({
           id: this.generateTaskId(),
           checklistId: checklist.id,
@@ -138,7 +158,15 @@ export class ChecklistScheduleProvider {
    */
   private shouldScheduleOnDate(checklist: Checklist, date: Date): boolean {
     const dayOfWeek = date.getDay();
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayNames = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
     const dayName = dayNames[dayOfWeek] as Checklist['scheduleDay'];
 
     switch (checklist.scheduleFrequency) {
@@ -148,7 +176,9 @@ export class ChecklistScheduleProvider {
         return checklist.scheduleDay === dayName;
       case 'bi_weekly': {
         // Every other week on specified day
-        const weekNumber = Math.floor(date.getTime() / (7 * 24 * 60 * 60 * 1000));
+        const weekNumber = Math.floor(
+          date.getTime() / (7 * 24 * 60 * 60 * 1000)
+        );
         return checklist.scheduleDay === dayName && weekNumber % 2 === 0;
       }
       case 'monthly':
@@ -168,7 +198,7 @@ export class ChecklistScheduleProvider {
    */
   private getScheduledTime(checklist: Checklist, date: Date): Date {
     const scheduledTime = new Date(date);
-    
+
     if (checklist.scheduleTime) {
       const [hours, minutes] = checklist.scheduleTime.split(':').map(Number);
       scheduledTime.setHours(hours, minutes, 0, 0);
@@ -204,7 +234,10 @@ export class ChecklistScheduleProvider {
   /**
    * Get next scheduled date for checklist
    */
-  getNextScheduledDate(checklist: Checklist, fromDate: Date = new Date()): Date | null {
+  getNextScheduledDate(
+    checklist: Checklist,
+    fromDate: Date = new Date()
+  ): Date | null {
     if (!checklist.autoSchedule) return null;
 
     const currentDate = new Date(fromDate);
@@ -296,7 +329,15 @@ export class ChecklistScheduleProvider {
     if (!config.frequency) {
       errors.push('Frequency is required');
     } else {
-      const validFrequencies = ['daily', 'per_patient', 'weekly', 'bi_weekly', 'monthly', 'quarterly', 'custom'];
+      const validFrequencies = [
+        'daily',
+        'per_patient',
+        'weekly',
+        'bi_weekly',
+        'monthly',
+        'quarterly',
+        'custom',
+      ];
       if (!validFrequencies.includes(config.frequency)) {
         errors.push(`Invalid frequency: ${config.frequency}`);
       }
@@ -306,7 +347,15 @@ export class ChecklistScheduleProvider {
       if (!config.day) {
         errors.push('Day is required for weekly/bi-weekly schedules');
       } else {
-        const validDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        const validDays = [
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
+          'sunday',
+        ];
         if (!validDays.includes(config.day)) {
           errors.push(`Invalid day: ${config.day}`);
         }

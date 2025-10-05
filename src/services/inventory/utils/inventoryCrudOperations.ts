@@ -1,4 +1,4 @@
-import { supabase } from '@/services/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { Database } from '@/types/database.types';
 import { getTableName as _getTableName } from '../../../config/inventoryConfig';
 import { InventoryItem } from '../../../types/inventory';

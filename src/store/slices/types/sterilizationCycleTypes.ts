@@ -104,13 +104,7 @@ export interface EfficiencyScore {
       expiringItems: number;
       accuracy: number;
     };
-    environmentalClean: {
-      efficiency: number;
-      cleaningEfficiency: number;
-      totalRooms: number;
-      cleanRooms: number;
-      complianceScore: number;
-    };
+    // Environmental cleaning data removed - sterilization analytics only
   };
 }
 

@@ -125,39 +125,43 @@ vi.mock('@mdi/react', () => ({
 // Mock fetch for authentication service tests
 global.fetch = vi.fn().mockImplementation((url, _options) => {
   // Handle relative URLs by converting them to absolute URLs
-  const _absoluteUrl = url.startsWith('/') ? `http://localhost:3000${url}` : url;
-  
+  const _absoluteUrl = url.startsWith('/')
+    ? `http://localhost:3000${url}`
+    : url;
+
   // Mock different responses based on URL
   if (url.includes('/auth-login')) {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({
-        success: true,
-        data: {
-          accessToken: 'supabase-token',
-          expiresIn: 1735689599 - Math.floor(Date.now() / 1000), // Calculate seconds until 2024-12-31T23:59:59Z
-        },
-      }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: {
+            accessToken: 'supabase-token',
+            expiresIn: 1735689599 - Math.floor(Date.now() / 1000), // Calculate seconds until 2024-12-31T23:59:59Z
+          },
+        }),
       text: () => Promise.resolve('OK'),
     });
   }
-  
+
   if (url.includes('/auth-validate')) {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({
-        success: true,
-        data: {
-          valid: true,
-          user: { id: 'user-123', email: 'test@example.com' },
-        },
-      }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: {
+            valid: true,
+            user: { id: 'user-123', email: 'test@example.com' },
+          },
+        }),
       text: () => Promise.resolve('OK'),
     });
   }
-  
+
   // Handle Supabase API requests
   if (url.includes('supabase.co') || url.includes('supabase')) {
     return Promise.resolve({
@@ -167,7 +171,7 @@ global.fetch = vi.fn().mockImplementation((url, _options) => {
       text: () => Promise.resolve('{"data":[],"error":null}'),
     });
   }
-  
+
   // Default response
   return Promise.resolve({
     ok: true,

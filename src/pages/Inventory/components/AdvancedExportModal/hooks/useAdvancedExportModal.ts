@@ -34,10 +34,13 @@ export const useAdvancedExportModal = ({
   onExportError,
 }: UseAdvancedExportModalProps) => {
   const [templates, setTemplates] = useState<ExportTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<ExportTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ExportTemplate | null>(null);
   const [schedules, setSchedules] = useState<ExportSchedule[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'export' | 'schedule' | 'templates'>('export');
+  const [activeTab, setActiveTab] = useState<
+    'export' | 'schedule' | 'templates'
+  >('export');
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [scheduleForm, setScheduleForm] = useState<ScheduleFormData>({
     name: '',

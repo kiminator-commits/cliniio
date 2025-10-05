@@ -3,7 +3,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useLoginStore } from '@/stores/useLoginStore';
 import { useUser } from '@/contexts/UserContext';
 import { usePagePerformance } from '@/hooks/usePagePerformance';
-import { SecureAuthService } from '@/services/secureAuthService';
+import { SecureAuthService as _SecureAuthService } from '@/services/secureAuthService';
+import { supabase } from '@/lib/supabaseClient';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,59 +14,66 @@ const ProtectedRouteComponent: React.FC<ProtectedRouteProps> = ({
   children,
 }) => {
   const location = useLocation();
-  const authToken = useLoginStore((state) => state.authToken);
+  const _authToken = useLoginStore((state) => state.authToken);
   const _tokenExpiry = useLoginStore((state) => state.tokenExpiry);
   const reset = useLoginStore((state) => state.reset);
-  const isTokenExpired = useLoginStore((state) => state.isTokenExpired);
-  const getRemainingSessionTime = useLoginStore((state) => state.getRemainingSessionTime);
+  const _isTokenExpired = useLoginStore((state) => state.isTokenExpired);
+  const getRemainingSessionTime = useLoginStore(
+    (state) => state.getRemainingSessionTime
+  );
   const [authTimeout, setAuthTimeout] = useState(false);
   const [isValidatingToken, setIsValidatingToken] = useState(false);
-  const { currentUser, isLoading: userLoading } = useUser();
+  const { currentUser, isLoading: userLoading, clearUserData } = useUser();
 
-  // Performance tracking
+  // Performance tracking - only for actual pages, not route components
   const { recordAuthenticationComplete } = usePagePerformance({
-    pageName: `ProtectedRoute-${location.pathname}`,
+    pageName: `Page-${location.pathname}`, // Changed from ProtectedRoute to Page
     trackAuthentication: true,
   });
 
   // Memoize authentication check to prevent unnecessary recalculations
   const authStatus = useMemo(() => {
-    const tokenExpired = isTokenExpired();
-    const isAuthenticated = !!authToken && !tokenExpired;
+    // Use UserContext authentication status - Supabase session validation handled in useEffect
+    const isAuthenticated = !!currentUser;
     const remainingTime = getRemainingSessionTime();
 
     return {
       isAuthenticated,
-      isTokenExpired: !!authToken && tokenExpired,
+      isTokenExpired: false, // Supabase handles session expiration
       remainingTime,
     };
-  }, [authToken, isTokenExpired, getRemainingSessionTime]);
+  }, [currentUser, getRemainingSessionTime]);
 
-  // Secure token validation on mount and when token changes
+  // Supabase session verification on mount
   useEffect(() => {
-    if (authToken && !authStatus.isTokenExpired && !isValidatingToken) {
-      setIsValidatingToken(true);
-      
-      const validateAuthToken = async () => {
-        try {
-          console.log('[AUTH] Validating token with secure server...');
-          const authService = new SecureAuthService();
-          const isValid = await authService.validateToken(authToken);
-          if (!isValid) {
-            throw new Error('Token validation failed');
-          }
-          console.log('[AUTH] Token validation successful');
-        } catch (error) {
-          console.error('[AUTH] Token validation failed:', error);
-          reset(); // Clear invalid session
-        } finally {
-          setIsValidatingToken(false);
-        }
-      };
+    setIsValidatingToken(true);
 
-      validateAuthToken();
-    }
-  }, [authToken, authStatus.isTokenExpired, isValidatingToken, reset]);
+    const validateSupabaseSession = async () => {
+      try {
+        console.log('[AUTH] Validating Supabase session...');
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          console.log('[AUTH] No valid session found - redirecting to login');
+          clearUserData(); // Clear user data
+          reset(); // Clear invalid session
+          return;
+        }
+
+        console.log('[AUTH] Supabase session validation successful');
+      } catch (error) {
+        console.error('[AUTH] Supabase session validation failed:', error);
+        clearUserData(); // Clear user data
+        reset(); // Clear invalid session
+      } finally {
+        setIsValidatingToken(false);
+      }
+    };
+
+    validateSupabaseSession();
+  }, [reset, clearUserData]); // Removed authToken and authStatus dependencies
 
   // Add timeout to prevent hanging authentication - reduced to 3 seconds
   useEffect(() => {
@@ -90,16 +98,10 @@ const ProtectedRouteComponent: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     if (authTimeout) {
       console.error('❌ Authentication timeout - redirecting to login');
+      clearUserData(); // Clear user data
       reset();
     }
-  }, [authTimeout, reset]);
-
-  // Handle expired token
-  useEffect(() => {
-    if (authStatus.isTokenExpired) {
-      reset();
-    }
-  }, [authStatus.isTokenExpired, reset]);
+  }, [authTimeout, reset, clearUserData]);
 
   // Show loading if we're validating token, loading user, or have auth timeout
   if (

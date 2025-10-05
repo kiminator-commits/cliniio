@@ -107,7 +107,9 @@ export class ContentBuilderProgressProvider {
   /**
    * Calculate progress for a specific assessment
    */
-  calculateAssessmentProgress(assessment: CourseData['assessments'][0]): number {
+  calculateAssessmentProgress(
+    assessment: CourseData['assessments'][0]
+  ): number {
     return assessment.questions.length > 0 ? 100 : 0;
   }
 
@@ -125,7 +127,8 @@ export class ContentBuilderProgressProvider {
 
     const assessmentProgress: Record<string, number> = {};
     courseData.assessments.forEach((assessment) => {
-      assessmentProgress[assessment.id] = this.calculateAssessmentProgress(assessment);
+      assessmentProgress[assessment.id] =
+        this.calculateAssessmentProgress(assessment);
     });
 
     return {
@@ -267,17 +270,23 @@ export class ContentBuilderProgressProvider {
 
     const averageModuleCompletion =
       completionStatus.modules.total > 0
-        ? (completionStatus.modules.completed / completionStatus.modules.total) * 100
+        ? (completionStatus.modules.completed /
+            completionStatus.modules.total) *
+          100
         : 0;
 
     const averageLessonCompletion =
       completionStatus.lessons.total > 0
-        ? (completionStatus.lessons.completed / completionStatus.lessons.total) * 100
+        ? (completionStatus.lessons.completed /
+            completionStatus.lessons.total) *
+          100
         : 0;
 
     const averageAssessmentCompletion =
       completionStatus.assessments.total > 0
-        ? (completionStatus.assessments.completed / completionStatus.assessments.total) * 100
+        ? (completionStatus.assessments.completed /
+            completionStatus.assessments.total) *
+          100
         : 0;
 
     const totalContentItems =
@@ -291,7 +300,9 @@ export class ContentBuilderProgressProvider {
       completionStatus.assessments.completed;
 
     const completionRate =
-      totalContentItems > 0 ? (completedContentItems / totalContentItems) * 100 : 0;
+      totalContentItems > 0
+        ? (completedContentItems / totalContentItems) * 100
+        : 0;
 
     return {
       averageModuleCompletion,
@@ -353,7 +364,9 @@ export class ContentBuilderProgressProvider {
       (assessment) => assessment.questions.length === 0
     );
     if (assessmentsWithoutQuestions.length > 0) {
-      warnings.push(`${assessmentsWithoutQuestions.length} assessment(s) have no questions`);
+      warnings.push(
+        `${assessmentsWithoutQuestions.length} assessment(s) have no questions`
+      );
     }
 
     return {
@@ -403,7 +416,10 @@ export class ContentBuilderProgressProvider {
   /**
    * Check if milestone is reached
    */
-  isMilestoneReached(currentProgress: number, milestonePercentage: number): boolean {
+  isMilestoneReached(
+    currentProgress: number,
+    milestonePercentage: number
+  ): boolean {
     return currentProgress >= milestonePercentage;
   }
 
@@ -418,8 +434,10 @@ export class ContentBuilderProgressProvider {
     progressToNext: number;
   } | null {
     const milestones = this.getProgressMilestones();
-    const nextMilestone = milestones.find(m => m.percentage > currentProgress);
-    
+    const nextMilestone = milestones.find(
+      (m) => m.percentage > currentProgress
+    );
+
     if (!nextMilestone) return null;
 
     const progressToNext = nextMilestone.percentage - currentProgress;
@@ -438,11 +456,15 @@ export class ContentBuilderProgressProvider {
     const statistics = this.getProgressStatistics(courseData);
     const recommendations = this.getProgressRecommendations(courseData);
 
-    return JSON.stringify({
-      progressMetrics,
-      statistics,
-      recommendations,
-      timestamp: new Date().toISOString(),
-    }, null, 2);
+    return JSON.stringify(
+      {
+        progressMetrics,
+        statistics,
+        recommendations,
+        timestamp: new Date().toISOString(),
+      },
+      null,
+      2
+    );
   }
 }

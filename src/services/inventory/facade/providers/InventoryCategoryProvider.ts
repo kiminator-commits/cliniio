@@ -16,7 +16,9 @@ export function normalizeCategory(category: string): string {
   return InventoryCategoryProvider.normalizeCategory(category);
 }
 
-export function categorizeItems(normalized: Record<string, unknown>[]): CategorizedItems {
+export function categorizeItems(
+  normalized: Record<string, unknown>[]
+): CategorizedItems {
   return InventoryCategoryProvider.categorizeItems(normalized);
 }
 
@@ -84,7 +86,9 @@ export class InventoryCategoryProvider {
   /**
    * Categorize items into normalized buckets
    */
-  static categorizeItems(normalized: Record<string, unknown>[]): CategorizedItems {
+  static categorizeItems(
+    normalized: Record<string, unknown>[]
+  ): CategorizedItems {
     const tools: Record<string, unknown>[] = [];
     const supplies: Record<string, unknown>[] = [];
     const equipment: Record<string, unknown>[] = [];
@@ -133,34 +137,37 @@ export class InventoryCategoryProvider {
   async addCategory(
     category: string
   ): Promise<{ success: boolean; error: string | null }> {
-    const result = await InventoryErrorHandler.handleOperation('addCategory', async () => {
-      await this.adapter.addCategory(category);
-      cacheInvalidationService.invalidateRelated(
-        'inventory:categories',
-        category
-      );
+    const result = await InventoryErrorHandler.handleOperation(
+      'addCategory',
+      async () => {
+        await this.adapter.addCategory(category);
+        cacheInvalidationService.invalidateRelated(
+          'inventory:categories',
+          category
+        );
 
-      // Track category creation
-      logEvent(
-        'inventory',
-        'category_created',
-        `Category created: ${category}`,
-        'info',
-        {
+        // Track category creation
+        logEvent(
+          'inventory',
+          'category_created',
+          `Category created: ${category}`,
+          'info',
+          {
+            category,
+            adapterType: this.adapterType,
+          }
+        );
+
+        trackUserAction('create_category', 'inventory', { category });
+
+        trackAnalyticsEvent('inventory_category_created', {
           category,
           adapterType: this.adapterType,
-        }
-      );
+        });
 
-      trackUserAction('create_category', 'inventory', { category });
-
-      trackAnalyticsEvent('inventory_category_created', {
-        category,
-        adapterType: this.adapterType,
-      });
-
-      return true;
-    });
+        return true;
+      }
+    );
 
     return { success: result, error: null };
   }
@@ -171,34 +178,37 @@ export class InventoryCategoryProvider {
   async deleteCategory(
     category: string
   ): Promise<{ success: boolean; error: string | null }> {
-    const result = await InventoryErrorHandler.handleOperation('deleteCategory', async () => {
-      await this.adapter.deleteCategory(category);
-      cacheInvalidationService.invalidateRelated(
-        'inventory:categories',
-        category
-      );
+    const result = await InventoryErrorHandler.handleOperation(
+      'deleteCategory',
+      async () => {
+        await this.adapter.deleteCategory(category);
+        cacheInvalidationService.invalidateRelated(
+          'inventory:categories',
+          category
+        );
 
-      // Track category deletion
-      logEvent(
-        'inventory',
-        'category_deleted',
-        `Category deleted: ${category}`,
-        'info',
-        {
+        // Track category deletion
+        logEvent(
+          'inventory',
+          'category_deleted',
+          `Category deleted: ${category}`,
+          'info',
+          {
+            category,
+            adapterType: this.adapterType,
+          }
+        );
+
+        trackUserAction('delete_category', 'inventory', { category });
+
+        trackAnalyticsEvent('inventory_category_deleted', {
           category,
           adapterType: this.adapterType,
-        }
-      );
+        });
 
-      trackUserAction('delete_category', 'inventory', { category });
-
-      trackAnalyticsEvent('inventory_category_deleted', {
-        category,
-        adapterType: this.adapterType,
-      });
-
-      return true;
-    });
+        return true;
+      }
+    );
 
     return { success: result, error: null };
   }
@@ -220,12 +230,15 @@ export class InventoryCategoryProvider {
   /**
    * Get normalized categories
    */
-  async getNormalizedCategories(): Promise<{ data: string[]; error: string | null }> {
+  async getNormalizedCategories(): Promise<{
+    data: string[];
+    error: string | null;
+  }> {
     const result = await InventoryErrorHandler.handleOperation(
       'getNormalizedCategories',
       async () => {
         const categories = await this.adapter.fetchCategories();
-        const normalizedCategories = categories.map(category => 
+        const normalizedCategories = categories.map((category) =>
           InventoryCategoryProvider.normalizeCategory(category)
         );
         return Array.from(new Set(normalizedCategories));
@@ -249,7 +262,8 @@ export class InventoryCategoryProvider {
         const stats: Record<string, number> = {};
 
         allItems.forEach((item) => {
-          const normalizedCategory = InventoryCategoryProvider.normalizeCategory(item.category || '');
+          const normalizedCategory =
+            InventoryCategoryProvider.normalizeCategory(item.category || '');
           stats[normalizedCategory] = (stats[normalizedCategory] || 0) + 1;
         });
 
@@ -294,19 +308,35 @@ export class InventoryCategoryProvider {
     const name = itemName.toLowerCase();
     const suggestions: string[] = [];
 
-    if (name.includes('mask') || name.includes('glove') || name.includes('gown')) {
+    if (
+      name.includes('mask') ||
+      name.includes('glove') ||
+      name.includes('gown')
+    ) {
       suggestions.push('Supplies');
     }
 
-    if (name.includes('scalpel') || name.includes('forceps') || name.includes('tool')) {
+    if (
+      name.includes('scalpel') ||
+      name.includes('forceps') ||
+      name.includes('tool')
+    ) {
       suggestions.push('Tools');
     }
 
-    if (name.includes('chair') || name.includes('autoclave') || name.includes('machine')) {
+    if (
+      name.includes('chair') ||
+      name.includes('autoclave') ||
+      name.includes('machine')
+    ) {
       suggestions.push('Equipment');
     }
 
-    if (name.includes('computer') || name.includes('printer') || name.includes('office')) {
+    if (
+      name.includes('computer') ||
+      name.includes('printer') ||
+      name.includes('office')
+    ) {
       suggestions.push('Office Hardware');
     }
 
@@ -330,7 +360,7 @@ export class InventoryCategoryProvider {
       async () => {
         const allItems = await this.adapter.fetchInventoryItems();
         const itemsToUpdate = allItems.filter(
-          item => item.category === sourceCategory
+          (item) => item.category === sourceCategory
         );
 
         // Update items to use target category
@@ -343,7 +373,7 @@ export class InventoryCategoryProvider {
         // Delete source category if it's empty
         const remainingItems = await this.adapter.fetchInventoryItems();
         const hasRemainingItems = remainingItems.some(
-          item => item.category === sourceCategory
+          (item) => item.category === sourceCategory
         );
 
         if (!hasRemainingItems) {

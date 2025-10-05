@@ -89,10 +89,11 @@ export class BulkOperationService {
                 const status: LearningPathStatus = isActive
                   ? 'active'
                   : 'inactive';
-                result = await this.learningPathService.bulkUpdateLearningPathsStatus(
-                  operation.ids,
-                  status
-                );
+                result =
+                  await this.learningPathService.bulkUpdateLearningPathsStatus(
+                    operation.ids,
+                    status
+                  );
               } else {
                 result = {
                   success: false,
@@ -102,7 +103,9 @@ export class BulkOperationService {
               break;
 
             case 'delete_article':
-              result = await this.articleService.bulkDeleteArticles(operation.ids);
+              result = await this.articleService.bulkDeleteArticles(
+                operation.ids
+              );
               break;
 
             case 'delete_pathway':

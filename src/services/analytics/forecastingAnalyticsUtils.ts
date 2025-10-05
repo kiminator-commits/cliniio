@@ -43,7 +43,5 @@ export function getBottleneckIndicators(efficiency: number): string[] {
   const indicators = [];
   if (efficiency < 80) indicators.push('Low utilization efficiency');
   if (efficiency < 70) indicators.push('Significant idle time detected');
-  return indicators.length > 0
-    ? indicators
-    : ['Minimal bottlenecks detected'];
+  return indicators.length > 0 ? indicators : ['Minimal bottlenecks detected'];
 }

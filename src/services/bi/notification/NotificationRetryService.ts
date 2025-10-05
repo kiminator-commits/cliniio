@@ -64,7 +64,9 @@ export class NotificationRetryService {
         retryTime.setMinutes(retryTime.getMinutes() + retryDelay);
 
         // No-op since scheduled_notifications table doesn't exist
-        console.log(`Notification ${notification.id} scheduled for retry at ${retryTime.toISOString()}`);
+        console.log(
+          `Notification ${notification.id} scheduled for retry at ${retryTime.toISOString()}`
+        );
 
         // Log retry attempt
         await BIFailureNotificationDataProvider.logNotificationAuditEvent(

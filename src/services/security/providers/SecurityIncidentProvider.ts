@@ -177,9 +177,7 @@ export class SecurityIncidentProvider {
   /**
    * Get incidents by threat indicator
    */
-  getIncidentsByThreatIndicator(
-    threatIndicatorId: string
-  ): SecurityIncident[] {
+  getIncidentsByThreatIndicator(threatIndicatorId: string): SecurityIncident[] {
     return Array.from(this.incidents.values())
       .filter((incident) => incident.threatIndicatorId === threatIndicatorId)
       .sort((a, b) => b.detectedAt.getTime() - a.detectedAt.getTime());
@@ -210,19 +208,27 @@ export class SecurityIncidentProvider {
     let incidents = Array.from(this.incidents.values());
 
     if (filters.status) {
-      incidents = incidents.filter((incident) => incident.status === filters.status);
+      incidents = incidents.filter(
+        (incident) => incident.status === filters.status
+      );
     }
 
     if (filters.severity) {
-      incidents = incidents.filter((incident) => incident.severity === filters.severity);
+      incidents = incidents.filter(
+        (incident) => incident.severity === filters.severity
+      );
     }
 
     if (filters.assignedTo) {
-      incidents = incidents.filter((incident) => incident.assignedTo === filters.assignedTo);
+      incidents = incidents.filter(
+        (incident) => incident.assignedTo === filters.assignedTo
+      );
     }
 
     if (filters.threatIndicatorId) {
-      incidents = incidents.filter((incident) => incident.threatIndicatorId === filters.threatIndicatorId);
+      incidents = incidents.filter(
+        (incident) => incident.threatIndicatorId === filters.threatIndicatorId
+      );
     }
 
     if (filters.dateRange) {
@@ -233,7 +239,9 @@ export class SecurityIncidentProvider {
       );
     }
 
-    return incidents.sort((a, b) => b.detectedAt.getTime() - a.detectedAt.getTime());
+    return incidents.sort(
+      (a, b) => b.detectedAt.getTime() - a.detectedAt.getTime()
+    );
   }
 
   /**
@@ -266,10 +274,14 @@ export class SecurityIncidentProvider {
 
     const total = incidents.length;
     const open = incidents.filter((i) => i.status === 'open').length;
-    const investigating = incidents.filter((i) => i.status === 'investigating').length;
+    const investigating = incidents.filter(
+      (i) => i.status === 'investigating'
+    ).length;
     const contained = incidents.filter((i) => i.status === 'contained').length;
     const resolved = incidents.filter((i) => i.status === 'resolved').length;
-    const falsePositive = incidents.filter((i) => i.status === 'false_positive').length;
+    const falsePositive = incidents.filter(
+      (i) => i.status === 'false_positive'
+    ).length;
 
     const bySeverity = incidents.reduce(
       (acc, incident) => {
@@ -359,11 +371,12 @@ export class SecurityIncidentProvider {
       throw new Error(`Incident not found: ${incidentId}`);
     }
 
-    const comments = (incident.evidence.comments as Array<{
-      text: string;
-      author: string;
-      timestamp: Date;
-    }>) || [];
+    const comments =
+      (incident.evidence.comments as Array<{
+        text: string;
+        author: string;
+        timestamp: Date;
+      }>) || [];
 
     comments.push({
       text: comment,
@@ -421,14 +434,18 @@ export class SecurityIncidentProvider {
       });
     }
 
-    return timeline.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return timeline.sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+    );
   }
 
   /**
    * Export incidents
    */
   exportIncidents(filters?: IncidentFilters): string {
-    const incidents = filters ? this.getFilteredIncidents(filters) : this.getAllIncidents();
+    const incidents = filters
+      ? this.getFilteredIncidents(filters)
+      : this.getAllIncidents();
     return JSON.stringify(incidents, null, 2);
   }
 
@@ -467,7 +484,9 @@ export class SecurityIncidentProvider {
           errors.push(`Incident not found: ${incidentId}`);
         }
       } catch (error) {
-        errors.push(`Error updating incident ${incidentId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        errors.push(
+          `Error updating incident ${incidentId}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     });
 

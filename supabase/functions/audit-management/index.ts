@@ -6,10 +6,22 @@ import { getAuditRetentionManager } from '../auth-login/auditRetention.ts';
 import { getAuditMonitoringService } from '../auth-login/auditMonitoring.ts';
 
 interface AuditManagementRequest {
-  action: 'get_events' | 'get_event' | 'get_chain' | 'verify_integrity' | 'export_events' |
-          'get_correlations' | 'get_correlation_stats' | 'add_correlation_rule' |
-          'get_retention_policies' | 'get_archival_jobs' | 'export_retention_report' |
-          'get_audit_alerts' | 'acknowledge_alert' | 'resolve_alert' | 'get_audit_metrics';
+  action:
+    | 'get_events'
+    | 'get_event'
+    | 'get_chain'
+    | 'verify_integrity'
+    | 'export_events'
+    | 'get_correlations'
+    | 'get_correlation_stats'
+    | 'add_correlation_rule'
+    | 'get_retention_policies'
+    | 'get_archival_jobs'
+    | 'export_retention_report'
+    | 'get_audit_alerts'
+    | 'acknowledge_alert'
+    | 'resolve_alert'
+    | 'get_audit_metrics';
   filters?: any;
   eventId?: string;
   alertId?: string;
@@ -22,7 +34,7 @@ interface AuditManagementRequest {
 
 serve(async (req) => {
   const origin = req.headers.get('origin');
-  
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     const corsHeaders = getCorsHeaders(origin);
@@ -67,7 +79,17 @@ serve(async (req) => {
 
   try {
     const body: AuditManagementRequest = await req.json();
-    const { action, filters = {}, eventId, alertId, ruleId, policyId, jobId, timeRange = 60, format = 'json' } = body;
+    const {
+      action,
+      filters = {},
+      eventId,
+      alertId,
+      ruleId,
+      policyId,
+      jobId,
+      timeRange = 60,
+      format = 'json',
+    } = body;
 
     const auditTrail = getImmutableAuditTrail();
     const eventCorrelator = getSecurityEventCorrelator();
@@ -104,7 +126,9 @@ serve(async (req) => {
         break;
 
       case 'get_correlations':
-        response.data = eventCorrelator.getCorrelationResults(timeRange * 60 * 1000);
+        response.data = eventCorrelator.getCorrelationResults(
+          timeRange * 60 * 1000
+        );
         break;
 
       case 'get_correlation_stats':
@@ -140,7 +164,10 @@ serve(async (req) => {
           throw new Error('Alert ID is required');
         }
         response.data = {
-          acknowledged: auditMonitoring.acknowledgeAlert(alertId, filters.acknowledgedBy || 'system'),
+          acknowledged: auditMonitoring.acknowledgeAlert(
+            alertId,
+            filters.acknowledgedBy || 'system'
+          ),
         };
         break;
 
@@ -149,7 +176,10 @@ serve(async (req) => {
           throw new Error('Alert ID is required');
         }
         response.data = {
-          resolved: auditMonitoring.resolveAlert(alertId, filters.resolvedBy || 'system'),
+          resolved: auditMonitoring.resolveAlert(
+            alertId,
+            filters.resolvedBy || 'system'
+          ),
         };
         break;
 
@@ -164,18 +194,14 @@ serve(async (req) => {
         throw new Error(`Unknown action: ${action}`);
     }
 
-    return new Response(
-      JSON.stringify(response),
-      {
-        status: 200,
-        headers: {
-          ...getCorsHeaders(origin),
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
-      }
-    );
-
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        ...getCorsHeaders(origin),
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    });
   } catch (error) {
     console.error('Audit management error:', error);
 

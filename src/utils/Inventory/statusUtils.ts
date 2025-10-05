@@ -19,8 +19,6 @@ export type InventoryStatus =
   | 'in-use'
   | 'maintenance'
   | 'operational'
-  | 'active'
-  | 'inactive'
   | 'low-stock'
   | 'out-of-stock'
   | 'unknown';
@@ -152,9 +150,9 @@ export const getStatusText = (status: string): string => {
     case 'out-of-service':
       return 'Out of Service';
     case 'active':
-      return 'Active';
+      return 'Available';
     case 'inactive':
-      return 'Inactive';
+      return 'In Use';
 
     // Supply statuses
     case 'in-stock':

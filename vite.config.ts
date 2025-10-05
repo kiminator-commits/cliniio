@@ -66,7 +66,7 @@ export default defineConfig({
     minify: 'esbuild',
     // Exclude API routes from build
     rollupOptions: {
-      external: ['/api/**'],
+      external: ['/api/**', './src/lib/redisClient.server'],
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
@@ -77,6 +77,13 @@ export default defineConfig({
           ui: ['@mdi/react', 'lucide-react', 'react-icons'],
           utils: ['clsx', 'framer-motion', 'react-hot-toast'],
           data: ['@tanstack/react-query', 'zustand'],
+          // Separate login page for faster initial load
+          login: ['./src/pages/Login'],
+          // Separate error handling for lazy loading
+          errors: [
+            './src/components/UserFriendlyErrorHandler',
+            './src/components/SupportContact',
+          ],
         },
         // Optimize chunk naming
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -98,10 +105,9 @@ export default defineConfig({
       '@tanstack/react-query',
       'zustand',
       'clsx',
-      'redis',
     ],
     // Exclude problematic dependencies
-    exclude: ['@mdi/js', 'framer-motion'],
+    exclude: ['@mdi/js', 'framer-motion', 'redis'],
   },
   // Optimize for development performance
   define: {

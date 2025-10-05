@@ -46,7 +46,8 @@ export class KHSearchProvider {
 
       // Add text search
       if (query && query.trim() !== '') {
-        const searchQuery = KHDataTransformationProvider.createSearchQuery(query);
+        const searchQuery =
+          KHDataTransformationProvider.createSearchQuery(query);
         queryBuilder = queryBuilder.or(searchQuery);
       }
 
@@ -67,7 +68,8 @@ export class KHSearchProvider {
 
       if (error) throw error;
 
-      const content = KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      const content =
+        KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
 
       return {
         content,
@@ -114,7 +116,8 @@ export class KHSearchProvider {
 
       if (error) throw error;
 
-      const content = KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      const content =
+        KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
 
       return {
         content,
@@ -135,13 +138,11 @@ export class KHSearchProvider {
   /**
    * Advanced search with multiple criteria
    */
-  async advancedSearch(
-    criteria: {
-      query?: string;
-      filters?: SearchFilters;
-      options?: SearchOptions;
-    }
-  ): Promise<SearchResult> {
+  async advancedSearch(criteria: {
+    query?: string;
+    filters?: SearchFilters;
+    options?: SearchOptions;
+  }): Promise<SearchResult> {
     try {
       let queryBuilder = supabase
         .from(this.tableName)
@@ -150,7 +151,9 @@ export class KHSearchProvider {
 
       // Add text search
       if (criteria.query && criteria.query.trim() !== '') {
-        const searchQuery = KHDataTransformationProvider.createSearchQuery(criteria.query);
+        const searchQuery = KHDataTransformationProvider.createSearchQuery(
+          criteria.query
+        );
         queryBuilder = queryBuilder.or(searchQuery);
       }
 
@@ -170,7 +173,8 @@ export class KHSearchProvider {
 
       if (error) throw error;
 
-      const content = KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      const content =
+        KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
 
       return {
         content,
@@ -181,17 +185,24 @@ export class KHSearchProvider {
       };
     } catch (error) {
       console.error('Error in advanced search:', error);
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to perform advanced search', {
-        severity: ErrorSeverity.HIGH,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to perform advanced search',
+        {
+          severity: ErrorSeverity.HIGH,
+          context: { originalError: error },
+        }
+      );
     }
   }
 
   /**
    * Get search suggestions based on query
    */
-  async getSearchSuggestions(query: string, limit: number = 10): Promise<string[]> {
+  async getSearchSuggestions(
+    query: string,
+    limit: number = 10
+  ): Promise<string[]> {
     try {
       if (!query || query.trim() === '') {
         return [];
@@ -210,7 +221,10 @@ export class KHSearchProvider {
 
       data?.forEach((item) => {
         // Add title suggestions
-        if (item.title && item.title.toLowerCase().includes(query.toLowerCase())) {
+        if (
+          item.title &&
+          item.title.toLowerCase().includes(query.toLowerCase())
+        ) {
           suggestions.add(item.title);
         }
 
@@ -252,7 +266,8 @@ export class KHSearchProvider {
         if (item.title) {
           const words = item.title.toLowerCase().split(/\s+/);
           words.forEach((word) => {
-            if (word.length > 2) { // Only count words longer than 2 characters
+            if (word.length > 2) {
+              // Only count words longer than 2 characters
               termCounts[word] = (termCounts[word] || 0) + 1;
             }
           });
@@ -262,7 +277,8 @@ export class KHSearchProvider {
         if (Array.isArray(item.tags)) {
           item.tags.forEach((tag: string) => {
             if (tag.length > 2) {
-              termCounts[tag.toLowerCase()] = (termCounts[tag.toLowerCase()] || 0) + 1;
+              termCounts[tag.toLowerCase()] =
+                (termCounts[tag.toLowerCase()] || 0) + 1;
             }
           });
         }
@@ -284,7 +300,10 @@ export class KHSearchProvider {
    */
   private applyFilters(queryBuilder: unknown, filters: SearchFilters): unknown {
     if (filters.category) {
-      queryBuilder = queryBuilder.eq('content_type', filters.category.toLowerCase());
+      queryBuilder = queryBuilder.eq(
+        'content_type',
+        filters.category.toLowerCase()
+      );
     }
     if (filters.status) {
       queryBuilder = queryBuilder.eq('status', filters.status);
@@ -296,7 +315,10 @@ export class KHSearchProvider {
       queryBuilder = queryBuilder.eq('domain', filters.domain);
     }
     if (filters.difficultyLevel) {
-      queryBuilder = queryBuilder.eq('difficulty_level', filters.difficultyLevel);
+      queryBuilder = queryBuilder.eq(
+        'difficulty_level',
+        filters.difficultyLevel
+      );
     }
     if (filters.tags && filters.tags.length > 0) {
       queryBuilder = queryBuilder.overlaps('tags', filters.tags);
@@ -313,11 +335,14 @@ export class KHSearchProvider {
       queryBuilder = queryBuilder.limit(options.limit);
     }
     if (options.offset) {
-      queryBuilder = queryBuilder.range(options.offset, options.offset + (options.limit || 10) - 1);
+      queryBuilder = queryBuilder.range(
+        options.offset,
+        options.offset + (options.limit || 10) - 1
+      );
     }
     if (options.sortBy) {
-      queryBuilder = queryBuilder.order(options.sortBy, { 
-        ascending: options.sortOrder === 'asc' 
+      queryBuilder = queryBuilder.order(options.sortBy, {
+        ascending: options.sortOrder === 'asc',
       });
     }
 

@@ -42,7 +42,7 @@ export class ServiceRegistry {
       const startTime = performance.now();
       try {
         const service = factory();
-        
+
         // Wrap service with performance tracking
         const trackedService = createPerformanceTrackedService(name, service);
         this.services.set(name, trackedService);
@@ -52,9 +52,12 @@ export class ServiceRegistry {
           service: name,
           operation: 'create',
         });
-        
+
         // Track service creation in performance monitor
-        const callId = servicePerformanceMonitor.startCall('ServiceRegistry', 'createService');
+        const callId = servicePerformanceMonitor.startCall(
+          'ServiceRegistry',
+          'createService'
+        );
         servicePerformanceMonitor.endCall(callId, true);
       } catch (error) {
         const duration = performance.now() - startTime;

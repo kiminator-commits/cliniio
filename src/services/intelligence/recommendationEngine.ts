@@ -1,8 +1,8 @@
 import { IntelligenceSummary } from '../analytics/forecastingAnalyticsService';
-import { 
-  IntelligenceRecommendation, 
-  OptimizationTip, 
-  RiskAlert 
+import {
+  IntelligenceRecommendation,
+  OptimizationTip,
+  RiskAlert,
 } from '../../types/intelligenceRecommendationTypes';
 import {
   mapAITypeToRecommendationType,
@@ -12,7 +12,7 @@ import {
   generateAIActionItems,
   calculateAITimeline,
   extractRelatedMetrics,
-  mapRiskScoreToSeverity
+  mapRiskScoreToSeverity,
 } from './intelligenceUtils';
 import { AILearningService } from '../../pages/KnowledgeHub/services/aiLearningService';
 
@@ -160,9 +160,7 @@ export class RecommendationEngine {
           // High risk threshold
           alerts.push({
             id: `ai_risk_${prediction.id}`,
-            severity: mapRiskScoreToSeverity(
-              prediction.risk_score as number
-            ),
+            severity: mapRiskScoreToSeverity(prediction.risk_score as number),
             title: (prediction.risk_title as string) || 'AI-Detected Risk',
             description:
               (prediction.risk_description as string) ||
@@ -259,9 +257,7 @@ export class RecommendationEngine {
   /**
    * Generate fallback risk alerts when AI fails
    */
-  static generateFallbackRiskAlerts(
-    summary: IntelligenceSummary
-  ): RiskAlert[] {
+  static generateFallbackRiskAlerts(summary: IntelligenceSummary): RiskAlert[] {
     // Basic fallback logic
     const alerts: RiskAlert[] = [];
 

@@ -44,7 +44,9 @@ export async function getItemById(id: string): Promise<InventoryItem | null> {
 /**
  * Get items by category
  */
-export async function getItemsByCategory(category: string): Promise<InventoryItem[]> {
+export async function getItemsByCategory(
+  category: string
+): Promise<InventoryItem[]> {
   try {
     const response = await InventoryCrudOperations.getItems({ category });
     return response.data || [];
@@ -57,7 +59,9 @@ export async function getItemsByCategory(category: string): Promise<InventoryIte
 /**
  * Get items by location
  */
-export async function getItemsByLocation(location: string): Promise<InventoryItem[]> {
+export async function getItemsByLocation(
+  location: string
+): Promise<InventoryItem[]> {
   try {
     const response = await InventoryCrudOperations.getItems({ location });
     return response.data || [];
@@ -70,7 +74,9 @@ export async function getItemsByLocation(location: string): Promise<InventoryIte
 /**
  * Get items by status
  */
-export async function getItemsByStatus(status: ToolStatus): Promise<InventoryItem[]> {
+export async function getItemsByStatus(
+  status: ToolStatus
+): Promise<InventoryItem[]> {
   try {
     const response = await InventoryCrudOperations.getItems({ status });
     return response.data || [];
@@ -83,9 +89,13 @@ export async function getItemsByStatus(status: ToolStatus): Promise<InventoryIte
 /**
  * Search items by term
  */
-export async function searchItems(searchTerm: string): Promise<InventoryItem[]> {
+export async function searchItems(
+  searchTerm: string
+): Promise<InventoryItem[]> {
   try {
-    const response = await InventoryCrudOperations.getItems({ search: searchTerm });
+    const response = await InventoryCrudOperations.getItems({
+      search: searchTerm,
+    });
     return response.data || [];
   } catch (error) {
     console.error('Error searching items:', error);
@@ -113,8 +123,8 @@ export async function getExpiringItems(
   days: number = 30
 ): Promise<InventoryItem[]> {
   try {
-    const response = await InventoryCrudOperations.getItems({ 
-      expiringWithinDays: days 
+    const response = await InventoryCrudOperations.getItems({
+      expiringWithinDays: days,
     });
     return response.data || [];
   } catch (error) {
@@ -210,14 +220,14 @@ export async function duplicateItem(itemId: string): Promise<InventoryItem> {
     if (!originalItem) {
       throw new Error('Original item not found');
     }
-    
+
     const duplicateData = {
       ...originalItem,
       name: `${originalItem.name} (Copy)`,
       id: undefined,
       lastUpdated: undefined,
     };
-    
+
     const duplicatedItem = await InventoryCrudOperations.createItem(
       duplicateData as Omit<InventoryItem, 'id' | 'lastUpdated'>
     );
@@ -237,13 +247,13 @@ export async function bulkUpdateItemsByCategory(
 ): Promise<{ updatedCount: number }> {
   try {
     const items = await getItemsByCategory(category);
-    const updatePromises = items.map(item => 
+    const updatePromises = items.map((item) =>
       InventoryCrudOperations.updateItem(item.id, updateData)
     );
-    
+
     const results = await Promise.allSettled(updatePromises);
-    const updatedCount = results.filter(r => r.status === 'fulfilled').length;
-    
+    const updatedCount = results.filter((r) => r.status === 'fulfilled').length;
+
     return { updatedCount };
   } catch (error) {
     console.error('Error in bulk update by category:', error);

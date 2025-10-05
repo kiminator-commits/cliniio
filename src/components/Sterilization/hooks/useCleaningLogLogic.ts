@@ -6,10 +6,10 @@ import {
   CycleStats,
   CleaningLog,
 } from '../services/cleaningLogService';
-import { ToolStatus } from '@/types/toolTypes';
+import { ToolStatus as _ToolStatus } from '@/types/toolTypes';
 
 interface UseCleaningLogLogicProps {
-  filterStatus: 'all' | ToolStatus;
+  filterStatus: 'all' | 'in_progress' | 'completed' | 'failed';
   filterDate: string;
 }
 
@@ -88,6 +88,10 @@ export const useCleaningLogLogic = ({
     return CleaningLogService.getComplianceScoreDisplay(score);
   };
 
+  const exportLogs = () => {
+    CleaningLogService.exportToCSV(filteredLogs);
+  };
+
   return {
     filteredLogs,
     stats,
@@ -101,5 +105,6 @@ export const useCleaningLogLogic = ({
     getCleaningTypeDisplayName,
     getQualityScoreDisplay,
     getComplianceScoreDisplay,
+    exportLogs,
   };
 };

@@ -15,7 +15,14 @@ interface CorrelationRule {
 
 interface CorrelationCondition {
   field: string;
-  operator: 'equals' | 'contains' | 'starts_with' | 'ends_with' | 'regex' | 'greater_than' | 'less_than';
+  operator:
+    | 'equals'
+    | 'contains'
+    | 'starts_with'
+    | 'ends_with'
+    | 'regex'
+    | 'greater_than'
+    | 'less_than';
   value: any;
   weight?: number; // for scoring
 }
@@ -64,30 +71,50 @@ class SecurityEventCorrelator {
       {
         id: 'multiple_failed_logins',
         name: 'Multiple Failed Login Attempts',
-        description: 'Detects multiple failed login attempts from the same source',
+        description:
+          'Detects multiple failed login attempts from the same source',
         enabled: true,
         severity: 'high',
         conditions: [
-          { field: 'eventType', operator: 'equals', value: 'login_failure', weight: 1 },
+          {
+            field: 'eventType',
+            operator: 'equals',
+            value: 'login_failure',
+            weight: 1,
+          },
           { field: 'actor', operator: 'equals', value: '{{actor}}', weight: 1 },
         ],
         timeWindow: 15 * 60 * 1000, // 15 minutes
         threshold: 5,
         actions: [
           { type: 'alert', config: { level: 'high' } },
-          { type: 'log', config: { message: 'Multiple failed logins detected' } },
+          {
+            type: 'log',
+            config: { message: 'Multiple failed logins detected' },
+          },
         ],
         cooldown: 5 * 60 * 1000, // 5 minutes
       },
       {
         id: 'distributed_attack',
         name: 'Distributed Attack Pattern',
-        description: 'Detects attacks from multiple IPs targeting the same resource',
+        description:
+          'Detects attacks from multiple IPs targeting the same resource',
         enabled: true,
         severity: 'critical',
         conditions: [
-          { field: 'eventType', operator: 'equals', value: 'login_failure', weight: 1 },
-          { field: 'resource', operator: 'equals', value: '{{resource}}', weight: 1 },
+          {
+            field: 'eventType',
+            operator: 'equals',
+            value: 'login_failure',
+            weight: 1,
+          },
+          {
+            field: 'resource',
+            operator: 'equals',
+            value: '{{resource}}',
+            weight: 1,
+          },
         ],
         timeWindow: 30 * 60 * 1000, // 30 minutes
         threshold: 10,
@@ -122,14 +149,27 @@ class SecurityEventCorrelator {
         enabled: true,
         severity: 'medium',
         conditions: [
-          { field: 'timestamp', operator: 'greater_than', value: '{{night_hours}}', weight: 1 },
-          { field: 'eventType', operator: 'equals', value: 'login_success', weight: 1 },
+          {
+            field: 'timestamp',
+            operator: 'greater_than',
+            value: '{{night_hours}}',
+            weight: 1,
+          },
+          {
+            field: 'eventType',
+            operator: 'equals',
+            value: 'login_success',
+            weight: 1,
+          },
         ],
         timeWindow: 24 * 60 * 60 * 1000, // 24 hours
         threshold: 3,
         actions: [
           { type: 'alert', config: { level: 'medium' } },
-          { type: 'log', config: { message: 'Unusual access pattern detected' } },
+          {
+            type: 'log',
+            config: { message: 'Unusual access pattern detected' },
+          },
         ],
         cooldown: 60 * 60 * 1000, // 1 hour
       },
@@ -140,8 +180,18 @@ class SecurityEventCorrelator {
         enabled: true,
         severity: 'medium',
         conditions: [
-          { field: 'eventType', operator: 'equals', value: 'login_success', weight: 1 },
-          { field: 'ipAddress', operator: 'equals', value: '{{ip}}', weight: 1 },
+          {
+            field: 'eventType',
+            operator: 'equals',
+            value: 'login_success',
+            weight: 1,
+          },
+          {
+            field: 'ipAddress',
+            operator: 'equals',
+            value: '{{ip}}',
+            weight: 1,
+          },
         ],
         timeWindow: 5 * 60 * 1000, // 5 minutes
         threshold: 10,
@@ -153,7 +203,7 @@ class SecurityEventCorrelator {
       },
     ];
 
-    defaultRules.forEach(rule => {
+    defaultRules.forEach((rule) => {
       this.rules.set(rule.id, rule);
     });
   }
@@ -166,7 +216,10 @@ class SecurityEventCorrelator {
         pattern: 'login_failure.*repeated',
         description: 'Repeated failed login attempts',
         severity: 'high',
-        examples: ['Multiple failed logins from same IP', 'Password spraying attack'],
+        examples: [
+          'Multiple failed logins from same IP',
+          'Password spraying attack',
+        ],
       },
       {
         id: 'credential_stuffing',
@@ -202,7 +255,7 @@ class SecurityEventCorrelator {
       },
     ];
 
-    defaultPatterns.forEach(pattern => {
+    defaultPatterns.forEach((pattern) => {
       this.patterns.set(pattern.id, pattern);
     });
   }
@@ -219,8 +272,10 @@ class SecurityEventCorrelator {
       if (!rule.enabled) continue;
 
       // Check cooldown
-      if (rule.lastTriggered && 
-          (Date.now() - rule.lastTriggered) < rule.cooldown) {
+      if (
+        rule.lastTriggered &&
+        Date.now() - rule.lastTriggered < rule.cooldown
+      ) {
         continue;
       }
 
@@ -237,7 +292,7 @@ class SecurityEventCorrelator {
 
     // Store results
     this.correlationResults.push(...results);
-    
+
     // Cleanup old results
     if (this.correlationResults.length > this.maxResults) {
       this.correlationResults = this.correlationResults.slice(-this.maxResults);
@@ -256,8 +311,8 @@ class SecurityEventCorrelator {
     buffer.push({ ...event, id: eventId });
 
     // Cleanup old events
-    const cutoff = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
-    const filtered = buffer.filter(e => e.timestamp > cutoff);
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000; // 24 hours
+    const filtered = buffer.filter((e) => e.timestamp > cutoff);
     this.eventBuffer.set(bufferKey, filtered);
 
     // Limit buffer size
@@ -269,25 +324,29 @@ class SecurityEventCorrelator {
   private getBufferKey(event: any): string {
     // Create a key based on relevant fields for correlation
     const fields = ['actor', 'ipAddress', 'resource', 'eventType'];
-    const keyParts = fields.map(field => event[field] || 'unknown');
+    const keyParts = fields.map((field) => event[field] || 'unknown');
     return keyParts.join('|');
   }
 
-  private async evaluateRule(rule: CorrelationRule, event: any): Promise<CorrelationResult | null> {
+  private async evaluateRule(
+    rule: CorrelationRule,
+    event: any
+  ): Promise<CorrelationResult | null> {
     const now = Date.now();
     const timeWindowStart = now - rule.timeWindow;
-    
+
     // Get relevant events from buffer
     const relevantEvents = this.getRelevantEvents(rule, timeWindowStart);
-    
+
     if (relevantEvents.length < rule.threshold) {
       return null;
     }
 
     // Calculate confidence score
     const confidence = this.calculateConfidence(rule, relevantEvents);
-    
-    if (confidence < 50) { // Minimum confidence threshold
+
+    if (confidence < 50) {
+      // Minimum confidence threshold
       return null;
     }
 
@@ -297,7 +356,7 @@ class SecurityEventCorrelator {
       ruleName: rule.name,
       severity: rule.severity,
       confidence,
-      matchedEvents: relevantEvents.map(e => e.id),
+      matchedEvents: relevantEvents.map((e) => e.id),
       score: confidence,
       timestamp: now,
       details: {
@@ -312,7 +371,10 @@ class SecurityEventCorrelator {
     return result;
   }
 
-  private getRelevantEvents(rule: CorrelationRule, timeWindowStart: number): any[] {
+  private getRelevantEvents(
+    rule: CorrelationRule,
+    timeWindowStart: number
+  ): any[] {
     const relevantEvents: any[] = [];
 
     for (const buffer of this.eventBuffer.values()) {
@@ -329,7 +391,10 @@ class SecurityEventCorrelator {
     return relevantEvents;
   }
 
-  private eventMatchesConditions(event: any, conditions: CorrelationCondition[]): boolean {
+  private eventMatchesConditions(
+    event: any,
+    conditions: CorrelationCondition[]
+  ): boolean {
     for (const condition of conditions) {
       if (!this.evaluateCondition(event, condition)) {
         return false;
@@ -338,7 +403,10 @@ class SecurityEventCorrelator {
     return true;
   }
 
-  private evaluateCondition(event: any, condition: CorrelationCondition): boolean {
+  private evaluateCondition(
+    event: any,
+    condition: CorrelationCondition
+  ): boolean {
     const fieldValue = this.getFieldValue(event, condition.field);
     const conditionValue = condition.value;
 
@@ -366,7 +434,7 @@ class SecurityEventCorrelator {
     // Handle nested fields (e.g., 'details.ipAddress')
     const parts = field.split('.');
     let value = event;
-    
+
     for (const part of parts) {
       if (value && typeof value === 'object') {
         value = value[part];
@@ -374,7 +442,7 @@ class SecurityEventCorrelator {
         return undefined;
       }
     }
-    
+
     return value;
   }
 
@@ -385,12 +453,12 @@ class SecurityEventCorrelator {
     for (const condition of rule.conditions) {
       const weight = condition.weight || 1;
       maxScore += weight;
-      
+
       // Count how many events match this condition
-      const matchCount = events.filter(event => 
+      const matchCount = events.filter((event) =>
         this.evaluateCondition(event, condition)
       ).length;
-      
+
       totalScore += (matchCount / events.length) * weight;
     }
 
@@ -403,7 +471,7 @@ class SecurityEventCorrelator {
     for (const pattern of this.patterns.values()) {
       const regex = new RegExp(pattern.pattern, 'i');
       const eventString = JSON.stringify(event);
-      
+
       if (regex.test(eventString)) {
         const result: CorrelationResult = {
           ruleId: `pattern_${pattern.id}`,
@@ -420,10 +488,13 @@ class SecurityEventCorrelator {
           },
           actions: [
             { type: 'alert', config: { level: pattern.severity } },
-            { type: 'log', config: { message: `Pattern matched: ${pattern.name}` } },
+            {
+              type: 'log',
+              config: { message: `Pattern matched: ${pattern.name}` },
+            },
           ],
         };
-        
+
         results.push(result);
       }
     }
@@ -441,16 +512,23 @@ class SecurityEventCorrelator {
     }
   }
 
-  private async executeAction(action: CorrelationAction, result: CorrelationResult): Promise<void> {
+  private async executeAction(
+    action: CorrelationAction,
+    result: CorrelationResult
+  ): Promise<void> {
     switch (action.type) {
       case 'alert':
-        console.log(`SECURITY ALERT [${result.severity.toUpperCase()}]: ${result.ruleName}`);
+        console.log(
+          `SECURITY ALERT [${result.severity.toUpperCase()}]: ${result.ruleName}`
+        );
         console.log(`Confidence: ${result.confidence}%`);
         console.log(`Details:`, result.details);
         break;
 
       case 'log':
-        console.log(`SECURITY LOG: ${action.config.message || result.ruleName}`);
+        console.log(
+          `SECURITY LOG: ${action.config.message || result.ruleName}`
+        );
         break;
 
       case 'webhook':
@@ -465,7 +543,9 @@ class SecurityEventCorrelator {
 
       case 'email':
         // Email notification implementation
-        console.log(`SECURITY EMAIL: ${result.ruleName} - ${result.confidence}% confidence`);
+        console.log(
+          `SECURITY EMAIL: ${result.ruleName} - ${result.confidence}% confidence`
+        );
         break;
 
       case 'block':
@@ -476,12 +556,12 @@ class SecurityEventCorrelator {
   }
 
   getCorrelationResults(timeRangeMinutes: number = 60): CorrelationResult[] {
-    const cutoff = Date.now() - (timeRangeMinutes * 60 * 1000);
-    return this.correlationResults.filter(r => r.timestamp >= cutoff);
+    const cutoff = Date.now() - timeRangeMinutes * 60 * 1000;
+    return this.correlationResults.filter((r) => r.timestamp >= cutoff);
   }
 
   getActiveRules(): CorrelationRule[] {
-    return Array.from(this.rules.values()).filter(rule => rule.enabled);
+    return Array.from(this.rules.values()).filter((rule) => rule.enabled);
   }
 
   addRule(rule: CorrelationRule): void {
@@ -511,7 +591,8 @@ class SecurityEventCorrelator {
   } {
     const stats = {
       totalRules: this.rules.size,
-      activeRules: Array.from(this.rules.values()).filter(r => r.enabled).length,
+      activeRules: Array.from(this.rules.values()).filter((r) => r.enabled)
+        .length,
       totalPatterns: this.patterns.size,
       totalCorrelations: this.correlationResults.length,
       correlationsBySeverity: {} as Record<string, number>,
@@ -520,7 +601,7 @@ class SecurityEventCorrelator {
 
     // Count correlations by severity
     for (const result of this.correlationResults) {
-      stats.correlationsBySeverity[result.severity] = 
+      stats.correlationsBySeverity[result.severity] =
         (stats.correlationsBySeverity[result.severity] || 0) + 1;
     }
 
@@ -549,4 +630,9 @@ export function getSecurityEventCorrelator(): SecurityEventCorrelator {
   return securityEventCorrelator;
 }
 
-export { SecurityEventCorrelator, type CorrelationRule, type CorrelationResult, type EventPattern };
+export {
+  SecurityEventCorrelator,
+  type CorrelationRule,
+  type CorrelationResult,
+  type EventPattern,
+};

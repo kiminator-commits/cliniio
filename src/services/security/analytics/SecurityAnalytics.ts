@@ -1,4 +1,9 @@
-import { SecurityEvent, SecurityViolation, ComplianceReport, SecurityEventFilter } from '../types/securityTypes';
+import {
+  SecurityEvent,
+  SecurityViolation,
+  ComplianceReport,
+  SecurityEventFilter,
+} from '../types/securityTypes';
 
 export class SecurityAnalytics {
   /**
@@ -93,7 +98,10 @@ export class SecurityAnalytics {
   /**
    * Filter security events
    */
-  filterSecurityEvents(events: SecurityEvent[], filter: SecurityEventFilter): SecurityEvent[] {
+  filterSecurityEvents(
+    events: SecurityEvent[],
+    filter: SecurityEventFilter
+  ): SecurityEvent[] {
     let filteredEvents = [...events];
 
     if (filter.eventType && filter.eventType.length > 0) {

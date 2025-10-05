@@ -2,7 +2,11 @@
 // KNOWLEDGE HUB PATHWAY PROVIDER - Learning Pathway Operations
 // ============================================================================
 
-import { ContentItem, ContentCategory, ContentStatus } from '../../pages/KnowledgeHub/types';
+import {
+  ContentItem,
+  ContentCategory,
+  ContentStatus,
+} from '../../pages/KnowledgeHub/types';
 import { UnifiedDatabaseAdapter } from '../../pages/KnowledgeHub/services/adapters/unifiedDatabaseAdapter';
 
 export class KnowledgeHubPathwayProvider {

@@ -81,7 +81,9 @@ export class ChecklistDataProvider {
    * Get checklists by category
    */
   getChecklistsByCategory(category: string): Checklist[] {
-    return this.checklists.filter((checklist) => checklist.category === category);
+    return this.checklists.filter(
+      (checklist) => checklist.category === category
+    );
   }
 
   /**
@@ -104,7 +106,9 @@ export class ChecklistDataProvider {
   /**
    * Add new checklist
    */
-  addChecklist(checklistData: Omit<Checklist, 'id' | 'createdAt' | 'updatedAt'>): Checklist {
+  addChecklist(
+    checklistData: Omit<Checklist, 'id' | 'createdAt' | 'updatedAt'>
+  ): Checklist {
     const newChecklist: Checklist = {
       ...checklistData,
       status: 'draft',
@@ -112,7 +116,7 @@ export class ChecklistDataProvider {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
+
     this.checklists.push(newChecklist);
     return newChecklist;
   }
@@ -203,7 +207,9 @@ export class ChecklistDataProvider {
     totalItems: number;
   } {
     const total = this.checklists.length;
-    const published = this.checklists.filter((c) => c.status === 'published').length;
+    const published = this.checklists.filter(
+      (c) => c.status === 'published'
+    ).length;
     const draft = this.checklists.filter((c) => c.status === 'draft').length;
 
     const byCategory = this.checklists.reduce(
@@ -214,7 +220,10 @@ export class ChecklistDataProvider {
       {} as Record<string, number>
     );
 
-    const totalItems = this.checklists.reduce((sum, checklist) => sum + checklist.items.length, 0);
+    const totalItems = this.checklists.reduce(
+      (sum, checklist) => sum + checklist.items.length,
+      0
+    );
     const averageItemsPerChecklist = total > 0 ? totalItems / total : 0;
 
     return {
@@ -235,9 +244,10 @@ export class ChecklistDataProvider {
     return this.checklists.filter(
       (checklist) =>
         checklist.title.toLowerCase().includes(lowercaseQuery) ||
-        checklist.items.some((item) =>
-          item.title.toLowerCase().includes(lowercaseQuery) ||
-          item.instructions.toLowerCase().includes(lowercaseQuery)
+        checklist.items.some(
+          (item) =>
+            item.title.toLowerCase().includes(lowercaseQuery) ||
+            item.instructions.toLowerCase().includes(lowercaseQuery)
         )
     );
   }
@@ -253,14 +263,25 @@ export class ChecklistDataProvider {
     maxItems?: number;
   }): Checklist[] {
     return this.checklists.filter((checklist) => {
-      if (filters.category && checklist.category !== filters.category) return false;
+      if (filters.category && checklist.category !== filters.category)
+        return false;
       if (filters.status && checklist.status !== filters.status) return false;
       if (filters.hasScheduling !== undefined) {
-        const hasScheduling = !!(checklist.autoSchedule || checklist.scheduleFrequency);
+        const hasScheduling = !!(
+          checklist.autoSchedule || checklist.scheduleFrequency
+        );
         if (hasScheduling !== filters.hasScheduling) return false;
       }
-      if (filters.minItems !== undefined && checklist.items.length < filters.minItems) return false;
-      if (filters.maxItems !== undefined && checklist.items.length > filters.maxItems) return false;
+      if (
+        filters.minItems !== undefined &&
+        checklist.items.length < filters.minItems
+      )
+        return false;
+      if (
+        filters.maxItems !== undefined &&
+        checklist.items.length > filters.maxItems
+      )
+        return false;
       return true;
     });
   }
@@ -281,10 +302,12 @@ export class ChecklistDataProvider {
           comparison = a.title.localeCompare(b.title);
           break;
         case 'createdAt':
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          comparison =
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           break;
         case 'updatedAt':
-          comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+          comparison =
+            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
           break;
         case 'category':
           comparison = a.category.localeCompare(b.category);
@@ -303,7 +326,9 @@ export class ChecklistDataProvider {
    */
   exportChecklists(checklistIds?: string[]): string {
     const checklistsToExport = checklistIds
-      ? this.checklists.filter((checklist) => checklistIds.includes(checklist.id))
+      ? this.checklists.filter((checklist) =>
+          checklistIds.includes(checklist.id)
+        )
       : this.checklists;
 
     return JSON.stringify(checklistsToExport, null, 2);
@@ -319,7 +344,7 @@ export class ChecklistDataProvider {
   } {
     try {
       const importedChecklists = JSON.parse(jsonData) as Checklist[];
-      
+
       if (!Array.isArray(importedChecklists)) {
         return {
           success: false,
@@ -334,7 +359,9 @@ export class ChecklistDataProvider {
       importedChecklists.forEach((checklist, index) => {
         const validation = this.validateChecklist(checklist);
         if (!validation.isValid) {
-          errors.push(`Checklist ${index + 1}: ${validation.errors.join(', ')}`);
+          errors.push(
+            `Checklist ${index + 1}: ${validation.errors.join(', ')}`
+          );
         } else {
           // Generate new IDs to avoid conflicts
           const importedChecklist: Checklist = {
@@ -385,7 +412,14 @@ export class ChecklistDataProvider {
     if (!checklist.category) {
       errors.push('Category is required');
     } else {
-      const validCategories = ['setup', 'patient', 'weekly', 'public', 'deep', 'environmental_cleaning'];
+      const validCategories = [
+        'setup',
+        'patient',
+        'weekly',
+        'public',
+        'deep',
+        'environmental_cleaning',
+      ];
       if (!validCategories.includes(checklist.category)) {
         errors.push(`Invalid category: ${checklist.category}`);
       }
@@ -417,7 +451,8 @@ export class ChecklistDataProvider {
           {
             id: 'clean-surfaces',
             title: 'Clean and sanitize all surfaces with CaviWipes',
-            instructions: 'Use 2 wipes per surface. Allow to air dry for 3 minutes.',
+            instructions:
+              'Use 2 wipes per surface. Allow to air dry for 3 minutes.',
             requiredInventory: [
               {
                 id: 'caviwipes-001',

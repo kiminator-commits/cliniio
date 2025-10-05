@@ -3,10 +3,28 @@
  * Supports multiple external error reporting providers
  */
 
-let _provider = process.env.ERROR_REPORTING_PROVIDER || 'console';
+// Browser-safe environment detection
+const isBrowser = typeof window !== 'undefined';
+const isTest =
+  typeof vi !== 'undefined' ||
+  (isBrowser && window.location.hostname === 'localhost');
 
-// Force console provider when running under Vitest / test environments
-if (typeof vi !== 'undefined' || process.env.NODE_ENV === 'test') {
+let _provider: ErrorReportingProvider = 'console';
+
+// Set provider based on environment
+if (isBrowser) {
+  // In browser, use console by default or check for environment variables
+  const envProvider = import.meta.env?.VITE_ERROR_REPORTING_PROVIDER;
+  _provider = (envProvider as ErrorReportingProvider) || 'console';
+} else {
+  // In Node.js environment
+  _provider =
+    (process.env.ERROR_REPORTING_PROVIDER as ErrorReportingProvider) ||
+    'console';
+}
+
+// Force console provider when running under test environments
+if (isTest) {
   _provider = 'console';
 }
 
@@ -47,7 +65,9 @@ export class ErrorReportingService {
   private static config: ErrorReportingConfig = {
     provider: 'console',
     enabled: true,
-    environment: process.env.NODE_ENV || 'development',
+    environment: isBrowser
+      ? import.meta.env?.MODE || 'development'
+      : process.env.NODE_ENV || 'development',
     maxQueueSize: 10,
     flushInterval: 5000, // 5 seconds
   };
@@ -105,7 +125,10 @@ export class ErrorReportingService {
     this.errorQueue.push(errorReport);
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    const isDevelopment = isBrowser
+      ? import.meta.env?.MODE === 'development'
+      : process.env.NODE_ENV === 'development';
+    if (isDevelopment) {
       console.error('Error reported:', errorReport);
     }
 
@@ -446,7 +469,9 @@ export class ErrorReportingService {
     this.config = {
       provider: 'console',
       enabled: true,
-      environment: process.env.NODE_ENV || 'development',
+      environment: isBrowser
+        ? import.meta.env?.MODE || 'development'
+        : process.env.NODE_ENV || 'development',
       maxQueueSize: 10,
       flushInterval: 5000,
     };

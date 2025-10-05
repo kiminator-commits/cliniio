@@ -41,7 +41,10 @@ export class SecurityAuditService {
   logSecurityEvent(event: Omit<SecurityEvent, 'id' | 'timestamp'>): void {
     const securityEvent = this.eventLogger.logSecurityEvent(event);
     this.dataManager.addSecurityEvent(securityEvent);
-    this.threatDetector.checkForViolations(securityEvent, this.dataManager.getAllEvents());
+    this.threatDetector.checkForViolations(
+      securityEvent,
+      this.dataManager.getAllEvents()
+    );
   }
 
   /**
@@ -60,9 +63,18 @@ export class SecurityAuditService {
     facilityId?: string,
     details: Record<string, unknown> = {}
   ): void {
-    const event = this.eventLogger.logAuthentication(action, result, userId, facilityId, details);
+    const event = this.eventLogger.logAuthentication(
+      action,
+      result,
+      userId,
+      facilityId,
+      details
+    );
     this.dataManager.addSecurityEvent(event);
-    this.threatDetector.checkForViolations(event, this.dataManager.getAllEvents());
+    this.threatDetector.checkForViolations(
+      event,
+      this.dataManager.getAllEvents()
+    );
   }
 
   /**
@@ -81,9 +93,19 @@ export class SecurityAuditService {
     resource?: string,
     details: Record<string, unknown> = {}
   ): void {
-    const event = this.eventLogger.logAuthorization(action, result, userId, facilityId, resource, details);
+    const event = this.eventLogger.logAuthorization(
+      action,
+      result,
+      userId,
+      facilityId,
+      resource,
+      details
+    );
     this.dataManager.addSecurityEvent(event);
-    this.threatDetector.checkForViolations(event, this.dataManager.getAllEvents());
+    this.threatDetector.checkForViolations(
+      event,
+      this.dataManager.getAllEvents()
+    );
   }
 
   /**
@@ -99,9 +121,21 @@ export class SecurityAuditService {
     recordCount?: number,
     details: Record<string, unknown> = {}
   ): void {
-    const event = this.eventLogger.logDataAccess(action, result, userId, facilityId, resource, dataType, recordCount, details);
+    const event = this.eventLogger.logDataAccess(
+      action,
+      result,
+      userId,
+      facilityId,
+      resource,
+      dataType,
+      recordCount,
+      details
+    );
     this.dataManager.addSecurityEvent(event);
-    this.threatDetector.checkForViolations(event, this.dataManager.getAllEvents());
+    this.threatDetector.checkForViolations(
+      event,
+      this.dataManager.getAllEvents()
+    );
   }
 
   /**
@@ -117,9 +151,21 @@ export class SecurityAuditService {
     changes?: Record<string, unknown>,
     details: Record<string, unknown> = {}
   ): void {
-    const event = this.eventLogger.logDataModification(action, result, userId, facilityId, resource, recordId, changes, details);
+    const event = this.eventLogger.logDataModification(
+      action,
+      result,
+      userId,
+      facilityId,
+      resource,
+      recordId,
+      changes,
+      details
+    );
     this.dataManager.addSecurityEvent(event);
-    this.threatDetector.checkForViolations(event, this.dataManager.getAllEvents());
+    this.threatDetector.checkForViolations(
+      event,
+      this.dataManager.getAllEvents()
+    );
   }
 
   /**
@@ -136,9 +182,18 @@ export class SecurityAuditService {
     facilityId?: string,
     details: Record<string, unknown> = {}
   ): void {
-    const event = this.eventLogger.logSystemAccess(action, result, userId, facilityId, details);
+    const event = this.eventLogger.logSystemAccess(
+      action,
+      result,
+      userId,
+      facilityId,
+      details
+    );
     this.dataManager.addSecurityEvent(event);
-    this.threatDetector.checkForViolations(event, this.dataManager.getAllEvents());
+    this.threatDetector.checkForViolations(
+      event,
+      this.dataManager.getAllEvents()
+    );
   }
 
   /**
@@ -173,7 +228,9 @@ export class SecurityAuditService {
   /**
    * Get security violations
    */
-  getSecurityViolations(filter: SecurityViolationFilter = {}): SecurityViolation[] {
+  getSecurityViolations(
+    filter: SecurityViolationFilter = {}
+  ): SecurityViolation[] {
     return this.violationManager.getSecurityViolations(filter);
   }
 
@@ -198,9 +255,13 @@ export class SecurityAuditService {
       endDate,
     });
 
-    return this.analytics.generateComplianceReport(events, violations, startDate, endDate);
+    return this.analytics.generateComplianceReport(
+      events,
+      violations,
+      startDate,
+      endDate
+    );
   }
-
 }
 
 // Singleton instance

@@ -3,7 +3,10 @@ import { LearningAIModelProvider } from '../../learningAI/LearningAIModelProvide
 import type { PerformancePredictionResult } from '../../../types/learningAITypes';
 import type { Json } from '../../../types/database.types';
 import type { PerformancePredictionRow } from '../../../types/learningAITypes';
-import { calculateProcessingTime, getCurrentTimestamp } from '../../learningAI/learningAIUtils';
+import {
+  calculateProcessingTime,
+  getCurrentTimestamp,
+} from '../../learningAI/learningAIUtils';
 import { DEFAULT_VALUES } from './learningAIConfig';
 
 export class EvaluationService {
@@ -181,7 +184,10 @@ export class EvaluationService {
 
       return {
         recommended_difficulty: (resultData.recommended_difficulty ??
-          DEFAULT_VALUES.DIFFICULTY_LEVEL) as 'beginner' | 'intermediate' | 'advanced',
+          DEFAULT_VALUES.DIFFICULTY_LEVEL) as
+          | 'beginner'
+          | 'intermediate'
+          | 'advanced',
         difficulty_adjustment: resultData.difficulty_adjustment ?? 0,
         learning_curve_analysis: resultData.learning_curve_analysis ?? '',
         adaptation_reasoning:

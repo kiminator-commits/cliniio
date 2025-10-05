@@ -34,6 +34,7 @@ interface HomeContentLayoutProps {
   integrationMetrics?:
     | Record<string, unknown>
     | import('../../../services/homeIntegrationService').HomeIntegrationMetrics;
+  aiImpactMetrics?: Record<string, unknown>; // Add AI impact metrics prop
 }
 
 const HomeContentLayout: React.FC<HomeContentLayoutProps> = React.memo(
@@ -54,6 +55,7 @@ const HomeContentLayout: React.FC<HomeContentLayoutProps> = React.memo(
     aiMetrics,
     sterilizationMetrics,
     integrationMetrics,
+    aiImpactMetrics, // Add AI impact metrics parameter
   }) => {
     // Memoize the layout classes to prevent recalculation on every render
     const layoutClasses = useMemo(
@@ -102,6 +104,7 @@ const HomeContentLayout: React.FC<HomeContentLayoutProps> = React.memo(
                 aiMetrics={aiMetrics}
                 sterilizationMetrics={sterilizationMetrics}
                 integrationMetrics={integrationMetrics}
+                aiImpactMetrics={aiImpactMetrics}
               />
             </div>
           </div>

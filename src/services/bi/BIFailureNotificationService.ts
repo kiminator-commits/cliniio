@@ -14,7 +14,7 @@ import {
 /**
  * @deprecated Use BIFailureNotificationService from '@/services/bi/failure/BIFailureNotificationService' instead
  * This service is deprecated in favor of the consolidated BI failure services
- * 
+ *
  * Service for BI failure notification operations
  * Handles regulatory notifications, clinic manager alerts, and email queuing
  */
@@ -38,7 +38,9 @@ export class BIFailureNotificationService {
       operatorName?: string;
     }
   ): Promise<boolean> {
-    console.warn('BIFailureNotificationService.notifyRegulator() is deprecated. Use BIFailureService.sendRegulatoryNotification() instead.');
+    console.warn(
+      'BIFailureNotificationService.notifyRegulator() is deprecated. Use BIFailureService.sendRegulatoryNotification() instead.'
+    );
     try {
       // Validate inputs
       const request: RegulatoryNotificationRequest = {

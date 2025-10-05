@@ -9,7 +9,10 @@ import { InventoryItemData } from '@/types/inventoryActionTypes';
 /**
  * Validate inventory item data
  */
-export function validateItemData(itemData: InventoryItemData): { isValid: boolean; errors: string[] } {
+export function validateItemData(itemData: InventoryItemData): {
+  isValid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (!itemData.name || itemData.name.trim().length === 0) {
@@ -36,7 +39,10 @@ export function validateItemData(itemData: InventoryItemData): { isValid: boolea
     errors.push('Maximum quantity cannot be negative');
   }
 
-  if (itemData.minQuantity !== undefined && itemData.maxQuantity !== undefined) {
+  if (
+    itemData.minQuantity !== undefined &&
+    itemData.maxQuantity !== undefined
+  ) {
     if (itemData.minQuantity > itemData.maxQuantity) {
       errors.push('Minimum quantity cannot be greater than maximum quantity');
     }
@@ -46,7 +52,10 @@ export function validateItemData(itemData: InventoryItemData): { isValid: boolea
     errors.push('Cost cannot be negative');
   }
 
-  if (itemData.expirationDate && new Date(itemData.expirationDate) < new Date()) {
+  if (
+    itemData.expirationDate &&
+    new Date(itemData.expirationDate) < new Date()
+  ) {
     errors.push('Expiration date cannot be in the past');
   }
 
@@ -67,7 +76,9 @@ export function validateItemData(itemData: InventoryItemData): { isValid: boolea
 /**
  * Build inventory payload from item data
  */
-export function buildInventoryPayload(itemData: InventoryItemData): Partial<InventoryItem> {
+export function buildInventoryPayload(
+  itemData: InventoryItemData
+): Partial<InventoryItem> {
   const payload: Partial<InventoryItem> = {
     name: itemData.name?.trim(),
     description: itemData.description?.trim(),
@@ -86,7 +97,7 @@ export function buildInventoryPayload(itemData: InventoryItemData): Partial<Inve
   };
 
   // Remove undefined values
-  Object.keys(payload).forEach(key => {
+  Object.keys(payload).forEach((key) => {
     if (payload[key as keyof InventoryItem] === undefined) {
       delete payload[key as keyof InventoryItem];
     }
@@ -112,7 +123,9 @@ export function formatInventoryItemData(itemData: InventoryItemData): string {
 /**
  * Parse inventory item from string
  */
-export function parseInventoryItemFromString(itemString: string): Partial<InventoryItemData> {
+export function parseInventoryItemFromString(
+  itemString: string
+): Partial<InventoryItemData> {
   const parts = itemString.split(' - ');
   if (parts.length < 2) {
     return {};
@@ -157,7 +170,9 @@ export function mapInventoryItemToData(item: InventoryItem): InventoryItemData {
 /**
  * Map item data to inventory item
  */
-export function mapItemDataToInventoryItem(itemData: InventoryItemData): Partial<InventoryItem> {
+export function mapItemDataToInventoryItem(
+  itemData: InventoryItemData
+): Partial<InventoryItem> {
   return {
     id: itemData.id,
     name: itemData.name,
@@ -182,15 +197,17 @@ export function mapItemDataToInventoryItem(itemData: InventoryItemData): Partial
  */
 export function calculateInventoryValue(items: InventoryItem[]): number {
   return items.reduce((total, item) => {
-    return total + (item.cost * item.quantity);
+    return total + item.cost * item.quantity;
   }, 0);
 }
 
 /**
  * Calculate low stock items
  */
-export function calculateLowStockItems(items: InventoryItem[]): InventoryItem[] {
-  return items.filter(item => {
+export function calculateLowStockItems(
+  items: InventoryItem[]
+): InventoryItem[] {
+  return items.filter((item) => {
     return item.quantity <= item.minQuantity;
   });
 }
@@ -198,11 +215,14 @@ export function calculateLowStockItems(items: InventoryItem[]): InventoryItem[] 
 /**
  * Calculate expiring items
  */
-export function calculateExpiringItems(items: InventoryItem[], days: number = 30): InventoryItem[] {
+export function calculateExpiringItems(
+  items: InventoryItem[],
+  days: number = 30
+): InventoryItem[] {
   const futureDate = new Date();
   futureDate.setDate(futureDate.getDate() + days);
 
-  return items.filter(item => {
+  return items.filter((item) => {
     if (!item.expirationDate) return false;
     const expirationDate = new Date(item.expirationDate);
     return expirationDate <= futureDate;
@@ -212,7 +232,10 @@ export function calculateExpiringItems(items: InventoryItem[], days: number = 30
 /**
  * Format currency value
  */
-export function formatCurrency(value: number, currency: string = 'USD'): string {
+export function formatCurrency(
+  value: number,
+  currency: string = 'USD'
+): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
@@ -384,7 +407,10 @@ export function isNotEmpty(value: unknown): boolean {
 /**
  * Get nested property value
  */
-export function getNestedProperty(obj: Record<string, unknown>, path: string): unknown {
+export function getNestedProperty(
+  obj: Record<string, unknown>,
+  path: string
+): unknown {
   return path.split('.').reduce((current, key) => {
     return current && current[key] !== undefined ? current[key] : undefined;
   }, obj);
@@ -393,7 +419,11 @@ export function getNestedProperty(obj: Record<string, unknown>, path: string): u
 /**
  * Set nested property value
  */
-export function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
+export function setNestedProperty(
+  obj: Record<string, unknown>,
+  path: string,
+  value: unknown
+): void {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
   const target = keys.reduce((current, key) => {
@@ -408,7 +438,10 @@ export function setNestedProperty(obj: Record<string, unknown>, path: string, va
 /**
  * Remove nested property
  */
-export function removeNestedProperty(obj: Record<string, unknown>, path: string): void {
+export function removeNestedProperty(
+  obj: Record<string, unknown>,
+  path: string
+): void {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
   const target = keys.reduce((current, key) => {

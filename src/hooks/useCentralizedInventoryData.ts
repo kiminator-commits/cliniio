@@ -174,10 +174,10 @@ export const useCentralizedInventoryData =
           set({ isLoading: true, error: null });
 
           try {
-            // Optimized retry logic for facade initialization
+            // Simplified retry logic - reduce retries and delay for faster loading
             let retryCount = 0;
-            const maxRetries = 3;
-            const baseDelay = 50;
+            const maxRetries = 2; // Reduced from 3
+            const baseDelay = 25; // Reduced from 50ms
 
             while (retryCount < maxRetries) {
               try {
@@ -284,17 +284,23 @@ export const useCentralizedInventoryData =
     )
   );
 
-// React hook to initialize data fetching
+// React hook to initialize data fetching with lazy loading
 export const useInitializeInventoryData = () => {
   const refreshData = useCentralizedInventoryData((state) => state.refreshData);
   const isLoading = useCentralizedInventoryData((state) => state.isLoading);
+  const data = useCentralizedInventoryData((state) => state.data);
 
   React.useEffect(() => {
-    // Only fetch if not already loading and no data exists
-    if (!isLoading) {
-      refreshData();
+    // Only fetch if not already loading, no data exists, and not already fetching
+    if (!isLoading && !data && !isDataFetching) {
+      // Defer initialization to avoid blocking initial render
+      const timeoutId = setTimeout(() => {
+        refreshData();
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [refreshData, isLoading]);
+  }, [refreshData, isLoading, data]);
 
   return { refreshData, isLoading };
 };

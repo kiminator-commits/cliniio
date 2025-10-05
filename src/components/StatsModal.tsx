@@ -36,26 +36,16 @@ const StatsModal: React.FC<StatsModalProps> = ({
     refreshStats,
   } = useCumulativeStats();
 
-  // Use real stats from the service, fallback to gamification data if loading
-  const stats = loading
-    ? gamificationData?.stats || {
-        toolsSterilized: 0,
-        inventoryChecks: 0,
-        perfectDays: 0,
-        totalTasks: 0,
-        completedTasks: 0,
-        currentStreak: 0,
-        bestStreak: 0,
-      }
-    : {
-        toolsSterilized: cumulativeStats.toolsSterilized,
-        inventoryChecks: cumulativeStats.inventoryChecks,
-        perfectDays: cumulativeStats.perfectDays,
-        totalTasks: cumulativeStats.totalTasks,
-        completedTasks: cumulativeStats.completedTasks,
-        currentStreak: cumulativeStats.currentStreak,
-        bestStreak: cumulativeStats.bestStreak,
-      };
+  // Use gamification data from home page as primary source, fallback to service data
+  const stats = gamificationData?.stats || {
+    toolsSterilized: cumulativeStats.toolsSterilized,
+    inventoryChecks: cumulativeStats.inventoryChecks,
+    perfectDays: cumulativeStats.perfectDays,
+    totalTasks: cumulativeStats.totalTasks,
+    completedTasks: cumulativeStats.completedTasks,
+    currentStreak: cumulativeStats.currentStreak,
+    bestStreak: cumulativeStats.bestStreak,
+  };
 
   return (
     <AnimatePresence>

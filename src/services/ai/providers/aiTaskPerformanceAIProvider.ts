@@ -5,7 +5,8 @@ import { aiImpactMeasurementService } from '../../aiImpactMeasurementService';
  */
 export async function getAIImpactMetrics() {
   try {
-    const aiImpactMetrics = await aiImpactMeasurementService.getAIImpactMetrics();
+    const aiImpactMetrics =
+      await aiImpactMeasurementService.getAIImpactMetrics();
     return {
       monthly: aiImpactMetrics.costSavings.monthly,
       annual: aiImpactMetrics.costSavings.annual,

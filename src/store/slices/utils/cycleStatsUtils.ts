@@ -33,17 +33,15 @@ export const calculateBIPassRate = (
       (result: BITestResult) => !result.passed && result.date < thirtyDaysAgo
     );
 
-    if (failedTests.length > 0) {
-      // Calculate actual pass rate if there are failures
-      const validTests = recentTests.filter(
-        (result: BITestResult) => result.passed !== false
-      );
+    if (recentTests.length > 0) {
+      // Calculate actual pass rate for all tests
+      const passedTests = recentTests.filter(
+        (result: BITestResult) => result.passed === true
+      ).length;
 
-      if (validTests.length > 0) {
-        const passedTests = validTests.filter(
-          (result: BITestResult) => result.passed
-        ).length;
-        biPassRate = Math.round((passedTests / validTests.length) * 100);
+      biPassRate = Math.round((passedTests / recentTests.length) * 100);
+
+      if (failedTests.length > 0) {
         biPassRateTrend = {
           direction: 'down',
           value: `${failedTests.length} failure(s) this month`,
@@ -106,74 +104,84 @@ export const calculateCycleTrend = (
   return null;
 };
 
-export const calculateAverageCycleTime = (
+export const calculateAverageToolTurnaroundTime = (
   cycles: SterilizationCycle[],
   availableTools: Tool[]
 ): number => {
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  // Extend to 30 days to match total cycles calculation
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const weeklyCycles = cycles.filter((cycle: SterilizationCycle) => {
-    const cycleStartTime = new Date(cycle.startTime);
-    const isWithinLastWeek = cycleStartTime >= oneWeekAgo;
-    return isWithinLastWeek && hasAutoclavePhase(cycle);
+  // Debug: Tool turnaround calculation
+
+  // Get tools that completed their full sterilization cycle within the last 30 days
+  const recentlyCompletedTools = availableTools.filter((tool: Tool) => {
+    // Tool must be clean and available
+    const isClean =
+      tool.currentPhase === 'complete' || tool.currentPhase === 'available';
+
+    // Must have timing data
+    const hasTiming = tool.startTime && tool.endTime;
+
+    // Must have completed within last 30 days
+    const isRecent = hasTiming && new Date(tool.endTime!) >= thirtyDaysAgo;
+
+    // Must have gone through sterilization (not just cleaning)
+    const wentThroughSterilization =
+      hasTiming &&
+      new Date(tool.endTime!).getTime() - new Date(tool.startTime!).getTime() >
+        30 * 60 * 1000; // At least 30 minutes
+
+    return isClean && hasTiming && isRecent && wentThroughSterilization;
   });
 
-  const completedCycles = weeklyCycles.filter(
-    (cycle: SterilizationCycle) => cycle.completedAt !== null
-  );
+  // Debug: Tool turnaround data
 
-  if (completedCycles.length === 0) return 0;
-
-  // Get tools that completed their sterilization cycle within the last week
-  const weeklyCompletedTools = availableTools.filter(
-    (tool: Tool) =>
-      tool.currentPhase === 'complete' &&
-      tool.startTime &&
-      tool.endTime &&
-      new Date(tool.endTime) >= oneWeekAgo
-  );
-
-  if (weeklyCompletedTools.length > 0) {
-    // Calculate time from when tool went dirty until it's clean again
-    const totalTime = weeklyCompletedTools.reduce(
-      (total: number, tool: Tool) => {
-        const startTime = new Date(tool.startTime!);
-        const endTime = new Date(tool.endTime!);
-        return total + (endTime.getTime() - startTime.getTime());
-      },
-      0
-    );
-    return Math.round(totalTime / weeklyCompletedTools.length / (1000 * 60)); // Convert to minutes
-  } else {
-    // Fallback to cycle-based calculation if no tool timing data available
-    const totalTime = cycles
-      .filter((cycle: SterilizationCycle) => cycle.completedAt !== null)
-      .reduce((total: number, cycle: SterilizationCycle) => {
-        const startTime = new Date(cycle.startTime);
-        const endTime = new Date(cycle.completedAt!);
-        return total + (endTime.getTime() - startTime.getTime());
-      }, 0);
-    return Math.round(totalTime / completedCycles.length / (1000 * 60)); // Convert to minutes
+  if (recentlyCompletedTools.length === 0) {
+    // Don't log this repeatedly - it's normal for new installations
+    return 0;
   }
+
+  // Calculate total turnaround time for all tools
+  const totalTurnaroundTime = recentlyCompletedTools.reduce(
+    (total: number, tool: Tool) => {
+      const startTime = new Date(tool.startTime!);
+      const endTime = new Date(tool.endTime!);
+      const turnaroundTime = endTime.getTime() - startTime.getTime();
+
+      // Debug: Individual tool timing
+      return total + turnaroundTime;
+    },
+    0
+  );
+
+  const avgTurnaroundMinutes = Math.round(
+    totalTurnaroundTime / recentlyCompletedTools.length / (1000 * 60)
+  );
+
+  // Debug: Final calculation
+
+  return avgTurnaroundMinutes;
 };
+
+interface _environmentalCleanMetrics {
+  cleaningEfficiency: number;
+  totalRooms: number;
+  cleanRooms: number;
+  complianceScore: number;
+}
 
 export const calculateEfficiencyScore = (
   cycles: SterilizationCycle[],
   biPassRate: number,
-  averageCycleTime: number,
+  averageToolTurnaroundTime: number,
   inventoryMetrics?: {
     lowStockItems: number;
     totalItems: number;
     expiringItems: number;
     inventoryAccuracy: number;
   },
-  environmentalCleanMetrics?: {
-    cleaningEfficiency: number;
-    totalRooms: number;
-    cleanRooms: number;
-    complianceScore: number;
-  }
+  _environmentalCleanMetrics?: _environmentalCleanMetrics
 ): EfficiencyScore => {
   // Enhanced weighted factors for comprehensive efficiency across all modules
   const weights = {
@@ -183,7 +191,7 @@ export const calculateEfficiencyScore = (
     qualityMetrics: 0.15, // BI pass rates, compliance
     throughputEfficiency: 0.1, // Cycles per day/week
     inventoryEfficiency: 0.15, // NEW: Inventory management efficiency
-    environmentalCleanEfficiency: 0.1, // NEW: Environmental cleaning efficiency
+    // Environmental cleaning efficiency removed - sterilization analytics only
   };
 
   const oneWeekAgo = new Date();
@@ -209,14 +217,15 @@ export const calculateEfficiencyScore = (
     totalCycles > 0 ? (completedCycles / totalCycles) * 100 : 0;
 
   // 2. Time Efficiency (0-100)
-  // Expected cycle time is ~90 minutes for full sterilization
-  const expectedCycleTime = 90;
+  // Expected tool turnaround time is ~60 minutes for optimized process
+  const expectedTurnaroundTime = 60;
   const timeEfficiency = Math.max(
     0,
     Math.min(
       100,
-      ((expectedCycleTime - Math.abs(averageCycleTime - expectedCycleTime)) /
-        expectedCycleTime) *
+      ((expectedTurnaroundTime -
+        Math.abs(averageToolTurnaroundTime - expectedTurnaroundTime)) /
+        expectedTurnaroundTime) *
         100
     )
   );
@@ -270,21 +279,7 @@ export const calculateEfficiencyScore = (
       stockHealth * 0.4 + expirationHealth * 0.3 + accuracyScore * 0.3;
   }
 
-  // 7. Environmental Clean Efficiency (0-100) - NEW
-  let environmentalCleanEfficiency = 0;
-  if (environmentalCleanMetrics) {
-    const { cleaningEfficiency, totalRooms, cleanRooms, complianceScore } =
-      environmentalCleanMetrics;
-
-    // Use provided cleaning efficiency or calculate from room data
-    const roomEfficiency = totalRooms > 0 ? (cleanRooms / totalRooms) * 100 : 0;
-    const finalCleaningEfficiency = cleaningEfficiency || roomEfficiency;
-    const complianceScoreValue = complianceScore || 100;
-
-    // Weighted environmental clean efficiency
-    environmentalCleanEfficiency =
-      finalCleaningEfficiency * 0.7 + complianceScoreValue * 0.3;
-  }
+  // Environmental cleaning efficiency removed - sterilization analytics only
 
   // Calculate weighted score with all modules
   const weightedScore =
@@ -293,8 +288,7 @@ export const calculateEfficiencyScore = (
     resourceUtilization * weights.resourceUtilization +
     qualityScore * weights.qualityMetrics +
     throughputEfficiency * weights.throughputEfficiency +
-    inventoryEfficiency * weights.inventoryEfficiency +
-    environmentalCleanEfficiency * weights.environmentalCleanEfficiency;
+    inventoryEfficiency * weights.inventoryEfficiency;
 
   // Calculate trend (compare with previous week)
   const previousWeekCycles = cycles.filter((cycle: SterilizationCycle) => {
@@ -342,13 +336,7 @@ export const calculateEfficiencyScore = (
         expiringItems: inventoryMetrics?.expiringItems || 0,
         accuracy: inventoryMetrics?.inventoryAccuracy || 100,
       },
-      environmentalClean: {
-        efficiency: environmentalCleanEfficiency,
-        cleaningEfficiency: environmentalCleanMetrics?.cleaningEfficiency || 0,
-        totalRooms: environmentalCleanMetrics?.totalRooms || 0,
-        cleanRooms: environmentalCleanMetrics?.cleanRooms || 0,
-        complianceScore: environmentalCleanMetrics?.complianceScore || 100,
-      },
+      // Environmental cleaning data removed - this is sterilization analytics only
     },
   };
 };
@@ -362,37 +350,36 @@ export const getCycleStats = (
     totalItems: number;
     expiringItems: number;
     inventoryAccuracy: number;
-  },
-  environmentalCleanMetrics?: {
-    cleaningEfficiency: number;
-    totalRooms: number;
-    cleanRooms: number;
-    complianceScore: number;
   }
 ): CycleStats => {
   const { rate: biPassRate, trend: biPassRateTrend } =
     calculateBIPassRate(biTestResults);
   const cycleTrendData = calculateCycleTrend(cycles);
-  const averageCycleTime = calculateAverageCycleTime(cycles, availableTools);
+  const averageToolTurnaroundTime = calculateAverageToolTurnaroundTime(
+    cycles,
+    availableTools
+  );
   const efficiencyScore = calculateEfficiencyScore(
     cycles,
     biPassRate,
-    averageCycleTime,
-    inventoryMetrics,
-    environmentalCleanMetrics
+    averageToolTurnaroundTime,
+    inventoryMetrics
   );
 
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  // Extend the time window to 30 days to include more cycles
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const weeklyCycles = cycles.filter((cycle: SterilizationCycle) => {
+  const recentCycles = cycles.filter((cycle: SterilizationCycle) => {
     const cycleStartTime = new Date(cycle.startTime);
-    const isWithinLastWeek = cycleStartTime >= oneWeekAgo;
-    return isWithinLastWeek && hasAutoclavePhase(cycle);
+    const isValidDate = !isNaN(cycleStartTime.getTime());
+    const isWithinLastMonth = isValidDate && cycleStartTime >= thirtyDaysAgo;
+    return isWithinLastMonth;
   });
 
-  const totalCycles = weeklyCycles.length;
-  const completedCycles = weeklyCycles.filter(
+  // Debug: Analytics calculation
+  const totalCycles = recentCycles.length;
+  const completedCycles = recentCycles.filter(
     (cycle: SterilizationCycle) => cycle.completedAt !== null
   ).length;
 
@@ -408,7 +395,7 @@ export const getCycleStats = (
   return {
     totalCycles,
     completedCycles,
-    averageCycleTime,
+    averageCycleTime: averageToolTurnaroundTime, // Map to existing field name
     biPassRate,
     biPassRateTrend,
     cycleTrend,

@@ -55,15 +55,17 @@ class ThreatIntelligenceService {
       const threatIPs = Deno.env.get('KNOWN_THREAT_IPS')?.split(',') || [];
       const goodIPs = Deno.env.get('KNOWN_GOOD_IPS')?.split(',') || [];
 
-      threatIPs.forEach(ip => {
+      threatIPs.forEach((ip) => {
         if (ip.trim()) this.knownThreats.add(ip.trim());
       });
 
-      goodIPs.forEach(ip => {
+      goodIPs.forEach((ip) => {
         if (ip.trim()) this.knownGoodIPs.add(ip.trim());
       });
 
-      console.log(`Loaded ${this.knownThreats.size} known threat IPs and ${this.knownGoodIPs.size} known good IPs`);
+      console.log(
+        `Loaded ${this.knownThreats.size} known threat IPs and ${this.knownGoodIPs.size} known good IPs`
+      );
     } catch (error) {
       console.error('Failed to load known threats:', error);
     }
@@ -71,13 +73,13 @@ class ThreatIntelligenceService {
 
   private isPrivateIP(ip: string): boolean {
     const parts = ip.split('.').map(Number);
-    
+
     // Check for private IP ranges
     return (
-      (parts[0] === 10) ||
+      parts[0] === 10 ||
       (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
       (parts[0] === 192 && parts[1] === 168) ||
-      (parts[0] === 127) // localhost
+      parts[0] === 127 // localhost
     );
   }
 
@@ -86,22 +88,28 @@ class ThreatIntelligenceService {
     if (cached && cached.expires > Date.now()) {
       return cached.data;
     }
-    
+
     if (cached) {
       this.cache.delete(ip);
     }
-    
+
     return null;
   }
 
   private setCache(ip: string, data: ThreatData): void {
-    const expires = Date.now() + (this.config.cacheDurationMinutes * 60 * 1000);
+    const expires = Date.now() + this.config.cacheDurationMinutes * 60 * 1000;
     this.cache.set(ip, { data, expires });
   }
 
-  private async makeRequest(url: string, options: RequestInit = {}): Promise<Response> {
+  private async makeRequest(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      this.config.timeoutMs
+    );
 
     try {
       const response = await fetch(url, {
@@ -132,8 +140,8 @@ class ThreatIntelligenceService {
         `https://api.abuseipdb.com/api/v2/check?ipAddress=${ip}&maxAgeInDays=90&verbose`,
         {
           headers: {
-            'Key': apiKey,
-            'Accept': 'application/json',
+            Key: apiKey,
+            Accept: 'application/json',
           },
         }
       );
@@ -145,9 +153,14 @@ class ThreatIntelligenceService {
 
       return {
         ip,
-        threatLevel: result.abuseConfidencePercentage > 75 ? 'critical' :
-                   result.abuseConfidencePercentage > 50 ? 'high' :
-                   result.abuseConfidencePercentage > 25 ? 'medium' : 'low',
+        threatLevel:
+          result.abuseConfidencePercentage > 75
+            ? 'critical'
+            : result.abuseConfidencePercentage > 50
+              ? 'high'
+              : result.abuseConfidencePercentage > 25
+                ? 'medium'
+                : 'low',
         sources: ['AbuseIPDB'],
         lastSeen: result.lastReportedAt || new Date().toISOString(),
         reputation: 100 - result.abuseConfidencePercentage,
@@ -184,21 +197,34 @@ class ThreatIntelligenceService {
 
       const maliciousCount = stats.malicious || 0;
       const suspiciousCount = stats.suspicious || 0;
-      const totalEngines = Object.values(stats).reduce((sum: number, count: any) => sum + count, 0);
+      const totalEngines = Object.values(stats).reduce(
+        (sum: number, count: any) => sum + count,
+        0
+      );
 
-      const threatScore = (maliciousCount * 2 + suspiciousCount) / totalEngines * 100;
+      const threatScore =
+        ((maliciousCount * 2 + suspiciousCount) / totalEngines) * 100;
 
       return {
         ip,
-        threatLevel: threatScore > 50 ? 'critical' :
-                   threatScore > 25 ? 'high' :
-                   threatScore > 10 ? 'medium' : 'low',
+        threatLevel:
+          threatScore > 50
+            ? 'critical'
+            : threatScore > 25
+              ? 'high'
+              : threatScore > 10
+                ? 'medium'
+                : 'low',
         sources: ['VirusTotal'],
-        lastSeen: data.data.attributes.last_analysis_date ? 
-                 new Date(data.data.attributes.last_analysis_date * 1000).toISOString() : 
-                 new Date().toISOString(),
+        lastSeen: data.data.attributes.last_analysis_date
+          ? new Date(
+              data.data.attributes.last_analysis_date * 1000
+            ).toISOString()
+          : new Date().toISOString(),
         reputation: Math.max(0, 100 - threatScore),
-        categories: data.data.attributes.categories ? Object.keys(data.data.attributes.categories) : [],
+        categories: data.data.attributes.categories
+          ? Object.keys(data.data.attributes.categories)
+          : [],
         confidence: threatScore,
         rawData: data.data,
       };
@@ -219,7 +245,7 @@ class ThreatIntelligenceService {
         `https://api.shodan.io/shodan/host/${ip}?key=${apiKey}`,
         {
           headers: {
-            'Accept': 'application/json',
+            Accept: 'application/json',
           },
         }
       );
@@ -227,7 +253,7 @@ class ThreatIntelligenceService {
       if (!response.ok) return null;
 
       const data = await response.json();
-      
+
       // Analyze Shodan data for threat indicators
       const threatIndicators = [];
       let threatScore = 0;
@@ -249,9 +275,14 @@ class ThreatIntelligenceService {
 
       return {
         ip,
-        threatLevel: threatScore > 75 ? 'critical' :
-                   threatScore > 50 ? 'high' :
-                   threatScore > 25 ? 'medium' : 'low',
+        threatLevel:
+          threatScore > 75
+            ? 'critical'
+            : threatScore > 50
+              ? 'high'
+              : threatScore > 25
+                ? 'medium'
+                : 'low',
         sources: ['Shodan'],
         lastSeen: new Date().toISOString(),
         reputation: Math.max(0, 100 - threatScore),
@@ -302,12 +333,14 @@ class ThreatIntelligenceService {
   private async checkGeolocation(ip: string): Promise<ThreatData | null> {
     try {
       // Use a free geolocation service
-      const response = await this.makeRequest(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,query`);
+      const response = await this.makeRequest(
+        `http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,query`
+      );
 
       if (!response.ok) return null;
 
       const data = await response.json();
-      
+
       if (data.status !== 'success') return null;
 
       // Check for suspicious countries/regions
@@ -322,7 +355,10 @@ class ThreatIntelligenceService {
         categories.push('Suspicious Country');
       }
 
-      if (data.isp && suspiciousISPs.some(isp => data.isp.toLowerCase().includes(isp))) {
+      if (
+        data.isp &&
+        suspiciousISPs.some((isp) => data.isp.toLowerCase().includes(isp))
+      ) {
         threatScore += 30;
         categories.push('Suspicious ISP');
       }
@@ -409,7 +445,7 @@ class ThreatIntelligenceService {
 
     // Aggregate threat data
     const aggregated = this.aggregateThreatData(threatData);
-    
+
     // Cache the result
     this.setCache(ip, aggregated);
 
@@ -418,15 +454,17 @@ class ThreatIntelligenceService {
 
   private aggregateThreatData(threatData: ThreatData[]): ThreatData {
     const ip = threatData[0].ip;
-    const sources = [...new Set(threatData.flatMap(td => td.sources))];
-    const categories = [...new Set(threatData.flatMap(td => td.categories))];
+    const sources = [...new Set(threatData.flatMap((td) => td.sources))];
+    const categories = [...new Set(threatData.flatMap((td) => td.categories))];
 
     // Calculate weighted threat level
     const threatLevels = { low: 1, medium: 2, high: 3, critical: 4 };
     const totalWeight = threatData.reduce((sum, td) => sum + td.confidence, 0);
-    const weightedThreat = threatData.reduce((sum, td) => 
-      sum + (threatLevels[td.threatLevel] * td.confidence), 0
-    ) / totalWeight;
+    const weightedThreat =
+      threatData.reduce(
+        (sum, td) => sum + threatLevels[td.threatLevel] * td.confidence,
+        0
+      ) / totalWeight;
 
     let threatLevel: 'low' | 'medium' | 'high' | 'critical';
     if (weightedThreat >= 3.5) threatLevel = 'critical';
@@ -435,7 +473,9 @@ class ThreatIntelligenceService {
     else threatLevel = 'low';
 
     // Calculate average reputation
-    const avgReputation = threatData.reduce((sum, td) => sum + td.reputation, 0) / threatData.length;
+    const avgReputation =
+      threatData.reduce((sum, td) => sum + td.reputation, 0) /
+      threatData.length;
 
     return {
       ip,
@@ -450,8 +490,10 @@ class ThreatIntelligenceService {
   }
 
   private processThreatData(threatData: ThreatData): ThreatIntelligenceResult {
-    const isThreat = threatData.threatLevel === 'high' || threatData.threatLevel === 'critical';
-    
+    const isThreat =
+      threatData.threatLevel === 'high' ||
+      threatData.threatLevel === 'critical';
+
     let details = `IP ${threatData.ip} has ${threatData.threatLevel} threat level`;
     if (threatData.categories.length > 0) {
       details += ` with categories: ${threatData.categories.join(', ')}`;
@@ -459,7 +501,7 @@ class ThreatIntelligenceService {
     details += `. Reputation score: ${threatData.reputation.toFixed(1)}/100`;
 
     const recommendations: string[] = [];
-    
+
     if (threatData.threatLevel === 'critical') {
       recommendations.push('Block immediately');
       recommendations.push('Investigate further');
@@ -501,10 +543,10 @@ class ThreatIntelligenceService {
       if (data.threatLevel === 'high' || data.threatLevel === 'critical') {
         stats.threatsDetected++;
       }
-      
+
       stats.threatLevels[data.threatLevel]++;
-      
-      data.sources.forEach(source => {
+
+      data.sources.forEach((source) => {
         stats.topSources[source] = (stats.topSources[source] || 0) + 1;
       });
     }
@@ -532,4 +574,8 @@ export function getThreatIntelligenceService(): ThreatIntelligenceService {
   return threatIntelligenceService;
 }
 
-export { ThreatIntelligenceService, type ThreatIntelligenceResult, type ThreatData };
+export {
+  ThreatIntelligenceService,
+  type ThreatIntelligenceResult,
+  type ThreatData,
+};

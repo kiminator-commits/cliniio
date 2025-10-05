@@ -105,7 +105,6 @@ export class NotificationMessenger {
         notification.facilityId
       );
       return;
-
     } catch (error) {
       console.error('Failed to send webhook notification:', error);
       throw error;

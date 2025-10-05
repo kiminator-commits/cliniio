@@ -5,9 +5,11 @@ import { EnhancedAiEfficiencyCard } from '../Dashboard/EnhancedAiEfficiencyCard'
 import { TeamPerformanceCard } from '../Dashboard/TeamPerformanceCard';
 import { MdInsertChart } from 'react-icons/md';
 import { MetricsData } from '../../types/homeTypes';
+import { AIImpactMetrics } from '../../services/aiMetricsService';
 
 export interface PerformanceMetricsProps {
   metrics: MetricsData;
+  aiImpactMetrics?: AIImpactMetrics; // Add AI impact metrics prop
 }
 
 export const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({
@@ -17,8 +19,28 @@ export const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({
     aiEfficiency: { timeSavings: 0, proactiveMgmt: 0 },
     teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },
   },
+  aiImpactMetrics, // Add AI impact metrics parameter
 }) => {
   const [selectedTimeframe] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+
+  console.log('📊 PerformanceMetrics: Received metrics:', metrics);
+  console.log(
+    '🤖 PerformanceMetrics: Received aiImpactMetrics:',
+    aiImpactMetrics
+  );
+  console.log(
+    '👥 PerformanceMetrics: Team performance data:',
+    metrics.teamPerformance
+  );
+
+  // Debug the transformation
+  if (aiImpactMetrics) {
+    console.log('🔍 aiImpactMetrics structure:', {
+      timeSavings: aiImpactMetrics.timeSavings,
+      costSavings: aiImpactMetrics.costSavings,
+      keys: Object.keys(aiImpactMetrics),
+    });
+  }
 
   return (
     <div className="bg-white rounded-lg p-4 pt-2">
@@ -41,6 +63,43 @@ export const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({
         <EnhancedAiEfficiencyCard
           timeframe={selectedTimeframe}
           showInsights={false}
+          aiImpactMetrics={
+            aiImpactMetrics
+              ? {
+                  timeSavings: {
+                    daily: aiImpactMetrics.timeSavings?.daily || 0,
+                    weekly: aiImpactMetrics.timeSavings?.weekly || 0,
+                    monthly: aiImpactMetrics.timeSavings?.monthly || 0,
+                    total: aiImpactMetrics.timeSavings?.total || 0,
+                    percentage: aiImpactMetrics.timeSavings?.percentage || 0,
+                  },
+                  costSavings: {
+                    daily: aiImpactMetrics.costSavings?.daily || 0,
+                    monthly: aiImpactMetrics.costSavings?.monthly || 0,
+                    annual: aiImpactMetrics.costSavings?.annual || 0,
+                    roi: aiImpactMetrics.costSavings?.roi || 0,
+                  },
+                  proactiveManagement: {
+                    issuesPrevented: 0,
+                    earlyInterventions: 0,
+                    complianceScore: 0,
+                    riskMitigation: 0,
+                    predictiveAccuracy: 0,
+                  },
+                  efficiencyGains: {
+                    taskCompletionRate: 0,
+                    qualityImprovement: 0,
+                    resourceOptimization: 0,
+                    workflowStreamlining: 0,
+                  },
+                  realTimeUpdates: {
+                    updated_at: new Date().toISOString(),
+                    nextUpdate: '',
+                    dataFreshness: 100,
+                  },
+                }
+              : null
+          }
         />
         <TeamPerformanceCard
           data={metrics.teamPerformance}

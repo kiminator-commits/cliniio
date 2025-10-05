@@ -11,10 +11,14 @@ export class InventorySupabaseProvider {
   }
 
   // Load AI settings for the facility
-  async loadSettings(): Promise<Database['public']['Tables']['inventory_ai_settings']['Row'] | null> {
+  async loadSettings(): Promise<
+    Database['public']['Tables']['inventory_ai_settings']['Row'] | null
+  > {
     try {
       const { data, error } = await supabase
-        .from<Database['public']['Tables']['inventory_ai_settings']['Row']>('inventory_ai_settings')
+        .from<
+          Database['public']['Tables']['inventory_ai_settings']['Row']
+        >('inventory_ai_settings')
         .select('*')
         .eq('facility_id', this.facilityId)
         .single();
@@ -35,8 +39,12 @@ export class InventorySupabaseProvider {
   async saveSettings(settings: Partial<InventoryAISettings>): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from<Database['public']['Tables']['inventory_ai_settings']['Row']>('inventory_ai_settings')
-        .upsert<Database['public']['Tables']['inventory_ai_settings']['Insert']>({
+        .from<
+          Database['public']['Tables']['inventory_ai_settings']['Row']
+        >('inventory_ai_settings')
+        .upsert<
+          Database['public']['Tables']['inventory_ai_settings']['Insert']
+        >({
           facility_id: this.facilityId,
           ...settings,
           updated_at: new Date().toISOString(),

@@ -12,9 +12,18 @@ import {
   ResendParams,
   MockConfig,
 } from '../types/supabaseMockTypes';
-import { createMockUser, createMockSession, createMockError, createMockAuthError } from './mockGenerators';
+import {
+  createMockUser,
+  createMockSession,
+  createMockError,
+  createMockAuthError,
+} from './mockGenerators';
 
-export const createAuthService = (config: MockConfig, mockUser: User, mockSession: Session) => ({
+export const createAuthService = (
+  config: MockConfig,
+  mockUser: User,
+  mockSession: Session
+) => ({
   async getUser(): Promise<AuthResponse> {
     if (config.shouldError) {
       return {

@@ -76,8 +76,8 @@ export class ServicePerformanceMonitor {
    * End tracking a service call
    */
   endCall(callId: string, success: boolean, error?: string): void {
-    const call = this.callHistory.find(c => 
-      `${c.serviceName}.${c.methodName}.${c.startTime}` === callId
+    const call = this.callHistory.find(
+      (c) => `${c.serviceName}.${c.methodName}.${c.startTime}` === callId
     );
 
     if (!call) {
@@ -123,18 +123,24 @@ export class ServicePerformanceMonitor {
 
     // Update response time (rolling average)
     if (call.responseTime) {
-      const totalResponseTime = existingMetrics.averageResponseTime * (existingMetrics.totalCalls - 1) + call.responseTime;
-      existingMetrics.averageResponseTime = totalResponseTime / existingMetrics.totalCalls;
+      const totalResponseTime =
+        existingMetrics.averageResponseTime * (existingMetrics.totalCalls - 1) +
+        call.responseTime;
+      existingMetrics.averageResponseTime =
+        totalResponseTime / existingMetrics.totalCalls;
     }
 
     // Update error rate
-    existingMetrics.errorRate = (existingMetrics.failedCalls / existingMetrics.totalCalls) * 100;
+    existingMetrics.errorRate =
+      (existingMetrics.failedCalls / existingMetrics.totalCalls) * 100;
 
     // Update last call time
     existingMetrics.lastCallTime = call.endTime || call.startTime;
 
     // Update uptime (time since first call)
-    const firstCall = this.callHistory.find(c => c.serviceName === serviceName);
+    const firstCall = this.callHistory.find(
+      (c) => c.serviceName === serviceName
+    );
     if (firstCall) {
       existingMetrics.uptime = call.endTime! - firstCall.startTime;
     }
@@ -157,22 +163,31 @@ export class ServicePerformanceMonitor {
 
     // Check response time
     if (metrics.averageResponseTime > this.thresholds.maxResponseTime) {
-      issues.push(`High response time: ${metrics.averageResponseTime}ms (threshold: ${this.thresholds.maxResponseTime}ms)`);
+      issues.push(
+        `High response time: ${metrics.averageResponseTime}ms (threshold: ${this.thresholds.maxResponseTime}ms)`
+      );
     }
 
     // Check error rate
     if (metrics.errorRate > this.thresholds.maxErrorRate) {
-      issues.push(`High error rate: ${metrics.errorRate.toFixed(2)}% (threshold: ${this.thresholds.maxErrorRate}%)`);
+      issues.push(
+        `High error rate: ${metrics.errorRate.toFixed(2)}% (threshold: ${this.thresholds.maxErrorRate}%)`
+      );
     }
 
     // Check call frequency
     const callsLastMinute = this.getCallsLastMinute(metrics.serviceName);
     if (callsLastMinute > this.thresholds.maxCallsPerMinute) {
-      issues.push(`High call frequency: ${callsLastMinute} calls/minute (threshold: ${this.thresholds.maxCallsPerMinute})`);
+      issues.push(
+        `High call frequency: ${callsLastMinute} calls/minute (threshold: ${this.thresholds.maxCallsPerMinute})`
+      );
     }
 
     if (issues.length > 0) {
-      console.warn(`[ServiceMonitor] Performance issues detected for ${metrics.serviceName}:`, issues);
+      console.warn(
+        `[ServiceMonitor] Performance issues detected for ${metrics.serviceName}:`,
+        issues
+      );
       this.alertPerformanceIssues(metrics.serviceName, issues);
     }
   }
@@ -182,8 +197,9 @@ export class ServicePerformanceMonitor {
    */
   private getCallsLastMinute(serviceName: string): number {
     const oneMinuteAgo = Date.now() - 60000;
-    return this.callHistory.filter(call => 
-      call.serviceName === serviceName && call.startTime > oneMinuteAgo
+    return this.callHistory.filter(
+      (call) =>
+        call.serviceName === serviceName && call.startTime > oneMinuteAgo
     ).length;
   }
 
@@ -192,8 +208,11 @@ export class ServicePerformanceMonitor {
    */
   private alertPerformanceIssues(serviceName: string, issues: string[]): void {
     // In a real application, this could send alerts to monitoring systems
-    console.error(`[ServiceMonitor] ALERT: ${serviceName} has performance issues:`, issues);
-    
+    console.error(
+      `[ServiceMonitor] ALERT: ${serviceName} has performance issues:`,
+      issues
+    );
+
     // Could integrate with external monitoring services here
     // Example: sendToMonitoringService({ serviceName, issues, timestamp: Date.now() });
   }
@@ -229,9 +248,10 @@ export class ServicePerformanceMonitor {
    * Get services with performance issues
    */
   getServicesWithIssues(): ServiceMetrics[] {
-    return this.getAllMetrics().filter(metrics => 
-      metrics.errorRate > this.thresholds.maxErrorRate ||
-      metrics.averageResponseTime > this.thresholds.maxResponseTime
+    return this.getAllMetrics().filter(
+      (metrics) =>
+        metrics.errorRate > this.thresholds.maxErrorRate ||
+        metrics.averageResponseTime > this.thresholds.maxResponseTime
     );
   }
 
@@ -244,7 +264,10 @@ export class ServicePerformanceMonitor {
    */
   updateThresholds(newThresholds: Partial<PerformanceThresholds>): void {
     this.thresholds = { ...this.thresholds, ...newThresholds };
-    console.log('[ServiceMonitor] Performance thresholds updated:', this.thresholds);
+    console.log(
+      '[ServiceMonitor] Performance thresholds updated:',
+      this.thresholds
+    );
   }
 
   /**
@@ -273,12 +296,16 @@ export class ServicePerformanceMonitor {
   private cleanupOldCalls(): void {
     const oneHourAgo = Date.now() - 3600000;
     const initialLength = this.callHistory.length;
-    
-    this.callHistory = this.callHistory.filter(call => call.startTime > oneHourAgo);
-    
+
+    this.callHistory = this.callHistory.filter(
+      (call) => call.startTime > oneHourAgo
+    );
+
     const removedCount = initialLength - this.callHistory.length;
     if (removedCount > 0) {
-      console.log(`[ServiceMonitor] Cleaned up ${removedCount} old call records`);
+      console.log(
+        `[ServiceMonitor] Cleaned up ${removedCount} old call records`
+      );
     }
   }
 
@@ -310,4 +337,5 @@ export class ServicePerformanceMonitor {
 }
 
 // Export singleton instance
-export const servicePerformanceMonitor = ServicePerformanceMonitor.getInstance();
+export const servicePerformanceMonitor =
+  ServicePerformanceMonitor.getInstance();

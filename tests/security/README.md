@@ -118,25 +118,25 @@ export const securityTestConfig = {
   baseUrl: process.env.SECURITY_TEST_BASE_URL || 'http://localhost:3000',
   timeout: parseInt(process.env.SECURITY_TEST_TIMEOUT || '30000'),
   retries: parseInt(process.env.SECURITY_TEST_RETRIES || '3'),
-  
+
   penetration: {
     enabled: process.env.PENETRATION_TEST_ENABLED === 'true',
     threads: parseInt(process.env.PENETRATION_TEST_THREADS || '10'),
     delay: parseInt(process.env.PENETRATION_TEST_DELAY || '1000'),
   },
-  
+
   vulnerability: {
     enabled: process.env.VULNERABILITY_SCAN_ENABLED === 'true',
     depth: process.env.VULNERABILITY_SCAN_DEPTH || 'deep',
     threads: parseInt(process.env.VULNERABILITY_SCAN_THREADS || '5'),
   },
-  
+
   validation: {
     enabled: process.env.SECURITY_VALIDATION_ENABLED === 'true',
     rules: process.env.SECURITY_VALIDATION_RULES || 'all',
     threshold: parseInt(process.env.SECURITY_VALIDATION_THRESHOLD || '75'),
   },
-  
+
   monitoring: {
     enabled: process.env.SECURITY_MONITORING_ENABLED === 'true',
     interval: parseInt(process.env.SECURITY_MONITORING_INTERVAL || '300000'),

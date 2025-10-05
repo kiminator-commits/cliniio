@@ -79,7 +79,10 @@ export class GamificationLevelProvider {
     const levelRange = nextLevelThreshold - currentLevelThreshold;
     const pointsInCurrentLevel = totalPoints - currentLevelThreshold;
 
-    return Math.min(100, Math.max(0, (pointsInCurrentLevel / levelRange) * 100));
+    return Math.min(
+      100,
+      Math.max(0, (pointsInCurrentLevel / levelRange) * 100)
+    );
   }
 
   /**
@@ -147,7 +150,10 @@ export class GamificationLevelProvider {
   /**
    * Calculate experience needed for next level
    */
-  getExperienceToNextLevel(currentPoints: number, currentLevel: number): number {
+  getExperienceToNextLevel(
+    currentPoints: number,
+    currentLevel: number
+  ): number {
     const nextLevelThreshold = this.getNextLevelThreshold(currentLevel);
     return Math.max(0, nextLevelThreshold - currentPoints);
   }
@@ -184,8 +190,9 @@ export class GamificationLevelProvider {
       };
     }
 
-    const levels = users.map(u => u.level).sort((a, b) => a - b);
-    const averageLevel = levels.reduce((sum, level) => sum + level, 0) / totalUsers;
+    const levels = users.map((u) => u.level).sort((a, b) => a - b);
+    const averageLevel =
+      levels.reduce((sum, level) => sum + level, 0) / totalUsers;
     const topLevel = Math.max(...levels);
     const medianLevel = levels[Math.floor(totalUsers / 2)];
 
@@ -200,8 +207,10 @@ export class GamificationLevelProvider {
       { min: 71, max: 80, label: 'Expert (71-80)' },
       { min: 81, max: 90, label: 'Master (81-90)' },
       { min: 91, max: 100, label: 'Legendary (91-100)' },
-    ].map(range => {
-      const count = levels.filter(level => level >= range.min && level <= range.max).length;
+    ].map((range) => {
+      const count = levels.filter(
+        (level) => level >= range.min && level <= range.max
+      ).length;
       return {
         range: range.label,
         count,
@@ -331,8 +340,8 @@ export class GamificationLevelProvider {
     progress: number;
   } | null {
     const milestones = this.getLevelMilestones();
-    const nextMilestone = milestones.find(m => m.level > userLevel);
-    
+    const nextMilestone = milestones.find((m) => m.level > userLevel);
+
     if (!nextMilestone) return null;
 
     const progress = Math.min(100, (userLevel / nextMilestone.level) * 100);
@@ -348,7 +357,7 @@ export class GamificationLevelProvider {
    */
   getLevelBonusMultiplier(level: number): number {
     // Higher levels get better bonuses
-    return 1 + (level * 0.01); // 1% bonus per level
+    return 1 + level * 0.01; // 1% bonus per level
   }
 
   /**

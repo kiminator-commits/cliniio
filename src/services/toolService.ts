@@ -97,7 +97,8 @@ export class ToolService {
       }
 
       // Check if tool is in 'complete' phase (ready to be marked as dirty)
-      if (tool.current_cycle_id) {
+      // Skip cycle check for mock tools
+      if (tool.current_cycle_id && !tool.id.startsWith('mock-tool-')) {
         // Get the current cycle status
         const { data: cycle } = await supabase
           .from('sterilization_cycles')

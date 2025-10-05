@@ -24,7 +24,8 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
   onOpen,
   onClose,
 }) => {
-  const { currentUser, getUserDisplayName, isLoading } = useUser();
+  const { currentUser, getUserDisplayName, isLoading, clearUserData } =
+    useUser();
   const [showLogout, setShowLogout] = useState(false);
   const userRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
@@ -215,7 +216,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
             {isOpen && (
               <div>
                 <p className="text-sm font-medium text-gray-700">
-                  {currentUser ? getUserDisplayName() : 'Loading...'}
+                  {getUserDisplayName()}
                 </p>
                 <p className="text-xs text-gray-500">
                   {currentUser?.role || 'User'}
@@ -244,19 +245,55 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
                 role="menuitem"
                 className="px-4 py-2 bg-[#4ECDC4] text-white rounded hover:bg-[#38b2ac] w-full"
                 onClick={async () => {
-                  console.log('Logout button clicked');
+                  console.log('🚪 DrawerMenu: Logout button clicked');
                   try {
-                    console.log('Calling logout function...');
+                    console.log('🚪 DrawerMenu: Starting logout process...');
+
+                    // Clear user data from UserContext FIRST (before clearing auth tokens)
+                    console.log('🚪 DrawerMenu: Calling clearUserData()...');
+                    clearUserData();
+
+                    // Wait a moment to ensure UserContext is cleared
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+
+                    // Clear login store data
+                    console.log(
+                      '🚪 DrawerMenu: Calling login store reset()...'
+                    );
+                    const { useLoginStore } = await import(
+                      '../../stores/useLoginStore'
+                    );
+                    await useLoginStore.getState().reset();
+
+                    // Call auth service logout
+                    console.log(
+                      '🚪 DrawerMenu: Calling auth service logout()...'
+                    );
                     const authService = new SecureAuthService();
                     await authService.logout();
-                    console.log('Logout successful, navigating to login');
+
+                    console.log(
+                      '🚪 DrawerMenu: Logout successful, navigating to login'
+                    );
                     navigate('/login');
                     setShowLogout(false);
+
+                    // Force page reload to clear console and reset all services
+                    console.log(
+                      '🔄 DrawerMenu: Reloading page for clean state...'
+                    );
+                    window.location.reload();
                   } catch (error) {
-                    console.error('Logout failed:', error);
+                    console.error('🚪 DrawerMenu: Logout failed:', error);
                     // Still navigate to login even if logout fails
                     navigate('/login');
                     setShowLogout(false);
+
+                    // Force page reload even on error to ensure clean state
+                    console.log(
+                      '🔄 DrawerMenu: Reloading page after logout error...'
+                    );
+                    window.location.reload();
                   }
                 }}
               >

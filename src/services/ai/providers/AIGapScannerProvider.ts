@@ -2,10 +2,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import { ToolService } from '../../tools/ToolService';
 import { ToolStatus } from '@/types/toolTypes';
 import { InventoryActionService } from '../../../pages/Inventory/services/inventoryActionService';
-import {
-  OperationalGap,
-  generateGapId,
-} from '../../aiDailyTaskProgress';
+import { OperationalGap, generateGapId } from '../../aiDailyTaskProgress';
 
 // Database row interfaces
 interface AutoclaveRow {
@@ -70,13 +67,18 @@ export class AIGapScannerProvider {
   /**
    * Scan for equipment maintenance needs
    */
-  async scanEquipmentMaintenance(facilityId: string): Promise<OperationalGap[]> {
+  async scanEquipmentMaintenance(
+    facilityId: string
+  ): Promise<OperationalGap[]> {
     const gaps: OperationalGap[] = [];
     const today = new Date();
 
     try {
       // Check autoclave maintenance
-      const autoclaveGaps = await this.scanAutoclaveMaintenance(facilityId, today);
+      const autoclaveGaps = await this.scanAutoclaveMaintenance(
+        facilityId,
+        today
+      );
       gaps.push(...autoclaveGaps);
 
       // Check sterilization tools that need maintenance
@@ -164,7 +166,9 @@ export class AIGapScannerProvider {
   /**
    * Scan tool maintenance needs
    */
-  private async scanToolMaintenance(facilityId: string): Promise<OperationalGap[]> {
+  private async scanToolMaintenance(
+    facilityId: string
+  ): Promise<OperationalGap[]> {
     const gaps: OperationalGap[] = [];
 
     const facilityTools = await ToolService.getToolsByFacilityAndStatus(
@@ -217,7 +221,10 @@ export class AIGapScannerProvider {
   /**
    * Scan biological indicator tests
    */
-  private async scanBITests(facilityId: string, today: Date): Promise<OperationalGap[]> {
+  private async scanBITests(
+    facilityId: string,
+    today: Date
+  ): Promise<OperationalGap[]> {
     const gaps: OperationalGap[] = [];
 
     const { data: biTests, error: biError } = await supabase
@@ -254,7 +261,10 @@ export class AIGapScannerProvider {
   /**
    * Scan cleaning tasks
    */
-  private async scanCleaningTasks(facilityId: string, today: Date): Promise<OperationalGap[]> {
+  private async scanCleaningTasks(
+    facilityId: string,
+    today: Date
+  ): Promise<OperationalGap[]> {
     const gaps: OperationalGap[] = [];
 
     const { data: cleaningTasks, error: cleaningError } = await supabase
@@ -356,7 +366,9 @@ export class AIGapScannerProvider {
   /**
    * Scan for low inventory items
    */
-  private async scanLowInventory(facilityId: string): Promise<OperationalGap[]> {
+  private async scanLowInventory(
+    facilityId: string
+  ): Promise<OperationalGap[]> {
     const gaps: OperationalGap[] = [];
 
     const allItems = await InventoryActionService.getItems();
@@ -413,7 +425,9 @@ export class AIGapScannerProvider {
   /**
    * Scan for failed sterilization cycles
    */
-  private async scanFailedCycles(facilityId: string): Promise<OperationalGap[]> {
+  private async scanFailedCycles(
+    facilityId: string
+  ): Promise<OperationalGap[]> {
     const gaps: OperationalGap[] = [];
 
     const { data: failedCycles, error: cyclesError } = await supabase
@@ -501,8 +515,14 @@ export class AIGapScannerProvider {
       {} as Record<string, number>
     );
 
-    const averagePoints = total > 0 ? gaps.reduce((sum, gap) => sum + gap.estimatedPoints, 0) / total : 0;
-    const totalEstimatedDuration = gaps.reduce((sum, gap) => sum + gap.estimatedDuration, 0);
+    const averagePoints =
+      total > 0
+        ? gaps.reduce((sum, gap) => sum + gap.estimatedPoints, 0) / total
+        : 0;
+    const totalEstimatedDuration = gaps.reduce(
+      (sum, gap) => sum + gap.estimatedDuration,
+      0
+    );
 
     return {
       total,
@@ -532,8 +552,10 @@ export class AIGapScannerProvider {
       if (filters.type && gap.type !== filters.type) return false;
       if (filters.priority && gap.priority !== filters.priority) return false;
       if (filters.category && gap.category !== filters.category) return false;
-      if (filters.assignedRole && gap.assignedRole !== filters.assignedRole) return false;
-      if (filters.facilityId && gap.facilityId !== filters.facilityId) return false;
+      if (filters.assignedRole && gap.assignedRole !== filters.assignedRole)
+        return false;
+      if (filters.facilityId && gap.facilityId !== filters.facilityId)
+        return false;
       return true;
     });
   }
@@ -543,11 +565,12 @@ export class AIGapScannerProvider {
    */
   sortGapsByPriority(gaps: OperationalGap[]): OperationalGap[] {
     const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
-    
+
     return gaps.sort((a, b) => {
-      const priorityDiff = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+      const priorityDiff =
+        (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
       if (priorityDiff !== 0) return priorityDiff;
-      
+
       // If same priority, sort by due date
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     });

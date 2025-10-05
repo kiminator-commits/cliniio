@@ -2,6 +2,8 @@ import React, { Suspense, useMemo } from 'react';
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
 import MetricsSection from '../../../components/MetricsSection';
 import { CardSkeleton } from '../../../components/ui/Skeleton';
+import { RefreshButton } from '../../../components/ui/RefreshButton';
+import { performanceMetricsCache } from '../../../services/performanceMetricsCache';
 
 interface HomeMetricsSectionProps {
   loading?: boolean; // Add loading prop to match HomeTasksSection
@@ -12,6 +14,7 @@ interface HomeMetricsSectionProps {
   integrationMetrics?:
     | Record<string, unknown>
     | import('../../../services/homeIntegrationService').HomeIntegrationMetrics;
+  aiImpactMetrics?: Record<string, unknown>; // Add AI impact metrics prop
 }
 
 const HomeMetricsSection = React.memo(function HomeMetricsSection({
@@ -19,11 +22,33 @@ const HomeMetricsSection = React.memo(function HomeMetricsSection({
   aiMetrics,
   sterilizationMetrics,
   integrationMetrics,
+  aiImpactMetrics, // Add AI impact metrics parameter
 }: HomeMetricsSectionProps) {
+  // Handle manual refresh of metrics
+  const handleRefresh = async () => {
+    try {
+      // Clear cache and fetch fresh metrics
+      performanceMetricsCache.clearCache();
+      await performanceMetricsCache.fetchAndCacheMetricsOnLogin();
+      // Force a page reload to show updated metrics
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to refresh metrics:', error);
+      throw error; // Re-throw so RefreshButton can handle the error state
+    }
+  };
+
   // Memoize the performance metrics object to prevent unnecessary re-renders
   const performanceMetrics = useMemo(
     () => ({
       timeSaved: (aiMetrics?.timeSaved as {
+        daily: number;
+        monthly: number;
+      }) || {
+        daily: 0,
+        monthly: 0,
+      },
+      aiTimeSaved: (aiMetrics?.aiTimeSaved as {
         daily: number;
         monthly: number;
       }) || {
@@ -72,19 +97,31 @@ const HomeMetricsSection = React.memo(function HomeMetricsSection({
   }
 
   return (
-    <Suspense fallback={<CardSkeleton />}>
-      <ErrorBoundary
-        fallback={
-          <div className="sr-only">Metrics section failed to load.</div>
-        }
-      >
-        <MetricsSection
-          biData={undefined}
-          ciData={undefined}
-          performanceMetrics={performanceMetrics}
+    <div className="relative">
+      {/* Refresh Button - positioned in top right */}
+      <div className="absolute top-4 right-4 z-10">
+        <RefreshButton
+          onRefresh={handleRefresh}
+          size="sm"
+          className="shadow-md"
         />
-      </ErrorBoundary>
-    </Suspense>
+      </div>
+
+      <Suspense fallback={<CardSkeleton />}>
+        <ErrorBoundary
+          fallback={
+            <div className="sr-only">Metrics section failed to load.</div>
+          }
+        >
+          <MetricsSection
+            biData={undefined}
+            ciData={undefined}
+            performanceMetrics={performanceMetrics}
+            aiImpactMetrics={aiImpactMetrics}
+          />
+        </ErrorBoundary>
+      </Suspense>
+    </div>
   );
 });
 

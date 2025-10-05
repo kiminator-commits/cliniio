@@ -18,7 +18,6 @@ vi.mock('@/config/devAuthConfig', () => ({
   },
 }));
 
-
 vi.mock('@/lib/getEnv', () => ({
   isDevelopment: vi.fn(),
 }));

@@ -3,7 +3,10 @@ import { LearningAIModelProvider } from '../../learningAI/LearningAIModelProvide
 import type { SkillGapAnalysisResult } from '../../../types/learningAITypes';
 import type { Json } from '../../../types/database.types';
 import type { SkillGapAnalysisRow } from '../../../types/learningAITypes';
-import { calculateProcessingTime, getCurrentTimestamp } from '../../learningAI/learningAIUtils';
+import {
+  calculateProcessingTime,
+  getCurrentTimestamp,
+} from '../../learningAI/learningAIUtils';
 
 export class KnowledgeGapService {
   private facilityId: string;

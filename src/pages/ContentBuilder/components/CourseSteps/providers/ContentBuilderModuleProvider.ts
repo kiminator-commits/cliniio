@@ -52,7 +52,10 @@ export class ContentBuilderModuleProvider {
   /**
    * Update module properties
    */
-  updateModule(module: Module, updates: Partial<Omit<Module, 'id' | 'lessons'>>): Module {
+  updateModule(
+    module: Module,
+    updates: Partial<Omit<Module, 'id' | 'lessons'>>
+  ): Module {
     return {
       ...module,
       ...updates,
@@ -131,7 +134,9 @@ export class ContentBuilderModuleProvider {
    * Duplicate lesson
    */
   duplicateLesson(module: Module, lessonId: string): Module {
-    const lessonToDuplicate = module.lessons.find((lesson) => lesson.id === lessonId);
+    const lessonToDuplicate = module.lessons.find(
+      (lesson) => lesson.id === lessonId
+    );
     if (!lessonToDuplicate) return module;
 
     const duplicatedLesson = {
@@ -176,10 +181,14 @@ export class ContentBuilderModuleProvider {
     module.lessons.forEach((lesson, index) => {
       const lessonValidation = this.validateLesson(lesson);
       if (!lessonValidation.isValid) {
-        errors.push(`Lesson ${index + 1}: ${lessonValidation.errors.join(', ')}`);
+        errors.push(
+          `Lesson ${index + 1}: ${lessonValidation.errors.join(', ')}`
+        );
       }
       if (lessonValidation.warnings.length > 0) {
-        warnings.push(`Lesson ${index + 1}: ${lessonValidation.warnings.join(', ')}`);
+        warnings.push(
+          `Lesson ${index + 1}: ${lessonValidation.warnings.join(', ')}`
+        );
       }
     });
 
@@ -238,18 +247,18 @@ export class ContentBuilderModuleProvider {
       (lesson) => lesson.title.trim() && lesson.content.trim()
     ).length;
 
-    const completionPercentage = totalLessons > 0 
-      ? Math.round((completedLessons / totalLessons) * 100) 
-      : 0;
+    const completionPercentage =
+      totalLessons > 0
+        ? Math.round((completedLessons / totalLessons) * 100)
+        : 0;
 
     const totalContentLength = module.lessons.reduce(
       (sum, lesson) => sum + lesson.content.length,
       0
     );
 
-    const averageLessonLength = totalLessons > 0 
-      ? Math.round(totalContentLength / totalLessons) 
-      : 0;
+    const averageLessonLength =
+      totalLessons > 0 ? Math.round(totalContentLength / totalLessons) : 0;
 
     return {
       totalLessons,
@@ -270,7 +279,10 @@ export class ContentBuilderModuleProvider {
     isEmpty: boolean;
     isComplete: boolean;
   } {
-    const wordCount = lesson.content.trim().split(/\s+/).filter(word => word.length > 0).length;
+    const wordCount = lesson.content
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
     const characterCount = lesson.content.length;
     const readingTimeMinutes = Math.ceil(wordCount / 200); // Average reading speed: 200 words per minute
     const isEmpty = !lesson.title.trim() && !lesson.content.trim();
@@ -334,7 +346,7 @@ export class ContentBuilderModuleProvider {
     }
 
     // Check for lesson variety
-    const lessonTypes = new Set(module.lessons.map(lesson => lesson.type));
+    const lessonTypes = new Set(module.lessons.map((lesson) => lesson.type));
     if (lessonTypes.size === 1 && module.lessons.length > 1) {
       recommendations.push({
         type: 'suggestion',
@@ -381,7 +393,7 @@ export class ContentBuilderModuleProvider {
 
     // Add content suggestions
     const stats = this.getLessonStatistics(lesson);
-    
+
     if (stats.wordCount < 100) {
       recommendations.push({
         type: 'suggestion',
@@ -409,13 +421,17 @@ export class ContentBuilderModuleProvider {
     const validation = this.validateModule(module);
     const recommendations = this.getModuleRecommendations(module);
 
-    return JSON.stringify({
-      module,
-      statistics,
-      validation,
-      recommendations,
-      timestamp: new Date().toISOString(),
-    }, null, 2);
+    return JSON.stringify(
+      {
+        module,
+        statistics,
+        validation,
+        recommendations,
+        timestamp: new Date().toISOString(),
+      },
+      null,
+      2
+    );
   }
 
   /**
@@ -428,7 +444,7 @@ export class ContentBuilderModuleProvider {
   } {
     try {
       const data = JSON.parse(jsonData);
-      
+
       if (!data.module) {
         return {
           success: false,

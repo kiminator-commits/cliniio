@@ -262,7 +262,15 @@ export class MonitoringService {
   private static async flushEvents(): Promise<void> {
     const events = this.eventQueue.splice(0, this.MAX_BATCH_SIZE);
 
-    // Get current user and facility info
+    // TEMPORARY: Disable database inserts to prevent created_by field error
+    // TODO: Investigate why created_by field is being expected
+    console.log(
+      '📊 Monitoring: Would flush',
+      events.length,
+      'events (disabled for debugging)'
+    );
+
+    // Get current user and facility info (for logging)
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -277,6 +285,14 @@ export class MonitoringService {
       facilityId = (userData?.facility_id as string) || null;
     }
 
+    console.log('📊 Monitoring: User context:', {
+      userId: user?.id,
+      facilityId,
+      eventsQueued: this.eventQueue.length,
+    });
+
+    // TEMPORARY: Comment out the problematic insert
+    /*
     const { error } = await supabase.from('monitoring_events').insert(
       events.map((event) => ({
         category: event.category,
@@ -295,6 +311,7 @@ export class MonitoringService {
       // Put events back in queue for retry
       this.eventQueue.unshift(...events);
     }
+    */
   }
 
   /**

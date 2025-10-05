@@ -154,11 +154,6 @@ const SocialLoginButtons = () => {
           <span className="ml-2">Microsoft</span>
         </button>
       </div>
-
-      {/* Security notice */}
-      <div className="text-xs text-gray-500 text-center">
-        <p>Secure OAuth authentication with PKCE and state validation</p>
-      </div>
     </div>
   );
 };

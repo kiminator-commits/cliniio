@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Icon from '@mdi/react';
-import { ToolStatus } from '@/types/toolTypes';
+import { ToolStatus as _ToolStatus } from '@/types/toolTypes';
 import {
   mdiFileDocument,
   mdiCalendar,
@@ -18,7 +18,9 @@ import { useCleaningLogLogic } from './hooks/useCleaningLogLogic';
 
 const CleaningLogTracker: React.FC = () => {
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | ToolStatus>('all');
+  const [filterStatus, setFilterStatus] = useState<
+    'all' | 'in_progress' | 'completed' | 'failed'
+  >('all');
   const [filterDate, setFilterDate] = useState<string>('');
 
   // Business logic separated into hook
@@ -32,9 +34,10 @@ const CleaningLogTracker: React.FC = () => {
     getBITestResultsForCycle,
     getBITestResultColor,
     formatTestTime,
-    getCleaningTypeDisplayName,
+    getCleaningTypeDisplayName: _getCleaningTypeDisplayName,
     getQualityScoreDisplay,
     getComplianceScoreDisplay,
+    exportLogs,
   } = useCleaningLogLogic({ filterStatus, filterDate });
 
   if (loading) {
@@ -75,7 +78,10 @@ const CleaningLogTracker: React.FC = () => {
           Cleaning Log Tracker
         </h2>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+          <button
+            onClick={exportLogs}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
             <Icon path={mdiDownload} size={1} />
             Export
           </button>
@@ -95,16 +101,16 @@ const CleaningLogTracker: React.FC = () => {
             id="status-filter"
             value={filterStatus}
             onChange={(e) =>
-              setFilterStatus(e.target.value as 'all' | ToolStatus)
+              setFilterStatus(
+                e.target.value as 'all' | 'in_progress' | 'completed' | 'failed'
+              )
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
           >
             <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="dirty">Dirty</option>
-            <option value="clean">Clean</option>
-            <option value="problem">Problem</option>
-            <option value="new_barcode">New Barcode</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
           </select>
         </div>
 
@@ -138,21 +144,7 @@ const CleaningLogTracker: React.FC = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-blue-600">
-                Total Cleanings
-              </p>
-              <p className="text-2xl font-bold text-blue-800">
-                {stats.totalCycles}
-              </p>
-            </div>
-            <Icon path={mdiFileDocument} size={1.5} className="text-blue-500" />
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-green-50 p-4 rounded-lg border border-green-200">
           <div className="flex items-center justify-between">
             <div>
@@ -178,7 +170,9 @@ const CleaningLogTracker: React.FC = () => {
         <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-purple-600">Total Rooms</p>
+              <p className="text-sm font-medium text-purple-600">
+                Total Cycles
+              </p>
               <p className="text-2xl font-bold text-purple-800">
                 {stats.totalTools}
               </p>
@@ -192,7 +186,7 @@ const CleaningLogTracker: React.FC = () => {
       <div className="space-y-4">
         {filteredLogs.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No cleaning logs found for the selected filters.
+            No sterilization cycles found for the selected filters.
           </div>
         ) : (
           filteredLogs.map((log) => {
@@ -212,7 +206,7 @@ const CleaningLogTracker: React.FC = () => {
                       {log.status.toUpperCase()}
                     </span>
                     <span className="text-sm text-gray-500">
-                      {getCleaningTypeDisplayName(log.cleaning_type)}
+                      Sterilization Cycle
                     </span>
                   </div>
                   <button

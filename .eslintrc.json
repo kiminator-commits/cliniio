@@ -91,9 +91,7 @@
       }
     },
     {
-      "files": [
-        "**/database.types.ts"
-      ],
+      "files": ["**/database.types.ts"],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off"
       }

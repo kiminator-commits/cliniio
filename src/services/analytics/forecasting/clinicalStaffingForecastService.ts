@@ -21,7 +21,8 @@ export class ClinicalStaffingForecastService {
 
   static getInstance(): ClinicalStaffingForecastService {
     if (!ClinicalStaffingForecastService.instance) {
-      ClinicalStaffingForecastService.instance = new ClinicalStaffingForecastService();
+      ClinicalStaffingForecastService.instance =
+        new ClinicalStaffingForecastService();
     }
     return ClinicalStaffingForecastService.instance;
   }
@@ -51,7 +52,10 @@ export class ClinicalStaffingForecastService {
           .eq('facility_id', filters.facilityId as string)
           .gte(
             'created_at',
-            new Date(Date.now() - CLINICAL_STAFFING_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000).toISOString()
+            new Date(
+              Date.now() -
+                CLINICAL_STAFFING_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000
+            ).toISOString()
           )
           .order('created_at', { ascending: false });
 
@@ -81,18 +85,26 @@ export class ClinicalStaffingForecastService {
         (incompleteCycles / totalCycles) * 100
       );
       const recommendedFTE =
-        workloadIncrease > CLINICAL_STAFFING_CONFIG.WORKLOAD_INCREASE_THRESHOLD ? currentFTE + CLINICAL_STAFFING_CONFIG.FTE_INCREASE : currentFTE;
+        workloadIncrease > CLINICAL_STAFFING_CONFIG.WORKLOAD_INCREASE_THRESHOLD
+          ? currentFTE + CLINICAL_STAFFING_CONFIG.FTE_INCREASE
+          : currentFTE;
 
       const forecasts: ClinicalStaffingForecast[] = [
         {
           currentFTE,
           recommendedFTE,
           timeline:
-            workloadIncrease > CLINICAL_STAFFING_CONFIG.WORKLOAD_INCREASE_THRESHOLD ? TIMELINE_CONFIG.NEXT_QUARTER : TIMELINE_CONFIG.MONITOR_3_MONTHS,
+            workloadIncrease >
+            CLINICAL_STAFFING_CONFIG.WORKLOAD_INCREASE_THRESHOLD
+              ? TIMELINE_CONFIG.NEXT_QUARTER
+              : TIMELINE_CONFIG.MONITOR_3_MONTHS,
           workloadIncrease,
           skillsetGaps: [], // This should come from training/competency data
           trainingRecommendations: [], // This should come from training gap analysis
-          estimatedCost: Math.round((recommendedFTE - currentFTE) * CLINICAL_STAFFING_CONFIG.COST_PER_FTE), // Rough estimate
+          estimatedCost: Math.round(
+            (recommendedFTE - currentFTE) *
+              CLINICAL_STAFFING_CONFIG.COST_PER_FTE
+          ), // Rough estimate
         },
       ];
 

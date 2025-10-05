@@ -94,7 +94,10 @@ export class InventoryAIService {
         throw new Error('Barcode scanning AI is not enabled');
       }
 
-      return await this.riskAnalysisService.analyzeBarcode(imageFile, barcodeValue);
+      return await this.riskAnalysisService.analyzeBarcode(
+        imageFile,
+        barcodeValue
+      );
     } catch (error) {
       console.error('Error analyzing barcode:', error);
       return null;
@@ -127,7 +130,10 @@ export class InventoryAIService {
         throw new Error('Demand forecasting AI is not enabled');
       }
 
-      return await this.forecastingService.generateDemandForecast(itemId, period);
+      return await this.forecastingService.generateDemandForecast(
+        itemId,
+        period
+      );
     } catch (error) {
       console.error('Error generating demand forecast:', error);
       return null;
@@ -144,7 +150,9 @@ export class InventoryAIService {
         throw new Error('Cost optimization AI is not enabled');
       }
 
-      return await this.optimizationService.generateCostOptimization(optimizationType);
+      return await this.optimizationService.generateCostOptimization(
+        optimizationType
+      );
     } catch (error) {
       console.error('Error generating cost optimization:', error);
       return null;
@@ -260,6 +268,4 @@ export class InventoryAIService {
       };
     }
   }
-
-
 }

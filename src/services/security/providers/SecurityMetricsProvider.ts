@@ -210,7 +210,8 @@ export class SecurityMetricsProvider {
         (incident) => incident.status === 'resolved'
       ).length;
       const openCount = dayIncidents.filter(
-        (incident) => incident.status !== 'resolved' && incident.status !== 'false_positive'
+        (incident) =>
+          incident.status !== 'resolved' && incident.status !== 'false_positive'
       ).length;
 
       resolutionTrend.push({
@@ -276,7 +277,8 @@ export class SecurityMetricsProvider {
 
     // High severity incidents
     const highSeverityIncidents = incidents.filter(
-      (incident) => incident.severity === 'critical' || incident.severity === 'high'
+      (incident) =>
+        incident.severity === 'critical' || incident.severity === 'high'
     );
     if (highSeverityIncidents.length > 0) {
       alerts.push({
@@ -289,7 +291,8 @@ export class SecurityMetricsProvider {
 
     // Unresolved incidents
     const unresolvedIncidents = incidents.filter(
-      (incident) => incident.status !== 'resolved' && incident.status !== 'false_positive'
+      (incident) =>
+        incident.status !== 'resolved' && incident.status !== 'false_positive'
     );
     if (unresolvedIncidents.length > 5) {
       alerts.push({
@@ -370,7 +373,9 @@ export class SecurityMetricsProvider {
     }
 
     // Unused threat indicators
-    const unusedIndicators = threatIndicators.filter((ti) => ti.triggerCount === 0);
+    const unusedIndicators = threatIndicators.filter(
+      (ti) => ti.triggerCount === 0
+    );
     if (unusedIndicators.length > 5) {
       recommendations.push({
         type: 'threat_indicator',
@@ -403,7 +408,9 @@ export class SecurityMetricsProvider {
     const total = threatIndicators.length;
     const enabled = threatIndicators.filter((ti) => ti.enabled).length;
     const disabled = total - enabled;
-    const triggered = threatIndicators.filter((ti) => ti.triggerCount > 0).length;
+    const triggered = threatIndicators.filter(
+      (ti) => ti.triggerCount > 0
+    ).length;
     const neverTriggered = total - triggered;
 
     const totalTriggers = threatIndicators.reduce(
@@ -446,7 +453,9 @@ export class SecurityMetricsProvider {
   } {
     const totalIncidents = incidents.length;
     const resolvedIncidents = incidents.filter((i) => i.status === 'resolved');
-    const falsePositiveIncidents = incidents.filter((i) => i.status === 'false_positive');
+    const falsePositiveIncidents = incidents.filter(
+      (i) => i.status === 'false_positive'
+    );
 
     // Average resolution time
     const resolvedWithTime = resolvedIncidents.filter((i) => i.resolvedAt);
@@ -460,27 +469,40 @@ export class SecurityMetricsProvider {
         : 0;
 
     // Resolution rate
-    const resolutionRate = totalIncidents > 0 ? (resolvedIncidents.length / totalIncidents) * 100 : 0;
+    const resolutionRate =
+      totalIncidents > 0
+        ? (resolvedIncidents.length / totalIncidents) * 100
+        : 0;
 
     // Escalation rate (incidents that took more than 24 hours to resolve)
     const escalatedIncidents = resolvedWithTime.filter(
-      (i) => i.resolvedAt!.getTime() - i.detectedAt.getTime() > 24 * 60 * 60 * 1000
+      (i) =>
+        i.resolvedAt!.getTime() - i.detectedAt.getTime() > 24 * 60 * 60 * 1000
     );
-    const escalationRate = resolvedWithTime.length > 0 ? (escalatedIncidents.length / resolvedWithTime.length) * 100 : 0;
+    const escalationRate =
+      resolvedWithTime.length > 0
+        ? (escalatedIncidents.length / resolvedWithTime.length) * 100
+        : 0;
 
     // False positive rate
-    const falsePositiveRate = totalIncidents > 0 ? (falsePositiveIncidents.length / totalIncidents) * 100 : 0;
+    const falsePositiveRate =
+      totalIncidents > 0
+        ? (falsePositiveIncidents.length / totalIncidents) * 100
+        : 0;
 
     // Response time by severity
     const responseTimeBySeverity: Record<string, number> = {};
     ['low', 'medium', 'high', 'critical'].forEach((severity) => {
-      const severityIncidents = resolvedWithTime.filter((i) => i.severity === severity);
+      const severityIncidents = resolvedWithTime.filter(
+        (i) => i.severity === severity
+      );
       if (severityIncidents.length > 0) {
-        responseTimeBySeverity[severity] = severityIncidents.reduce((sum, incident) => {
-          const resolutionTime =
-            incident.resolvedAt!.getTime() - incident.detectedAt.getTime();
-          return sum + resolutionTime / (1000 * 60 * 60); // Convert to hours
-        }, 0) / severityIncidents.length;
+        responseTimeBySeverity[severity] =
+          severityIncidents.reduce((sum, incident) => {
+            const resolutionTime =
+              incident.resolvedAt!.getTime() - incident.detectedAt.getTime();
+            return sum + resolutionTime / (1000 * 60 * 60); // Convert to hours
+          }, 0) / severityIncidents.length;
       } else {
         responseTimeBySeverity[severity] = 0;
       }

@@ -117,19 +117,27 @@ export const createCycleActions: StateCreator<
       const cycles: SterilizationCycle[] = dbCycles.map((dbCycle) => ({
         id: dbCycle.id,
         cycleNumber: dbCycle.cycle_number,
-        phases: dbCycle.phases.map((phase) => ({
-          id: phase.id,
-          name: phase.name,
-          duration: phase.duration,
-          tools: phase.tools.map((tool) => tool.id),
-          isActive: phase.isActive,
-          startTime: phase.startTime ? new Date(phase.startTime) : null,
-          endTime: phase.endTime ? new Date(phase.endTime) : null,
-          status: phase.status,
-        })),
-        tools: dbCycle.tools.map((tool) => tool.id),
+        phases: Array.isArray(dbCycle.phases)
+          ? dbCycle.phases.map((phase) => ({
+              id: phase.id,
+              name: phase.name,
+              duration: phase.duration,
+              tools: Array.isArray(phase.tools)
+                ? phase.tools.map((tool) => tool.id)
+                : [],
+              isActive: phase.isActive,
+              startTime: phase.startTime ? new Date(phase.startTime) : null,
+              endTime: phase.endTime ? new Date(phase.endTime) : null,
+              status: phase.status,
+            }))
+          : [], // Default to empty array if phases is not an array
+        tools: Array.isArray(dbCycle.tools)
+          ? dbCycle.tools.map((tool) => tool.id)
+          : [], // Default to empty array if tools is not an array
         operator: dbCycle.operator_id || 'Unknown',
-        startTime: new Date(dbCycle.start_time),
+        startTime: dbCycle.start_time
+          ? new Date(dbCycle.start_time)
+          : new Date(),
         completedAt: dbCycle.end_time || null,
         batchId: dbCycle.cycle_number,
       }));

@@ -1,5 +1,14 @@
 import { supabase } from '../../lib/supabaseClient';
-import { SkillLevels, SterilizationCycleRow, BITestRow, InventoryCheckRow, OrderRow, CleaningTaskRow, LearningProgressRow, CertificationRow } from './GamificationTypes';
+import {
+  SkillLevels,
+  SterilizationCycleRow,
+  BITestRow,
+  InventoryCheckRow,
+  OrderRow,
+  CleaningTaskRow,
+  LearningProgressRow,
+  CertificationRow,
+} from './GamificationTypes';
 
 // Re-export SkillLevels for backward compatibility
 export type { SkillLevels };
@@ -14,13 +23,15 @@ export class GamificationSkillProvider {
   ): Promise<SkillLevels> {
     try {
       // Sterilization skills
-      const sterilizationLevel = await this.calculateSterilizationLevel(facilityId);
+      const sterilizationLevel =
+        await this.calculateSterilizationLevel(facilityId);
 
       // Inventory skills
       const inventoryLevel = await this.calculateInventoryLevel(facilityId);
 
       // Environmental cleaning skills
-      const environmentalLevel = await this.calculateEnvironmentalLevel(facilityId);
+      const environmentalLevel =
+        await this.calculateEnvironmentalLevel(facilityId);
 
       // Knowledge skills
       const knowledgeLevel = await this.calculateKnowledgeLevel(userId);
@@ -91,7 +102,8 @@ export class GamificationSkillProvider {
           : 0;
       const totalTools =
         cyclesData?.reduce(
-          (sum: number, c: SterilizationCycleRow) => sum + (c.tools?.length || 0),
+          (sum: number, c: SterilizationCycleRow) =>
+            sum + (c.tools?.length || 0),
           0
         ) || 0;
 
@@ -102,7 +114,9 @@ export class GamificationSkillProvider {
       const biScore = biPassRate * 30;
       const toolScore = Math.min((totalTools / 100) * 20, 20);
       const efficiencyScore =
-        totalCycles > 0 ? Math.min((completedCycles / totalCycles) * 10, 10) : 0;
+        totalCycles > 0
+          ? Math.min((completedCycles / totalCycles) * 10, 10)
+          : 0;
 
       const totalScore = cycleScore + biScore + toolScore + efficiencyScore;
       return Math.max(1, Math.min(100, Math.round(totalScore)));
@@ -252,7 +266,8 @@ export class GamificationSkillProvider {
       if (!userLearningProgress) return 1;
       if (!userCertifications) return 1;
 
-      const learningProgressData = userLearningProgress as LearningProgressRow[];
+      const learningProgressData =
+        userLearningProgress as LearningProgressRow[];
       const certificationsData = userCertifications as CertificationRow[];
 
       const completedModules = learningProgressData?.length || 0;
@@ -315,7 +330,10 @@ export class GamificationSkillProvider {
   /**
    * Get skill level icon
    */
-  getSkillLevelIcon(skill: keyof Omit<SkillLevels, 'overall'>, level: number): string {
+  getSkillLevelIcon(
+    skill: keyof Omit<SkillLevels, 'overall'>,
+    level: number
+  ): string {
     const icons = {
       sterilization: ['🧪', '🔬', '⚗️', '🧬', '💊'],
       inventory: ['📦', '📋', '📊', '🗂️', '📈'],
@@ -448,13 +466,34 @@ export class GamificationSkillProvider {
     averageLevels: SkillLevels;
     highestLevels: SkillLevels;
     lowestLevels: SkillLevels;
-    distribution: Record<keyof SkillLevels, Array<{ range: string; count: number }>>;
+    distribution: Record<
+      keyof SkillLevels,
+      Array<{ range: string; count: number }>
+    >;
   } {
     if (skillLevels.length === 0) {
       return {
-        averageLevels: { sterilization: 0, inventory: 0, environmental: 0, knowledge: 0, overall: 0 },
-        highestLevels: { sterilization: 0, inventory: 0, environmental: 0, knowledge: 0, overall: 0 },
-        lowestLevels: { sterilization: 0, inventory: 0, environmental: 0, knowledge: 0, overall: 0 },
+        averageLevels: {
+          sterilization: 0,
+          inventory: 0,
+          environmental: 0,
+          knowledge: 0,
+          overall: 0,
+        },
+        highestLevels: {
+          sterilization: 0,
+          inventory: 0,
+          environmental: 0,
+          knowledge: 0,
+          overall: 0,
+        },
+        lowestLevels: {
+          sterilization: 0,
+          inventory: 0,
+          environmental: 0,
+          knowledge: 0,
+          overall: 0,
+        },
         distribution: {
           sterilization: [],
           inventory: [],
@@ -473,10 +512,31 @@ export class GamificationSkillProvider {
       'overall',
     ];
 
-    const averageLevels: SkillLevels = { sterilization: 0, inventory: 0, environmental: 0, knowledge: 0, overall: 0 };
-    const highestLevels: SkillLevels = { sterilization: 0, inventory: 0, environmental: 0, knowledge: 0, overall: 0 };
-    const lowestLevels: SkillLevels = { sterilization: 100, inventory: 100, environmental: 100, knowledge: 100, overall: 100 };
-    const distribution: Record<keyof SkillLevels, Array<{ range: string; count: number }>> = {
+    const averageLevels: SkillLevels = {
+      sterilization: 0,
+      inventory: 0,
+      environmental: 0,
+      knowledge: 0,
+      overall: 0,
+    };
+    const highestLevels: SkillLevels = {
+      sterilization: 0,
+      inventory: 0,
+      environmental: 0,
+      knowledge: 0,
+      overall: 0,
+    };
+    const lowestLevels: SkillLevels = {
+      sterilization: 100,
+      inventory: 100,
+      environmental: 100,
+      knowledge: 100,
+      overall: 100,
+    };
+    const distribution: Record<
+      keyof SkillLevels,
+      Array<{ range: string; count: number }>
+    > = {
       sterilization: [],
       inventory: [],
       environmental: [],
@@ -485,7 +545,7 @@ export class GamificationSkillProvider {
     };
 
     skills.forEach((skill) => {
-      const levels = skillLevels.map(s => s[skill]);
+      const levels = skillLevels.map((s) => s[skill]);
       const sum = levels.reduce((acc, level) => acc + level, 0);
       const max = Math.max(...levels);
       const min = Math.min(...levels);
@@ -503,9 +563,11 @@ export class GamificationSkillProvider {
         { min: 81, max: 100, label: '81-100' },
       ];
 
-      distribution[skill] = ranges.map(range => ({
+      distribution[skill] = ranges.map((range) => ({
         range: range.label,
-        count: levels.filter(level => level >= range.min && level <= range.max).length,
+        count: levels.filter(
+          (level) => level >= range.min && level <= range.max
+        ).length,
       }));
     });
 

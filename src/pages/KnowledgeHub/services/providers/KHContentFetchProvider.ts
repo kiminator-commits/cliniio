@@ -25,7 +25,9 @@ export class KHContentFetchProvider {
         throw error;
       }
 
-      return KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      return KHDataTransformationProvider.transformRawRowsToContentItems(
+        data || []
+      );
     } catch (error) {
       console.error('Error fetching knowledge hub content:', error);
       // Return empty array for any other errors to prevent app crashes
@@ -53,7 +55,9 @@ export class KHContentFetchProvider {
         throw error;
       }
 
-      return KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      return KHDataTransformationProvider.transformRawRowsToContentItems(
+        data || []
+      );
     } catch (error) {
       console.error('Error fetching content by category:', error);
       return [];
@@ -79,7 +83,9 @@ export class KHContentFetchProvider {
         throw error;
       }
 
-      return KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      return KHDataTransformationProvider.transformRawRowsToContentItems(
+        data || []
+      );
     } catch (error) {
       console.error('Error fetching content by domain:', error);
       return [];
@@ -105,7 +111,9 @@ export class KHContentFetchProvider {
         throw error;
       }
 
-      return KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      return KHDataTransformationProvider.transformRawRowsToContentItems(
+        data || []
+      );
     } catch (error) {
       console.error('Error fetching content by status:', error);
       return [];
@@ -131,7 +139,9 @@ export class KHContentFetchProvider {
         throw error;
       }
 
-      return KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      return KHDataTransformationProvider.transformRawRowsToContentItems(
+        data || []
+      );
     } catch (error) {
       console.error('Error fetching content by department:', error);
       return [];
@@ -160,7 +170,8 @@ export class KHContentFetchProvider {
         return null;
       }
 
-      const courseData = KHDataTransformationProvider.transformRawRowToCourse(data);
+      const courseData =
+        KHDataTransformationProvider.transformRawRowToCourse(data);
       return KHDataTransformationProvider.transformRowToContentItem(courseData);
     } catch (error) {
       console.error('Error fetching content by ID:', error);
@@ -195,7 +206,10 @@ export class KHContentFetchProvider {
 
       // Apply filters
       if (filters?.category) {
-        queryBuilder = queryBuilder.eq('content_type', filters.category.toLowerCase());
+        queryBuilder = queryBuilder.eq(
+          'content_type',
+          filters.category.toLowerCase()
+        );
       }
       if (filters?.status) {
         queryBuilder = queryBuilder.eq('status', filters.status);
@@ -230,7 +244,8 @@ export class KHContentFetchProvider {
         throw error;
       }
 
-      const content = KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+      const content =
+        KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
       const total = count || 0;
       const totalPages = Math.ceil(total / pageSize);
 
@@ -298,7 +313,8 @@ export class KHContentFetchProvider {
 
         // Count by department
         const department = item.department || 'Unknown';
-        stats.byDepartment[department] = (stats.byDepartment[department] || 0) + 1;
+        stats.byDepartment[department] =
+          (stats.byDepartment[department] || 0) + 1;
       });
 
       return stats;

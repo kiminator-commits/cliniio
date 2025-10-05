@@ -14,11 +14,17 @@ export const HelpSystem: React.FC<HelpSystemProps> = ({
   const {
     selectedHelpType,
     expandedMetrics,
+    expandedTasks,
+    expandedGamification,
+    expandedRelevant,
     currentContext,
     handleOptionClick,
     handleBack,
     handleFeedbackSuccess,
     toggleMetricSection,
+    toggleTaskSection,
+    toggleGamificationSection,
+    toggleRelevantSection,
     setHelpType,
   } = useHelpSystem(onClose);
 
@@ -27,14 +33,19 @@ export const HelpSystem: React.FC<HelpSystemProps> = ({
       selectedHelpType={selectedHelpType}
       currentContext={currentContext}
       expandedMetrics={expandedMetrics}
+      expandedTasks={expandedTasks}
+      expandedGamification={expandedGamification}
+      expandedRelevant={expandedRelevant}
       onOptionClick={handleOptionClick}
       onBack={handleBack}
       onFeedbackSuccess={handleFeedbackSuccess}
       onToggleMetricSection={toggleMetricSection}
+      onToggleTaskSection={toggleTaskSection}
+      onToggleGamificationSection={toggleGamificationSection}
+      onToggleRelevantSection={toggleRelevantSection}
       onSetHelpType={setHelpType}
     />
   );
-
 
   if (!isDrawerOpen) return null;
 

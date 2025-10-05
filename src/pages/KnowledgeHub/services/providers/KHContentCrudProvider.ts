@@ -1,7 +1,10 @@
 import { supabase } from '../../../../lib/supabase';
 import { ContentItem } from '../../KnowledgeHub/types';
 import { ApiError, ErrorType, ErrorSeverity } from '../../../types/errors';
-import { KHDataTransformationProvider, KnowledgeHubCourse } from './KHDataTransformationProvider';
+import {
+  KHDataTransformationProvider,
+  KnowledgeHubCourse,
+} from './KHDataTransformationProvider';
 
 export class KHContentCrudProvider {
   private tableName = 'knowledge_hub_courses';
@@ -14,7 +17,8 @@ export class KHContentCrudProvider {
   ): Promise<ContentItem> {
     try {
       // Validate data before insertion
-      const validation = KHDataTransformationProvider.validateCourseData(contentData);
+      const validation =
+        KHDataTransformationProvider.validateCourseData(contentData);
       if (!validation.isValid) {
         throw new ApiError(ErrorType.VALIDATION_ERROR, 'Invalid content data', {
           severity: ErrorSeverity.MEDIUM,
@@ -22,7 +26,8 @@ export class KHContentCrudProvider {
         });
       }
 
-      const insertData = KHDataTransformationProvider.sanitizeCourseDataForInsert(contentData);
+      const insertData =
+        KHDataTransformationProvider.sanitizeCourseDataForInsert(contentData);
 
       const { data, error } = await supabase
         .from(this.tableName)
@@ -36,7 +41,8 @@ export class KHContentCrudProvider {
         throw new Error('No data returned from content creation');
       }
 
-      const courseData = KHDataTransformationProvider.transformRawRowToCourse(data);
+      const courseData =
+        KHDataTransformationProvider.transformRawRowToCourse(data);
       return KHDataTransformationProvider.transformRowToContentItem(courseData);
     } catch (error) {
       console.error('Error creating content:', error);
@@ -59,7 +65,8 @@ export class KHContentCrudProvider {
   ): Promise<ContentItem> {
     try {
       // Validate data before update
-      const validation = KHDataTransformationProvider.validateCourseData(updates);
+      const validation =
+        KHDataTransformationProvider.validateCourseData(updates);
       if (!validation.isValid) {
         throw new ApiError(ErrorType.VALIDATION_ERROR, 'Invalid update data', {
           severity: ErrorSeverity.MEDIUM,
@@ -67,7 +74,8 @@ export class KHContentCrudProvider {
         });
       }
 
-      const updateData = KHDataTransformationProvider.sanitizeCourseDataForInsert(updates);
+      const updateData =
+        KHDataTransformationProvider.sanitizeCourseDataForInsert(updates);
 
       const { data, error } = await supabase
         .from(this.tableName)
@@ -82,7 +90,8 @@ export class KHContentCrudProvider {
         throw new Error('No data returned from content update');
       }
 
-      const courseData = KHDataTransformationProvider.transformRawRowToCourse(data);
+      const courseData =
+        KHDataTransformationProvider.transformRawRowToCourse(data);
       return KHDataTransformationProvider.transformRowToContentItem(courseData);
     } catch (error) {
       console.error('Error updating content:', error);
@@ -123,9 +132,9 @@ export class KHContentCrudProvider {
     try {
       const { data, error } = await supabase
         .from(this.tableName)
-        .update({ 
+        .update({
           is_active: false,
-          archived_at: new Date().toISOString()
+          archived_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
@@ -137,14 +146,19 @@ export class KHContentCrudProvider {
         throw new Error('No data returned from soft delete');
       }
 
-      const courseData = KHDataTransformationProvider.transformRawRowToCourse(data);
+      const courseData =
+        KHDataTransformationProvider.transformRawRowToCourse(data);
       return KHDataTransformationProvider.transformRowToContentItem(courseData);
     } catch (error) {
       console.error('Error soft deleting content:', error);
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to soft delete content', {
-        severity: ErrorSeverity.MEDIUM,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to soft delete content',
+        {
+          severity: ErrorSeverity.MEDIUM,
+          context: { originalError: error },
+        }
+      );
     }
   }
 
@@ -155,9 +169,9 @@ export class KHContentCrudProvider {
     try {
       const { data, error } = await supabase
         .from(this.tableName)
-        .update({ 
+        .update({
           is_active: true,
-          archived_at: null
+          archived_at: null,
         })
         .eq('id', id)
         .select()
@@ -169,7 +183,8 @@ export class KHContentCrudProvider {
         throw new Error('No data returned from restore');
       }
 
-      const courseData = KHDataTransformationProvider.transformRawRowToCourse(data);
+      const courseData =
+        KHDataTransformationProvider.transformRawRowToCourse(data);
       return KHDataTransformationProvider.transformRowToContentItem(courseData);
     } catch (error) {
       console.error('Error restoring content:', error);
@@ -187,9 +202,9 @@ export class KHContentCrudProvider {
     try {
       const { data, error } = await supabase
         .from(this.tableName)
-        .update({ 
+        .update({
           status: 'published',
-          published_at: new Date().toISOString()
+          published_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
@@ -201,7 +216,8 @@ export class KHContentCrudProvider {
         throw new Error('No data returned from publish');
       }
 
-      const courseData = KHDataTransformationProvider.transformRawRowToCourse(data);
+      const courseData =
+        KHDataTransformationProvider.transformRawRowToCourse(data);
       return KHDataTransformationProvider.transformRowToContentItem(courseData);
     } catch (error) {
       console.error('Error publishing content:', error);
@@ -219,9 +235,9 @@ export class KHContentCrudProvider {
     try {
       const { data, error } = await supabase
         .from(this.tableName)
-        .update({ 
+        .update({
           status: 'draft',
-          published_at: null
+          published_at: null,
         })
         .eq('id', id)
         .select()
@@ -233,14 +249,19 @@ export class KHContentCrudProvider {
         throw new Error('No data returned from unpublish');
       }
 
-      const courseData = KHDataTransformationProvider.transformRawRowToCourse(data);
+      const courseData =
+        KHDataTransformationProvider.transformRawRowToCourse(data);
       return KHDataTransformationProvider.transformRowToContentItem(courseData);
     } catch (error) {
       console.error('Error unpublishing content:', error);
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to unpublish content', {
-        severity: ErrorSeverity.MEDIUM,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to unpublish content',
+        {
+          severity: ErrorSeverity.MEDIUM,
+          context: { originalError: error },
+        }
+      );
     }
   }
 
@@ -252,7 +273,8 @@ export class KHContentCrudProvider {
     updates: Partial<KnowledgeHubCourse>
   ): Promise<ContentItem[]> {
     try {
-      const updateData = KHDataTransformationProvider.sanitizeCourseDataForInsert(updates);
+      const updateData =
+        KHDataTransformationProvider.sanitizeCourseDataForInsert(updates);
 
       const { data, error } = await supabase
         .from(this.tableName)
@@ -269,10 +291,14 @@ export class KHContentCrudProvider {
       return KHDataTransformationProvider.transformRawRowsToContentItems(data);
     } catch (error) {
       console.error('Error bulk updating content:', error);
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to bulk update content', {
-        severity: ErrorSeverity.HIGH,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to bulk update content',
+        {
+          severity: ErrorSeverity.HIGH,
+          context: { originalError: error },
+        }
+      );
     }
   }
 
@@ -289,10 +315,14 @@ export class KHContentCrudProvider {
       if (error) throw error;
     } catch (error) {
       console.error('Error bulk deleting content:', error);
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to bulk delete content', {
-        severity: ErrorSeverity.HIGH,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to bulk delete content',
+        {
+          severity: ErrorSeverity.HIGH,
+          context: { originalError: error },
+        }
+      );
     }
   }
 }

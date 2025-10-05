@@ -65,10 +65,16 @@ class SecureApiClient {
   private generateNonce(): string {
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join(
+      ''
+    );
   }
 
-  private async generateSignature(data: string, timestamp: number, nonce: string): Promise<string> {
+  private async generateSignature(
+    data: string,
+    timestamp: number,
+    nonce: string
+  ): Promise<string> {
     if (!this.config.enableRequestSigning) {
       return '';
     }
@@ -77,11 +83,11 @@ class SecureApiClient {
       // In production, use a proper signing key from secure storage
       const signingKey = await this.getSigningKey();
       const message = `${data}:${timestamp}:${nonce}`;
-      
+
       const encoder = new TextEncoder();
       const keyData = encoder.encode(signingKey);
       const messageData = encoder.encode(message);
-      
+
       const key = await crypto.subtle.importKey(
         'raw',
         keyData,
@@ -89,10 +95,12 @@ class SecureApiClient {
         false,
         ['sign']
       );
-      
+
       const signature = await crypto.subtle.sign('HMAC', key, messageData);
       const signatureArray = new Uint8Array(signature);
-      return Array.from(signatureArray, byte => byte.toString(16).padStart(2, '0')).join('');
+      return Array.from(signatureArray, (byte) =>
+        byte.toString(16).padStart(2, '0')
+      ).join('');
     } catch (error) {
       console.warn('Failed to generate request signature:', error);
       return '';
@@ -109,8 +117,10 @@ class SecureApiClient {
     // Generate new signing key for this session
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
-    const key = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-    
+    const key = Array.from(array, (byte) =>
+      byte.toString(16).padStart(2, '0')
+    ).join('');
+
     sessionStorage.setItem('api_signing_key', key);
     return key;
   }
@@ -118,7 +128,7 @@ class SecureApiClient {
   private createRequestSignature(_data: string): RequestSignature {
     const timestamp = Date.now();
     const nonce = this.generateNonce();
-    
+
     return {
       timestamp,
       nonce,
@@ -137,7 +147,7 @@ class SecureApiClient {
     let hash = 0;
     for (let i = 0; i < data.length; i++) {
       const char = data.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
@@ -181,10 +191,13 @@ class SecureApiClient {
     }
   }
 
-  private async validateResponse<T>(response: Response, requestId: string): Promise<SecureResponse<T>> {
+  private async validateResponse<T>(
+    response: Response,
+    requestId: string
+  ): Promise<SecureResponse<T>> {
     try {
       const data = await response.json();
-      
+
       if (this.config.enableResponseValidation) {
         // Validate response structure
         if (typeof data !== 'object' || data === null) {
@@ -222,7 +235,9 @@ class SecureApiClient {
     }
   }
 
-  private async makeRequest<T>(options: RequestOptions): Promise<SecureResponse<T>> {
+  private async makeRequest<T>(
+    options: RequestOptions
+  ): Promise<SecureResponse<T>> {
     const requestId = this.generateRequestId();
     const startTime = Date.now();
 
@@ -232,7 +247,11 @@ class SecureApiClient {
       return await this.pendingRequests.get(requestKey);
     }
 
-    const requestPromise = this.executeRequest<T>(options, requestId, startTime);
+    const requestPromise = this.executeRequest<T>(
+      options,
+      requestId,
+      startTime
+    );
     this.pendingRequests.set(requestKey, requestPromise);
 
     try {
@@ -243,7 +262,11 @@ class SecureApiClient {
     }
   }
 
-  private async executeRequest<T>(options: RequestOptions, requestId: string, startTime: number): Promise<SecureResponse<T>> {
+  private async executeRequest<T>(
+    options: RequestOptions,
+    requestId: string,
+    startTime: number
+  ): Promise<SecureResponse<T>> {
     const url = `${this.config.baseUrl}${options.endpoint}`;
     const timeout = options.timeout || this.config.timeout;
     const retries = options.retries || this.config.retryAttempts;
@@ -269,26 +292,34 @@ class SecureApiClient {
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
-        const response = await this.performHttpRequest(url, options, requestId, timeout);
+        const response = await this.performHttpRequest(
+          url,
+          options,
+          requestId,
+          timeout
+        );
         const result = await this.validateResponse<T>(response, requestId);
-        
+
         result.metadata!.processingTime = Date.now() - startTime;
 
         // Cache successful GET responses
-        if (options.method === 'GET' && result.success && options.cache !== false) {
+        if (
+          options.method === 'GET' &&
+          result.success &&
+          options.cache !== false
+        ) {
           const cacheKey = this.getCacheKey(options.endpoint, options.data);
           this.setCache(cacheKey, result.data);
         }
 
         return result;
-
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt < retries) {
           // Exponential backoff
           const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
@@ -318,7 +349,7 @@ class SecureApiClient {
       // Prepare headers
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'X-Request-ID': requestId,
         'X-Requested-With': 'XMLHttpRequest',
         ...options.headers,
@@ -328,8 +359,12 @@ class SecureApiClient {
       if (options.signRequest !== false && this.config.enableRequestSigning) {
         const dataString = JSON.stringify(options.data || {});
         const signature = this.createRequestSignature(dataString);
-        const actualSignature = await this.generateSignature(dataString, signature.timestamp, signature.nonce);
-        
+        const actualSignature = await this.generateSignature(
+          dataString,
+          signature.timestamp,
+          signature.nonce
+        );
+
         headers['X-Request-Timestamp'] = signature.timestamp.toString();
         headers['X-Request-Nonce'] = signature.nonce;
         headers['X-Request-Signature'] = actualSignature;
@@ -357,20 +392,23 @@ class SecureApiClient {
       }
 
       return response;
-
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
-      
+
       throw error;
     }
   }
 
   // Public API methods
-  async get<T>(endpoint: string, data?: unknown, options: Partial<RequestOptions> = {}): Promise<SecureResponse<T>> {
+  async get<T>(
+    endpoint: string,
+    data?: unknown,
+    options: Partial<RequestOptions> = {}
+  ): Promise<SecureResponse<T>> {
     return this.makeRequest<T>({
       method: 'GET',
       endpoint,
@@ -379,7 +417,11 @@ class SecureApiClient {
     });
   }
 
-  async post<T>(endpoint: string, data?: unknown, options: Partial<RequestOptions> = {}): Promise<SecureResponse<T>> {
+  async post<T>(
+    endpoint: string,
+    data?: unknown,
+    options: Partial<RequestOptions> = {}
+  ): Promise<SecureResponse<T>> {
     return this.makeRequest<T>({
       method: 'POST',
       endpoint,
@@ -388,7 +430,11 @@ class SecureApiClient {
     });
   }
 
-  async put<T>(endpoint: string, data?: unknown, options: Partial<RequestOptions> = {}): Promise<SecureResponse<T>> {
+  async put<T>(
+    endpoint: string,
+    data?: unknown,
+    options: Partial<RequestOptions> = {}
+  ): Promise<SecureResponse<T>> {
     return this.makeRequest<T>({
       method: 'PUT',
       endpoint,
@@ -397,7 +443,11 @@ class SecureApiClient {
     });
   }
 
-  async delete<T>(endpoint: string, data?: unknown, options: Partial<RequestOptions> = {}): Promise<SecureResponse<T>> {
+  async delete<T>(
+    endpoint: string,
+    data?: unknown,
+    options: Partial<RequestOptions> = {}
+  ): Promise<SecureResponse<T>> {
     return this.makeRequest<T>({
       method: 'DELETE',
       endpoint,
@@ -406,7 +456,11 @@ class SecureApiClient {
     });
   }
 
-  async patch<T>(endpoint: string, data?: unknown, options: Partial<RequestOptions> = {}): Promise<SecureResponse<T>> {
+  async patch<T>(
+    endpoint: string,
+    data?: unknown,
+    options: Partial<RequestOptions> = {}
+  ): Promise<SecureResponse<T>> {
     return this.makeRequest<T>({
       method: 'PATCH',
       endpoint,
@@ -421,38 +475,50 @@ class SecureApiClient {
     password: string;
     csrfToken?: string;
     rememberMe?: boolean;
-  }): Promise<SecureResponse<{
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-    user: {
-      id: string;
-      email: string;
-      role: string;
-    };
-  }>> {
+  }): Promise<
+    SecureResponse<{
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+      user: {
+        id: string;
+        email: string;
+        role: string;
+      };
+    }>
+  > {
     return this.post('/auth-login', credentials, {
       signRequest: true,
       cache: false,
     });
   }
 
-  async refreshToken(refreshToken: string): Promise<SecureResponse<{
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-  }>> {
-    return this.post('/auth-refresh', { refreshToken }, {
-      signRequest: true,
-      cache: false,
-    });
+  async refreshToken(refreshToken: string): Promise<
+    SecureResponse<{
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+    }>
+  > {
+    return this.post(
+      '/auth-refresh',
+      { refreshToken },
+      {
+        signRequest: true,
+        cache: false,
+      }
+    );
   }
 
   async logout(): Promise<SecureResponse<void>> {
-    return this.post('/auth-logout', {}, {
-      signRequest: true,
-      cache: false,
-    });
+    return this.post(
+      '/auth-logout',
+      {},
+      {
+        signRequest: true,
+        cache: false,
+      }
+    );
   }
 
   // Utility methods
@@ -489,4 +555,10 @@ export const secureApiClient = new SecureApiClient({
 });
 
 // Export types and class for testing
-export { SecureApiClient, type SecureApiConfig, type RequestOptions, type SecureResponse, type RequestSignature };
+export {
+  SecureApiClient,
+  type SecureApiConfig,
+  type RequestOptions,
+  type SecureResponse,
+  type RequestSignature,
+};

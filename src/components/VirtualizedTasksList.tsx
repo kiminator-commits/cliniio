@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { FaEdit, FaChevronRight } from 'react-icons/fa';
 import { TASK_STATUSES } from '../constants/homeTaskConstants';
 import { Task } from '../store/homeStore';
+import clsx from 'clsx';
 
 // Helper function to map homeStore Task to taskService Task
 const mapToServiceTask = (task: Task) => ({
@@ -39,6 +40,34 @@ const VirtualizedTasksList: React.FC<VirtualizedTasksListProps> = React.memo(
     const [editedTask, setEditedTask] = useState<Partial<Task>>({});
     const [scrollTop, setScrollTop] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Helper function to determine if a task is newly assigned (within last 24 hours)
+    const isNewlyAssigned = useCallback((task: Task): boolean => {
+      if (!task.dueDate) return false;
+
+      const taskDate = new Date(task.dueDate);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - taskDate.getTime()) / (1000 * 60 * 60);
+
+      return hoursDiff <= 24;
+    }, []);
+
+    // Helper function to get enhanced shadow class for new tasks
+    const getTaskCardClass = useCallback(
+      (task: Task): string => {
+        const baseClass = 'rounded-xl border border-gray-200 p-4 bg-white mx-2';
+        const isNew = isNewlyAssigned(task);
+
+        return clsx(baseClass, {
+          // Enhanced shadow effect for newly assigned tasks (same as performance metrics)
+          'shadow-lg border-l-4 border-[#4ECDC4] border-opacity-50 bg-gradient-to-r from-white to-teal-50':
+            isNew,
+          // Standard styling for older tasks
+          'shadow-sm': !isNew,
+        });
+      },
+      [isNewlyAssigned]
+    );
 
     // Memoize expensive calculations
     const safeTasks = useMemo(
@@ -138,7 +167,7 @@ const VirtualizedTasksList: React.FC<VirtualizedTasksListProps> = React.memo(
               className="absolute w-full"
               style={{ top, height: itemHeight }}
             >
-              <div className="rounded-xl border border-gray-200 p-4 shadow-sm bg-white mx-2">
+              <div className={getTaskCardClass(task)}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-2">
                     <button
@@ -155,8 +184,15 @@ const VirtualizedTasksList: React.FC<VirtualizedTasksListProps> = React.memo(
                       />
                     </button>
                     <div>
-                      <div className="font-semibold text-gray-800">
-                        {task.title}
+                      <div className="flex items-center gap-2">
+                        <div className="font-semibold text-gray-800">
+                          {task.title}
+                        </div>
+                        {isNewlyAssigned(task) && (
+                          <span className="px-2 py-1 text-xs font-semibold bg-[#4ECDC4] text-white rounded-full animate-pulse">
+                            NEW
+                          </span>
+                        )}
                       </div>
                       <div className="text-sm text-gray-500">
                         {`${task.category || 'General'} - ${task.type || 'Training'} - Due: ${task.dueDate || 'N/A'}`}
@@ -340,6 +376,8 @@ const VirtualizedTasksList: React.FC<VirtualizedTasksListProps> = React.memo(
         handleEdit,
         handleCancel,
         handleSave,
+        getTaskCardClass,
+        isNewlyAssigned,
       ]
     );
 

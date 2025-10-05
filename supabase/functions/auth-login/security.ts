@@ -24,7 +24,7 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
 
     // Store in memory (in production, save to database)
     securityEvents.push(event);
-    
+
     // Keep only recent events in memory
     if (securityEvents.length > MAX_EVENTS_IN_MEMORY) {
       securityEvents.splice(0, securityEvents.length - MAX_EVENTS_IN_MEMORY);
@@ -41,7 +41,6 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
     // 2. Send alerts for high/critical severity events
     // 3. Integrate with monitoring systems
     // 4. Generate security reports
-
   } catch (error) {
     console.error('Failed to log security event:', error);
   }
@@ -53,12 +52,12 @@ export async function detectSuspiciousActivity(
   clientId: string
 ): Promise<SuspiciousActivityResult> {
   const now = Date.now();
-  const oneHourAgo = now - (60 * 60 * 1000);
-  const oneDayAgo = now - (24 * 60 * 60 * 1000);
+  const oneHourAgo = now - 60 * 60 * 1000;
+  const oneDayAgo = now - 24 * 60 * 60 * 1000;
 
   // Get recent security events
   const recentEvents = securityEvents.filter(
-    event => new Date(event.details.timestamp).getTime() > oneHourAgo
+    (event) => new Date(event.details.timestamp).getTime() > oneHourAgo
   );
 
   const suspiciousPatterns: string[] = [];
@@ -66,10 +65,10 @@ export async function detectSuspiciousActivity(
 
   // Pattern 1: Multiple failed attempts from same IP
   const failedAttemptsFromIP = recentEvents.filter(
-    event => event.type === 'login_failure' && 
-             event.details.ipAddress === ipAddress
+    (event) =>
+      event.type === 'login_failure' && event.details.ipAddress === ipAddress
   );
-  
+
   if (failedAttemptsFromIP.length >= 10) {
     suspiciousPatterns.push('Multiple failed attempts from same IP');
     maxSeverity = 'high';
@@ -78,10 +77,10 @@ export async function detectSuspiciousActivity(
   // Pattern 2: Multiple different emails from same IP
   const uniqueEmailsFromIP = new Set(
     recentEvents
-      .filter(event => event.details.ipAddress === ipAddress)
-      .map(event => event.details.email)
+      .filter((event) => event.details.ipAddress === ipAddress)
+      .map((event) => event.details.email)
   );
-  
+
   if (uniqueEmailsFromIP.size >= 5) {
     suspiciousPatterns.push('Multiple different emails from same IP');
     maxSeverity = 'critical';
@@ -89,11 +88,12 @@ export async function detectSuspiciousActivity(
 
   // Pattern 3: Rapid successive attempts
   const rapidAttempts = recentEvents.filter(
-    event => event.type === 'login_failure' && 
-             event.details.email === email &&
-             new Date(event.details.timestamp).getTime() > now - (5 * 60 * 1000) // Last 5 minutes
+    (event) =>
+      event.type === 'login_failure' &&
+      event.details.email === email &&
+      new Date(event.details.timestamp).getTime() > now - 5 * 60 * 1000 // Last 5 minutes
   );
-  
+
   if (rapidAttempts.length >= 3) {
     suspiciousPatterns.push('Rapid successive login attempts');
     maxSeverity = 'high';
@@ -101,10 +101,10 @@ export async function detectSuspiciousActivity(
 
   // Pattern 4: Unusual user agent patterns
   const userAgents = recentEvents
-    .filter(event => event.details.ipAddress === ipAddress)
-    .map(event => event.details.userAgent)
+    .filter((event) => event.details.ipAddress === ipAddress)
+    .map((event) => event.details.userAgent)
     .filter(Boolean);
-  
+
   const uniqueUserAgents = new Set(userAgents);
   if (uniqueUserAgents.size >= 3) {
     suspiciousPatterns.push('Multiple different user agents from same IP');
@@ -113,7 +113,7 @@ export async function detectSuspiciousActivity(
 
   // Pattern 5: Geographic anomalies (if IP geolocation is available)
   // This would require IP geolocation service integration
-  
+
   // Pattern 6: Known malicious IP ranges
   if (isKnownMaliciousIP(ipAddress)) {
     suspiciousPatterns.push('Known malicious IP address');
@@ -142,35 +142,41 @@ function isKnownMaliciousIP(ipAddress: string): boolean {
     // '192.168.1.100',
     // '10.0.0.50',
   ];
-  
+
   return maliciousIPs.includes(ipAddress);
 }
 
-function detectBotBehavior(events: SecurityEvent[], ipAddress: string): string[] {
+function detectBotBehavior(
+  events: SecurityEvent[],
+  ipAddress: string
+): string[] {
   const patterns: string[] = [];
-  
+
   // Check for very regular timing patterns (bot-like)
-  const ipEvents = events.filter(event => event.details.ipAddress === ipAddress);
-  
+  const ipEvents = events.filter(
+    (event) => event.details.ipAddress === ipAddress
+  );
+
   if (ipEvents.length >= 5) {
     const timestamps = ipEvents
-      .map(event => new Date(event.details.timestamp).getTime())
+      .map((event) => new Date(event.details.timestamp).getTime())
       .sort((a, b) => a - b);
-    
+
     // Check for very regular intervals (within 1 second tolerance)
     let regularIntervals = 0;
     for (let i = 1; i < timestamps.length; i++) {
       const interval = timestamps[i] - timestamps[i - 1];
-      if (interval >= 29000 && interval <= 31000) { // ~30 seconds
+      if (interval >= 29000 && interval <= 31000) {
+        // ~30 seconds
         regularIntervals++;
       }
     }
-    
+
     if (regularIntervals >= 3) {
       patterns.push('Regular timing patterns detected (bot-like behavior)');
     }
   }
-  
+
   return patterns;
 }
 
@@ -180,22 +186,27 @@ export async function getSecurityMetrics(): Promise<{
   recentThreats: string[];
 }> {
   const now = Date.now();
-  const oneHourAgo = now - (60 * 60 * 1000);
-  
+  const oneHourAgo = now - 60 * 60 * 1000;
+
   const recentEvents = securityEvents.filter(
-    event => new Date(event.details.timestamp).getTime() > oneHourAgo
+    (event) => new Date(event.details.timestamp).getTime() > oneHourAgo
   );
-  
-  const eventsBySeverity = recentEvents.reduce((acc, event) => {
-    acc[event.severity] = (acc[event.severity] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
+
+  const eventsBySeverity = recentEvents.reduce(
+    (acc, event) => {
+      acc[event.severity] = (acc[event.severity] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
   const recentThreats = recentEvents
-    .filter(event => event.severity === 'high' || event.severity === 'critical')
-    .map(event => `${event.type} (${event.severity})`)
+    .filter(
+      (event) => event.severity === 'high' || event.severity === 'critical'
+    )
+    .map((event) => `${event.type} (${event.severity})`)
     .slice(0, 10); // Last 10 threats
-  
+
   return {
     totalEvents: securityEvents.length,
     eventsBySeverity,

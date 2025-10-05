@@ -73,10 +73,7 @@ export class UnifiedAIService {
   /**
    * Get personalized learning recommendations
    */
-  static async getLearningRecommendations(
-    facilityId: string,
-    userId: string
-  ) {
+  static async getLearningRecommendations(facilityId: string, userId: string) {
     const learningAI = this.getLearningAI(facilityId);
     return learningAI.getPersonalizedRecommendations(userId);
   }
@@ -84,10 +81,7 @@ export class UnifiedAIService {
   /**
    * Analyze knowledge gaps
    */
-  static async analyzeKnowledgeGaps(
-    facilityId: string,
-    userId: string
-  ) {
+  static async analyzeKnowledgeGaps(facilityId: string, userId: string) {
     const learningAI = this.getLearningAI(facilityId);
     return learningAI.analyzeKnowledgeGaps(userId);
   }
@@ -95,10 +89,7 @@ export class UnifiedAIService {
   /**
    * Optimize learning pathways
    */
-  static async optimizeLearningPathways(
-    facilityId: string,
-    userId: string
-  ) {
+  static async optimizeLearningPathways(facilityId: string, userId: string) {
     const learningAI = this.getLearningAI(facilityId);
     return learningAI.optimizeLearningPathways(userId);
   }
@@ -120,10 +111,7 @@ export class UnifiedAIService {
   /**
    * Analyze barcode data
    */
-  static async analyzeBarcode(
-    facilityId: string,
-    barcodeData: string
-  ) {
+  static async analyzeBarcode(facilityId: string, barcodeData: string) {
     const inventoryAI = this.getInventoryAI(facilityId);
     return inventoryAI.analyzeBarcode(barcodeData);
   }
@@ -131,10 +119,7 @@ export class UnifiedAIService {
   /**
    * Perform image recognition
    */
-  static async performImageRecognition(
-    facilityId: string,
-    imageData: string
-  ) {
+  static async performImageRecognition(facilityId: string, imageData: string) {
     const inventoryAI = this.getInventoryAI(facilityId);
     return inventoryAI.performImageRecognition(imageData);
   }
@@ -153,9 +138,7 @@ export class UnifiedAIService {
   /**
    * Optimize inventory costs
    */
-  static async optimizeInventoryCosts(
-    facilityId: string
-  ) {
+  static async optimizeInventoryCosts(facilityId: string) {
     const inventoryAI = this.getInventoryAI(facilityId);
     return inventoryAI.optimizeInventoryCosts();
   }
@@ -213,7 +196,9 @@ export class UnifiedAIService {
   /**
    * Get Environmental AI service instance
    */
-  private static getEnvironmentalAI(facilityId: string): EnvironmentalAIService {
+  private static getEnvironmentalAI(
+    facilityId: string
+  ): EnvironmentalAIService {
     if (!this.environmentalAIInstance) {
       this.environmentalAIInstance = new EnvironmentalAIService(facilityId);
     }
@@ -234,9 +219,7 @@ export class UnifiedAIService {
   /**
    * Generate environmental insights
    */
-  static async generateEnvironmentalInsights(
-    facilityId: string
-  ) {
+  static async generateEnvironmentalInsights(facilityId: string) {
     const environmentalAI = this.getEnvironmentalAI(facilityId);
     return environmentalAI.generateInsights();
   }
@@ -262,9 +245,14 @@ export class UnifiedAIService {
       const environmentalAI = this.getEnvironmentalAI(facilityId);
       await environmentalAI.initialize();
 
-      console.log(`[UnifiedAIService] All AI services initialized for facility: ${facilityId}`);
+      console.log(
+        `[UnifiedAIService] All AI services initialized for facility: ${facilityId}`
+      );
     } catch (error) {
-      console.error('[UnifiedAIService] Failed to initialize AI services:', error);
+      console.error(
+        '[UnifiedAIService] Failed to initialize AI services:',
+        error
+      );
       throw error;
     }
   }

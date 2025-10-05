@@ -33,9 +33,7 @@ const AnalyticsConfiguration: React.FC<AnalyticsConfigurationProps> = ({
           <ToggleSwitch
             id="dataCollection"
             checked={settings.analytics.dataCollection}
-            onChange={(checked) =>
-              updateAnalytics('dataCollection', checked)
-            }
+            onChange={(checked) => updateAnalytics('dataCollection', checked)}
             label={UI_TEXT.TOGGLE_LABELS.DATA_COLLECTION}
             description={UI_TEXT.DESCRIPTIONS.DATA_COLLECTION}
             disabled={!settings.aiEnabled}
@@ -43,9 +41,7 @@ const AnalyticsConfiguration: React.FC<AnalyticsConfigurationProps> = ({
           <ToggleSwitch
             id="realTimeUpdates"
             checked={settings.analytics.realTimeUpdates}
-            onChange={(checked) =>
-              updateAnalytics('realTimeUpdates', checked)
-            }
+            onChange={(checked) => updateAnalytics('realTimeUpdates', checked)}
             label={UI_TEXT.TOGGLE_LABELS.REAL_TIME_UPDATES}
             description={UI_TEXT.DESCRIPTIONS.REAL_TIME_UPDATES}
             disabled={!settings.aiEnabled}

@@ -21,9 +21,7 @@ const InterfaceHelp: React.FC<InterfaceHelpProps> = ({
       <ToggleSwitch
         id="accessibility"
         checked={settings.userExperience.accessibility}
-        onChange={(checked) =>
-          updateUserExperience('accessibility', checked)
-        }
+        onChange={(checked) => updateUserExperience('accessibility', checked)}
         label={UI_TEXT.TOGGLE_LABELS.ACCESSIBILITY_FEATURES}
         description={UI_TEXT.DESCRIPTIONS.ACCESSIBILITY_FEATURES}
         disabled={!settings.aiEnabled}
@@ -31,9 +29,7 @@ const InterfaceHelp: React.FC<InterfaceHelpProps> = ({
       <ToggleSwitch
         id="helpSystem"
         checked={settings.userExperience.helpSystem}
-        onChange={(checked) =>
-          updateUserExperience('helpSystem', checked)
-        }
+        onChange={(checked) => updateUserExperience('helpSystem', checked)}
         label={UI_TEXT.TOGGLE_LABELS.SMART_HELP_SYSTEM}
         description={UI_TEXT.DESCRIPTIONS.SMART_HELP_SYSTEM}
         disabled={!settings.aiEnabled}

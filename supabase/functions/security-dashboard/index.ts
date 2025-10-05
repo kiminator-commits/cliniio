@@ -6,14 +6,20 @@ import { getThreatIntelligenceService } from '../auth-login/threatIntelligence.t
 import { getDistributedRateLimiter } from '../auth-login/redisCluster.ts';
 
 interface DashboardRequest {
-  action: 'get_metrics' | 'get_alerts' | 'get_threat_stats' | 'get_cluster_health' | 'acknowledge_alert' | 'resolve_alert';
+  action:
+    | 'get_metrics'
+    | 'get_alerts'
+    | 'get_threat_stats'
+    | 'get_cluster_health'
+    | 'acknowledge_alert'
+    | 'resolve_alert';
   alertId?: string;
   timeRange?: number; // minutes
 }
 
 serve(async (req) => {
   const origin = req.headers.get('origin');
-  
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     const corsHeaders = getCorsHeaders(origin);
@@ -111,18 +117,14 @@ serve(async (req) => {
         throw new Error(`Unknown action: ${action}`);
     }
 
-    return new Response(
-      JSON.stringify(response),
-      {
-        status: 200,
-        headers: {
-          ...getCorsHeaders(origin),
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
-      }
-    );
-
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        ...getCorsHeaders(origin),
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    });
   } catch (error) {
     console.error('Security dashboard error:', error);
 

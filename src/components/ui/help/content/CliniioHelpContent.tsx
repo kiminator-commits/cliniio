@@ -123,27 +123,34 @@ export const CliniioHelpContent: React.FC<CliniioHelpContentProps> = ({
         ) : currentContext === 'sterilization' ? (
           <div className="space-y-4">
             <h4 className="font-semibold text-gray-800 text-lg">
-              Sterilization Help
+              Sterilization Standards & Protocols
             </h4>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <h5 className="font-medium text-blue-800 mb-2">Quick Actions</h5>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Start new cycle</li>
-                <li>• Monitor active cycles</li>
-                <li>• View history</li>
-                <li>• Manage BI tests</li>
-              </ul>
-            </div>
+            <div className="space-y-3">
+              <button
+                onClick={() => onSetHelpType('bi-testing')}
+                className="bg-blue-50 border border-blue-200 rounded-lg p-3 w-full text-left hover:bg-blue-100 transition-colors"
+              >
+                <h5 className="font-medium text-blue-800">🧪 BI Testing</h5>
+              </button>
 
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <h5 className="font-medium text-green-800 mb-2">Common Tasks</h5>
-              <ul className="text-sm text-green-700 space-y-1">
-                <li>• Load autoclave</li>
-                <li>• Set parameters</li>
-                <li>• Monitor progress</li>
-                <li>• Document results</li>
-              </ul>
+              <button
+                onClick={() => onSetHelpType('sterilization-workflow')}
+                className="bg-green-50 border border-green-200 rounded-lg p-3 w-full text-left hover:bg-green-100 transition-colors"
+              >
+                <h5 className="font-medium text-green-800">
+                  ✂️ Sterilization Workflow
+                </h5>
+              </button>
+
+              <button
+                onClick={() => onSetHelpType('reporting-compliance')}
+                className="bg-purple-50 border border-purple-200 rounded-lg p-3 w-full text-left hover:bg-purple-100 transition-colors"
+              >
+                <h5 className="font-medium text-purple-800">
+                  📊 Reporting and Compliance
+                </h5>
+              </button>
             </div>
           </div>
         ) : (

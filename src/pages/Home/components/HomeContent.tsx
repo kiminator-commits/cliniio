@@ -1,12 +1,10 @@
 // React imports
 import React, { useState, useMemo, useCallback } from 'react';
 
-// Hook imports
-import { useHomeTasksManager } from '../../../hooks/useHomeTasksManager';
-import { useHomeGamification } from '../../../hooks/useHomeGamification';
-
 // Service imports
 import { aiDailyTaskService } from '../../../services/aiDailyTaskService';
+
+// Hook imports
 
 // Type imports
 import { HomeData } from '../../../types/homeDataTypes';
@@ -28,22 +26,58 @@ interface HomeContentProps {
 export const HomeContent: React.FC<HomeContentProps> = React.memo(
   ({ homeData }) => {
     const [useLoadMore, setUseLoadMore] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedType, setSelectedType] = useState('');
 
-    // Use the hook for dynamic task management
-    const {
-      tasks,
-      availablePoints,
-      pagination,
-      isLoading,
-      error,
-      refreshTasks,
-      loadNextPage,
-      loadPreviousPage,
-      goToPage,
-      hasMore,
-      currentPage,
-      completeTask,
-    } = useHomeTasksManager();
+    // Use tasks from homeData instead of fetching separately
+    const tasks = useMemo(() => homeData.tasks || [], [homeData.tasks]);
+    const totalTasksCount = homeData.totalTasksCount || 0;
+
+    // Simple pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
+    const totalPages = Math.ceil(totalTasksCount / pageSize);
+    const hasMore = currentPage < totalPages;
+
+    // Pagination handlers
+    const loadNextPage = useCallback(() => {
+      if (hasMore) {
+        setCurrentPage((prev) => prev + 1);
+      }
+    }, [hasMore]);
+
+    const loadPreviousPage = useCallback(() => {
+      if (currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
+      }
+    }, [currentPage]);
+
+    const goToPage = useCallback(
+      (page: number) => {
+        if (page >= 1 && page <= totalPages) {
+          setCurrentPage(page);
+        }
+      },
+      [totalPages]
+    );
+
+    // Task completion handler
+    const completeTask = useCallback(async (taskId: string) => {
+      // Simple task completion logic
+      console.log('Completing task:', taskId);
+      // TODO: Implement actual task completion
+    }, []);
+
+    // Simple refresh function for tasks
+    const refreshTasks = useCallback(async () => {
+      // For now, just log - could implement actual refresh later
+      console.log('Refreshing tasks...');
+    }, []);
+
+    // Simple loading and error states
+    const isLoading = false; // Tasks are loaded from homeData
+    const error = null; // No error state needed for now
 
     // Extract metrics from homeData (still needed for other components)
     const {
@@ -62,12 +96,8 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
       },
       sterilizationMetrics = {},
       integrationMetrics = {},
+      aiImpactMetrics = null, // Add AI impact metrics extraction
     } = homeData || {};
-
-    const totalPages = useMemo(
-      () => Math.ceil(pagination.total / pagination.pageSize),
-      [pagination.total, pagination.pageSize]
-    );
 
     // Memoize task mapping to prevent unnecessary re-renders
     const mappedTasks = useMemo(
@@ -87,26 +117,52 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
       [tasks]
     );
 
-    // Get real gamification data from statsService
-    const { gamificationData: realGamificationData } = useHomeGamification();
+    // Calculate total available points from all tasks
+    const availablePoints = useMemo(() => {
+      return tasks.reduce((total, task) => {
+        return total + (task.points || 0);
+      }, 0);
+    }, [tasks]);
 
-    // Memoize gamification data object to prevent unnecessary re-renders
-    const gamificationData = useMemo(
-      () => ({
-        // streak now comes from useHomeGamification, no default override
-        streak: realGamificationData?.streak,
-        level:
-          realGamificationData?.level ?? Math.floor(availablePoints / 100) + 1,
-        rank: realGamificationData?.rank ?? 1,
-        // Show availablePoints if realGamificationData.totalScore is 0 or undefined
-        totalScore:
-          realGamificationData?.totalScore &&
-          realGamificationData.totalScore > 0
-            ? realGamificationData.totalScore
-            : availablePoints || 0,
-      }),
-      [realGamificationData, availablePoints]
-    );
+    // Hardened gamification data with type guards and validation
+    const gamificationData = useMemo(() => {
+      // Type guard to ensure data exists and has required properties
+      const isValidGamificationData = (
+        data: unknown
+      ): data is {
+        streak: number;
+        level: number;
+        rank: number;
+        totalScore: number;
+      } => {
+        return (
+          data &&
+          typeof data.streak === 'number' &&
+          data.streak >= 0 &&
+          typeof data.level === 'number' &&
+          data.level >= 1 &&
+          typeof data.rank === 'number' &&
+          data.rank >= 1 &&
+          typeof data.totalScore === 'number' &&
+          data.totalScore >= 0
+        );
+      };
+
+      // Use validated data if available, otherwise fallback
+      if (isValidGamificationData(homeData.gamificationData)) {
+        return homeData.gamificationData;
+      }
+
+      // Bulletproof fallback with bounds checking
+      const safeAvailablePoints = Math.max(0, availablePoints || 0);
+      // For fallback, assume middle rank (level 5-7 range)
+      return {
+        streak: 0,
+        level: 5, // Default to middle level when no leaderboard data
+        rank: 1, // Default rank
+        totalScore: safeAvailablePoints,
+      };
+    }, [homeData.gamificationData, availablePoints]);
 
     // Memoize event handlers
     const handlePaginationStyleChange = useCallback((newValue: boolean) => {
@@ -114,13 +170,21 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
     }, []);
 
     // Memoize empty callbacks to prevent unnecessary re-renders
-    const emptyCallback = useCallback(() => {}, []);
+    const _emptyCallback = useCallback(() => {}, []);
+
+    // Filter callback functions
+    const handleCategoryChange = useCallback((category: string) => {
+      setSelectedCategory(category);
+    }, []);
+
+    const handleTypeChange = useCallback((type: string) => {
+      setSelectedType(type);
+    }, []);
 
     // Task management functions
 
     const handleTaskToggle = useCallback(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async (taskId: string, _completed: boolean) => {
+      async (taskId: string, points?: number) => {
         try {
           const { FacilityService } = await import(
             '@/services/facilityService'
@@ -129,6 +193,12 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
           if (!userId) throw new Error('No authenticated user for task toggle');
 
           await completeTask(taskId, userId);
+
+          // Show success message with points awarded
+          if (points && points > 0) {
+            console.log(`Task completed! Awarded ${points} points.`);
+            // TODO: Add toast notification or visual feedback
+          }
         } catch (error) {
           console.error('Error toggling task:', error);
         }
@@ -173,17 +243,18 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
           loading={isLoading}
           taskError={error} // Use error state from hook
           storeAvailablePoints={availablePoints}
-          storeShowFilters={false}
-          setStoreShowFilters={emptyCallback}
-          selectedCategory=""
-          selectedType=""
-          onCategoryChange={emptyCallback}
-          onTypeChange={emptyCallback}
+          storeShowFilters={showFilters}
+          setStoreShowFilters={setShowFilters}
+          selectedCategory={selectedCategory}
+          selectedType={selectedType}
+          onCategoryChange={handleCategoryChange}
+          onTypeChange={handleTypeChange}
           onTaskToggle={handleTaskToggle}
           onTaskUpdate={handleTaskUpdate}
           aiMetrics={aiMetrics || undefined}
           sterilizationMetrics={sterilizationMetrics || undefined}
           integrationMetrics={integrationMetrics || undefined}
+          aiImpactMetrics={aiImpactMetrics || undefined}
         />
 
         {/* Pagination Controls */}

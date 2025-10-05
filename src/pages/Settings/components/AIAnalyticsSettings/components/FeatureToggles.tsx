@@ -9,9 +9,18 @@ import FormGroup from './FormGroup';
 interface FeatureTogglesProps {
   settings: UnifiedAISettings;
   updateMasterAI: (value: boolean) => void;
-  updateComputerVision: (key: keyof UnifiedAISettings['computerVision'], value: boolean) => void;
-  updatePredictiveAnalytics: (key: keyof UnifiedAISettings['predictiveAnalytics'], value: boolean) => void;
-  updateSmartWorkflow: (key: keyof UnifiedAISettings['smartWorkflow'], value: boolean) => void;
+  updateComputerVision: (
+    key: keyof UnifiedAISettings['computerVision'],
+    value: boolean
+  ) => void;
+  updatePredictiveAnalytics: (
+    key: keyof UnifiedAISettings['predictiveAnalytics'],
+    value: boolean
+  ) => void;
+  updateSmartWorkflow: (
+    key: keyof UnifiedAISettings['smartWorkflow'],
+    value: boolean
+  ) => void;
 }
 
 const FeatureToggles: React.FC<FeatureTogglesProps> = ({
@@ -48,7 +57,9 @@ const FeatureToggles: React.FC<FeatureTogglesProps> = ({
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-4">
             <Icon path={mdiLightbulbOn} size={1} className="text-[#4ECDC4]" />
-            <h5 className="text-lg font-medium text-gray-800">{UI_TEXT.SECTIONS.AI_FEATURES}</h5>
+            <h5 className="text-lg font-medium text-gray-800">
+              {UI_TEXT.SECTIONS.AI_FEATURES}
+            </h5>
           </div>
 
           <div className="space-y-6">
@@ -126,7 +137,9 @@ const FeatureToggles: React.FC<FeatureTogglesProps> = ({
                   updateSmartWorkflow('intelligentWorkflowSelection', checked)
                 }
                 label={UI_TEXT.TOGGLE_LABELS.INTELLIGENT_WORKFLOW_SELECTION}
-                description={UI_TEXT.DESCRIPTIONS.INTELLIGENT_WORKFLOW_SELECTION}
+                description={
+                  UI_TEXT.DESCRIPTIONS.INTELLIGENT_WORKFLOW_SELECTION
+                }
                 disabled={!settings.aiEnabled}
               />
               <ToggleSwitch

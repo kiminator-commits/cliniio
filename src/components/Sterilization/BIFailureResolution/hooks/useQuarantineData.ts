@@ -10,6 +10,8 @@ export interface QuarantineData {
   affectedTools: Tool[];
   totalToolsAffected: number;
   totalCyclesAffected: number;
+  totalSterilizationEvents: number; // Total sterilization events (including tool repeats)
+  toolsUsedMultipleTimes: number; // Tools sterilized 2+ times in risk window
   uniqueOperators: string[];
   dateRange: { start: Date; end: Date } | null;
   toolsByCategory: Record<string, number>;
@@ -44,18 +46,27 @@ export const useQuarantineData = (): QuarantineData => {
         )
       : allCycles;
 
-    // Get all unique tool IDs from affected cycles
-    const affectedToolIds = [
-      ...new Set(
-        affectedCycles.flatMap((cycle: SterilizationCycle) => cycle.tools)
-      ),
-    ];
+    // Get ALL tool instances from affected cycles (not unique - track multiple uses)
+    const allToolInstances = affectedCycles.flatMap(
+      (cycle: SterilizationCycle) => cycle.tools.map((toolId) => toolId)
+    );
 
-    // Get detailed tool information
-    const affectedTools = affectedToolIds.map((toolId) => {
+    // Count how many times each tool appears in the risk window
+    const toolFrequencyMap = new Map<string, number>();
+    allToolInstances.forEach((toolId) => {
+      toolFrequencyMap.set(toolId, (toolFrequencyMap.get(toolId) || 0) + 1);
+    });
+
+    // Get unique tool IDs with their frequency data
+    const uniqueAffectedToolIds = Array.from(toolFrequencyMap.keys());
+
+    // Get detailed tool information with frequency data
+    const affectedTools = uniqueAffectedToolIds.map((toolId) => {
       const availableTool = availableTools.find((t: Tool) => t.id === toolId);
-      return (
-        availableTool || {
+      const sterilizationFrequency = toolFrequencyMap.get(toolId) || 0;
+
+      return {
+        ...(availableTool || {
           id: toolId,
           name: `Tool ${toolId}`,
           barcode: toolId,
@@ -64,13 +75,20 @@ export const useQuarantineData = (): QuarantineData => {
           cycleCount: 0,
           lastSterilized: undefined,
           status: 'available' as const,
-        }
-      );
+        }),
+        // Add sterilization frequency within risk window
+        riskWindowCycles: sterilizationFrequency,
+      };
     });
 
     // Calculate statistics
     const totalToolsAffected = affectedTools.length;
     const totalCyclesAffected = affectedCycles.length;
+    const totalSterilizationEvents = allToolInstances.length; // Total sterilization events (including repeats)
+    const toolsUsedMultipleTimes = affectedTools.filter(
+      (tool) => tool.riskWindowCycles > 1
+    ).length;
+
     const uniqueOperators = [
       ...new Set(
         affectedCycles.map((cycle: SterilizationCycle) => cycle.operator)
@@ -112,6 +130,8 @@ export const useQuarantineData = (): QuarantineData => {
       affectedTools,
       totalToolsAffected,
       totalCyclesAffected,
+      totalSterilizationEvents,
+      toolsUsedMultipleTimes,
       uniqueOperators,
       dateRange,
       toolsByCategory,

@@ -1,7 +1,7 @@
 /**
  * @deprecated This service is deprecated in favor of authMigrationService
  * Use authMigrationService from '@/services/authMigrationService' instead
- * 
+ *
  * Migration guide and utilities for transitioning from old to new authentication
  */
 import { secureAuthService } from './secureAuthenticationService';
@@ -9,7 +9,7 @@ import { authMigrationService } from './authMigrationService';
 
 /**
  * AUTHENTICATION MIGRATION GUIDE
- * 
+ *
  * This file provides utilities and guidance for migrating from the old
  * client-side Supabase authentication to the new secure server-side system.
  */
@@ -31,12 +31,17 @@ class LegacyAuthService {
   }
 
   // Legacy login method - redirects to new system
-  async login(email: string, password: string): Promise<{
+  async login(
+    email: string,
+    password: string
+  ): Promise<{
     token: string;
     expiry: string;
   }> {
     if (!this.isMigrated) {
-      throw new Error('Authentication system migration required. Please refresh the page.');
+      throw new Error(
+        'Authentication system migration required. Please refresh the page.'
+      );
     }
 
     const result = await secureAuthService.authenticate({
@@ -47,7 +52,9 @@ class LegacyAuthService {
     if (result.success && result.data) {
       return {
         token: result.data.accessToken,
-        expiry: new Date(Date.now() + result.data.expiresIn * 1000).toISOString(),
+        expiry: new Date(
+          Date.now() + result.data.expiresIn * 1000
+        ).toISOString(),
       };
     } else {
       throw new Error(result.error || 'Login failed');
@@ -61,7 +68,7 @@ class LegacyAuthService {
     }
 
     const currentToken = secureAuthService.getAccessToken();
-    return currentToken === token && await secureAuthService.validateToken();
+    return currentToken === token && (await secureAuthService.validateToken());
   }
 }
 
@@ -80,7 +87,7 @@ export class AuthMigrationUtilities {
         'sb-access-token',
         'sb-refresh-token',
         'auth_token',
-      ].some(key => localStorage.getItem(key) !== null);
+      ].some((key) => localStorage.getItem(key) !== null);
 
       // Check if new system is initialized
       const isNewSystemReady = authMigrationService.isMigrationComplete();
@@ -150,7 +157,7 @@ export class AuthMigrationUtilities {
         'supabase.auth.refresh_token',
       ];
 
-      oldKeys.forEach(key => {
+      oldKeys.forEach((key) => {
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
       });
@@ -175,7 +182,7 @@ export class AuthMigrationUtilities {
     try {
       const isAuthenticated = await secureAuthService.isAuthenticated();
       const user = await secureAuthService.getCurrentUser();
-      
+
       return isAuthenticated && user !== null;
     } catch (error) {
       console.error('New system validation failed:', error);
@@ -249,18 +256,18 @@ export const SERVICE_REPLACEMENTS = {
   'supabase.auth.signOut': 'secureAuthService.logout',
   'supabase.auth.getUser': 'secureAuthService.getCurrentUser',
   'supabase.auth.refreshSession': 'secureAuthService.refreshToken',
-  'useLoginService': 'useSecureAuth',
-  'loginService': 'secureAuthService',
-  'authService': 'secureAuthService',
+  useLoginService: 'useSecureAuth',
+  loginService: 'secureAuthService',
+  authService: 'secureAuthService',
 };
 
 // Error code mappings for backward compatibility
 export const ERROR_CODE_MAPPINGS = {
-  'invalid_credentials': 'Invalid email or password',
-  'rate_limit_exceeded': 'Too many login attempts. Please try again later.',
-  'csrf_token_invalid': 'Security token invalid. Please refresh the page.',
-  'threat_detected': 'Security threat detected. Access denied.',
-  'account_locked': 'Account temporarily locked due to security concerns.',
+  invalid_credentials: 'Invalid email or password',
+  rate_limit_exceeded: 'Too many login attempts. Please try again later.',
+  csrf_token_invalid: 'Security token invalid. Please refresh the page.',
+  threat_detected: 'Security threat detected. Access denied.',
+  account_locked: 'Account temporarily locked due to security concerns.',
 };
 
 // Migration status constants
@@ -272,7 +279,8 @@ export const MIGRATION_STATUS = {
   ROLLBACK_REQUIRED: 'rollback_required',
 } as const;
 
-export type MigrationStatus = typeof MIGRATION_STATUS[keyof typeof MIGRATION_STATUS];
+export type MigrationStatus =
+  (typeof MIGRATION_STATUS)[keyof typeof MIGRATION_STATUS];
 
 // Export everything for easy migration
 export {

@@ -103,7 +103,7 @@ export class AIMetricsService {
       today.getMonth(),
       today.getDate()
     );
-    const startOfWeek = new Date(
+    const _startOfWeek = new Date(
       startOfDay.getTime() - startOfDay.getDay() * 24 * 60 * 60 * 1000
     );
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -132,13 +132,17 @@ export class AIMetricsService {
       (aiChallenges || []) as unknown as AIChallenge[]
     );
 
-    // Calculate time savings
-    const timeSavings = await this.calculateTimeSavings(
-      (aiTasks || []) as unknown as AITask[],
-      startOfDay,
-      startOfWeek,
-      startOfMonth
-    );
+    // Use aiTimeSavingsService for accurate AI time savings calculation
+    const { aiTimeSavingsService } = await import('./aiTimeSavingsService');
+    const aiTimeSavings = await aiTimeSavingsService.getAITimeSavings();
+
+    const timeSavings = {
+      daily: aiTimeSavings.daily_time_saved,
+      weekly: Math.round(aiTimeSavings.daily_time_saved * 7),
+      monthly: aiTimeSavings.monthly_time_saved,
+      total: aiTimeSavings.monthly_time_saved,
+      percentage: 0, // Could calculate this if we had baseline data
+    };
 
     // Calculate cost savings using the cost calculation service
     const { aiCostCalculationService } = await import(

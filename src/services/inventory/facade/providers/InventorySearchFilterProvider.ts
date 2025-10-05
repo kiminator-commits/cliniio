@@ -71,7 +71,9 @@ export class InventorySearchFilterProvider {
   /**
    * Get filtered items
    */
-  async getFilteredItems(filters: SearchFilters): Promise<{ data: LocalInventoryItem[]; error: string | null }> {
+  async getFilteredItems(
+    filters: SearchFilters
+  ): Promise<{ data: LocalInventoryItem[]; error: string | null }> {
     const result = await InventoryErrorHandler.handleOperation(
       'getFilteredItems',
       async () => {
@@ -124,14 +126,18 @@ export class InventorySearchFilterProvider {
         if (filters.dateRange) {
           filteredItems = filteredItems.filter((item) => {
             const itemDate = new Date(item.lastUpdated || item.createdAt);
-            return itemDate >= filters.dateRange!.start && itemDate <= filters.dateRange!.end;
+            return (
+              itemDate >= filters.dateRange!.start &&
+              itemDate <= filters.dateRange!.end
+            );
           });
         }
 
         if (filters.tags && filters.tags.length > 0) {
           filteredItems = filteredItems.filter((item) => {
-            const itemTags = (item.data as Record<string, unknown>)?.tags as string[] || [];
-            return filters.tags!.some(tag => itemTags.includes(tag));
+            const itemTags =
+              ((item.data as Record<string, unknown>)?.tags as string[]) || [];
+            return filters.tags!.some((tag) => itemTags.includes(tag));
           });
         }
 
@@ -203,14 +209,18 @@ export class InventorySearchFilterProvider {
         if (filters.dateRange) {
           filteredItems = filteredItems.filter((item) => {
             const itemDate = new Date(item.lastUpdated || item.createdAt);
-            return itemDate >= filters.dateRange!.start && itemDate <= filters.dateRange!.end;
+            return (
+              itemDate >= filters.dateRange!.start &&
+              itemDate <= filters.dateRange!.end
+            );
           });
         }
 
         if (filters.tags && filters.tags.length > 0) {
           filteredItems = filteredItems.filter((item) => {
-            const itemTags = (item.data as Record<string, unknown>)?.tags as string[] || [];
-            return filters.tags!.some(tag => itemTags.includes(tag));
+            const itemTags =
+              ((item.data as Record<string, unknown>)?.tags as string[]) || [];
+            return filters.tags!.some((tag) => itemTags.includes(tag));
           });
         }
 
@@ -223,14 +233,20 @@ export class InventorySearchFilterProvider {
 
         // Apply sorting
         if (options.sortBy) {
-          filteredItems = this.sortItems(filteredItems, options.sortBy, options.sortOrder || 'asc');
+          filteredItems = this.sortItems(
+            filteredItems,
+            options.sortBy,
+            options.sortOrder || 'asc'
+          );
         }
 
         // Apply pagination
         const total = filteredItems.length;
         if (options.limit || options.offset) {
           const start = options.offset || 0;
-          const end = options.limit ? start + options.limit : filteredItems.length;
+          const end = options.limit
+            ? start + options.limit
+            : filteredItems.length;
           filteredItems = filteredItems.slice(start, end);
         }
 
@@ -261,7 +277,8 @@ export class InventorySearchFilterProvider {
 
         // Apply normalized category filtering
         const filteredItems = allItems.filter((item) => {
-          const itemNormalizedCategory = InventoryCategoryProvider.normalizeCategory(item.category || '');
+          const itemNormalizedCategory =
+            InventoryCategoryProvider.normalizeCategory(item.category || '');
           return itemNormalizedCategory === normalizedCategory;
         });
 
@@ -275,13 +292,19 @@ export class InventorySearchFilterProvider {
         }
 
         if (options.sortBy) {
-          resultItems = this.sortItems(resultItems, options.sortBy, options.sortOrder || 'asc');
+          resultItems = this.sortItems(
+            resultItems,
+            options.sortBy,
+            options.sortOrder || 'asc'
+          );
         }
 
         const total = resultItems.length;
         if (options.limit || options.offset) {
           const start = options.offset || 0;
-          const end = options.limit ? start + options.limit : resultItems.length;
+          const end = options.limit
+            ? start + options.limit
+            : resultItems.length;
           resultItems = resultItems.slice(start, end);
         }
 
@@ -301,7 +324,10 @@ export class InventorySearchFilterProvider {
   /**
    * Get search suggestions
    */
-  async getSearchSuggestions(query: string, limit: number = 10): Promise<string[]> {
+  async getSearchSuggestions(
+    query: string,
+    limit: number = 10
+  ): Promise<string[]> {
     const result = await InventoryErrorHandler.handleOperation(
       'getSearchSuggestions',
       async () => {
@@ -321,23 +347,33 @@ export class InventorySearchFilterProvider {
           }
 
           // Add category suggestions
-          if (item.category && item.category.toLowerCase().includes(searchTerm)) {
+          if (
+            item.category &&
+            item.category.toLowerCase().includes(searchTerm)
+          ) {
             suggestions.add(item.category);
           }
 
           // Add location suggestions
-          if (item.location && item.location.toLowerCase().includes(searchTerm)) {
+          if (
+            item.location &&
+            item.location.toLowerCase().includes(searchTerm)
+          ) {
             suggestions.add(item.location);
           }
 
           // Add description suggestions
-          const description = (item.data as Record<string, unknown>)?.description as string;
+          const description = (item.data as Record<string, unknown>)
+            ?.description as string;
           if (description && description.toLowerCase().includes(searchTerm)) {
             // Extract relevant words from description
-            const words = description.split(/\s+/).filter(word => 
-              word.toLowerCase().includes(searchTerm) && word.length > 2
-            );
-            words.forEach(word => suggestions.add(word));
+            const words = description
+              .split(/\s+/)
+              .filter(
+                (word) =>
+                  word.toLowerCase().includes(searchTerm) && word.length > 2
+              );
+            words.forEach((word) => suggestions.add(word));
           }
         });
 
@@ -423,7 +459,10 @@ export class InventorySearchFilterProvider {
   } {
     const errors: string[] = [];
 
-    if (filters.minQuantity !== undefined && filters.maxQuantity !== undefined) {
+    if (
+      filters.minQuantity !== undefined &&
+      filters.maxQuantity !== undefined
+    ) {
       if (filters.minQuantity > filters.maxQuantity) {
         errors.push('Minimum quantity cannot be greater than maximum quantity');
       }
@@ -466,14 +505,24 @@ export class InventorySearchFilterProvider {
       errors.push('Offset must be non-negative');
     }
 
-    const validSortFields = ['name', 'category', 'location', 'quantity', 'lastUpdated'];
+    const validSortFields = [
+      'name',
+      'category',
+      'location',
+      'quantity',
+      'lastUpdated',
+    ];
     if (options.sortBy && !validSortFields.includes(options.sortBy)) {
-      errors.push(`Invalid sort field. Must be one of: ${validSortFields.join(', ')}`);
+      errors.push(
+        `Invalid sort field. Must be one of: ${validSortFields.join(', ')}`
+      );
     }
 
     const validSortOrders = ['asc', 'desc'];
     if (options.sortOrder && !validSortOrders.includes(options.sortOrder)) {
-      errors.push(`Invalid sort order. Must be one of: ${validSortOrders.join(', ')}`);
+      errors.push(
+        `Invalid sort order. Must be one of: ${validSortOrders.join(', ')}`
+      );
     }
 
     return {

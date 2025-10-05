@@ -5,11 +5,13 @@ This Edge Function provides server-side authentication with comprehensive securi
 ## Security Features
 
 ### 🔒 Server-Side Authentication
+
 - All authentication requests are processed server-side
 - No direct Supabase client usage from browser
 - Secure token generation and validation
 
 ### 🛡️ Rate Limiting
+
 - **Email-based**: 5 attempts per 15 minutes per email
 - **IP-based**: 10 attempts per 15 minutes per IP
 - **Progressive delays**: Exponential backoff on failures
@@ -17,18 +19,21 @@ This Edge Function provides server-side authentication with comprehensive securi
 - **Redis-based**: Distributed rate limiting (with in-memory fallback)
 
 ### 🔍 Threat Detection
+
 - **Suspicious activity detection**: Multiple patterns from same IP
 - **Bot detection**: Regular timing pattern analysis
 - **Geographic anomaly detection**: (Ready for IP geolocation integration)
 - **Known malicious IP blocking**: (Ready for threat intelligence feeds)
 
 ### 📊 Audit Logging
+
 - **Immutable audit trail**: All events logged server-side
 - **Security event correlation**: Failed login clustering
 - **Real-time monitoring**: Security dashboard integration
 - **Retention policies**: Automatic cleanup of old data
 
 ### ✅ Input Validation
+
 - **Email validation**: Format and length checks
 - **Password strength**: Complexity requirements
 - **CSRF protection**: Token validation
@@ -39,6 +44,7 @@ This Edge Function provides server-side authentication with comprehensive securi
 ### POST `/functions/v1/auth-login`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -49,6 +55,7 @@ This Edge Function provides server-side authentication with comprehensive securi
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -68,6 +75,7 @@ This Edge Function provides server-side authentication with comprehensive securi
 **Error Responses:**
 
 **Rate Limit Exceeded (429):**
+
 ```json
 {
   "success": false,
@@ -81,6 +89,7 @@ This Edge Function provides server-side authentication with comprehensive securi
 ```
 
 **Authentication Failed (401):**
+
 ```json
 {
   "success": false,
@@ -90,6 +99,7 @@ This Edge Function provides server-side authentication with comprehensive securi
 ```
 
 **Security Violation (403):**
+
 ```json
 {
   "success": false,
@@ -121,6 +131,7 @@ LOG_SECURITY_EVENTS=true
 ### CORS Configuration
 
 The function supports the following origins by default:
+
 - `http://localhost:3000`
 - `http://localhost:3001`
 - `https://localhost:3000`
@@ -153,6 +164,7 @@ Add production domains to `cors.ts` as needed.
 ### Replace Direct Supabase Calls
 
 **Before (Vulnerable):**
+
 ```typescript
 const { data, error } = await supabase.auth.signInWithPassword({
   email,
@@ -161,6 +173,7 @@ const { data, error } = await supabase.auth.signInWithPassword({
 ```
 
 **After (Secure):**
+
 ```typescript
 import { secureAuthService } from '@/services/secureAuthService';
 
@@ -205,6 +218,7 @@ const isValid = secureAuthService.validateCSRFToken(token, storedToken);
 ### 📈 Monitoring
 
 Monitor the following metrics:
+
 - Login success/failure rates
 - Rate limiting triggers
 - Security event patterns
@@ -251,6 +265,7 @@ curl -X POST "http://localhost:54321/functions/v1/auth-login" \
 ## Support
 
 For issues or questions:
+
 1. Check the security event logs
 2. Review rate limiting configuration
 3. Validate CORS settings

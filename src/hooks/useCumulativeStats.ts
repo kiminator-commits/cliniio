@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { statsService, CumulativeStats } from '../services/statsService';
 
 export const useCumulativeStats = () => {
@@ -17,7 +17,7 @@ export const useCumulativeStats = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -30,15 +30,15 @@ export const useCumulativeStats = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
-  const refreshStats = () => {
+  const refreshStats = useCallback(() => {
     fetchStats();
-  };
+  }, [fetchStats]);
 
   return {
     stats,

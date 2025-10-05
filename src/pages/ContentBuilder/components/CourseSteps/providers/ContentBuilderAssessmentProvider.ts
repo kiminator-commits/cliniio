@@ -60,7 +60,10 @@ export class ContentBuilderAssessmentProvider {
   /**
    * Update assessment properties
    */
-  updateAssessment(assessment: Assessment, updates: Partial<Omit<Assessment, 'id' | 'questions'>>): Assessment {
+  updateAssessment(
+    assessment: Assessment,
+    updates: Partial<Omit<Assessment, 'id' | 'questions'>>
+  ): Assessment {
     return {
       ...assessment,
       ...updates,
@@ -88,7 +91,10 @@ export class ContentBuilderAssessmentProvider {
   /**
    * Add question to assessment
    */
-  addQuestionToAssessment(assessment: Assessment, question?: Question): Assessment {
+  addQuestionToAssessment(
+    assessment: Assessment,
+    question?: Question
+  ): Assessment {
     const newQuestion = question || this.createQuestion();
     return {
       ...assessment,
@@ -99,17 +105,26 @@ export class ContentBuilderAssessmentProvider {
   /**
    * Remove question from assessment
    */
-  removeQuestionFromAssessment(assessment: Assessment, questionId: string): Assessment {
+  removeQuestionFromAssessment(
+    assessment: Assessment,
+    questionId: string
+  ): Assessment {
     return {
       ...assessment,
-      questions: assessment.questions.filter((question) => question.id !== questionId),
+      questions: assessment.questions.filter(
+        (question) => question.id !== questionId
+      ),
     };
   }
 
   /**
    * Reorder questions in assessment
    */
-  reorderQuestions(assessment: Assessment, fromIndex: number, toIndex: number): Assessment {
+  reorderQuestions(
+    assessment: Assessment,
+    fromIndex: number,
+    toIndex: number
+  ): Assessment {
     const questions = [...assessment.questions];
     const [movedQuestion] = questions.splice(fromIndex, 1);
     questions.splice(toIndex, 0, movedQuestion);
@@ -139,7 +154,9 @@ export class ContentBuilderAssessmentProvider {
    * Duplicate question
    */
   duplicateQuestion(assessment: Assessment, questionId: string): Assessment {
-    const questionToDuplicate = assessment.questions.find((question) => question.id === questionId);
+    const questionToDuplicate = assessment.questions.find(
+      (question) => question.id === questionId
+    );
     if (!questionToDuplicate) return assessment;
 
     const duplicatedQuestion = {
@@ -204,13 +221,17 @@ export class ContentBuilderAssessmentProvider {
     const validation = this.validateAssessment(assessment);
     const recommendations = this.getAssessmentRecommendations(assessment);
 
-    return JSON.stringify({
-      assessment,
-      statistics,
-      validation,
-      recommendations,
-      timestamp: new Date().toISOString(),
-    }, null, 2);
+    return JSON.stringify(
+      {
+        assessment,
+        statistics,
+        validation,
+        recommendations,
+        timestamp: new Date().toISOString(),
+      },
+      null,
+      2
+    );
   }
 
   /**
@@ -219,7 +240,7 @@ export class ContentBuilderAssessmentProvider {
   importAssessmentData(jsonData: string): ImportResult {
     try {
       const data = JSON.parse(jsonData);
-      
+
       if (!data.assessment) {
         return {
           success: false,
@@ -269,7 +290,10 @@ export class ContentBuilderAssessmentProvider {
   /**
    * Calculate assessment score
    */
-  calculateScore(assessment: Assessment, answers: Record<string, string>): AssessmentScore {
+  calculateScore(
+    assessment: Assessment,
+    answers: Record<string, string>
+  ): AssessmentScore {
     return this.scoring.calculateScore(assessment, answers);
   }
 }

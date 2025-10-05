@@ -73,8 +73,7 @@ export function getLowStockItems(
       name: ((item as { name?: string }).name as string) || '',
       current_stock: item.quantity || 0,
       reorder_point:
-        ((item.data as { min_quantity?: number })?.min_quantity as number) ||
-        0,
+        ((item.data as { min_quantity?: number })?.min_quantity as number) || 0,
     }));
 }
 
@@ -139,9 +138,7 @@ export function convertToCSV(data: ReportData): string {
     const csvRows = [headers.join(',')];
 
     for (const row of data) {
-      const values = headers.map((header) =>
-        JSON.stringify(row[header] || '')
-      );
+      const values = headers.map((header) => JSON.stringify(row[header] || ''));
       csvRows.push(values.join(','));
     }
 

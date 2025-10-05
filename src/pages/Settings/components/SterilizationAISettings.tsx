@@ -328,7 +328,6 @@ const SterilizationAISettings: React.FC = () => {
               </span>
             </label>
 
-
             <label
               htmlFor="failurePrediction"
               className="flex items-center gap-3"
@@ -358,7 +357,6 @@ const SterilizationAISettings: React.FC = () => {
                 happen
               </span>
             </label>
-
           </div>
         </div>
 
@@ -463,7 +461,6 @@ const SterilizationAISettings: React.FC = () => {
                 potential issues
               </span>
             </label>
-
           </div>
         </div>
 

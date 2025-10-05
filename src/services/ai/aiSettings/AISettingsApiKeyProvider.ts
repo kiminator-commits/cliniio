@@ -29,11 +29,17 @@ export class AISettingsApiKeyProvider {
       errors.push('Invalid OpenAI API key format');
     }
 
-    if (apiKeys.googleVisionApiKey && !this.isValidApiKey(apiKeys.googleVisionApiKey)) {
+    if (
+      apiKeys.googleVisionApiKey &&
+      !this.isValidApiKey(apiKeys.googleVisionApiKey)
+    ) {
       errors.push('Invalid Google Vision API key format');
     }
 
-    if (apiKeys.azureComputerVisionKey && !this.isValidApiKey(apiKeys.azureComputerVisionKey)) {
+    if (
+      apiKeys.azureComputerVisionKey &&
+      !this.isValidApiKey(apiKeys.azureComputerVisionKey)
+    ) {
       errors.push('Invalid Azure Computer Vision API key format');
     }
 
@@ -44,24 +50,40 @@ export class AISettingsApiKeyProvider {
   }
 
   // Encrypt API keys for storage
-  encryptApiKeys(apiKeys: UnifiedAISettings['apiKeys']): UnifiedAISettings['apiKeys'] {
+  encryptApiKeys(
+    apiKeys: UnifiedAISettings['apiKeys']
+  ): UnifiedAISettings['apiKeys'] {
     // In a real implementation, you would encrypt these keys
     // For now, we'll just return them as-is
     return {
-      openaiApiKey: apiKeys.openaiApiKey ? this.encryptKey(apiKeys.openaiApiKey) : undefined,
-      googleVisionApiKey: apiKeys.googleVisionApiKey ? this.encryptKey(apiKeys.googleVisionApiKey) : undefined,
-      azureComputerVisionKey: apiKeys.azureComputerVisionKey ? this.encryptKey(apiKeys.azureComputerVisionKey) : undefined,
+      openaiApiKey: apiKeys.openaiApiKey
+        ? this.encryptKey(apiKeys.openaiApiKey)
+        : undefined,
+      googleVisionApiKey: apiKeys.googleVisionApiKey
+        ? this.encryptKey(apiKeys.googleVisionApiKey)
+        : undefined,
+      azureComputerVisionKey: apiKeys.azureComputerVisionKey
+        ? this.encryptKey(apiKeys.azureComputerVisionKey)
+        : undefined,
     };
   }
 
   // Decrypt API keys for use
-  decryptApiKeys(encryptedApiKeys: UnifiedAISettings['apiKeys']): UnifiedAISettings['apiKeys'] {
+  decryptApiKeys(
+    encryptedApiKeys: UnifiedAISettings['apiKeys']
+  ): UnifiedAISettings['apiKeys'] {
     // In a real implementation, you would decrypt these keys
     // For now, we'll just return them as-is
     return {
-      openaiApiKey: encryptedApiKeys.openaiApiKey ? this.decryptKey(encryptedApiKeys.openaiApiKey) : undefined,
-      googleVisionApiKey: encryptedApiKeys.googleVisionApiKey ? this.decryptKey(encryptedApiKeys.googleVisionApiKey) : undefined,
-      azureComputerVisionKey: encryptedApiKeys.azureComputerVisionKey ? this.decryptKey(encryptedApiKeys.azureComputerVisionKey) : undefined,
+      openaiApiKey: encryptedApiKeys.openaiApiKey
+        ? this.decryptKey(encryptedApiKeys.openaiApiKey)
+        : undefined,
+      googleVisionApiKey: encryptedApiKeys.googleVisionApiKey
+        ? this.decryptKey(encryptedApiKeys.googleVisionApiKey)
+        : undefined,
+      azureComputerVisionKey: encryptedApiKeys.azureComputerVisionKey
+        ? this.decryptKey(encryptedApiKeys.azureComputerVisionKey)
+        : undefined,
     };
   }
 
@@ -70,32 +92,40 @@ export class AISettingsApiKeyProvider {
     const requiredKeys: string[] = [];
 
     // Check computer vision features
-    if (settings.computerVision.toolConditionAssessment ||
-        settings.computerVision.barcodeQualityDetection ||
-        settings.computerVision.toolTypeRecognition ||
-        settings.computerVision.imageRecognition ||
-        settings.computerVision.qualityAssessment) {
+    if (
+      settings.computerVision.toolConditionAssessment ||
+      settings.computerVision.barcodeQualityDetection ||
+      settings.computerVision.toolTypeRecognition ||
+      settings.computerVision.imageRecognition ||
+      settings.computerVision.qualityAssessment
+    ) {
       requiredKeys.push('googleVisionApiKey', 'azureComputerVisionKey');
     }
 
     // Check predictive analytics features
-    if (settings.predictiveAnalytics.failurePrediction ||
-        settings.predictiveAnalytics.cycleOptimization ||
-        settings.predictiveAnalytics.demandForecasting) {
+    if (
+      settings.predictiveAnalytics.failurePrediction ||
+      settings.predictiveAnalytics.cycleOptimization ||
+      settings.predictiveAnalytics.demandForecasting
+    ) {
       requiredKeys.push('openaiApiKey');
     }
 
     // Check environmental AI features
-    if (settings.environmental.predictiveCleaning ||
-        settings.environmental.contaminationPrediction ||
-        settings.environmental.resourceOptimization) {
+    if (
+      settings.environmental.predictiveCleaning ||
+      settings.environmental.contaminationPrediction ||
+      settings.environmental.resourceOptimization
+    ) {
       requiredKeys.push('openaiApiKey');
     }
 
     // Check learning AI features
-    if (settings.learning.personalizedRecommendations ||
-        settings.learning.skillGapAnalysis ||
-        settings.learning.learningPathOptimization) {
+    if (
+      settings.learning.personalizedRecommendations ||
+      settings.learning.skillGapAnalysis ||
+      settings.learning.learningPathOptimization
+    ) {
       requiredKeys.push('openaiApiKey');
     }
 
@@ -106,11 +136,11 @@ export class AISettingsApiKeyProvider {
   hasRequiredApiKeys(settings: UnifiedAISettings): boolean {
     const requiredKeys = this.getRequiredApiKeys(settings);
     const availableKeys = Object.keys(settings.apiKeys).filter(
-      key => settings.apiKeys[key as keyof typeof settings.apiKeys]
+      (key) => settings.apiKeys[key as keyof typeof settings.apiKeys]
     );
 
-    return requiredKeys.every(requiredKey => 
-      availableKeys.some(availableKey => availableKey === requiredKey)
+    return requiredKeys.every((requiredKey) =>
+      availableKeys.some((availableKey) => availableKey === requiredKey)
     );
   }
 

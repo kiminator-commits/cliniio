@@ -21,9 +21,7 @@ export function checkThresholdsForMetric(
   metric: PerformanceMetric,
   thresholds: PerformanceThreshold[]
 ): void {
-  const relevantThresholds = thresholds.filter(
-    (t) => t.metric === metric.name
-  );
+  const relevantThresholds = thresholds.filter((t) => t.metric === metric.name);
 
   for (const threshold of relevantThresholds) {
     const { shouldAlert, severity } = shouldTriggerAlert(metric, threshold);
@@ -185,7 +183,11 @@ export function getSystemHealthSync(
   const errorRate = getAggregatedMetrics('error_rate').avg;
   const memory = getAggregatedMetrics('memory_usage').avg;
 
-  const { score, status } = calculateHealthScore(responseTime, errorRate, memory);
+  const { score, status } = calculateHealthScore(
+    responseTime,
+    errorRate,
+    memory
+  );
 
   return {
     status,

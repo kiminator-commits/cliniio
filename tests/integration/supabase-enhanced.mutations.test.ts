@@ -134,7 +134,7 @@ describe('Enhanced Supabase Integration Tests - Mutations and Data Modifications
 
       expect(createResult.error).toBeNull();
       expect(createResult.data).toBeDefined();
-      
+
       // Use the actual ID from the created item
       const actualItemId = createResult.data?.id || itemId;
 
@@ -190,9 +190,7 @@ describe('Enhanced Supabase Integration Tests - Mutations and Data Modifications
           updated_at: '2024-01-01T00:00:00Z',
         });
 
-      const result = await InventoryServiceFacade.createItem(
-        bulkItems[0]
-      );
+      const result = await InventoryServiceFacade.createItem(bulkItems[0]);
 
       // createItem returns InventoryCreateResponse with data as single item
       expect(result).toBeDefined();
@@ -231,8 +229,7 @@ describe('Enhanced Supabase Integration Tests - Mutations and Data Modifications
           updated_at: '2024-01-01T00:00:00Z',
         });
 
-      const result =
-        await InventoryServiceFacade.createItem(invalidItem);
+      const result = await InventoryServiceFacade.createItem(invalidItem);
 
       // The service should handle validation internally, so we just check it completes
       expect(result).toBeDefined();
@@ -283,12 +280,17 @@ describe('Enhanced Supabase Integration Tests - Mutations and Data Modifications
       });
 
       // Mock the LocalStorageAdapter
-      vi.spyOn(LocalStorageAdapter.prototype, 'addInventoryItem').mockImplementation(mockAddItem);
-      vi.spyOn(LocalStorageAdapter.prototype, 'updateInventoryItem').mockImplementation(mockUpdateItem);
+      vi.spyOn(
+        LocalStorageAdapter.prototype,
+        'addInventoryItem'
+      ).mockImplementation(mockAddItem);
+      vi.spyOn(
+        LocalStorageAdapter.prototype,
+        'updateInventoryItem'
+      ).mockImplementation(mockUpdateItem);
 
       // Create item
-      const createResult =
-        await InventoryServiceFacade.createItem(testItem);
+      const createResult = await InventoryServiceFacade.createItem(testItem);
       validateSuccessResponse(
         createResult as { data: Record<string, unknown>[]; error: null }
       );
@@ -335,12 +337,17 @@ describe('Enhanced Supabase Integration Tests - Mutations and Data Modifications
       const mockUpdateItem = vi.fn().mockResolvedValue(null);
 
       // Mock the LocalStorageAdapter
-      vi.spyOn(LocalStorageAdapter.prototype, 'addInventoryItem').mockImplementation(mockAddItem);
-      vi.spyOn(LocalStorageAdapter.prototype, 'updateInventoryItem').mockImplementation(mockUpdateItem);
+      vi.spyOn(
+        LocalStorageAdapter.prototype,
+        'addInventoryItem'
+      ).mockImplementation(mockAddItem);
+      vi.spyOn(
+        LocalStorageAdapter.prototype,
+        'updateInventoryItem'
+      ).mockImplementation(mockUpdateItem);
 
       // Create should succeed
-      const createResult =
-        await InventoryServiceFacade.createItem(testItem);
+      const createResult = await InventoryServiceFacade.createItem(testItem);
       expect(createResult).toBeDefined();
       expect(createResult).not.toBeNull();
 

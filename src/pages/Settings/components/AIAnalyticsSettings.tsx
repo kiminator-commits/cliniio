@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Icon from '@mdi/react';
-import {
-  mdiCheckCircle,
-  mdiAlertCircle,
-} from '@mdi/js';
+import { mdiCheckCircle, mdiAlertCircle } from '@mdi/js';
 
 import {
   useAISettings,
@@ -11,10 +8,7 @@ import {
 } from '../../../services/ai/aiSettingsService';
 import { useFacility } from '../../../contexts/FacilityContext';
 
-import {
-  MessageState,
-  ServiceStatus,
-} from './AIAnalyticsSettings.types';
+import { MessageState, ServiceStatus } from './AIAnalyticsSettings.types';
 import { UI_TEXT, TIMEOUTS } from './AIAnalyticsSettings.config';
 import FeatureToggles from './AIAnalyticsSettings/components/FeatureToggles';
 import AnalyticsConfiguration from './AIAnalyticsSettings/components/AnalyticsConfiguration';
@@ -25,7 +19,6 @@ import SystemHealth from './AIAnalyticsSettings/components/SystemHealth';
 import UserExperience from './AIAnalyticsSettings/components/UserExperience';
 import AnalyticsOverviewPanel from './AnalyticsOverviewPanel';
 import PerformancePanel from './PerformancePanel';
-
 
 const AIAnalyticsSettings: React.FC = () => {
   const { getCurrentFacilityId } = useFacility();
@@ -39,7 +32,9 @@ const AIAnalyticsSettings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<MessageState | null>(null);
-  const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(null);
+  const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(
+    null
+  );
 
   // Load settings function
   const loadSettings = useCallback(async () => {
@@ -295,9 +290,7 @@ const AIAnalyticsSettings: React.FC = () => {
           size={2}
           className="text-red-500 mx-auto mb-4"
         />
-        <p className="text-gray-600">
-          {UI_TEXT.MESSAGES.FAILED_TO_LOAD}
-        </p>
+        <p className="text-gray-600">{UI_TEXT.MESSAGES.FAILED_TO_LOAD}</p>
       </div>
     );
   }
@@ -343,7 +336,6 @@ const AIAnalyticsSettings: React.FC = () => {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
         {/* Analytics Configuration */}
         <AnalyticsConfiguration
           settings={settings}
@@ -362,10 +354,7 @@ const AIAnalyticsSettings: React.FC = () => {
         />
 
         {/* Data Privacy & Security */}
-        <SecurityPrivacy
-          settings={settings}
-          updatePrivacy={updatePrivacy}
-        />
+        <SecurityPrivacy settings={settings} updatePrivacy={updatePrivacy} />
 
         {/* Integration Settings */}
         <IntegrationSettings

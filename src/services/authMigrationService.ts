@@ -96,43 +96,52 @@ class AuthMigrationService {
         try {
           console.log(`[MIGRATION] Executing step: ${step.name}`);
           await this.executeStep(step);
-          
+
           step.completed = true;
           this.migrationStatus.stepsCompleted.push(step.id);
-          
+
           console.log(`[MIGRATION] Completed step: ${step.name}`);
         } catch (error) {
           step.error = error.message;
           this.migrationStatus.errors.push(`${step.name}: ${error.message}`);
-          
+
           if (step.required) {
-            console.error(`[MIGRATION] Required step failed: ${step.name}`, error);
+            console.error(
+              `[MIGRATION] Required step failed: ${step.name}`,
+              error
+            );
             break;
           } else {
-            console.warn(`[MIGRATION] Optional step failed: ${step.name}`, error);
-            this.migrationStatus.warnings.push(`${step.name}: ${error.message}`);
+            console.warn(
+              `[MIGRATION] Optional step failed: ${step.name}`,
+              error
+            );
+            this.migrationStatus.warnings.push(
+              `${step.name}: ${error.message}`
+            );
           }
         }
       }
 
       // Check if migration is complete
       const requiredStepsCompleted = this.migrationSteps
-        .filter(step => step.required)
-        .every(step => step.completed);
+        .filter((step) => step.required)
+        .every((step) => step.completed);
 
       this.migrationStatus.isComplete = requiredStepsCompleted;
       this.migrationStatus.stepsRemaining = this.migrationSteps
-        .filter(step => !step.completed)
-        .map(step => step.id);
+        .filter((step) => !step.completed)
+        .map((step) => step.id);
 
       if (this.migrationStatus.isComplete) {
-        console.log('[MIGRATION] Authentication migration completed successfully');
+        console.log(
+          '[MIGRATION] Authentication migration completed successfully'
+        );
       } else {
         console.error('[MIGRATION] Authentication migration failed');
       }
 
       return this.migrationStatus;
-
     } finally {
       this.isRunning = false;
     }
@@ -189,10 +198,13 @@ class AuthMigrationService {
       // Store backup in localStorage with expiration
       const backupKey = `auth_backup_${Date.now()}`;
       localStorage.setItem(backupKey, JSON.stringify(backup));
-      
+
       // Set expiration (7 days)
       const expirationKey = `${backupKey}_expires`;
-      localStorage.setItem(expirationKey, (Date.now() + (7 * 24 * 60 * 60 * 1000)).toString());
+      localStorage.setItem(
+        expirationKey,
+        (Date.now() + 7 * 24 * 60 * 60 * 1000).toString()
+      );
 
       console.log('[MIGRATION] Existing tokens backed up successfully');
     } catch (error) {
@@ -213,7 +225,7 @@ class AuthMigrationService {
         'supabase.auth.refresh_token',
       ];
 
-      supabaseKeys.forEach(key => {
+      supabaseKeys.forEach((key) => {
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
       });
@@ -227,7 +239,7 @@ class AuthMigrationService {
         'session_token',
       ];
 
-      authKeys.forEach(key => {
+      authKeys.forEach((key) => {
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
       });
@@ -249,7 +261,7 @@ class AuthMigrationService {
     try {
       // Initialize the secure authentication service
       await secureAuthService.getCurrentUser();
-      
+
       console.log('[MIGRATION] Secure authentication service initialized');
     } catch (error) {
       throw new Error(`Failed to initialize secure auth: ${error.message}`);
@@ -262,13 +274,16 @@ class AuthMigrationService {
       const oldPreferences = localStorage.getItem('user_preferences');
       if (oldPreferences) {
         const preferences = JSON.parse(oldPreferences);
-        
+
         // Store in new format
-        sessionStorage.setItem('user_preferences', JSON.stringify({
-          ...preferences,
-          migratedAt: Date.now(),
-          migrationVersion: '1.0',
-        }));
+        sessionStorage.setItem(
+          'user_preferences',
+          JSON.stringify({
+            ...preferences,
+            migratedAt: Date.now(),
+            migrationVersion: '1.0',
+          })
+        );
 
         console.log('[MIGRATION] User preferences migrated');
       }
@@ -282,13 +297,15 @@ class AuthMigrationService {
     try {
       // Validate that the new authentication system is working
       const isAuthenticated = await secureAuthService.isAuthenticated();
-      
+
       if (!isAuthenticated) {
         // Check if we have any stored tokens
         const hasTokens = secureAuthService.getAccessToken() !== null;
-        
+
         if (hasTokens) {
-          throw new Error('Migration validation failed: tokens present but authentication failed');
+          throw new Error(
+            'Migration validation failed: tokens present but authentication failed'
+          );
         }
       }
 
@@ -297,10 +314,12 @@ class AuthMigrationService {
         'sb-access-token',
         'sb-refresh-token',
         'auth_token',
-      ].some(key => localStorage.getItem(key) !== null);
+      ].some((key) => localStorage.getItem(key) !== null);
 
       if (oldTokensExist) {
-        throw new Error('Migration validation failed: old tokens still present');
+        throw new Error(
+          'Migration validation failed: old tokens still present'
+        );
       }
 
       console.log('[MIGRATION] Migration validation successful');
@@ -335,7 +354,7 @@ class AuthMigrationService {
 
       // Find the most recent backup
       const backupKeys = Object.keys(localStorage)
-        .filter(key => key.startsWith('auth_backup_'))
+        .filter((key) => key.startsWith('auth_backup_'))
         .sort()
         .reverse();
 
@@ -345,7 +364,7 @@ class AuthMigrationService {
 
       const latestBackupKey = backupKeys[0];
       const backupData = localStorage.getItem(latestBackupKey);
-      
+
       if (!backupData) {
         throw new Error('Backup data is corrupted');
       }
@@ -374,7 +393,7 @@ class AuthMigrationService {
       await secureAuthService.logout();
 
       // Reset migration status
-      this.migrationSteps.forEach(step => {
+      this.migrationSteps.forEach((step) => {
         step.completed = false;
         step.error = undefined;
       });
@@ -382,7 +401,7 @@ class AuthMigrationService {
       this.migrationStatus = {
         isComplete: false,
         stepsCompleted: [],
-        stepsRemaining: this.migrationSteps.map(step => step.id),
+        stepsRemaining: this.migrationSteps.map((step) => step.id),
         errors: [],
         warnings: [],
       };
@@ -397,13 +416,14 @@ class AuthMigrationService {
   async cleanupBackups(): Promise<void> {
     try {
       const now = Date.now();
-      const backupKeys = Object.keys(localStorage)
-        .filter(key => key.startsWith('auth_backup_'));
+      const backupKeys = Object.keys(localStorage).filter((key) =>
+        key.startsWith('auth_backup_')
+      );
 
       for (const key of backupKeys) {
         const expirationKey = `${key}_expires`;
         const expiration = localStorage.getItem(expirationKey);
-        
+
         if (expiration && parseInt(expiration) < now) {
           localStorage.removeItem(key);
           localStorage.removeItem(expirationKey);

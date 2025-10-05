@@ -100,39 +100,50 @@ export const createInventoryAISlice: StateCreator<
   // Actions to set results
   setBarcodeResults: (results) => set({ barcodeResults: results }),
   setImageResults: (results) => set({ imageResults: results }),
-  setDemandForecastResults: (results) => set({ demandForecastResults: results }),
-  setCostOptimizationResults: (results) => set({ costOptimizationResults: results }),
-  setCategorizationResults: (results) => set({ categorizationResults: results }),
+  setDemandForecastResults: (results) =>
+    set({ demandForecastResults: results }),
+  setCostOptimizationResults: (results) =>
+    set({ costOptimizationResults: results }),
+  setCategorizationResults: (results) =>
+    set({ categorizationResults: results }),
   setInventoryInsights: (insights) => set({ inventoryInsights: insights }),
 
   // Actions to clear results
   clearBarcodeResults: () => set({ barcodeResults: [], barcodeError: null }),
   clearImageResults: () => set({ imageResults: [], imageError: null }),
-  clearDemandForecastResults: () => set({ demandForecastResults: [], demandForecastError: null }),
-  clearCostOptimizationResults: () => set({ costOptimizationResults: [], costOptimizationError: null }),
-  clearCategorizationResults: () => set({ categorizationResults: [], categorizationError: null }),
-  clearInventoryInsights: () => set({ inventoryInsights: [], insightsError: null }),
-  clearAllResults: () => set({
-    barcodeResults: [],
-    imageResults: [],
-    demandForecastResults: [],
-    costOptimizationResults: [],
-    categorizationResults: [],
-    inventoryInsights: [],
-    barcodeError: null,
-    imageError: null,
-    demandForecastError: null,
-    costOptimizationError: null,
-    categorizationError: null,
-    insightsError: null,
-  }),
+  clearDemandForecastResults: () =>
+    set({ demandForecastResults: [], demandForecastError: null }),
+  clearCostOptimizationResults: () =>
+    set({ costOptimizationResults: [], costOptimizationError: null }),
+  clearCategorizationResults: () =>
+    set({ categorizationResults: [], categorizationError: null }),
+  clearInventoryInsights: () =>
+    set({ inventoryInsights: [], insightsError: null }),
+  clearAllResults: () =>
+    set({
+      barcodeResults: [],
+      imageResults: [],
+      demandForecastResults: [],
+      costOptimizationResults: [],
+      categorizationResults: [],
+      inventoryInsights: [],
+      barcodeError: null,
+      imageError: null,
+      demandForecastError: null,
+      costOptimizationError: null,
+      categorizationError: null,
+      insightsError: null,
+    }),
 
   // Actions to set loading states
   setBarcodeLoading: (loading) => set({ isLoadingBarcode: loading }),
   setImageLoading: (loading) => set({ isLoadingImage: loading }),
-  setDemandForecastLoading: (loading) => set({ isLoadingDemandForecast: loading }),
-  setCostOptimizationLoading: (loading) => set({ isLoadingCostOptimization: loading }),
-  setCategorizationLoading: (loading) => set({ isLoadingCategorization: loading }),
+  setDemandForecastLoading: (loading) =>
+    set({ isLoadingDemandForecast: loading }),
+  setCostOptimizationLoading: (loading) =>
+    set({ isLoadingCostOptimization: loading }),
+  setCategorizationLoading: (loading) =>
+    set({ isLoadingCategorization: loading }),
   setInsightsLoading: (loading) => set({ isLoadingInsights: loading }),
 
   // Actions to set error states

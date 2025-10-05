@@ -277,28 +277,33 @@ export class BIFailureIncidentService {
 
     try {
       const result = await BIFailureErrorHandler.withRetry(async () => {
-        const { data, error } = await supabase.rpc<
-          boolean,
-          {
-            p_incident_id: string;
-            p_resolved_by_operator_id: string;
-            p_resolution_notes: string;
-          }
-        >('resolve_bi_failure_incident', {
-          p_incident_id: params.incidentId,
-          p_resolved_by_operator_id: params.resolvedByOperatorId,
-          p_resolution_notes: params.resolutionNotes || '',
-        });
+        const { data, error } = await supabase
+          .from('bi_failure_incidents')
+          .update({
+            status: 'resolved',
+            resolved_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', params.incidentId)
+          .select('id')
+          .single();
+
         if (error) {
-          throw error;
+          BIFailureErrorHandler.handleDatabaseError(
+            error,
+            'resolve BI failure incident'
+          );
         }
+
         return data;
       }, 'resolve BI failure incident');
 
-      return result === true;
+      return !!result;
     } catch (error) {
-      if (error instanceof Error && error.name === 'BIFailureError')
+      if (error instanceof Error && error.name === 'BIFailureError') {
         throw error;
+      }
+
       BIFailureErrorHandler.handleUnexpectedError(
         error,
         'resolve BI failure incident'
@@ -495,14 +500,19 @@ export class BIFailureIncidentService {
 
   static async getCurrentFacilityId(): Promise<string> {
     try {
-      const { FacilityService } = await import('@/services/facilityService');
-      return await FacilityService.getCurrentFacilityId();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const facilityId = session?.user?.app_metadata?.facility_id;
+
+      if (!facilityId) {
+        throw new Error('No authenticated facility ID found.');
+      }
+
+      return facilityId;
     } catch (error) {
       console.error('Failed to get current facility ID:', error);
-      if (process.env.NODE_ENV === 'development') {
-        return '550e8400-e29b-41d4-a716-446655440000';
-      }
-      throw new Error('Failed to get current facility ID');
+      throw new Error('No authenticated facility ID found.');
     }
   }
 }

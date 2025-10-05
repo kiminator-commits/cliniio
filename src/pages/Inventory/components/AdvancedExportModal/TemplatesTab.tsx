@@ -20,9 +20,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900">
-          Export Templates
-        </h3>
+        <h3 className="text-lg font-medium text-gray-900">Export Templates</h3>
       </div>
 
       <div className="space-y-4">
@@ -33,9 +31,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
           >
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="font-medium text-gray-900">
-                  {template.name}
-                </h4>
+                <h4 className="font-medium text-gray-900">{template.name}</h4>
                 {template.description && (
                   <p className="text-sm text-gray-600 mt-1">
                     {template.description}
@@ -43,16 +39,14 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                 )}
                 <div className="text-sm text-gray-600 mt-2">
                   <p>
-                    <strong>Format:</strong>{' '}
-                    {template.format.toUpperCase()}
+                    <strong>Format:</strong> {template.format.toUpperCase()}
                   </p>
                   <p>
                     <strong>Fields:</strong> {template.fields.length}
                   </p>
                   {template.filters && template.filters.length > 0 && (
                     <p>
-                      <strong>Filters:</strong>{' '}
-                      {template.filters.length}
+                      <strong>Filters:</strong> {template.filters.length}
                     </p>
                   )}
                   {template.isDefault && (

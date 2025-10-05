@@ -1,5 +1,9 @@
 // Immutable audit trail with cryptographic signatures
-import { createHash, createHmac, randomBytes } from 'https://deno.land/std@0.168.0/crypto/mod.ts';
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+} from 'https://deno.land/std@0.168.0/crypto/mod.ts';
 
 interface AuditEvent {
   id: string;
@@ -51,7 +55,10 @@ class ImmutableAuditTrail {
       enableChaining: config.enableChaining || true,
       retentionDays: config.retentionDays || 2555, // 7 years
       maxEventsPerChain: config.maxEventsPerChain || 10000,
-      signatureKey: config.signatureKey || Deno.env.get('AUDIT_SIGNATURE_KEY') || 'default-key-change-in-production',
+      signatureKey:
+        config.signatureKey ||
+        Deno.env.get('AUDIT_SIGNATURE_KEY') ||
+        'default-key-change-in-production',
       hashAlgorithm: config.hashAlgorithm || 'sha256',
       compressionEnabled: config.compressionEnabled || false,
     };
@@ -93,12 +100,17 @@ class ImmutableAuditTrail {
       return '';
     }
 
-    const hmac = createHmac(this.config.hashAlgorithm, this.config.signatureKey);
+    const hmac = createHmac(
+      this.config.hashAlgorithm,
+      this.config.signatureKey
+    );
     hmac.update(data);
     return hmac.toString('hex');
   }
 
-  private createEventHash(event: Omit<AuditEvent, 'hash' | 'signature' | 'chainIndex'>): string {
+  private createEventHash(
+    event: Omit<AuditEvent, 'hash' | 'signature' | 'chainIndex'>
+  ): string {
     const eventData = {
       id: event.id,
       timestamp: event.timestamp,
@@ -171,7 +183,7 @@ class ImmutableAuditTrail {
 
     // Calculate event hash
     const eventHash = this.createEventHash(event);
-    
+
     // Create complete event with hash and signature
     const completeEvent: AuditEvent = {
       ...event,
@@ -205,22 +217,26 @@ class ImmutableAuditTrail {
     if (!this.currentChain) return;
 
     // Finalize current chain
-    this.currentChain.chainIntegrity = await this.verifyChainIntegrity(this.currentChain);
+    this.currentChain.chainIntegrity = await this.verifyChainIntegrity(
+      this.currentChain
+    );
 
     // Create new chain
     this.initializeChain();
-    
-    console.log(`Audit chain rotated. Previous chain had ${this.currentChain.totalEvents} events`);
+
+    console.log(
+      `Audit chain rotated. Previous chain had ${this.currentChain.totalEvents} events`
+    );
   }
 
   async verifyChainIntegrity(chain: AuditChain): Promise<boolean> {
     if (chain.events.length === 0) return true;
 
     let previousHash = '';
-    
+
     for (let i = 0; i < chain.events.length; i++) {
       const event = chain.events[i];
-      
+
       // Verify event hash
       const expectedEventHash = this.createEventHash({
         id: event.id,
@@ -293,22 +309,25 @@ class ImmutableAuditTrail {
     return result;
   }
 
-  async queryEvents(filters: {
-    eventType?: string;
-    severity?: string;
-    actor?: string;
-    resource?: string;
-    outcome?: string;
-    startTime?: number;
-    endTime?: number;
-    limit?: number;
-  } = {}): Promise<AuditEvent[]> {
+  async queryEvents(
+    filters: {
+      eventType?: string;
+      severity?: string;
+      actor?: string;
+      resource?: string;
+      outcome?: string;
+      startTime?: number;
+      endTime?: number;
+      limit?: number;
+    } = {}
+  ): Promise<AuditEvent[]> {
     const results: AuditEvent[] = [];
 
     for (const chain of this.chains.values()) {
       for (const event of chain.events) {
         // Apply filters
-        if (filters.eventType && event.eventType !== filters.eventType) continue;
+        if (filters.eventType && event.eventType !== filters.eventType)
+          continue;
         if (filters.severity && event.severity !== filters.severity) continue;
         if (filters.actor && event.actor !== filters.actor) continue;
         if (filters.resource && event.resource !== filters.resource) continue;
@@ -317,12 +336,12 @@ class ImmutableAuditTrail {
         if (filters.endTime && event.timestamp > filters.endTime) continue;
 
         results.push(event);
-        
+
         if (filters.limit && results.length >= filters.limit) {
           break;
         }
       }
-      
+
       if (filters.limit && results.length >= filters.limit) {
         break;
       }
@@ -334,7 +353,7 @@ class ImmutableAuditTrail {
 
   async getEventById(eventId: string): Promise<AuditEvent | null> {
     for (const chain of this.chains.values()) {
-      const event = chain.events.find(e => e.id === eventId);
+      const event = chain.events.find((e) => e.id === eventId);
       if (event) return event;
     }
     return null;
@@ -342,7 +361,7 @@ class ImmutableAuditTrail {
 
   async getEventChain(eventId: string): Promise<AuditEvent[]> {
     for (const chain of this.chains.values()) {
-      const eventIndex = chain.events.findIndex(e => e.id === eventId);
+      const eventIndex = chain.events.findIndex((e) => e.id === eventId);
       if (eventIndex !== -1) {
         return chain.events.slice(0, eventIndex + 1);
       }
@@ -351,18 +370,19 @@ class ImmutableAuditTrail {
   }
 
   async cleanupOldEvents(): Promise<number> {
-    const cutoffTime = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);
+    const cutoffTime =
+      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000;
     let removedEvents = 0;
 
     for (const [chainId, chain] of this.chains) {
-      const oldEvents = chain.events.filter(e => e.timestamp < cutoffTime);
-      const newEvents = chain.events.filter(e => e.timestamp >= cutoffTime);
-      
+      const oldEvents = chain.events.filter((e) => e.timestamp < cutoffTime);
+      const newEvents = chain.events.filter((e) => e.timestamp >= cutoffTime);
+
       if (oldEvents.length > 0) {
         chain.events = newEvents;
         chain.totalEvents = newEvents.length;
         removedEvents += oldEvents.length;
-        
+
         // If chain is empty, remove it
         if (chain.events.length === 0) {
           this.chains.delete(chainId);
@@ -376,7 +396,7 @@ class ImmutableAuditTrail {
 
   async exportEvents(format: 'json' | 'csv' = 'json'): Promise<string> {
     const allEvents: AuditEvent[] = [];
-    
+
     for (const chain of this.chains.values()) {
       allEvents.push(...chain.events);
     }
@@ -385,20 +405,32 @@ class ImmutableAuditTrail {
 
     if (format === 'csv') {
       const headers = [
-        'id', 'timestamp', 'eventType', 'severity', 'actor', 'action', 
-        'resource', 'outcome', 'ipAddress', 'userAgent', 'sessionId', 'hash'
+        'id',
+        'timestamp',
+        'eventType',
+        'severity',
+        'actor',
+        'action',
+        'resource',
+        'outcome',
+        'ipAddress',
+        'userAgent',
+        'sessionId',
+        'hash',
       ];
-      
+
       const csvRows = [headers.join(',')];
-      
+
       for (const event of allEvents) {
-        const row = headers.map(header => {
+        const row = headers.map((header) => {
           const value = event[header as keyof AuditEvent];
-          return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+          return typeof value === 'string'
+            ? `"${value.replace(/"/g, '""')}"`
+            : value;
         });
         csvRows.push(row.join(','));
       }
-      
+
       return csvRows.join('\n');
     }
 
@@ -435,9 +467,11 @@ class ImmutableAuditTrail {
       stats.chainIntegrity = stats.chainIntegrity && chain.chainIntegrity;
 
       for (const event of chain.events) {
-        stats.eventsBySeverity[event.severity] = (stats.eventsBySeverity[event.severity] || 0) + 1;
-        stats.eventsByType[event.eventType] = (stats.eventsByType[event.eventType] || 0) + 1;
-        
+        stats.eventsBySeverity[event.severity] =
+          (stats.eventsBySeverity[event.severity] || 0) + 1;
+        stats.eventsByType[event.eventType] =
+          (stats.eventsByType[event.eventType] || 0) + 1;
+
         if (event.timestamp < stats.oldestEvent) {
           stats.oldestEvent = event.timestamp;
         }
@@ -460,9 +494,15 @@ export function getImmutableAuditTrail(): ImmutableAuditTrail {
       enableSignatures: Deno.env.get('ENABLE_AUDIT_SIGNATURES') === 'true',
       enableChaining: Deno.env.get('ENABLE_AUDIT_CHAINING') === 'true',
       retentionDays: parseInt(Deno.env.get('AUDIT_RETENTION_DAYS') || '2555'),
-      maxEventsPerChain: parseInt(Deno.env.get('MAX_EVENTS_PER_CHAIN') || '10000'),
-      signatureKey: Deno.env.get('AUDIT_SIGNATURE_KEY') || 'default-key-change-in-production',
-      hashAlgorithm: (Deno.env.get('AUDIT_HASH_ALGORITHM') as 'sha256' | 'sha512') || 'sha256',
+      maxEventsPerChain: parseInt(
+        Deno.env.get('MAX_EVENTS_PER_CHAIN') || '10000'
+      ),
+      signatureKey:
+        Deno.env.get('AUDIT_SIGNATURE_KEY') ||
+        'default-key-change-in-production',
+      hashAlgorithm:
+        (Deno.env.get('AUDIT_HASH_ALGORITHM') as 'sha256' | 'sha512') ||
+        'sha256',
     });
   }
 

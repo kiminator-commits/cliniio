@@ -3,22 +3,22 @@ import { IntelligenceSummary } from './forecastingAnalyticsService';
 import { AILearningService } from '../../pages/KnowledgeHub/services/aiLearningService';
 
 // Type definitions
-import { 
-  IntelligenceRecommendation, 
-  OptimizationTip, 
-  RiskAlert 
+import {
+  IntelligenceRecommendation,
+  OptimizationTip,
+  RiskAlert,
 } from '../../types/intelligenceRecommendationTypes';
 
 // Intelligence services
 import { RecommendationEngine } from '../intelligence/recommendationEngine';
 import {
   getAIRiskPredictions,
-  getHistoricalRiskPatterns
+  getHistoricalRiskPatterns,
 } from '../intelligence/intelligenceAIProvider';
 import {
   sortRecommendationsByPriority,
   sortOptimizationTipsByPriority,
-  sortRiskAlertsBySeverity
+  sortRiskAlertsBySeverity,
 } from '../intelligence/intelligenceUtils';
 
 // Data providers
@@ -27,7 +27,7 @@ import {
   getUserBehaviorInsights,
   getUserPerformancePatterns,
   getAIConfidenceScore,
-  getLearningProgressMetrics
+  getLearningProgressMetrics,
 } from './providers/intelligenceRecommendationSupabaseProvider';
 
 export class IntelligenceRecommendationService {
@@ -47,11 +47,12 @@ export class IntelligenceRecommendationService {
       const userInsights = await getUserBehaviorInsights();
 
       // Combine AI insights with business logic for hybrid recommendations
-      const recommendations = await RecommendationEngine.generateHybridRecommendations(
-        summary,
-        aiRecommendations,
-        userInsights
-      );
+      const recommendations =
+        await RecommendationEngine.generateHybridRecommendations(
+          summary,
+          aiRecommendations,
+          userInsights
+        );
 
       // Sort by priority and AI confidence
       return sortRecommendationsByPriority(recommendations);
@@ -154,9 +155,6 @@ export class IntelligenceRecommendationService {
       learningProgress: await getLearningProgressMetrics(),
     };
   }
-
-
-
 }
 
 export default IntelligenceRecommendationService;

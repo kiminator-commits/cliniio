@@ -1,4 +1,4 @@
-import { supabase } from '../../__mocks__/supabase/supabaseMockClient';
+import { supabase } from '@/lib/supabaseClient';
 import {
   BITestResult,
   CreateBITestRequest,
@@ -40,10 +40,18 @@ export class BITestService {
     testData: CreateBITestRequest
   ): Promise<BITestResult> {
     try {
-      const insertData: Partial<BITestResultRow> = {
+      // Generate unique test number inline
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+      const timestamp = Date.now().toString().slice(-6);
+      const testNumber = `BI-${dateStr}-${timestamp}`;
+
+      const insertData: Partial<BITestResult> = {
         facility_id: testData.facility_id,
         operator_id: testData.operator_id,
-        cycle_id: testData.cycle_id,
+        cycle_id: testData.cycle_id || '00000000-0000-0000-0000-000000000000', // Use placeholder UUID for standalone tests
+        test_number: testNumber,
+        test_date: testData.test_date || new Date().toISOString(),
         result: testData.result,
         bi_lot_number: testData.bi_lot_number,
         bi_expiry_date: testData.bi_expiry_date,
@@ -53,7 +61,13 @@ export class BITestService {
         failure_reason: testData.failure_reason,
         skip_reason: testData.skip_reason,
         compliance_notes: testData.compliance_notes,
+        // Removed created_by and updated_by - they don't exist in the table schema
       };
+
+      console.log(
+        '🔍 Inserting BI test data:',
+        JSON.stringify(insertData, null, 2)
+      );
 
       const { data, error } = await supabase
         .from('bi_test_results')
@@ -61,7 +75,10 @@ export class BITestService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database error details:', error);
+        throw error;
+      }
 
       // Add type guard to ensure data has required properties
       if (!data || typeof data !== 'object') {
@@ -308,7 +325,7 @@ export class BITestService {
   /**
    * Generate unique test number
    */
-  private static async generateTestNumber(facilityId: string): Promise<string> {
+  static async generateTestNumber(facilityId: string): Promise<string> {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
 

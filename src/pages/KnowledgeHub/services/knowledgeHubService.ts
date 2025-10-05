@@ -204,7 +204,10 @@ export class KnowledgeHubService {
   /**
    * Get recent user activity
    */
-  static async getRecentUserActivity(userId?: string, limit?: number): Promise<Record<string, unknown>[]> {
+  static async getRecentUserActivity(
+    userId?: string,
+    limit?: number
+  ): Promise<Record<string, unknown>[]> {
     return KnowledgeHubActivityProvider.getRecentUserActivity(userId, limit);
   }
 

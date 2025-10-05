@@ -105,7 +105,11 @@ export class LearningAIProviderService {
     learningHistory: string,
     skillGaps: string
   ): string {
-    return buildPersonalizedRecommendationPrompt(userProfile, learningHistory, skillGaps);
+    return buildPersonalizedRecommendationPrompt(
+      userProfile,
+      learningHistory,
+      skillGaps
+    );
   }
 
   buildSkillGapAnalysisPrompt(
@@ -113,7 +117,11 @@ export class LearningAIProviderService {
     requiredSkills: string,
     roleRequirements: string
   ): string {
-    return buildSkillGapAnalysisPrompt(currentSkills, requiredSkills, roleRequirements);
+    return buildSkillGapAnalysisPrompt(
+      currentSkills,
+      requiredSkills,
+      roleRequirements
+    );
   }
 
   buildLearningPathOptimizationPrompt(
@@ -121,7 +129,11 @@ export class LearningAIProviderService {
     availableContent: string,
     constraints: string
   ): string {
-    return buildLearningPathOptimizationPrompt(userGoals, availableContent, constraints);
+    return buildLearningPathOptimizationPrompt(
+      userGoals,
+      availableContent,
+      constraints
+    );
   }
 
   buildPerformancePredictionPrompt(
@@ -129,7 +141,11 @@ export class LearningAIProviderService {
     contentInfo: string,
     historicalPerformance: string
   ): string {
-    return buildPerformancePredictionPrompt(userProfile, contentInfo, historicalPerformance);
+    return buildPerformancePredictionPrompt(
+      userProfile,
+      contentInfo,
+      historicalPerformance
+    );
   }
 
   // Optimized retry and backoff logic

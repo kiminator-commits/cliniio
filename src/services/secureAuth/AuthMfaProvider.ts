@@ -148,7 +148,9 @@ export class AuthMfaProvider {
   /**
    * Set session store (for initialization from other providers)
    */
-  setSessionStore(sessionStore: Map<string, { session: Session; lastActivity: number }>): void {
+  setSessionStore(
+    sessionStore: Map<string, { session: Session; lastActivity: number }>
+  ): void {
     this.sessionStore = sessionStore;
   }
 }

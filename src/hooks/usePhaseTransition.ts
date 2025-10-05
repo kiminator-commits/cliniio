@@ -3,15 +3,24 @@ import { useTimerStore } from '../store/timerStore';
 import { useSterilizationStore } from '../store/sterilizationStore';
 import { sterilizationPhases } from '../config/workflowConfig';
 import { trackedToolsService } from '../services/trackedToolsService';
+import { useUser } from '../contexts/UserContext';
 
 export const usePhaseTransition = () => {
   const { startTimer, pauseTimer, resetTimer } = useTimerStore();
   const { currentCycle, moveToolToNextPhase, updateToolStatus, addActivity } =
     useSterilizationStore();
+  const { currentUser } = useUser();
 
   const handleMoveToNextPhase = useCallback(
     (currentPhaseId: string) => {
       console.log(`🔄 Starting phase transition from ${currentPhaseId}`);
+
+      // Require user authentication for phase transitions
+      if (!currentUser) {
+        console.log('❌ User authentication required for phase transitions');
+        alert('Please log in to perform sterilization phase transitions');
+        return;
+      }
 
       if (!currentCycle) {
         console.log('❌ No active cycle found');
@@ -158,6 +167,7 @@ export const usePhaseTransition = () => {
       }
     },
     [
+      currentUser,
       currentCycle,
       startTimer,
       pauseTimer,

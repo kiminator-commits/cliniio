@@ -2,6 +2,7 @@ import React from 'react';
 import { mdiChartPie, mdiTrophy, mdiTarget } from '@mdi/js';
 import Icon from '@mdi/react';
 import Greeting from './Greeting';
+import { Tooltip } from './ui/Tooltip';
 
 interface NavBarProps {
   onStatsClick?: () => void;
@@ -14,19 +15,19 @@ const features = [
     icon: mdiChartPie,
     bg: 'teal',
     label: 'Cumulative Stats',
-    description: 'View your performance statistics',
+    description: 'Performance\nStatistics',
   },
   {
     icon: mdiTrophy,
     bg: 'purple',
     label: 'Leaderboard',
-    description: 'See team rankings and achievements',
+    description: 'Team\nRankings',
   },
   {
     icon: mdiTarget,
     bg: 'blue',
     label: 'Daily Challenge',
-    description: "Complete today's challenge",
+    description: 'Daily\nChallenge',
   },
 ];
 
@@ -65,34 +66,34 @@ const NavBar: React.FC<NavBarProps> = ({
                     : undefined;
 
             return (
-              <button
-                key={f.label}
-                className={`rounded-xl w-12 h-12 flex items-center justify-center transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  f.label === 'Cumulative Stats'
-                    ? 'bg-purple-100 focus:ring-purple-500'
-                    : f.label === 'Leaderboard'
-                      ? 'bg-amber-100 focus:ring-amber-500'
-                      : 'bg-blue-100 focus:ring-blue-500'
-                }`}
-                title={f.label}
-                aria-label={`${f.label}: ${f.description}`}
-                onClick={handleClick}
-                onKeyDown={(e) => handleKeyDown(e, handleClick)}
-                tabIndex={0}
-              >
-                <Icon
-                  path={f.icon}
-                  size={1.1}
-                  aria-hidden="true"
-                  color={
+              <Tooltip key={f.label} content={f.description}>
+                <button
+                  className={`rounded-xl w-12 h-12 flex items-center justify-center transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     f.label === 'Cumulative Stats'
-                      ? '#9333ea' // purple-600
+                      ? 'bg-purple-100 focus:ring-purple-500'
                       : f.label === 'Leaderboard'
-                        ? '#d97706' // amber-600
-                        : '#2563eb' // blue-600
-                  }
-                />
-              </button>
+                        ? 'bg-amber-100 focus:ring-amber-500'
+                        : 'bg-blue-100 focus:ring-blue-500'
+                  }`}
+                  aria-label={`${f.label}: ${f.description}`}
+                  onClick={handleClick}
+                  onKeyDown={(e) => handleKeyDown(e, handleClick)}
+                  tabIndex={0}
+                >
+                  <Icon
+                    path={f.icon}
+                    size={1.1}
+                    aria-hidden="true"
+                    color={
+                      f.label === 'Cumulative Stats'
+                        ? '#9333ea' // purple-600
+                        : f.label === 'Leaderboard'
+                          ? '#d97706' // amber-600
+                          : '#2563eb' // blue-600
+                    }
+                  />
+                </button>
+              </Tooltip>
             );
           })}
         </nav>

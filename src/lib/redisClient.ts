@@ -3,14 +3,31 @@ import { logger } from '../utils/_core/logger';
 // Optional Redis import - will fallback to in-memory if not available
 let createClient: ((config: unknown) => unknown) | null = null;
 
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const redis = require('redis');
-  createClient = redis.createClient;
-} catch (err) {
-  console.error(err);
-  // Redis package not available, will use in-memory fallback
-  // Don't log warning here as it's expected in some environments
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
+// Initialize Redis client dynamically - only in server environments
+const initializeRedisClient = async (): Promise<void> => {
+  // Skip Redis initialization in browser environments
+  if (isBrowser) {
+    return;
+  }
+
+  try {
+    // Import server-only Redis client
+    const { createClient: serverCreateClient } = await import(
+      './redisClient.server'
+    );
+    createClient = serverCreateClient;
+  } catch {
+    // Redis package not available, will use in-memory fallback
+    // This is expected in environments without Redis
+  }
+};
+
+// Only initialize Redis in server environments
+if (!isBrowser) {
+  initializeRedisClient();
 }
 
 export interface RedisConfig {
@@ -33,6 +50,20 @@ class RedisManager {
 
   async connect(): Promise<void> {
     if (this.isConnected) return;
+
+    // In browser environments, Redis is not available
+    if (isBrowser) {
+      logger.warn(
+        'Redis not available in browser environment, using in-memory fallback'
+      );
+      return;
+    }
+
+    // Wait for Redis client to be initialized
+    if (!createClient) {
+      // Wait a bit for the async initialization to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
     if (!createClient) {
       logger.warn('Redis not available, using in-memory fallback');
@@ -93,6 +124,10 @@ class RedisManager {
   }
 
   isHealthy(): boolean {
+    // In browser environments, Redis is never healthy
+    if (isBrowser) {
+      return false;
+    }
     return this.isConnected && this.client !== null;
   }
 }

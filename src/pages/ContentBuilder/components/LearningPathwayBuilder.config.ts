@@ -69,7 +69,8 @@ export const UI_TEXT = {
   AVAILABLE_CONTENT_TITLE: 'Available Content',
   AVAILABLE_CONTENT_DESCRIPTION: 'Select content to add to your pathway',
   PATHWAY_TITLE: 'Your Learning Pathway',
-  PATHWAY_DESCRIPTION: 'Organized into logical sections for better learning flow',
+  PATHWAY_DESCRIPTION:
+    'Organized into logical sections for better learning flow',
   SEARCH_PLACEHOLDER: 'Search content...',
   ADD_BUTTON: 'Add',
   ADD_SECTION_BUTTON: 'Add Section',
@@ -88,7 +89,8 @@ export const UI_TEXT = {
   CANCEL_BUTTON: 'Cancel',
   ADD_SECTION_CONFIRM: 'Add Section',
   SMART_ORGANIZE_MODAL_TITLE: 'Smart Organize',
-  SMART_ORGANIZE_DESCRIPTION: 'This will reorganize your pathway content automatically using AI. Your current organization will be replaced with an optimized structure.',
+  SMART_ORGANIZE_DESCRIPTION:
+    'This will reorganize your pathway content automatically using AI. Your current organization will be replaced with an optimized structure.',
   SMART_ORGANIZE_CONFIRM: 'Do you want to continue?',
   CONTINUE_BUTTON: 'Continue',
   EDIT_SECTION_PROMPT: 'Edit section name:',

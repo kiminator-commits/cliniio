@@ -112,7 +112,9 @@ export const RecentUpdatesPanel: React.FC = () => {
                           : 'bg-gray-100 text-gray-700'
                 }`}
               >
-                {update.type.charAt(0).toUpperCase() + update.type.slice(1)}
+                {update.type
+                  ? update.type.charAt(0).toUpperCase() + update.type.slice(1)
+                  : 'Unknown'}
               </span>
             </div>
           ))

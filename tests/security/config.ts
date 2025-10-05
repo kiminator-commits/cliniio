@@ -48,7 +48,7 @@ export const securityTestConfig: SecurityTestConfig = {
   baseUrl: process.env.SECURITY_TEST_BASE_URL || 'http://localhost:3000',
   timeout: parseInt(process.env.SECURITY_TEST_TIMEOUT || '30000'),
   retries: parseInt(process.env.SECURITY_TEST_RETRIES || '3'),
-  
+
   penetration: {
     enabled: process.env.PENETRATION_TEST_ENABLED === 'true',
     threads: parseInt(process.env.PENETRATION_TEST_THREADS || '10'),
@@ -57,24 +57,33 @@ export const securityTestConfig: SecurityTestConfig = {
     testTimeout: parseInt(process.env.PENETRATION_TEST_TIMEOUT || '30000'),
     retryAttempts: parseInt(process.env.PENETRATION_TEST_RETRIES || '3'),
   },
-  
+
   vulnerability: {
     enabled: process.env.VULNERABILITY_SCAN_ENABLED === 'true',
-    depth: (process.env.VULNERABILITY_SCAN_DEPTH as 'shallow' | 'deep' | 'comprehensive') || 'deep',
+    depth:
+      (process.env.VULNERABILITY_SCAN_DEPTH as
+        | 'shallow'
+        | 'deep'
+        | 'comprehensive') || 'deep',
     threads: parseInt(process.env.VULNERABILITY_SCAN_THREADS || '5'),
     timeout: parseInt(process.env.VULNERABILITY_SCAN_TIMEOUT || '60000'),
     includeInfo: process.env.VULNERABILITY_SCAN_INCLUDE_INFO === 'true',
     customRules: process.env.VULNERABILITY_SCAN_CUSTOM_RULES === 'true',
   },
-  
+
   validation: {
     enabled: process.env.SECURITY_VALIDATION_ENABLED === 'true',
-    rules: (process.env.SECURITY_VALIDATION_RULES as 'all' | 'critical' | 'high' | 'custom') || 'all',
+    rules:
+      (process.env.SECURITY_VALIDATION_RULES as
+        | 'all'
+        | 'critical'
+        | 'high'
+        | 'custom') || 'all',
     threshold: parseInt(process.env.SECURITY_VALIDATION_THRESHOLD || '75'),
     timeout: parseInt(process.env.SECURITY_VALIDATION_TIMEOUT || '30000'),
     parallel: process.env.SECURITY_VALIDATION_PARALLEL === 'true',
   },
-  
+
   monitoring: {
     enabled: process.env.SECURITY_MONITORING_ENABLED === 'true',
     interval: parseInt(process.env.SECURITY_MONITORING_INTERVAL || '300000'), // 5 minutes
@@ -210,7 +219,8 @@ export interface ReportingConfig {
 }
 
 export const reportingConfig: ReportingConfig = {
-  format: (process.env.REPORT_FORMAT as 'json' | 'html' | 'pdf' | 'xml') || 'html',
+  format:
+    (process.env.REPORT_FORMAT as 'json' | 'html' | 'pdf' | 'xml') || 'html',
   outputDir: process.env.REPORT_OUTPUT_DIR || './reports',
   includeEvidence: process.env.REPORT_INCLUDE_EVIDENCE === 'true',
   includeRecommendations: process.env.REPORT_INCLUDE_RECOMMENDATIONS === 'true',

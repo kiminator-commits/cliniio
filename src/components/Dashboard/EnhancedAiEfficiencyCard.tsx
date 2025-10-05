@@ -8,16 +8,32 @@ import {
 interface EnhancedAiEfficiencyCardProps {
   timeframe?: 'daily' | 'weekly' | 'monthly';
   showInsights?: boolean;
+  aiImpactMetrics?: AIImpactMetrics; // Add pre-loaded metrics prop
 }
 
 export const EnhancedAiEfficiencyCard: React.FC<
   EnhancedAiEfficiencyCardProps
-> = ({ timeframe = 'daily' }) => {
+> = ({ timeframe = 'daily', aiImpactMetrics }) => {
   const [metrics, setMetrics] = useState<AIImpactMetrics | null>(null);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If pre-loaded metrics are provided, use them immediately
+    if (aiImpactMetrics) {
+      console.log(
+        '🤖 EnhancedAiEfficiencyCard: Using pre-loaded AI metrics:',
+        aiImpactMetrics
+      );
+      setMetrics(aiImpactMetrics);
+      setLoading(false);
+      return;
+    }
+
+    console.log(
+      '🤖 EnhancedAiEfficiencyCard: No pre-loaded metrics, fetching independently...'
+    );
+    // Otherwise, fetch metrics independently (fallback for backward compatibility)
     const fetchMetrics = async () => {
       try {
         setLoading(true);
@@ -33,10 +49,10 @@ export const EnhancedAiEfficiencyCard: React.FC<
 
     fetchMetrics();
 
-    // Auto-refresh every 2 minutes
+    // Auto-refresh every 2 minutes only if no pre-loaded metrics
     const interval = setInterval(fetchMetrics, 2 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [aiImpactMetrics]); // Add aiImpactMetrics as dependency
 
   if (loading) {
     return (
@@ -77,25 +93,43 @@ export const EnhancedAiEfficiencyCard: React.FC<
   };
 
   const getTimeframeValue = () => {
-    switch (timeframe) {
-      case 'daily':
-        return displayMetrics.timeSavings.daily;
-      case 'weekly':
-        return displayMetrics.timeSavings.weekly;
-      case 'monthly':
-        return displayMetrics.timeSavings.monthly;
-      default:
-        return displayMetrics.timeSavings.daily;
-    }
+    const value = (() => {
+      switch (timeframe) {
+        case 'daily':
+          return displayMetrics.timeSavings.daily;
+        case 'weekly':
+          return displayMetrics.timeSavings.weekly;
+        case 'monthly':
+          return displayMetrics.timeSavings.monthly;
+        default:
+          return displayMetrics.timeSavings.daily;
+      }
+    })();
+
+    console.log('🕒 EnhancedAiEfficiencyCard: getTimeframeValue:', {
+      timeframe,
+      timeSavings: displayMetrics.timeSavings,
+      returnedValue: value,
+    });
+
+    return value;
   };
 
   const formatTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes} m`;
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0
-      ? `${hours}h ${remainingMinutes} m`
-      : `${hours}h`;
+    console.log(
+      '⏰ EnhancedAiEfficiencyCard: formatTime called with:',
+      minutes
+    );
+    const result = (() => {
+      if (minutes < 60) return `${minutes} m`;
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return remainingMinutes > 0
+        ? `${hours}h ${remainingMinutes} m`
+        : `${hours}h`;
+    })();
+    console.log('⏰ EnhancedAiEfficiencyCard: formatTime result:', result);
+    return result;
   };
 
   const formatCurrency = (amount: number) => {

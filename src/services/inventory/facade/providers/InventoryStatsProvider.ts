@@ -94,31 +94,43 @@ export class InventoryStatsProvider {
 
         // Calculate normalized category distribution
         allItems.forEach((item) => {
-          const normalizedCategory = InventoryCategoryProvider.normalizeCategory(item.category || '');
-          stats.normalizedCategories[normalizedCategory.toLowerCase().replace(' ', '') as keyof typeof stats.normalizedCategories]++;
+          const normalizedCategory =
+            InventoryCategoryProvider.normalizeCategory(item.category || '');
+          stats.normalizedCategories[
+            normalizedCategory
+              .toLowerCase()
+              .replace(' ', '') as keyof typeof stats.normalizedCategories
+          ]++;
         });
 
         // Calculate status distribution
         allItems.forEach((item) => {
           const status = item.status || 'unknown';
-          stats.statusDistribution[status] = (stats.statusDistribution[status] || 0) + 1;
+          stats.statusDistribution[status] =
+            (stats.statusDistribution[status] || 0) + 1;
         });
 
         // Calculate category distribution
         allItems.forEach((item) => {
           const category = item.category || 'unknown';
-          stats.categoryDistribution[category] = (stats.categoryDistribution[category] || 0) + 1;
+          stats.categoryDistribution[category] =
+            (stats.categoryDistribution[category] || 0) + 1;
         });
 
         // Calculate location distribution
         allItems.forEach((item) => {
           const location = item.location || 'unknown';
-          stats.locationDistribution[location] = (stats.locationDistribution[location] || 0) + 1;
+          stats.locationDistribution[location] =
+            (stats.locationDistribution[location] || 0) + 1;
         });
 
         // Calculate average quantity
-        const totalQuantity = allItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
-        stats.averageQuantity = allItems.length > 0 ? totalQuantity / allItems.length : 0;
+        const totalQuantity = allItems.reduce(
+          (sum, item) => sum + (item.quantity || 0),
+          0
+        );
+        stats.averageQuantity =
+          allItems.length > 0 ? totalQuantity / allItems.length : 0;
 
         return stats;
       }
@@ -141,7 +153,8 @@ export class InventoryStatsProvider {
         const stats: Record<string, number> = {};
 
         allItems.forEach((item) => {
-          const normalizedCategory = InventoryCategoryProvider.normalizeCategory(item.category || '');
+          const normalizedCategory =
+            InventoryCategoryProvider.normalizeCategory(item.category || '');
           stats[normalizedCategory] = (stats[normalizedCategory] || 0) + 1;
         });
 
@@ -218,7 +231,7 @@ export class InventoryStatsProvider {
       'getStockLevelStats',
       async () => {
         const allItems = await this.adapter.fetchInventoryItems();
-        
+
         let inStock = 0;
         let lowStock = 0;
         let outOfStock = 0;
@@ -269,7 +282,7 @@ export class InventoryStatsProvider {
       'getTrendingItems',
       async () => {
         const allItems = await this.adapter.fetchInventoryItems();
-        
+
         // Group items by ID and count updates (simplified - in real implementation, you'd track update history)
         const itemUpdateCounts: Record<string, number> = {};
         allItems.forEach((item) => {
@@ -278,7 +291,11 @@ export class InventoryStatsProvider {
 
         // Sort by last updated and return top items
         const trendingItems = allItems
-          .sort((a, b) => new Date(b.lastUpdated || b.createdAt).getTime() - new Date(a.lastUpdated || a.createdAt).getTime())
+          .sort(
+            (a, b) =>
+              new Date(b.lastUpdated || b.createdAt).getTime() -
+              new Date(a.lastUpdated || a.createdAt).getTime()
+          )
           .slice(0, limit)
           .map((item) => ({
             id: item.id,
@@ -306,7 +323,9 @@ export class InventoryStatsProvider {
    * Get adapter metadata
    */
   getAdapterMetadata(): AdapterMetadata | null {
-    const metadata = inventoryAdapterFactory.getAdapterMetadata(this.adapterType);
+    const metadata = inventoryAdapterFactory.getAdapterMetadata(
+      this.adapterType
+    );
     return metadata;
   }
 
@@ -379,7 +398,7 @@ export class InventoryStatsProvider {
       async () => {
         const allItems = await this.adapter.fetchInventoryItems();
         const issues: string[] = [];
-        
+
         let completeFields = 0;
         let totalFields = 0;
 
@@ -407,8 +426,11 @@ export class InventoryStatsProvider {
         });
 
         const completeness = totalFields > 0 ? completeFields / totalFields : 0;
-        const accuracy = 1 - (issues.length / allItems.length); // Simplified accuracy calculation
-        const consistency = 1 - (issues.filter(issue => issue.includes('consistency')).length / allItems.length);
+        const accuracy = 1 - issues.length / allItems.length; // Simplified accuracy calculation
+        const consistency =
+          1 -
+          issues.filter((issue) => issue.includes('consistency')).length /
+            allItems.length;
 
         return {
           completeness,
@@ -445,7 +467,13 @@ export class InventoryStatsProvider {
     const result = await InventoryErrorHandler.handleOperation(
       'generateInventoryReport',
       async () => {
-        const [statsResult, categoryStats, statusStats, locationStats, stockStats] = await Promise.all([
+        const [
+          statsResult,
+          categoryStats,
+          statusStats,
+          locationStats,
+          stockStats,
+        ] = await Promise.all([
           this.getInventoryStats(),
           this.getCategoryStats(),
           this.getStatusStats(),
@@ -458,12 +486,19 @@ export class InventoryStatsProvider {
         // Generate recommendations based on stats
         if (statsResult.data) {
           if (statsResult.data.lowStockItems > 0) {
-            recommendations.push(`Consider restocking ${statsResult.data.lowStockItems} low stock items`);
+            recommendations.push(
+              `Consider restocking ${statsResult.data.lowStockItems} low stock items`
+            );
           }
           if (statsResult.data.outOfStockItems > 0) {
-            recommendations.push(`Urgent: ${statsResult.data.outOfStockItems} items are out of stock`);
+            recommendations.push(
+              `Urgent: ${statsResult.data.outOfStockItems} items are out of stock`
+            );
           }
-          if (statsResult.data.archivedItems > statsResult.data.totalItems * 0.1) {
+          if (
+            statsResult.data.archivedItems >
+            statsResult.data.totalItems * 0.1
+          ) {
             recommendations.push('Consider cleaning up archived items');
           }
         }
@@ -473,7 +508,12 @@ export class InventoryStatsProvider {
           categoryBreakdown: categoryStats.data || {},
           statusBreakdown: statusStats.data || {},
           locationBreakdown: locationStats.data || {},
-          stockLevels: stockStats.data || { inStock: 0, lowStock: 0, outOfStock: 0, overStock: 0 },
+          stockLevels: stockStats.data || {
+            inStock: 0,
+            lowStock: 0,
+            outOfStock: 0,
+            overStock: 0,
+          },
           recommendations,
           generatedAt: new Date().toISOString(),
         };

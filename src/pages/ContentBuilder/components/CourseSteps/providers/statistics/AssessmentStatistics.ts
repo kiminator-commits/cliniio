@@ -11,25 +11,32 @@ export class AssessmentStatistics {
    */
   getAssessmentStatistics(assessment: Assessment): AssessmentStats {
     const totalQuestions = assessment.questions.length;
-    const totalPoints = assessment.questions.reduce((sum, question) => sum + question.points, 0);
-    const averagePointsPerQuestion = totalQuestions > 0 ? totalPoints / totalQuestions : 0;
-    
+    const totalPoints = assessment.questions.reduce(
+      (sum, question) => sum + question.points,
+      0
+    );
+    const averagePointsPerQuestion =
+      totalQuestions > 0 ? totalPoints / totalQuestions : 0;
+
     // Estimate time based on question types and points
-    const estimatedTimeMinutes = assessment.questions.reduce((sum, question) => {
-      const baseTime = question.points * 2; // 2 minutes per point
-      switch (question.type) {
-        case 'multiple-choice':
-          return sum + baseTime;
-        case 'true-false':
-          return sum + baseTime * 0.5;
-        case 'short-answer':
-          return sum + baseTime * 1.5;
-        case 'essay':
-          return sum + baseTime * 3;
-        default:
-          return sum + baseTime;
-      }
-    }, 0);
+    const estimatedTimeMinutes = assessment.questions.reduce(
+      (sum, question) => {
+        const baseTime = question.points * 2; // 2 minutes per point
+        switch (question.type) {
+          case 'multiple-choice':
+            return sum + baseTime;
+          case 'true-false':
+            return sum + baseTime * 0.5;
+          case 'short-answer':
+            return sum + baseTime * 1.5;
+          case 'essay':
+            return sum + baseTime * 3;
+          default:
+            return sum + baseTime;
+        }
+      },
+      0
+    );
 
     // Determine difficulty level
     let difficultyLevel: 'easy' | 'medium' | 'hard' = 'easy';
@@ -52,10 +59,13 @@ export class AssessmentStatistics {
    * Get question statistics
    */
   getQuestionStatistics(question: Question): QuestionStatistics {
-    const wordCount = question.text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    const wordCount = question.text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
     const characterCount = question.text.length;
     const readingTimeSeconds = Math.ceil(wordCount / 3); // Average reading speed: 3 words per second
-    
+
     // Calculate difficulty score based on various factors
     let difficultyScore = 1;
     if (question.points > 2) difficultyScore += 1;

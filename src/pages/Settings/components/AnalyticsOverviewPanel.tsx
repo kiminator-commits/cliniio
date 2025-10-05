@@ -1,10 +1,6 @@
 import React from 'react';
 import Icon from '@mdi/react';
-import {
-  mdiBrain,
-  mdiContentSave,
-  mdiRefresh,
-} from '@mdi/js';
+import { mdiBrain, mdiContentSave, mdiRefresh } from '@mdi/js';
 import { UI_TEXT } from './AIAnalyticsSettings.config';
 
 interface AnalyticsOverviewPanelProps {
@@ -26,9 +22,7 @@ const AnalyticsOverviewPanel: React.FC<AnalyticsOverviewPanelProps> = ({
           <h4 className="text-xl font-semibold text-gray-800">
             {UI_TEXT.HEADER.TITLE}
           </h4>
-          <p className="text-sm text-gray-600">
-            {UI_TEXT.HEADER.SUBTITLE}
-          </p>
+          <p className="text-sm text-gray-600">{UI_TEXT.HEADER.SUBTITLE}</p>
         </div>
       </div>
 

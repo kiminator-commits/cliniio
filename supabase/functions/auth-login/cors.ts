@@ -27,7 +27,8 @@ export function isValidOrigin(origin: string | null): boolean {
 export function getCorsHeaders(origin: string | null): Record<string, string> {
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Allow-Headers':
+      'Content-Type, Authorization, X-Requested-With',
     'Access-Control-Max-Age': '86400',
   };
 
@@ -44,12 +45,15 @@ export function getCorsHeaders(origin: string | null): Record<string, string> {
 
 export function getClientId(req: Request): string {
   // Generate a client identifier based on IP and User-Agent
-  const ip = req.headers.get('x-forwarded-for') || 
-             req.headers.get('x-real-ip') || 
-             'unknown';
+  const ip =
+    req.headers.get('x-forwarded-for') ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
   const userAgent = req.headers.get('user-agent') || 'unknown';
-  
+
   // Create a simple hash-like identifier
   const identifier = `${ip}-${userAgent}`;
-  return btoa(identifier).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+  return btoa(identifier)
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .substring(0, 16);
 }

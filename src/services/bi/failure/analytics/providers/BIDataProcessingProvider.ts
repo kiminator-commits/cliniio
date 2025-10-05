@@ -159,22 +159,22 @@ export class BIDataProcessingProvider {
    */
   private static normalizeSeverity(severity?: string): string {
     if (!severity) return 'unknown';
-    
+
     const normalized = severity.toLowerCase().trim();
     const validSeverities = ['low', 'medium', 'high', 'critical'];
-    
+
     if (validSeverities.includes(normalized)) {
       return normalized;
     }
-    
+
     // Map common variations
     const severityMap: { [key: string]: string } = {
-      'minor': 'low',
-      'major': 'high',
-      'severe': 'critical',
-      'urgent': 'high',
+      minor: 'low',
+      major: 'high',
+      severe: 'critical',
+      urgent: 'high',
     };
-    
+
     return severityMap[normalized] || 'unknown';
   }
 
@@ -183,23 +183,29 @@ export class BIDataProcessingProvider {
    */
   private static normalizeStatus(status?: string): string {
     if (!status) return 'unknown';
-    
+
     const normalized = status.toLowerCase().trim();
-    const validStatuses = ['open', 'in_progress', 'resolved', 'closed', 'cancelled'];
-    
+    const validStatuses = [
+      'open',
+      'in_progress',
+      'resolved',
+      'closed',
+      'cancelled',
+    ];
+
     if (validStatuses.includes(normalized)) {
       return normalized;
     }
-    
+
     // Map common variations
     const statusMap: { [key: string]: string } = {
-      'pending': 'open',
-      'active': 'in_progress',
-      'completed': 'resolved',
-      'finished': 'resolved',
-      'cancelled': 'closed',
+      pending: 'open',
+      active: 'in_progress',
+      completed: 'resolved',
+      finished: 'resolved',
+      cancelled: 'closed',
     };
-    
+
     return statusMap[normalized] || 'unknown';
   }
 
@@ -211,22 +217,26 @@ export class BIDataProcessingProvider {
 
     const requiredFields = ['created_at', 'severity', 'status'];
     const optionalFields = ['category', 'resolved_at', 'incident_type'];
-    
+
     let completenessScore = 0;
     const totalFields = requiredFields.length + optionalFields.length;
-    
+
     // Check required fields (weighted more heavily)
     requiredFields.forEach((field) => {
-      const filledCount = incidents.filter((i) => i[field] !== undefined && i[field] !== null && i[field] !== '').length;
+      const filledCount = incidents.filter(
+        (i) => i[field] !== undefined && i[field] !== null && i[field] !== ''
+      ).length;
       completenessScore += (filledCount / incidents.length) * 2; // Double weight for required fields
     });
-    
+
     // Check optional fields
     optionalFields.forEach((field) => {
-      const filledCount = incidents.filter((i) => i[field] !== undefined && i[field] !== null && i[field] !== '').length;
+      const filledCount = incidents.filter(
+        (i) => i[field] !== undefined && i[field] !== null && i[field] !== ''
+      ).length;
       completenessScore += (filledCount / incidents.length) * 1; // Single weight for optional fields
     });
-    
+
     return Math.min(1, completenessScore / totalFields);
   }
 
@@ -248,7 +258,7 @@ export class BIDataProcessingProvider {
       count: number;
       severity: 'low' | 'medium' | 'high';
     }> = [];
-    
+
     let anomalyScore = 0;
 
     if (incidents.length === 0) {
@@ -262,7 +272,8 @@ export class BIDataProcessingProvider {
         type: 'duplicates',
         description: `Found ${duplicates.length} potential duplicate incidents`,
         count: duplicates.length,
-        severity: duplicates.length > incidents.length * 0.1 ? 'high' : 'medium',
+        severity:
+          duplicates.length > incidents.length * 0.1 ? 'high' : 'medium',
       });
       anomalyScore += duplicates.length / incidents.length;
     }
@@ -271,14 +282,14 @@ export class BIDataProcessingProvider {
     const unusualPatterns = this.detectUnusualPatterns(incidents);
     unusualPatterns.forEach((pattern) => {
       anomalies.push(pattern);
-      anomalyScore += pattern.count / incidents.length * 0.5;
+      anomalyScore += (pattern.count / incidents.length) * 0.5;
     });
 
     // Check for data inconsistencies
     const inconsistencies = this.detectInconsistencies(incidents);
     inconsistencies.forEach((inconsistency) => {
       anomalies.push(inconsistency);
-      anomalyScore += inconsistency.count / incidents.length * 0.3;
+      anomalyScore += (inconsistency.count / incidents.length) * 0.3;
     });
 
     return {
@@ -330,8 +341,10 @@ export class BIDataProcessingProvider {
     });
 
     const avgHourlyRate = incidents.length / 24;
-    const highRateHours = Object.entries(hourlyData).filter(([, count]) => count > avgHourlyRate * 3);
-    
+    const highRateHours = Object.entries(hourlyData).filter(
+      ([, count]) => count > avgHourlyRate * 3
+    );
+
     if (highRateHours.length > 0) {
       patterns.push({
         type: 'high_frequency_hours',
@@ -350,8 +363,12 @@ export class BIDataProcessingProvider {
         return resolved - created;
       });
 
-      const avgResolutionTime = resolutionTimes.reduce((sum, time) => sum + time, 0) / resolutionTimes.length;
-      const longResolutionIncidents = resolutionTimes.filter((time) => time > avgResolutionTime * 5).length;
+      const avgResolutionTime =
+        resolutionTimes.reduce((sum, time) => sum + time, 0) /
+        resolutionTimes.length;
+      const longResolutionIncidents = resolutionTimes.filter(
+        (time) => time > avgResolutionTime * 5
+      ).length;
 
       if (longResolutionIncidents > 0) {
         patterns.push({
@@ -383,7 +400,9 @@ export class BIDataProcessingProvider {
     }> = [];
 
     // Check for resolved incidents without resolved_at
-    const resolvedWithoutDate = incidents.filter((i) => i.status === 'resolved' && !i.resolved_at).length;
+    const resolvedWithoutDate = incidents.filter(
+      (i) => i.status === 'resolved' && !i.resolved_at
+    ).length;
     if (resolvedWithoutDate > 0) {
       inconsistencies.push({
         type: 'missing_resolution_date',
@@ -394,7 +413,9 @@ export class BIDataProcessingProvider {
     }
 
     // Check for open incidents with resolved_at
-    const openWithDate = incidents.filter((i) => i.status === 'open' && i.resolved_at).length;
+    const openWithDate = incidents.filter(
+      (i) => i.status === 'open' && i.resolved_at
+    ).length;
     if (openWithDate > 0) {
       inconsistencies.push({
         type: 'open_with_resolution_date',

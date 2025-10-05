@@ -6,7 +6,7 @@ import { BIFailureStatus } from './BIFailureStatus';
 import { BIFailureWorkflowSteps } from './BIFailureWorkflowSteps';
 import { BIFailureErrorDisplay } from './BIFailureErrorDisplay';
 import { BIFailureActions } from './BIFailureActions';
-import { PatientExposureReport } from '../PatientExposureReport';
+import { ExposureReport } from '../PatientExposureReport';
 
 /**
  * Props for the BIFailureResolution component.
@@ -17,6 +17,8 @@ import { PatientExposureReport } from '../PatientExposureReport';
 interface BIFailureResolutionProps {
   isOpen: boolean;
   onClose: () => void;
+  onMinimize?: () => void;
+  isMinimized?: boolean;
 }
 
 /**
@@ -31,6 +33,8 @@ interface BIFailureResolutionProps {
 export const BIFailureResolution: React.FC<BIFailureResolutionProps> = ({
   isOpen,
   onClose,
+  onMinimize,
+  isMinimized: _isMinimized = false,
 }) => {
   // Business logic separated into hook
   const {
@@ -99,7 +103,11 @@ export const BIFailureResolution: React.FC<BIFailureResolutionProps> = ({
         onKeyDown={handleKeyDown}
       >
         {/* Header */}
-        <BIFailureHeader isSubmitting={isLoading} onClose={handleClose} />
+        <BIFailureHeader
+          isSubmitting={isLoading}
+          onClose={handleClose}
+          onMinimize={onMinimize}
+        />
 
         {/* Content */}
         <div className="p-6 space-y-6">
@@ -132,9 +140,9 @@ export const BIFailureResolution: React.FC<BIFailureResolutionProps> = ({
         </div>
       </div>
 
-      {/* Patient Exposure Report Modal */}
+      {/* Exposure Report Modal */}
       {showExposureReport && (
-        <PatientExposureReport
+        <ExposureReport
           isOpen={showExposureReport}
           onClose={toggleExposureReport}
           incidentId={biFailureDetails?.id}

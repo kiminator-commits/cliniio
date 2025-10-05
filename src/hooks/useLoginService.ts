@@ -22,7 +22,9 @@ export const useLoginService = () => {
       if (response.success && response.data) {
         return {
           token: response.data.accessToken,
-          expiry: new Date(Date.now() + response.data.expiresIn * 1000).toISOString(),
+          expiry: new Date(
+            Date.now() + response.data.expiresIn * 1000
+          ).toISOString(),
         };
       } else {
         throw new Error(response.error || 'Authentication failed');

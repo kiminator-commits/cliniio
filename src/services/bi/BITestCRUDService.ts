@@ -1,4 +1,4 @@
-import { supabase } from '../../__mocks__/supabase/supabaseMockClient';
+import { supabase } from '@/lib/supabaseClient';
 import {
   BITestResult,
   CreateBITestRequest,

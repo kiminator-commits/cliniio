@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Task } from '../store/homeStore';
 import { TaskEditModal } from './TaskEditModal';
+import clsx from 'clsx';
 
 interface TasksListProps {
   tasks: Task[];
-  onTaskComplete?: (taskId: string) => void;
+  onTaskComplete?: (taskId: string, points?: number) => void;
   onTaskUpdate?: (taskId: string, updatedTask: Task) => void;
 }
 
@@ -18,6 +19,34 @@ export const TasksList: React.FC<TasksListProps> = ({
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const itemsPerPage = 10;
+
+  // Helper function to determine if a task is newly assigned (within last 24 hours)
+  const isNewlyAssigned = useCallback((task: Task): boolean => {
+    if (!task.dueDate) return false;
+
+    const taskDate = new Date(task.dueDate);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - taskDate.getTime()) / (1000 * 60 * 60);
+
+    return hoursDiff <= 24;
+  }, []);
+
+  // Helper function to get enhanced shadow class for new tasks
+  const getTaskCardClass = useCallback(
+    (task: Task): string => {
+      const baseClass = 'task-item border rounded-lg p-4 mb-2';
+      const isNew = isNewlyAssigned(task);
+
+      return clsx(baseClass, {
+        // Enhanced shadow effect for newly assigned tasks (same as performance metrics)
+        'shadow-lg border-l-4 border-[#4ECDC4] border-opacity-50 bg-gradient-to-r from-white to-teal-50':
+          isNew,
+        // Standard styling for older tasks
+        'shadow-sm': !isNew,
+      });
+    },
+    [isNewlyAssigned]
+  );
 
   // Memoize expensive calculations
   const safeTasks = useMemo(() => (Array.isArray(tasks) ? tasks : []), [tasks]);
@@ -88,7 +117,7 @@ export const TasksList: React.FC<TasksListProps> = ({
   const renderedTasks = useMemo(
     () =>
       currentTasks.map((task) => (
-        <div key={task.id} className="task-item border rounded-lg p-4 mb-2">
+        <div key={task.id} className={getTaskCardClass(task)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <button
@@ -107,8 +136,16 @@ export const TasksList: React.FC<TasksListProps> = ({
                 </span>
               </button>
               <span className="font-medium">{task.title}</span>
+              {isNewlyAssigned(task) && (
+                <span className="px-2 py-1 text-xs font-semibold bg-[#4ECDC4] text-white rounded-full animate-pulse">
+                  NEW
+                </span>
+              )}
             </div>
-            <div className="flex space-x-2">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-semibold text-[#4ECDC4] bg-[#4ECDC4] bg-opacity-10 px-2 py-1 rounded-full">
+                +{task.points || 0} pts
+              </span>
               <button
                 onClick={() => handleEdit(task)}
                 className="px-3 py-1 text-xs bg-[#4ECDC4] text-white rounded hover:bg-[#38b2ac] transition-colors"
@@ -117,7 +154,7 @@ export const TasksList: React.FC<TasksListProps> = ({
               </button>
               {onTaskComplete && (
                 <button
-                  onClick={() => onTaskComplete(task.id)}
+                  onClick={() => onTaskComplete(task.id, task.points || 0)}
                   className="px-3 py-1 text-xs bg-[#4ECDC4] text-white rounded hover:bg-[#38b2ac] transition-colors"
                 >
                   Complete
@@ -132,6 +169,7 @@ export const TasksList: React.FC<TasksListProps> = ({
               <div className="text-xs text-gray-500 space-y-1">
                 <div>Priority: {task.priority}</div>
                 <div>Status: {task.status}</div>
+                <div>Points: {task.points || 0}</div>
                 {task.dueDate && (
                   <div>Due: {new Date(task.dueDate).toLocaleDateString()}</div>
                 )}
@@ -140,7 +178,15 @@ export const TasksList: React.FC<TasksListProps> = ({
           )}
         </div>
       )),
-    [currentTasks, expandedTaskId, toggleTask, handleEdit, onTaskComplete]
+    [
+      currentTasks,
+      expandedTaskId,
+      toggleTask,
+      handleEdit,
+      onTaskComplete,
+      getTaskCardClass,
+      isNewlyAssigned,
+    ]
   );
 
   if (incompleteTasks.length === 0) {

@@ -90,7 +90,13 @@ export class PerformanceMonitor {
     // Check thresholds
     checkThresholdsForMetric(metric, this.thresholds);
 
-    performanceAlertingProvider.logMetricRecorded(name, value, unit, tags, metadata);
+    performanceAlertingProvider.logMetricRecorded(
+      name,
+      value,
+      unit,
+      tags,
+      metadata
+    );
   }
 
   /**
@@ -348,7 +354,6 @@ export class PerformanceMonitor {
     performanceAlertingProvider.logThresholdsUpdated(thresholds);
   }
 
-
   /**
    * Initialize default thresholds
    */
@@ -364,7 +369,9 @@ export class PerformanceMonitor {
     this.addHealthCheck(createDatabaseHealthCheck());
 
     // Memory usage check
-    this.addHealthCheck(createMemoryHealthCheck((name) => this.getAggregatedMetrics(name)));
+    this.addHealthCheck(
+      createMemoryHealthCheck((name) => this.getAggregatedMetrics(name))
+    );
   }
 
   /**
@@ -408,7 +415,11 @@ export class PerformanceMonitor {
       const health = await this.getSystemHealth();
       const activeAlerts = this.getActiveAlerts();
 
-      const snapshot = createPerformanceSnapshot(health, activeAlerts, this.metrics);
+      const snapshot = createPerformanceSnapshot(
+        health,
+        activeAlerts,
+        this.metrics
+      );
 
       // Store snapshot
       const key = 'performance_snapshot';
@@ -480,7 +491,6 @@ export class PerformanceMonitor {
   private getSystemHealthSync(): SystemHealth {
     return getSystemHealthSync((name) => this.getAggregatedMetrics(name));
   }
-
 }
 
 // Singleton instance

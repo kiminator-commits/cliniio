@@ -29,11 +29,11 @@ vi.doMock('@/lib/getEnv', () => ({
 const { createMockSupabaseClient, setGlobalMockResponse } = vi.hoisted(() => {
   // Global state to control mock behavior
   let globalMockResponse = { data: [], error: null };
-  
+
   const setGlobalMockResponse = (response: any) => {
     globalMockResponse = response;
   };
-  
+
   const createMockSupabaseClient = () => {
     const createMockQuery = () => {
       // Create a simple mock that always returns the global response
@@ -51,7 +51,7 @@ const { createMockSupabaseClient, setGlobalMockResponse } = vi.hoisted(() => {
 
       // Make the query object itself awaitable
       const awaitableQuery = Promise.resolve(globalMockResponse);
-      
+
       // Copy all methods to the promise
       Object.assign(awaitableQuery, mockQuery);
 
@@ -149,7 +149,9 @@ describe('Enhanced Supabase Integration Tests - External Services and Complex Sc
   describe('Authentication Service - External Service Integration', () => {
     test('should handle network timeouts gracefully', async () => {
       // Mock the specific method that the service will call
-      const mockSignInWithPassword = vi.fn().mockRejectedValue(new Error('Network timeout'));
+      const mockSignInWithPassword = vi
+        .fn()
+        .mockRejectedValue(new Error('Network timeout'));
       mockSupabaseClient.auth.signInWithPassword = mockSignInWithPassword;
 
       const result = await SupabaseAuthService.signIn(testCredentials.valid);
@@ -281,7 +283,7 @@ describe('Enhanced Supabase Integration Tests - External Services and Complex Sc
         'Connection to database failed',
         'PGRST301'
       );
-      
+
       // Set the global mock response to return the error
       setMockResponse(mockResponse);
 
@@ -303,7 +305,7 @@ describe('Enhanced Supabase Integration Tests - External Services and Complex Sc
         'Permission denied',
         'PGRST116'
       );
-      
+
       // Set the global mock response to return the error
       setMockResponse(permissionError);
 

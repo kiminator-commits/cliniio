@@ -1,4 +1,7 @@
-export { SecurityAuditService, securityAuditService } from './SecurityAuditService';
+export {
+  SecurityAuditService,
+  securityAuditService,
+} from './SecurityAuditService';
 export { SecurityEventLogger } from './logging/SecurityEventLogger';
 export { SecurityViolationManager } from './violations/SecurityViolationManager';
 export { SecurityAnalytics } from './analytics/SecurityAnalytics';

@@ -1,7 +1,7 @@
 /**
  * @deprecated This service is deprecated in favor of BISubscriptionService
  * Use BISubscriptionService from '@/services/bi/BISubscriptionService' instead
- * 
+ *
  * BI Realtime Service - Handles real-time subscriptions
  */
 import { isSupabaseConfigured } from '@/lib/supabase';
@@ -18,7 +18,9 @@ export class BIRealtimeService {
       old?: Record<string, unknown>;
     }) => void
   ) {
-    console.warn('BIRealtimeService.subscribeToBITestChanges() is deprecated. Use BISubscriptionService.subscribeToBITestChanges() instead.');
+    console.warn(
+      'BIRealtimeService.subscribeToBITestChanges() is deprecated. Use BISubscriptionService.subscribeToBITestChanges() instead.'
+    );
     // Check if Supabase is configured
     if (!isSupabaseConfigured()) {
       console.warn('⚠️ Supabase not configured, skipping BI test subscription');

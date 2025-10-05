@@ -4,6 +4,7 @@ import { mdiTestTube, mdiCheckCircle, mdiAlertCircle } from '@mdi/js';
 import { useSterilizationStore } from '../../store/sterilizationStore';
 import { BITestResult } from '../../types/toolTypes';
 import { BIFailConfirmationModal } from './BIFailConfirmationModal';
+import { useQuarantineData } from './BIFailureResolution/hooks/useQuarantineData';
 
 interface BITestBannerProps {
   isVisible: boolean;
@@ -22,6 +23,7 @@ const BITestBanner: React.FC<BITestBannerProps> = ({
   >(null);
 
   const { currentCycle, enforceBI } = useSterilizationStore();
+  const quarantineData = useQuarantineData();
 
   if (!isVisible || !enforceBI) return null;
 
@@ -65,11 +67,11 @@ const BITestBanner: React.FC<BITestBannerProps> = ({
       // Activate global BI failure banner
       const { activateBIFailure } = useSterilizationStore.getState();
 
-      // Calculate actual affected tools count from current cycle
-      const affectedToolsCount = currentCycle?.tools?.length || 0;
-      const affectedBatchIds = currentCycle?.batchId
-        ? [currentCycle.batchId]
-        : [];
+      // Calculate actual affected tools count from quarantine data (all tools since last successful BI test)
+      const affectedToolsCount = quarantineData.totalToolsAffected;
+      const affectedBatchIds = quarantineData.affectedCycles
+        .map((cycle) => cycle.batchId)
+        .filter((batchId): batchId is string => Boolean(batchId));
 
       activateBIFailure({
         affectedToolsCount,

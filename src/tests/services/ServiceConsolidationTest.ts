@@ -30,14 +30,14 @@ describe('Service Consolidation Test Suite', () => {
         'Test prompt',
         'Test context'
       );
-      
+
       expect(response).toBeDefined();
       expect(typeof response).toBe('string');
     });
 
     it('should manage service instances correctly', () => {
       const status = UnifiedAIService.getServiceStatus();
-      
+
       expect(status).toBeDefined();
       expect(typeof status).toBe('object');
       expect(status).toHaveProperty('learningAI');
@@ -48,10 +48,11 @@ describe('Service Consolidation Test Suite', () => {
 
     it('should initialize services for facility', async () => {
       const facilityId = 'test-facility';
-      
+
       // This should not throw an error
-      await expect(UnifiedAIService.initializeServices(facilityId))
-        .resolves.not.toThrow();
+      await expect(
+        UnifiedAIService.initializeServices(facilityId)
+      ).resolves.not.toThrow();
     });
   });
 
@@ -59,7 +60,7 @@ describe('Service Consolidation Test Suite', () => {
     it('should generate CSRF tokens', () => {
       const authService = new SecureAuthService();
       const token = authService.generateCSRFToken();
-      
+
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
       expect(token.length).toBeGreaterThan(0);
@@ -67,21 +68,22 @@ describe('Service Consolidation Test Suite', () => {
 
     it('should validate tokens correctly', async () => {
       const authService = new SecureAuthService();
-      
+
       // Invalid token should be rejected
-      await expect(authService.validateToken('invalid-token'))
-        .resolves.toBe(false);
+      await expect(authService.validateToken('invalid-token')).resolves.toBe(
+        false
+      );
     });
 
     it('should handle secure login', async () => {
       const authService = new SecureAuthService();
-      
+
       // Test with invalid credentials (should fail gracefully)
       const result = await authService.secureLogin({
         email: 'invalid@test.com',
-        password: 'invalid-password'
+        password: 'invalid-password',
       });
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
@@ -91,14 +93,14 @@ describe('Service Consolidation Test Suite', () => {
   describe('KnowledgeHubService', () => {
     it('should retrieve knowledge articles', async () => {
       const articles = await KnowledgeHubService.getKnowledgeArticles();
-      
+
       expect(articles).toBeDefined();
       expect(Array.isArray(articles)).toBe(true);
     });
 
     it('should retrieve user activity', async () => {
       const activity = await KnowledgeHubService.getRecentUserActivity();
-      
+
       expect(activity).toBeDefined();
       expect(Array.isArray(activity)).toBe(true);
     });
@@ -106,9 +108,12 @@ describe('Service Consolidation Test Suite', () => {
     it('should retrieve user activity with parameters', async () => {
       const userId = 'test-user';
       const limit = 5;
-      
-      const activity = await KnowledgeHubService.getRecentUserActivity(userId, limit);
-      
+
+      const activity = await KnowledgeHubService.getRecentUserActivity(
+        userId,
+        limit
+      );
+
       expect(activity).toBeDefined();
       expect(Array.isArray(activity)).toBe(true);
     });
@@ -118,22 +123,24 @@ describe('Service Consolidation Test Suite', () => {
     it('should retrieve active incidents', async () => {
       const facilityId = 'test-facility';
       const incidents = await BIFailureService.getActiveIncidents(facilityId);
-      
+
       expect(incidents).toBeDefined();
       expect(Array.isArray(incidents)).toBe(true);
     });
 
     it('should generate analytics summary', async () => {
       const facilityId = 'test-facility';
-      const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const startDate = new Date(
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString();
       const endDate = new Date().toISOString();
-      
+
       const analytics = await BIFailureService.getAnalyticsSummary(
         facilityId,
         startDate,
         endDate
       );
-      
+
       expect(analytics).toBeDefined();
       expect(typeof analytics).toBe('object');
     });
@@ -146,10 +153,10 @@ describe('Service Consolidation Test Suite', () => {
         {
           incidentNumber: 'TEST-001',
           failureDate: new Date().toISOString(),
-          affectedToolsCount: 1
+          affectedToolsCount: 1,
         }
       );
-      
+
       expect(result).toBeDefined();
       expect(typeof result).toBe('boolean');
     });
@@ -158,7 +165,7 @@ describe('Service Consolidation Test Suite', () => {
   describe('InventoryServiceFacade', () => {
     it('should fetch all inventory data', async () => {
       const data = await InventoryServiceFacade.fetchAllInventoryData();
-      
+
       expect(data).toBeDefined();
       expect(typeof data).toBe('object');
       expect(data).toHaveProperty('items');
@@ -168,7 +175,7 @@ describe('Service Consolidation Test Suite', () => {
     it('should be a singleton', () => {
       const instance1 = InventoryServiceFacade.getInstance();
       const instance2 = InventoryServiceFacade.getInstance();
-      
+
       expect(instance1).toBe(instance2);
     });
   });
@@ -177,7 +184,7 @@ describe('Service Consolidation Test Suite', () => {
     it('should register and retrieve services', () => {
       const registry = ServiceRegistry.getInstance();
       const serviceNames = registry.getServiceNames();
-      
+
       expect(serviceNames).toBeDefined();
       expect(Array.isArray(serviceNames)).toBe(true);
     });
@@ -185,7 +192,7 @@ describe('Service Consolidation Test Suite', () => {
     it('should provide performance metrics', () => {
       const registry = ServiceRegistry.getInstance();
       const metrics = registry.getPerformanceMetrics();
-      
+
       expect(metrics).toBeDefined();
       expect(Array.isArray(metrics)).toBe(true);
     });
@@ -193,7 +200,7 @@ describe('Service Consolidation Test Suite', () => {
     it('should identify services with performance issues', () => {
       const registry = ServiceRegistry.getInstance();
       const issues = registry.getServicesWithPerformanceIssues();
-      
+
       expect(issues).toBeDefined();
       expect(Array.isArray(issues)).toBe(true);
     });
@@ -201,27 +208,34 @@ describe('Service Consolidation Test Suite', () => {
 
   describe('ServicePerformanceMonitor', () => {
     it('should track service calls', () => {
-      const callId = servicePerformanceMonitor.startCall('TestService', 'testMethod');
-      
+      const callId = servicePerformanceMonitor.startCall(
+        'TestService',
+        'testMethod'
+      );
+
       expect(callId).toBeDefined();
       expect(typeof callId).toBe('string');
-      
+
       servicePerformanceMonitor.endCall(callId, true);
     });
 
     it('should track failed service calls', () => {
-      const callId = servicePerformanceMonitor.startCall('TestService', 'testMethod');
-      
+      const callId = servicePerformanceMonitor.startCall(
+        'TestService',
+        'testMethod'
+      );
+
       servicePerformanceMonitor.endCall(callId, false, 'Test error');
-      
-      const metrics = servicePerformanceMonitor.getServiceMetrics('TestService');
+
+      const metrics =
+        servicePerformanceMonitor.getServiceMetrics('TestService');
       expect(metrics).toBeDefined();
       expect(metrics?.failedCalls).toBeGreaterThan(0);
     });
 
     it('should provide all metrics', () => {
       const metrics = servicePerformanceMonitor.getAllMetrics();
-      
+
       expect(metrics).toBeDefined();
       expect(Array.isArray(metrics)).toBe(true);
     });
@@ -230,11 +244,11 @@ describe('Service Consolidation Test Suite', () => {
       const newThresholds = {
         maxResponseTime: 10000,
         maxErrorRate: 15,
-        maxCallsPerMinute: 200
+        maxCallsPerMinute: 200,
       };
-      
+
       servicePerformanceMonitor.updateThresholds(newThresholds);
-      
+
       const thresholds = servicePerformanceMonitor.getThresholds();
       expect(thresholds.maxResponseTime).toBe(10000);
       expect(thresholds.maxErrorRate).toBe(15);
@@ -243,7 +257,7 @@ describe('Service Consolidation Test Suite', () => {
 
     it('should export metrics data', () => {
       const exportData = servicePerformanceMonitor.exportMetrics();
-      
+
       expect(exportData).toBeDefined();
       expect(exportData).toHaveProperty('metrics');
       expect(exportData).toHaveProperty('callHistory');
@@ -255,7 +269,7 @@ describe('Service Consolidation Test Suite', () => {
   describe('Service Validation Test', () => {
     it('should run comprehensive validation', async () => {
       const summary = await serviceValidationTest.runFullValidation();
-      
+
       expect(summary).toBeDefined();
       expect(summary.totalServices).toBeGreaterThan(0);
       expect(summary.successfulServices).toBeGreaterThan(0);
@@ -265,7 +279,7 @@ describe('Service Consolidation Test Suite', () => {
 
     it('should export validation results', () => {
       const results = serviceValidationTest.exportResults();
-      
+
       expect(results).toBeDefined();
       expect(results).toHaveProperty('totalServices');
       expect(results).toHaveProperty('successfulServices');
@@ -280,7 +294,7 @@ describe('Service Consolidation Test Suite', () => {
     it('should have no deprecated service usage', () => {
       // This test ensures that all services are using the consolidated versions
       // The fact that these tests run without errors indicates successful consolidation
-      
+
       expect(UnifiedAIService).toBeDefined();
       expect(SecureAuthService).toBeDefined();
       expect(KnowledgeHubService).toBeDefined();
@@ -296,13 +310,13 @@ describe('Service Consolidation Test Suite', () => {
         UnifiedAIService,
         KnowledgeHubService,
         BIFailureService,
-        InventoryServiceFacade
+        InventoryServiceFacade,
       ];
-      
-      services.forEach(Service => {
+
+      services.forEach((Service) => {
         // All services should have static methods
         expect(typeof Service).toBe('function');
-        
+
         // Check for common patterns (this is a basic check)
         const serviceMethods = Object.getOwnPropertyNames(Service);
         expect(serviceMethods.length).toBeGreaterThan(0);

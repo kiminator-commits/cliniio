@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from '@mdi/react';
-import { mdiAlert, mdiClose } from '@mdi/js';
+import { mdiAlert, mdiClose, mdiMinus } from '@mdi/js';
 
 /**
  * Props for the BIFailureHeader component.
@@ -11,6 +11,7 @@ import { mdiAlert, mdiClose } from '@mdi/js';
 interface BIFailureHeaderProps {
   isSubmitting: boolean;
   onClose: () => void;
+  onMinimize?: () => void;
 }
 
 /**
@@ -24,6 +25,7 @@ interface BIFailureHeaderProps {
 export const BIFailureHeader: React.FC<BIFailureHeaderProps> = ({
   isSubmitting,
   onClose,
+  onMinimize,
 }) => {
   const handleClose = () => {
     if (!isSubmitting) {
@@ -56,18 +58,36 @@ export const BIFailureHeader: React.FC<BIFailureHeaderProps> = ({
           </p>
         </div>
       </div>
-      <button
-        onClick={handleClose}
-        onKeyDown={handleKeyDown}
-        disabled={isSubmitting}
-        className={`p-2 hover:bg-gray-100 rounded-lg transition-colors ${
-          isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-        aria-label="Close modal"
-        aria-describedby="bi-failure-modal-description"
-      >
-        <Icon path={mdiClose} size={1.2} />
-      </button>
+      <div className="flex items-center gap-2">
+        {/* Minimize Button */}
+        {onMinimize && (
+          <button
+            onClick={onMinimize}
+            disabled={isSubmitting}
+            className={`p-2 hover:bg-gray-100 rounded-lg transition-colors ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            aria-label="Minimize workflow to banner"
+            title="Minimize to continue working on other tasks"
+          >
+            <Icon path={mdiMinus} size={1.2} />
+          </button>
+        )}
+
+        {/* Close Button */}
+        <button
+          onClick={handleClose}
+          onKeyDown={handleKeyDown}
+          disabled={isSubmitting}
+          className={`p-2 hover:bg-gray-100 rounded-lg transition-colors ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          aria-label="Close modal"
+          aria-describedby="bi-failure-modal-description"
+        >
+          <Icon path={mdiClose} size={1.2} />
+        </button>
+      </div>
     </div>
   );
 };

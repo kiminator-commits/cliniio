@@ -59,18 +59,15 @@ export function shouldTriggerAlert(
       break;
     case 'gte':
       shouldAlert = metric.value >= threshold.warning;
-      severity =
-        metric.value >= threshold.critical ? 'critical' : 'warning';
+      severity = metric.value >= threshold.critical ? 'critical' : 'warning';
       break;
     case 'lte':
       shouldAlert = metric.value <= threshold.warning;
-      severity =
-        metric.value <= threshold.critical ? 'critical' : 'warning';
+      severity = metric.value <= threshold.critical ? 'critical' : 'warning';
       break;
     case 'eq':
       shouldAlert = metric.value === threshold.warning;
-      severity =
-        metric.value === threshold.critical ? 'critical' : 'warning';
+      severity = metric.value === threshold.critical ? 'critical' : 'warning';
       break;
   }
 
@@ -194,7 +191,10 @@ export function isAlertRecent(alertTimestamp: Date): boolean {
 /**
  * Calculate throughput rate
  */
-export function calculateThroughputRate(count: number, period: number = 60): number {
+export function calculateThroughputRate(
+  count: number,
+  period: number = 60
+): number {
   return count / period;
 }
 
@@ -222,6 +222,9 @@ export function bytesToMB(bytes: number): number {
 /**
  * Check if memory usage is healthy
  */
-export function isMemoryUsageHealthy(memoryBytes: number, thresholdMB: number = 200): boolean {
+export function isMemoryUsageHealthy(
+  memoryBytes: number,
+  thresholdMB: number = 200
+): boolean {
   return memoryBytes < thresholdMB * 1024 * 1024;
 }

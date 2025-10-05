@@ -161,7 +161,9 @@ export class AISettingsPersistenceProvider {
   }
 
   // Restore settings from backup
-  async restoreSettings(backupDate?: string): Promise<UnifiedAISettings | null> {
+  async restoreSettings(
+    backupDate?: string
+  ): Promise<UnifiedAISettings | null> {
     try {
       let query = supabase
         .from('ai_settings_backup')
@@ -192,10 +194,12 @@ export class AISettingsPersistenceProvider {
   }
 
   // Get list of available backups
-  async getAvailableBackups(): Promise<Array<{
-    backup_date: string;
-    ai_version: string;
-  }>> {
+  async getAvailableBackups(): Promise<
+    Array<{
+      backup_date: string;
+      ai_version: string;
+    }>
+  > {
     try {
       const { data, error } = await supabase
         .from('ai_settings_backup')
@@ -224,7 +228,7 @@ export class AISettingsPersistenceProvider {
   importSettingsFromJson(jsonString: string): UnifiedAISettings | null {
     try {
       const parsed = JSON.parse(jsonString);
-      
+
       // Validate that it has the required structure
       if (!parsed.aiEnabled || !parsed.facilityId || !parsed.aiConfig) {
         throw new Error('Invalid settings format');
@@ -267,18 +271,24 @@ export class AISettingsPersistenceProvider {
       'updated_at',
     ];
 
-    requiredProperties.forEach(prop => {
+    requiredProperties.forEach((prop) => {
       if (!(prop in settings)) {
         errors.push(`Missing required property: ${prop}`);
       }
     });
 
     // Check nested object structures
-    if (settings.computerVision && typeof settings.computerVision !== 'object') {
+    if (
+      settings.computerVision &&
+      typeof settings.computerVision !== 'object'
+    ) {
       errors.push('computerVision must be an object');
     }
 
-    if (settings.predictiveAnalytics && typeof settings.predictiveAnalytics !== 'object') {
+    if (
+      settings.predictiveAnalytics &&
+      typeof settings.predictiveAnalytics !== 'object'
+    ) {
       errors.push('predictiveAnalytics must be an object');
     }
 

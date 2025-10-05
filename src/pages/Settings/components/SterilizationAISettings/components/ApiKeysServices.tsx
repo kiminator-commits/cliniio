@@ -58,10 +58,7 @@ const ApiKeysServices: React.FC<ApiKeysServicesProps> = ({
             type="password"
             value={settings.google_vision_api_key_encrypted}
             onChange={(e) =>
-              onApiKeyChange(
-                'google_vision_api_key_encrypted',
-                e.target.value
-              )
+              onApiKeyChange('google_vision_api_key_encrypted', e.target.value)
             }
             disabled={!settings.ai_enabled}
             placeholder="AIza..."

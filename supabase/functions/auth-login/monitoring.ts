@@ -105,7 +105,8 @@ class SecurityMonitoringService {
     ];
   }
 
-  startMonitoring(intervalMs: number = 300000): void { // 5 minutes default
+  startMonitoring(intervalMs: number = 300000): void {
+    // 5 minutes default
     if (this.isMonitoring) return;
 
     this.isMonitoring = true;
@@ -131,7 +132,7 @@ class SecurityMonitoringService {
       // This would typically query your database for metrics
       // For now, we'll simulate metrics collection
       const now = Date.now();
-      const fiveMinutesAgo = now - (5 * 60 * 1000);
+      const fiveMinutesAgo = now - 5 * 60 * 1000;
 
       // Simulate metrics collection
       const metrics: SecurityMetrics = {
@@ -168,13 +169,19 @@ class SecurityMonitoringService {
       if (!rule.enabled) continue;
 
       // Check cooldown
-      if (rule.lastTriggered && 
-          (Date.now() - rule.lastTriggered) < (rule.cooldownMinutes * 60 * 1000)) {
+      if (
+        rule.lastTriggered &&
+        Date.now() - rule.lastTriggered < rule.cooldownMinutes * 60 * 1000
+      ) {
         continue;
       }
 
-      const shouldAlert = this.evaluateCondition(rule.condition, latestMetrics, rule.threshold);
-      
+      const shouldAlert = this.evaluateCondition(
+        rule.condition,
+        latestMetrics,
+        rule.threshold
+      );
+
       if (shouldAlert) {
         this.triggerAlert(rule, latestMetrics);
         rule.lastTriggered = Date.now();
@@ -182,7 +189,11 @@ class SecurityMonitoringService {
     }
   }
 
-  private evaluateCondition(condition: string, metrics: SecurityMetrics, threshold: number): boolean {
+  private evaluateCondition(
+    condition: string,
+    metrics: SecurityMetrics,
+    threshold: number
+  ): boolean {
     try {
       // Simple condition evaluation
       // In production, you'd want a more robust expression evaluator
@@ -193,12 +204,30 @@ class SecurityMonitoringService {
 
       // Replace variables in condition
       let expression = condition;
-      expression = expression.replace(/failedLogins/g, metrics.failedLogins.toString());
-      expression = expression.replace(/totalRequests/g, metrics.totalRequests.toString());
-      expression = expression.replace(/rateLimitHits/g, metrics.rateLimitHits.toString());
-      expression = expression.replace(/threatDetections/g, metrics.threatDetections.toString());
-      expression = expression.replace(/averageResponseTime/g, metrics.averageResponseTime.toString());
-      expression = expression.replace(/errorRate/g, metrics.errorRate.toString());
+      expression = expression.replace(
+        /failedLogins/g,
+        metrics.failedLogins.toString()
+      );
+      expression = expression.replace(
+        /totalRequests/g,
+        metrics.totalRequests.toString()
+      );
+      expression = expression.replace(
+        /rateLimitHits/g,
+        metrics.rateLimitHits.toString()
+      );
+      expression = expression.replace(
+        /threatDetections/g,
+        metrics.threatDetections.toString()
+      );
+      expression = expression.replace(
+        /averageResponseTime/g,
+        metrics.averageResponseTime.toString()
+      );
+      expression = expression.replace(
+        /errorRate/g,
+        metrics.errorRate.toString()
+      );
       expression = expression.replace(/threshold/g, threshold.toString());
 
       // Evaluate the expression
@@ -238,7 +267,10 @@ class SecurityMonitoringService {
     console.log(`Security alert triggered: ${alert.message}`);
   }
 
-  private generateAlertMessage(rule: AlertRule, metrics: SecurityMetrics): string {
+  private generateAlertMessage(
+    rule: AlertRule,
+    metrics: SecurityMetrics
+  ): string {
     switch (rule.id) {
       case 'high_failure_rate':
         return `High login failure rate detected: ${((metrics.failedLogins / metrics.totalRequests) * 100).toFixed(1)}%`;
@@ -261,7 +293,7 @@ class SecurityMonitoringService {
     try {
       // In production, you would send to various notification channels
       // For now, we'll just log the alert
-      
+
       const notification = {
         alert,
         channels: ['console', 'webhook', 'email'], // Configure based on severity
@@ -278,7 +310,6 @@ class SecurityMonitoringService {
           body: JSON.stringify(notification),
         });
       }
-
     } catch (error) {
       console.error('Failed to send alert notification:', error);
     }
@@ -304,7 +335,7 @@ class SecurityMonitoringService {
     if (this.metrics.length > 0) {
       const metrics = this.metrics[this.metrics.length - 1];
       metrics.totalRequests++;
-      
+
       if (success) {
         metrics.successfulLogins++;
       } else {
@@ -314,7 +345,8 @@ class SecurityMonitoringService {
       // Update average response time
       const totalRequests = metrics.totalRequests;
       const currentAvg = metrics.averageResponseTime;
-      metrics.averageResponseTime = ((currentAvg * (totalRequests - 1)) + responseTime) / totalRequests;
+      metrics.averageResponseTime =
+        (currentAvg * (totalRequests - 1) + responseTime) / totalRequests;
     }
   }
 
@@ -331,21 +363,22 @@ class SecurityMonitoringService {
   }
 
   getMetrics(timeRangeMinutes: number = 60): SecurityMetrics[] {
-    const cutoff = Date.now() - (timeRangeMinutes * 60 * 1000);
-    return this.metrics.filter(m => m.timestamp >= cutoff);
+    const cutoff = Date.now() - timeRangeMinutes * 60 * 1000;
+    return this.metrics.filter((m) => m.timestamp >= cutoff);
   }
 
-  getAlerts(timeRangeMinutes: number = 1440): SecurityAlert[] { // 24 hours default
-    const cutoff = Date.now() - (timeRangeMinutes * 60 * 1000);
-    return this.alerts.filter(a => a.timestamp >= cutoff);
+  getAlerts(timeRangeMinutes: number = 1440): SecurityAlert[] {
+    // 24 hours default
+    const cutoff = Date.now() - timeRangeMinutes * 60 * 1000;
+    return this.alerts.filter((a) => a.timestamp >= cutoff);
   }
 
   getActiveAlerts(): SecurityAlert[] {
-    return this.alerts.filter(a => !a.resolved);
+    return this.alerts.filter((a) => !a.resolved);
   }
 
   acknowledgeAlert(alertId: string): boolean {
-    const alert = this.alerts.find(a => a.id === alertId);
+    const alert = this.alerts.find((a) => a.id === alertId);
     if (alert) {
       alert.acknowledged = true;
       return true;
@@ -354,7 +387,7 @@ class SecurityMonitoringService {
   }
 
   resolveAlert(alertId: string): boolean {
-    const alert = this.alerts.find(a => a.id === alertId);
+    const alert = this.alerts.find((a) => a.id === alertId);
     if (alert) {
       alert.resolved = true;
       return true;
@@ -379,7 +412,7 @@ class SecurityMonitoringService {
   }
 
   updateAlertRule(ruleId: string, updates: Partial<AlertRule>): boolean {
-    const rule = this.alertRules.find(r => r.id === ruleId);
+    const rule = this.alertRules.find((r) => r.id === ruleId);
     if (rule) {
       Object.assign(rule, updates);
       return true;
@@ -392,13 +425,13 @@ class SecurityMonitoringService {
       ...rule,
       id: `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
-    
+
     this.alertRules.push(newRule);
     return newRule.id;
   }
 
   removeAlertRule(ruleId: string): boolean {
-    const index = this.alertRules.findIndex(r => r.id === ruleId);
+    const index = this.alertRules.findIndex((r) => r.id === ruleId);
     if (index !== -1) {
       this.alertRules.splice(index, 1);
       return true;
@@ -413,7 +446,7 @@ let securityMonitoringService: SecurityMonitoringService | null = null;
 export function getSecurityMonitoringService(): SecurityMonitoringService {
   if (!securityMonitoringService) {
     securityMonitoringService = new SecurityMonitoringService();
-    
+
     // Start monitoring if enabled
     if (Deno.env.get('ENABLE_SECURITY_MONITORING') === 'true') {
       securityMonitoringService.startMonitoring();
@@ -423,4 +456,9 @@ export function getSecurityMonitoringService(): SecurityMonitoringService {
   return securityMonitoringService;
 }
 
-export { SecurityMonitoringService, type SecurityMetrics, type SecurityAlert, type AlertRule };
+export {
+  SecurityMonitoringService,
+  type SecurityMetrics,
+  type SecurityAlert,
+  type AlertRule,
+};

@@ -16,13 +16,13 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
   showMigrationStatus = true,
 }) => {
   const { login, isLoading, error, migrationStatus } = useSecureAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false,
   });
-  
+
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rateLimitInfo, setRateLimitInfo] = useState<{
@@ -33,14 +33,14 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
 
     // Clear field-specific errors
     if (formErrors[name]) {
-      setFormErrors(prev => ({
+      setFormErrors((prev) => ({
         ...prev,
         [name]: '',
       }));
@@ -72,7 +72,7 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -97,7 +97,8 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
         onLoginError?.(result.error || 'Login failed');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Login failed';
       onLoginError?.(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -124,10 +125,10 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
             <h3>Updating Security System</h3>
             <p>Please wait while we update your authentication system...</p>
             <div className="progress-bar">
-              <div 
+              <div
                 className="progress-fill"
-                style={{ 
-                  width: `${(migrationStatus.stepsCompleted.length / 5) * 100}%` 
+                style={{
+                  width: `${(migrationStatus.stepsCompleted.length / 5) * 100}%`,
                 }}
               />
             </div>
@@ -165,11 +166,7 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
           </div>
 
           {/* Global Error */}
-          {error && (
-            <div className="error-message global-error">
-              {error}
-            </div>
-          )}
+          {error && <div className="error-message global-error">{error}</div>}
 
           {/* Rate Limit Warning */}
           {rateLimitInfo && (
@@ -179,9 +176,7 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
                 Too many login attempts. Please try again in{' '}
                 {formatResetTime(rateLimitInfo.resetTime)}.
               </p>
-              <p>
-                Remaining attempts: {rateLimitInfo.remainingAttempts}
-              </p>
+              <p>Remaining attempts: {rateLimitInfo.remainingAttempts}</p>
             </div>
           )}
 
@@ -259,9 +254,9 @@ export const SecureLoginForm: React.FC<SecureLoginFormProps> = ({
           {/* Security Notice */}
           <div className="security-notice">
             <p>
-              <strong>🔒 Secure Authentication:</strong> This login uses advanced 
-              security features including rate limiting, threat detection, and 
-              cryptographic verification.
+              <strong>🔒 Secure Authentication:</strong> This login uses
+              advanced security features including rate limiting, threat
+              detection, and cryptographic verification.
             </p>
           </div>
         </form>

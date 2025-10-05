@@ -92,24 +92,56 @@ class SecurityTestRunner {
     const executionTime = Date.now() - startTime;
 
     // Calculate overall metrics
-    const totalTests = testSuites.reduce((sum, suite) => sum + suite.tests.length, 0);
-    const passedTests = testSuites.reduce((sum, suite) => 
-      sum + suite.tests.filter(test => test.status === 'passed').length, 0);
-    const failedTests = testSuites.reduce((sum, suite) => 
-      sum + suite.tests.filter(test => test.status === 'failed').length, 0);
-    const skippedTests = testSuites.reduce((sum, suite) => 
-      sum + suite.tests.filter(test => test.status === 'skipped').length, 0);
+    const totalTests = testSuites.reduce(
+      (sum, suite) => sum + suite.tests.length,
+      0
+    );
+    const passedTests = testSuites.reduce(
+      (sum, suite) =>
+        sum + suite.tests.filter((test) => test.status === 'passed').length,
+      0
+    );
+    const failedTests = testSuites.reduce(
+      (sum, suite) =>
+        sum + suite.tests.filter((test) => test.status === 'failed').length,
+      0
+    );
+    const skippedTests = testSuites.reduce(
+      (sum, suite) =>
+        sum + suite.tests.filter((test) => test.status === 'skipped').length,
+      0
+    );
 
-    const criticalIssues = testSuites.reduce((sum, suite) => sum + suite.criticalIssues, 0);
-    const highIssues = testSuites.reduce((sum, suite) => sum + suite.highIssues, 0);
-    const mediumIssues = testSuites.reduce((sum, suite) => sum + suite.mediumIssues, 0);
-    const lowIssues = testSuites.reduce((sum, suite) => sum + suite.lowIssues, 0);
+    const criticalIssues = testSuites.reduce(
+      (sum, suite) => sum + suite.criticalIssues,
+      0
+    );
+    const highIssues = testSuites.reduce(
+      (sum, suite) => sum + suite.highIssues,
+      0
+    );
+    const mediumIssues = testSuites.reduce(
+      (sum, suite) => sum + suite.mediumIssues,
+      0
+    );
+    const lowIssues = testSuites.reduce(
+      (sum, suite) => sum + suite.lowIssues,
+      0
+    );
 
     const overallScore = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
 
-    const summary = this.generateSummary(overallScore, criticalIssues, highIssues);
+    const summary = this.generateSummary(
+      overallScore,
+      criticalIssues,
+      highIssues
+    );
     const recommendations = this.generateRecommendations(testSuites);
-    const nextSteps = this.generateNextSteps(criticalIssues, highIssues, mediumIssues);
+    const nextSteps = this.generateNextSteps(
+      criticalIssues,
+      highIssues,
+      mediumIssues
+    );
 
     const report: SecurityTestReport = {
       reportId,
@@ -130,7 +162,7 @@ class SecurityTestRunner {
     };
 
     this.testReports.push(report);
-    
+
     console.log('✅ Security testing completed!');
     console.log(`📊 Overall Score: ${overallScore.toFixed(1)}%`);
     console.log(`🚨 Critical Issues: ${criticalIssues}`);
@@ -146,9 +178,9 @@ class SecurityTestRunner {
 
     try {
       const penetrationReport = await this.penetrationTester.runAllTests();
-      
+
       // Convert penetration test results to security tests
-      penetrationReport.tests.forEach(test => {
+      penetrationReport.tests.forEach((test) => {
         tests.push({
           id: `penetration_${test.testName.replace(/\s+/g, '_').toLowerCase()}`,
           name: test.testName,
@@ -166,7 +198,8 @@ class SecurityTestRunner {
 
       return {
         name: 'Penetration Testing Suite',
-        description: 'Comprehensive penetration testing for authentication system',
+        description:
+          'Comprehensive penetration testing for authentication system',
         tests,
         overallScore: penetrationReport.overallScore,
         criticalIssues: penetrationReport.criticalIssues,
@@ -174,8 +207,8 @@ class SecurityTestRunner {
         mediumIssues: penetrationReport.mediumIssues,
         lowIssues: penetrationReport.lowIssues,
         recommendations: penetrationReport.tests
-          .filter(t => !t.passed)
-          .flatMap(t => t.recommendations),
+          .filter((t) => !t.passed)
+          .flatMap((t) => t.recommendations),
         executionTime,
         timestamp: Date.now(),
       };
@@ -183,16 +216,18 @@ class SecurityTestRunner {
       return {
         name: 'Penetration Testing Suite',
         description: 'Penetration testing failed to execute',
-        tests: [{
-          id: 'penetration_error',
-          name: 'Penetration Test Execution',
-          type: 'penetration',
-          status: 'failed',
-          score: 0,
-          details: `Penetration testing failed: ${error.message}`,
-          recommendations: ['Fix penetration testing implementation'],
-          executionTime: Date.now() - startTime,
-        }],
+        tests: [
+          {
+            id: 'penetration_error',
+            name: 'Penetration Test Execution',
+            type: 'penetration',
+            status: 'failed',
+            score: 0,
+            details: `Penetration testing failed: ${error.message}`,
+            recommendations: ['Fix penetration testing implementation'],
+            executionTime: Date.now() - startTime,
+          },
+        ],
         overallScore: 0,
         criticalIssues: 1,
         highIssues: 0,
@@ -210,10 +245,11 @@ class SecurityTestRunner {
     const tests: SecurityTest[] = [];
 
     try {
-      const vulnerabilityReport = await this.vulnerabilityScanner.scanAuthenticationSystem();
-      
+      const vulnerabilityReport =
+        await this.vulnerabilityScanner.scanAuthenticationSystem();
+
       // Convert vulnerability scan results to security tests
-      vulnerabilityReport.vulnerabilities.forEach(vuln => {
+      vulnerabilityReport.vulnerabilities.forEach((vuln) => {
         tests.push({
           id: `vulnerability_${vuln.id}`,
           name: vuln.name,
@@ -231,7 +267,8 @@ class SecurityTestRunner {
 
       return {
         name: 'Vulnerability Scanning Suite',
-        description: 'Automated vulnerability scanning for authentication system',
+        description:
+          'Automated vulnerability scanning for authentication system',
         tests,
         overallScore: 100 - vulnerabilityReport.riskScore,
         criticalIssues: vulnerabilityReport.criticalCount,
@@ -246,16 +283,18 @@ class SecurityTestRunner {
       return {
         name: 'Vulnerability Scanning Suite',
         description: 'Vulnerability scanning failed to execute',
-        tests: [{
-          id: 'vulnerability_error',
-          name: 'Vulnerability Scan Execution',
-          type: 'vulnerability',
-          status: 'failed',
-          score: 0,
-          details: `Vulnerability scanning failed: ${error.message}`,
-          recommendations: ['Fix vulnerability scanning implementation'],
-          executionTime: Date.now() - startTime,
-        }],
+        tests: [
+          {
+            id: 'vulnerability_error',
+            name: 'Vulnerability Scan Execution',
+            type: 'vulnerability',
+            status: 'failed',
+            score: 0,
+            details: `Vulnerability scanning failed: ${error.message}`,
+            recommendations: ['Fix vulnerability scanning implementation'],
+            executionTime: Date.now() - startTime,
+          },
+        ],
         overallScore: 0,
         criticalIssues: 1,
         highIssues: 0,
@@ -273,8 +312,9 @@ class SecurityTestRunner {
     const tests: SecurityTest[] = [];
 
     try {
-      const validationReport = await this.validationFramework.runSecurityValidation();
-      
+      const validationReport =
+        await this.validationFramework.runSecurityValidation();
+
       // Convert validation results to security tests
       validationReport.results.forEach((result, index) => {
         const rule = this.validationFramework.getValidationRules()[index];
@@ -310,16 +350,18 @@ class SecurityTestRunner {
       return {
         name: 'Security Validation Suite',
         description: 'Security validation failed to execute',
-        tests: [{
-          id: 'validation_error',
-          name: 'Security Validation Execution',
-          type: 'validation',
-          status: 'failed',
-          score: 0,
-          details: `Security validation failed: ${error.message}`,
-          recommendations: ['Fix security validation implementation'],
-          executionTime: Date.now() - startTime,
-        }],
+        tests: [
+          {
+            id: 'validation_error',
+            name: 'Security Validation Execution',
+            type: 'validation',
+            status: 'failed',
+            score: 0,
+            details: `Security validation failed: ${error.message}`,
+            recommendations: ['Fix security validation implementation'],
+            executionTime: Date.now() - startTime,
+          },
+        ],
         overallScore: 0,
         criticalIssues: 1,
         highIssues: 0,
@@ -365,7 +407,7 @@ class SecurityTestRunner {
         },
       ];
 
-      integrationTests.forEach(test => {
+      integrationTests.forEach((test) => {
         tests.push({
           id: test.id,
           name: test.name,
@@ -379,7 +421,7 @@ class SecurityTestRunner {
       });
 
       const executionTime = Date.now() - startTime;
-      const passedTests = tests.filter(t => t.status === 'passed').length;
+      const passedTests = tests.filter((t) => t.status === 'passed').length;
       const overallScore = (passedTests / tests.length) * 100;
 
       return {
@@ -399,16 +441,18 @@ class SecurityTestRunner {
       return {
         name: 'Integration Testing Suite',
         description: 'Integration testing failed to execute',
-        tests: [{
-          id: 'integration_error',
-          name: 'Integration Test Execution',
-          type: 'integration',
-          status: 'failed',
-          score: 0,
-          details: `Integration testing failed: ${error.message}`,
-          recommendations: ['Fix integration testing implementation'],
-          executionTime: Date.now() - startTime,
-        }],
+        tests: [
+          {
+            id: 'integration_error',
+            name: 'Integration Test Execution',
+            type: 'integration',
+            status: 'failed',
+            score: 0,
+            details: `Integration testing failed: ${error.message}`,
+            recommendations: ['Fix integration testing implementation'],
+            executionTime: Date.now() - startTime,
+          },
+        ],
         overallScore: 0,
         criticalIssues: 1,
         highIssues: 0,
@@ -421,7 +465,11 @@ class SecurityTestRunner {
     }
   }
 
-  private generateSummary(overallScore: number, criticalIssues: number, highIssues: number): string {
+  private generateSummary(
+    overallScore: number,
+    criticalIssues: number,
+    highIssues: number
+  ): string {
     if (criticalIssues > 0) {
       return `CRITICAL: ${criticalIssues} critical security issues require immediate attention. Overall score: ${overallScore.toFixed(1)}%`;
     } else if (highIssues > 0) {
@@ -441,26 +489,40 @@ class SecurityTestRunner {
     const recommendations: string[] = [];
 
     // Collect all recommendations from test suites
-    testSuites.forEach(suite => {
+    testSuites.forEach((suite) => {
       recommendations.push(...suite.recommendations);
     });
 
     // Add general recommendations
-    const criticalIssues = testSuites.reduce((sum, suite) => sum + suite.criticalIssues, 0);
-    const highIssues = testSuites.reduce((sum, suite) => sum + suite.highIssues, 0);
+    const criticalIssues = testSuites.reduce(
+      (sum, suite) => sum + suite.criticalIssues,
+      0
+    );
+    const highIssues = testSuites.reduce(
+      (sum, suite) => sum + suite.highIssues,
+      0
+    );
 
     if (criticalIssues > 0) {
-      recommendations.unshift('URGENT: Address all critical security issues immediately');
+      recommendations.unshift(
+        'URGENT: Address all critical security issues immediately'
+      );
     }
     if (highIssues > 0) {
-      recommendations.unshift('HIGH PRIORITY: Fix all high-severity security issues');
+      recommendations.unshift(
+        'HIGH PRIORITY: Fix all high-severity security issues'
+      );
     }
 
     // Remove duplicates
     return [...new Set(recommendations)];
   }
 
-  private generateNextSteps(criticalIssues: number, highIssues: number, mediumIssues: number): string[] {
+  private generateNextSteps(
+    criticalIssues: number,
+    highIssues: number,
+    mediumIssues: number
+  ): string[] {
     const nextSteps: string[] = [];
 
     if (criticalIssues > 0) {
@@ -494,13 +556,15 @@ class SecurityTestRunner {
   }
 
   getLatestReport(): SecurityTestReport | null {
-    return this.testReports.length > 0 ? this.testReports[this.testReports.length - 1] : null;
+    return this.testReports.length > 0
+      ? this.testReports[this.testReports.length - 1]
+      : null;
   }
 
   async runQuickSecurityCheck(): Promise<SecurityTestReport> {
     // Run a subset of critical tests for quick validation
     console.log('⚡ Running quick security check...');
-    
+
     // This would run only the most critical tests
     return await this.runComprehensiveSecurityTests();
   }
@@ -508,18 +572,21 @@ class SecurityTestRunner {
   async runContinuousSecurityMonitoring(): Promise<void> {
     // Run security tests continuously
     console.log('🔄 Starting continuous security monitoring...');
-    
-    setInterval(async () => {
-      try {
-        const report = await this.runQuickSecurityCheck();
-        if (report.criticalIssues > 0) {
-          console.log('🚨 CRITICAL SECURITY ISSUES DETECTED!');
-          // In a real implementation, this would trigger alerts
+
+    setInterval(
+      async () => {
+        try {
+          const report = await this.runQuickSecurityCheck();
+          if (report.criticalIssues > 0) {
+            console.log('🚨 CRITICAL SECURITY ISSUES DETECTED!');
+            // In a real implementation, this would trigger alerts
+          }
+        } catch (error) {
+          console.error('Security monitoring error:', error);
         }
-      } catch (error) {
-        console.error('Security monitoring error:', error);
-      }
-    }, 5 * 60 * 1000); // Run every 5 minutes
+      },
+      5 * 60 * 1000
+    ); // Run every 5 minutes
   }
 }
 
@@ -568,4 +635,9 @@ describe('Security Test Runner', () => {
   });
 });
 
-export { SecurityTestRunner, type SecurityTestSuite, type SecurityTest, type SecurityTestReport };
+export {
+  SecurityTestRunner,
+  type SecurityTestSuite,
+  type SecurityTest,
+  type SecurityTestReport,
+};

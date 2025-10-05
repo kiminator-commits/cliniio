@@ -1,6 +1,16 @@
-import { GamificationLevelProvider, EnhancedLevelData, UserStats } from './providers/GamificationLevelProvider';
-import { GamificationSkillProvider, SkillLevels } from './providers/GamificationSkillProvider';
-import { GamificationAchievementProvider, Achievement } from './providers/GamificationAchievementProvider';
+import {
+  GamificationLevelProvider,
+  EnhancedLevelData,
+  UserStats,
+} from './providers/GamificationLevelProvider';
+import {
+  GamificationSkillProvider,
+  SkillLevels,
+} from './providers/GamificationSkillProvider';
+import {
+  GamificationAchievementProvider,
+  Achievement,
+} from './providers/GamificationAchievementProvider';
 import { GamificationRankingProvider } from './providers/GamificationRankingProvider';
 import { GamificationStatsProvider } from './providers/GamificationStatsProvider';
 
@@ -26,7 +36,10 @@ export async function calculateEnhancedLevel(
     const stats = await statsProvider.getUserCumulativeStats(facilityId);
 
     // Calculate skill-based levels
-    const skillLevels = await skillProvider.calculateSkillLevels(userId, facilityId);
+    const skillLevels = await skillProvider.calculateSkillLevels(
+      userId,
+      facilityId
+    );
 
     // Get achievements
     const achievements = await achievementProvider.getUserAchievements();
@@ -64,7 +77,6 @@ export async function calculateEnhancedLevel(
     return getDefaultEnhancedLevel();
   }
 }
-
 
 /**
  * Get default enhanced level data

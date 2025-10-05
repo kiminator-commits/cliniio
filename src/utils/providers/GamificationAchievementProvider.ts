@@ -113,7 +113,9 @@ export class GamificationAchievementProvider {
       learningModules?: number;
     }
   ): boolean {
-    const achievement = this.getDefaultAchievements().find(a => a.id === achievementId);
+    const achievement = this.getDefaultAchievements().find(
+      (a) => a.id === achievementId
+    );
     if (!achievement) return false;
 
     switch (achievementId) {
@@ -132,8 +134,10 @@ export class GamificationAchievementProvider {
       case 'streak_master':
         return userStats.currentStreak >= 30;
       case 'perfectionist':
-        return userStats.totalTasks > 0 && 
-               (userStats.completedTasks / userStats.totalTasks) === 1;
+        return (
+          userStats.totalTasks > 0 &&
+          userStats.completedTasks / userStats.totalTasks === 1
+        );
       default:
         return false;
     }
@@ -158,8 +162,13 @@ export class GamificationAchievementProvider {
     const allAchievements = this.getDefaultAchievements();
 
     allAchievements.forEach((achievement) => {
-      const wasUnlocked = previousAchievements.find(a => a.id === achievement.id)?.unlocked || false;
-      const isNowUnlocked = this.checkAchievementUnlock(achievement.id, currentStats);
+      const wasUnlocked =
+        previousAchievements.find((a) => a.id === achievement.id)?.unlocked ||
+        false;
+      const isNowUnlocked = this.checkAchievementUnlock(
+        achievement.id,
+        currentStats
+      );
 
       if (!wasUnlocked && isNowUnlocked) {
         newlyUnlocked.push({
@@ -180,21 +189,23 @@ export class GamificationAchievementProvider {
     achievements: Achievement[],
     category: Achievement['category']
   ): Achievement[] {
-    return achievements.filter(achievement => achievement.category === category);
+    return achievements.filter(
+      (achievement) => achievement.category === category
+    );
   }
 
   /**
    * Get unlocked achievements
    */
   getUnlockedAchievements(achievements: Achievement[]): Achievement[] {
-    return achievements.filter(achievement => achievement.unlocked);
+    return achievements.filter((achievement) => achievement.unlocked);
   }
 
   /**
    * Get locked achievements
    */
   getLockedAchievements(achievements: Achievement[]): Achievement[] {
-    return achievements.filter(achievement => !achievement.unlocked);
+    return achievements.filter((achievement) => !achievement.unlocked);
   }
 
   /**
@@ -250,8 +261,12 @@ export class GamificationAchievementProvider {
         target = 30;
         break;
       case 'perfectionist':
-        current = userStats.totalTasks > 0 ? 
-          Math.round((userStats.completedTasks / userStats.totalTasks) * 100) : 0;
+        current =
+          userStats.totalTasks > 0
+            ? Math.round(
+                (userStats.completedTasks / userStats.totalTasks) * 100
+              )
+            : 0;
         target = 100;
         break;
       default:
@@ -279,28 +294,34 @@ export class GamificationAchievementProvider {
     lockedAchievements: number;
     totalPoints: number;
     unlockedPoints: number;
-    byCategory: Record<string, {
-      total: number;
-      unlocked: number;
-      points: number;
-    }>;
+    byCategory: Record<
+      string,
+      {
+        total: number;
+        unlocked: number;
+        points: number;
+      }
+    >;
     completionRate: number;
   } {
     const totalAchievements = achievements.length;
-    const unlockedAchievements = achievements.filter(a => a.unlocked).length;
+    const unlockedAchievements = achievements.filter((a) => a.unlocked).length;
     const lockedAchievements = totalAchievements - unlockedAchievements;
     const totalPoints = achievements.reduce((sum, a) => sum + a.points, 0);
     const unlockedPoints = achievements
-      .filter(a => a.unlocked)
+      .filter((a) => a.unlocked)
       .reduce((sum, a) => sum + a.points, 0);
 
-    const byCategory: Record<string, {
-      total: number;
-      unlocked: number;
-      points: number;
-    }> = {};
+    const byCategory: Record<
+      string,
+      {
+        total: number;
+        unlocked: number;
+        points: number;
+      }
+    > = {};
 
-    achievements.forEach(achievement => {
+    achievements.forEach((achievement) => {
       if (!byCategory[achievement.category]) {
         byCategory[achievement.category] = {
           total: 0,
@@ -311,14 +332,16 @@ export class GamificationAchievementProvider {
 
       byCategory[achievement.category].total++;
       byCategory[achievement.category].points += achievement.points;
-      
+
       if (achievement.unlocked) {
         byCategory[achievement.category].unlocked++;
       }
     });
 
-    const completionRate = totalAchievements > 0 ? 
-      (unlockedAchievements / totalAchievements) * 100 : 0;
+    const completionRate =
+      totalAchievements > 0
+        ? (unlockedAchievements / totalAchievements) * 100
+        : 0;
 
     return {
       totalAchievements,
@@ -359,8 +382,11 @@ export class GamificationAchievementProvider {
       estimatedTimeToUnlock: string;
     }> = [];
 
-    lockedAchievements.forEach(achievement => {
-      const progressData = this.getAchievementProgress(achievement.id, userStats);
+    lockedAchievements.forEach((achievement) => {
+      const progressData = this.getAchievementProgress(
+        achievement.id,
+        userStats
+      );
       let priority: 'low' | 'medium' | 'high' = 'low';
       let estimatedTime = 'Unknown';
 
@@ -420,7 +446,13 @@ export class GamificationAchievementProvider {
     if (!achievement.category) {
       errors.push('Achievement category is required');
     } else {
-      const validCategories = ['sterilization', 'inventory', 'environmental', 'knowledge', 'general'];
+      const validCategories = [
+        'sterilization',
+        'inventory',
+        'environmental',
+        'knowledge',
+        'general',
+      ];
       if (!validCategories.includes(achievement.category)) {
         errors.push(`Invalid category: ${achievement.category}`);
       }
@@ -500,7 +532,7 @@ export class GamificationAchievementProvider {
   } {
     try {
       const achievements = JSON.parse(jsonData) as Achievement[];
-      
+
       if (!Array.isArray(achievements)) {
         return {
           success: false,
@@ -515,7 +547,9 @@ export class GamificationAchievementProvider {
       achievements.forEach((achievement, index) => {
         const validation = this.validateAchievement(achievement);
         if (!validation.isValid) {
-          errors.push(`Achievement ${index + 1}: ${validation.errors.join(', ')}`);
+          errors.push(
+            `Achievement ${index + 1}: ${validation.errors.join(', ')}`
+          );
         } else {
           validAchievements.push(achievement as Achievement);
         }

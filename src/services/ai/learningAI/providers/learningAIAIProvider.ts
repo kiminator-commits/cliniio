@@ -128,11 +128,7 @@ export async function processLearningPathOptimizationWithAI(): Promise<AILearnin
       quality_assurance_protocols: ['advanced_sterilization_techniques'],
     },
     alternative_paths: [
-      [
-        'safety_fundamentals',
-        'equipment_operation',
-        'sterilization_protocols',
-      ],
+      ['safety_fundamentals', 'equipment_operation', 'sterilization_protocols'],
       [
         'safety_fundamentals',
         'documentation_basics',
@@ -546,7 +542,9 @@ export function selectModelForTask(
 /**
  * Provider configuration
  */
-export function getProviderConfig(provider: 'openai' | 'google' | 'azure' | 'custom') {
+export function getProviderConfig(
+  provider: 'openai' | 'google' | 'azure' | 'custom'
+) {
   const configs = {
     openai: {
       baseUrl: process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1',

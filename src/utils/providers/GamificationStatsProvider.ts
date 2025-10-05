@@ -73,13 +73,11 @@ export class GamificationStatsProvider {
     updates: Partial<UserStats>
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('user_gamification_stats')
-        .upsert({
-          facility_id: facilityId,
-          ...updates,
-          updated_at: new Date().toISOString(),
-        });
+      const { error } = await supabase.from('user_gamification_stats').upsert({
+        facility_id: facilityId,
+        ...updates,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) throw error;
       return true;
@@ -126,9 +124,7 @@ export class GamificationStatsProvider {
   ): Promise<boolean> {
     try {
       const currentStats = await this.getUserCumulativeStats(facilityId);
-      const newStreak = increment 
-        ? currentStats.currentStreak + 1 
-        : 0; // Reset to 0 if broken
+      const newStreak = increment ? currentStats.currentStreak + 1 : 0; // Reset to 0 if broken
 
       return await this.updateUserStats(facilityId, {
         currentStreak: newStreak,
@@ -148,7 +144,7 @@ export class GamificationStatsProvider {
   ): Promise<boolean> {
     try {
       const currentStats = await this.getUserCumulativeStats(facilityId);
-      
+
       const updates: Partial<UserStats> = {
         completedTasks: currentStats.completedTasks + 1,
         totalPoints: currentStats.totalPoints + points,
@@ -193,11 +189,16 @@ export class GamificationStatsProvider {
       }
 
       const totalUsers = users.length;
-      const totalPoints = users.reduce((sum, user) => sum + (user.total_points || 0), 0);
+      const totalPoints = users.reduce(
+        (sum, user) => sum + (user.total_points || 0),
+        0
+      );
       const averagePoints = totalPoints / totalUsers;
-      const averageLevel = this.calculateAverageLevel(users.map(u => u.total_points || 0));
-      
-      const topUser = users.reduce((top, user) => 
+      const averageLevel = this.calculateAverageLevel(
+        users.map((u) => u.total_points || 0)
+      );
+
+      const topUser = users.reduce((top, user) =>
         (user.total_points || 0) > (top.total_points || 0) ? user : top
       );
 
@@ -283,7 +284,7 @@ export class GamificationStatsProvider {
       const sortedUsers = users.sort(
         (a, b) => (b.total_points || 0) - (a.total_points || 0)
       );
-      const userIndex = sortedUsers.findIndex(u => u.id === userId);
+      const userIndex = sortedUsers.findIndex((u) => u.id === userId);
       const rank = userIndex + 1;
       const percentile = ((users.length - rank + 1) / users.length) * 100;
 
@@ -297,8 +298,18 @@ export class GamificationStatsProvider {
     } catch (error) {
       console.error('Error getting user performance comparison:', error);
       return {
-        userStats: { totalPoints: 0, currentStreak: 0, totalTasks: 0, completedTasks: 0 },
-        facilityAverage: { totalPoints: 0, currentStreak: 0, totalTasks: 0, completedTasks: 0 },
+        userStats: {
+          totalPoints: 0,
+          currentStreak: 0,
+          totalTasks: 0,
+          completedTasks: 0,
+        },
+        facilityAverage: {
+          totalPoints: 0,
+          currentStreak: 0,
+          totalTasks: 0,
+          completedTasks: 0,
+        },
         percentile: 50,
         rank: 1,
         totalUsers: 0,
@@ -316,9 +327,18 @@ export class GamificationStatsProvider {
   }> {
     // Mock data for now - would query actual activity data
     return {
-      daily: Array.from({ length: 7 }, () => Math.floor(Math.random() * 20) + 5),
-      weekly: Array.from({ length: 4 }, () => Math.floor(Math.random() * 100) + 50),
-      monthly: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500) + 200),
+      daily: Array.from(
+        { length: 7 },
+        () => Math.floor(Math.random() * 20) + 5
+      ),
+      weekly: Array.from(
+        { length: 4 },
+        () => Math.floor(Math.random() * 100) + 50
+      ),
+      monthly: Array.from(
+        { length: 12 },
+        () => Math.floor(Math.random() * 500) + 200
+      ),
     };
   }
 
@@ -332,7 +352,9 @@ export class GamificationStatsProvider {
   ): Promise<void> {
     try {
       // No-op since gamification_activity_log table doesn't exist
-      console.log(`Points activity logged: ${points} points for ${reason} (facility: ${facilityId})`);
+      console.log(
+        `Points activity logged: ${points} points for ${reason} (facility: ${facilityId})`
+      );
     } catch (error) {
       console.error('Error logging points activity:', error);
     }
@@ -342,7 +364,9 @@ export class GamificationStatsProvider {
    * Calculate average level from points
    */
   private calculateAverageLevel(points: number[]): number {
-    const levels = points.map(p => Math.max(1, Math.floor(Math.sqrt(p / 500))));
+    const levels = points.map((p) =>
+      Math.max(1, Math.floor(Math.sqrt(p / 500)))
+    );
     return levels.reduce((sum, level) => sum + level, 0) / levels.length;
   }
 
@@ -355,13 +379,13 @@ export class GamificationStatsProvider {
     streakStatus: 'active' | 'broken' | 'new';
     performanceLevel: 'excellent' | 'good' | 'average' | 'needs_improvement';
   } {
-    const completionRate = stats.totalTasks > 0 
-      ? (stats.completedTasks / stats.totalTasks) * 100 
-      : 0;
+    const completionRate =
+      stats.totalTasks > 0
+        ? (stats.completedTasks / stats.totalTasks) * 100
+        : 0;
 
-    const averagePointsPerTask = stats.completedTasks > 0 
-      ? stats.totalPoints / stats.completedTasks 
-      : 0;
+    const averagePointsPerTask =
+      stats.completedTasks > 0 ? stats.totalPoints / stats.completedTasks : 0;
 
     let streakStatus: 'active' | 'broken' | 'new' = 'new';
     if (stats.currentStreak > 0) {
@@ -370,7 +394,11 @@ export class GamificationStatsProvider {
       streakStatus = 'broken';
     }
 
-    let performanceLevel: 'excellent' | 'good' | 'average' | 'needs_improvement' = 'needs_improvement';
+    let performanceLevel:
+      | 'excellent'
+      | 'good'
+      | 'average'
+      | 'needs_improvement' = 'needs_improvement';
     if (completionRate >= 90) {
       performanceLevel = 'excellent';
     } else if (completionRate >= 75) {
@@ -401,14 +429,16 @@ export class GamificationStatsProvider {
       priority: 'low' | 'medium' | 'high';
     }> = [];
 
-    const completionRate = stats.totalTasks > 0 
-      ? (stats.completedTasks / stats.totalTasks) * 100 
-      : 0;
+    const completionRate =
+      stats.totalTasks > 0
+        ? (stats.completedTasks / stats.totalTasks) * 100
+        : 0;
 
     if (completionRate < 50) {
       recommendations.push({
         category: 'Task Completion',
-        recommendation: 'Focus on completing more tasks to improve your completion rate',
+        recommendation:
+          'Focus on completing more tasks to improve your completion rate',
         priority: 'high',
       });
     }
@@ -432,7 +462,8 @@ export class GamificationStatsProvider {
     if (stats.totalTasks === 0) {
       recommendations.push({
         category: 'Getting Started',
-        recommendation: 'Start completing tasks to begin your gamification journey',
+        recommendation:
+          'Start completing tasks to begin your gamification journey',
         priority: 'high',
       });
     }

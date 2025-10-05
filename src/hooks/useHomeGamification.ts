@@ -42,7 +42,14 @@ export const useHomeGamification = () => {
       setLoading(true);
       setError(null);
 
+      console.log(
+        '🎮 useHomeGamification: Starting to fetch cumulative stats...'
+      );
       const cumulativeStats = await statsService.fetchCumulativeStats();
+      console.log(
+        '🎮 useHomeGamification: Received cumulative stats:',
+        cumulativeStats
+      );
 
       // Use enhanced leveling system if available, fallback to basic calculation
       let level: number;
@@ -76,9 +83,13 @@ export const useHomeGamification = () => {
         },
       };
 
+      console.log(
+        '🎮 useHomeGamification: Final gamification data:',
+        homeGamificationData
+      );
       setGamificationData(homeGamificationData);
     } catch (err) {
-      console.error('Error fetching gamification data:', err);
+      console.error('❌ Error fetching gamification data:', err);
       setError(
         err instanceof Error ? err.message : 'Failed to fetch gamification data'
       );

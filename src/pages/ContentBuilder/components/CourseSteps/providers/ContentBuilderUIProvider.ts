@@ -119,7 +119,10 @@ export class ContentBuilderUIProvider {
   /**
    * Get status badge color based on completion status
    */
-  getStatusBadgeColor(isComplete: boolean, isInProgress: boolean = false): string {
+  getStatusBadgeColor(
+    isComplete: boolean,
+    isInProgress: boolean = false
+  ): string {
     if (isComplete) return 'bg-green-100 text-green-800';
     if (isInProgress) return 'bg-yellow-100 text-yellow-800';
     return 'bg-gray-100 text-gray-800';
@@ -128,7 +131,10 @@ export class ContentBuilderUIProvider {
   /**
    * Get status badge text
    */
-  getStatusBadgeText(isComplete: boolean, isInProgress: boolean = false): string {
+  getStatusBadgeText(
+    isComplete: boolean,
+    isInProgress: boolean = false
+  ): string {
     if (isComplete) return 'Complete';
     if (isInProgress) return 'In Progress';
     return 'Not Started';
@@ -232,8 +238,9 @@ export class ContentBuilderUIProvider {
     variant: 'primary' | 'secondary' | 'danger' | 'success' | 'warning',
     size: 'sm' | 'md' | 'lg' = 'md'
   ): string {
-    const baseClasses = 'inline-flex items-center gap-2 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
-    
+    const baseClasses =
+      'inline-flex items-center gap-2 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+
     const sizeClasses = {
       sm: 'px-3 py-1.5 text-sm',
       md: 'px-4 py-2 text-sm',
@@ -244,8 +251,10 @@ export class ContentBuilderUIProvider {
       primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
       secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
       danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-      success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
-      warning: 'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500',
+      success:
+        'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
+      warning:
+        'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500',
     };
 
     return `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`;
@@ -258,7 +267,7 @@ export class ContentBuilderUIProvider {
     state: 'default' | 'hover' | 'selected' | 'disabled' = 'default'
   ): string {
     const baseClasses = 'bg-white border border-gray-200 rounded-lg';
-    
+
     switch (state) {
       case 'hover':
         return `${baseClasses} hover:border-gray-300 hover:shadow-md transition-all duration-200`;
@@ -277,8 +286,9 @@ export class ContentBuilderUIProvider {
   getInputClasses(
     state: 'default' | 'error' | 'success' | 'disabled' = 'default'
   ): string {
-    const baseClasses = 'w-full px-3 py-2 border rounded-md focus:outline-none transition-colors';
-    
+    const baseClasses =
+      'w-full px-3 py-2 border rounded-md focus:outline-none transition-colors';
+
     switch (state) {
       case 'error':
         return `${baseClasses} border-red-300 focus:ring-red-500 focus:border-red-500`;
@@ -297,8 +307,9 @@ export class ContentBuilderUIProvider {
   getTextareaClasses(
     state: 'default' | 'error' | 'success' | 'disabled' = 'default'
   ): string {
-    const baseClasses = 'w-full px-3 py-2 border rounded-md focus:outline-none transition-colors resize-none';
-    
+    const baseClasses =
+      'w-full px-3 py-2 border rounded-md focus:outline-none transition-colors resize-none';
+
     switch (state) {
       case 'error':
         return `${baseClasses} border-red-300 focus:ring-red-500 focus:border-red-500`;
@@ -327,9 +338,12 @@ export class ContentBuilderUIProvider {
   /**
    * Get tooltip classes
    */
-  getTooltipClasses(position: 'top' | 'bottom' | 'left' | 'right' = 'top'): string {
-    const baseClasses = 'absolute z-10 px-2 py-1 text-sm text-white bg-gray-900 rounded shadow-lg';
-    
+  getTooltipClasses(
+    position: 'top' | 'bottom' | 'left' | 'right' = 'top'
+  ): string {
+    const baseClasses =
+      'absolute z-10 px-2 py-1 text-sm text-white bg-gray-900 rounded shadow-lg';
+
     switch (position) {
       case 'top':
         return `${baseClasses} bottom-full left-1/2 transform -translate-x-1/2 mb-1`;
@@ -351,7 +365,7 @@ export class ContentBuilderUIProvider {
     type: 'success' | 'error' | 'warning' | 'info' = 'info'
   ): string {
     const baseClasses = 'p-4 rounded-md border';
-    
+
     switch (type) {
       case 'success':
         return `${baseClasses} bg-green-50 border-green-200 text-green-800`;
@@ -370,7 +384,8 @@ export class ContentBuilderUIProvider {
    * Get drag handle classes
    */
   getDragHandleClasses(isDragging: boolean = false): string {
-    const baseClasses = 'cursor-move text-gray-400 hover:text-gray-600 transition-colors';
+    const baseClasses =
+      'cursor-move text-gray-400 hover:text-gray-600 transition-colors';
     return isDragging ? `${baseClasses} text-blue-600` : baseClasses;
   }
 
@@ -378,7 +393,8 @@ export class ContentBuilderUIProvider {
    * Get expand/collapse button classes
    */
   getExpandCollapseClasses(_isExpanded: boolean): string {
-    const baseClasses = 'inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors border border-gray-200 hover:border-gray-300';
+    const baseClasses =
+      'inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors border border-gray-200 hover:border-gray-300';
     return baseClasses;
   }
 
@@ -412,7 +428,9 @@ export class ContentBuilderUIProvider {
   /**
    * Get progress fill classes
    */
-  getProgressFillClasses(color: 'blue' | 'green' | 'purple' | 'orange' = 'blue'): string {
+  getProgressFillClasses(
+    color: 'blue' | 'green' | 'purple' | 'orange' = 'blue'
+  ): string {
     const colorClasses = {
       blue: 'bg-blue-600',
       green: 'bg-green-600',
@@ -426,7 +444,9 @@ export class ContentBuilderUIProvider {
   /**
    * Get summary card classes
    */
-  getSummaryCardClasses(color: 'blue' | 'green' | 'purple' | 'orange' = 'blue'): string {
+  getSummaryCardClasses(
+    color: 'blue' | 'green' | 'purple' | 'orange' = 'blue'
+  ): string {
     const colorClasses = {
       blue: 'bg-blue-50 text-blue-600',
       green: 'bg-green-50 text-green-600',

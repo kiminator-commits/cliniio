@@ -1,13 +1,11 @@
-import {
-  OperationalGap,
-  DailyTaskAssignment,
-} from './aiDailyTaskProgress';
-import {
-  AdminTaskConfig,
-} from './aiDailyTaskConfig';
+import { OperationalGap, DailyTaskAssignment } from './aiDailyTaskProgress';
+import { AdminTaskConfig } from './aiDailyTaskConfig';
 import { AIGapScannerProvider } from './ai/providers/AIGapScannerProvider';
 import { AITaskAssignmentProvider } from './ai/providers/AITaskAssignmentProvider';
-import { AIUserManagementProvider, FacilityUser } from './ai/providers/AIUserManagementProvider';
+import {
+  AIUserManagementProvider,
+  FacilityUser,
+} from './ai/providers/AIUserManagementProvider';
 import { AIConfigProvider } from './ai/providers/AIConfigProvider';
 
 // Re-export interfaces for backward compatibility
@@ -56,4 +54,3 @@ export async function assignTasksWithAI(
 ): Promise<DailyTaskAssignment[]> {
   return taskAssignmentProvider.assignTasksWithAI(gaps, users, config);
 }
-

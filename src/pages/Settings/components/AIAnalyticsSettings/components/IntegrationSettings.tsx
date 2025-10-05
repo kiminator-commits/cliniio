@@ -75,9 +75,7 @@ const IntegrationSettings: React.FC<IntegrationSettingsProps> = ({
           <ToggleSwitch
             id="syncScheduling"
             checked={settings.integration.syncScheduling}
-            onChange={(checked) =>
-              updateIntegration('syncScheduling', checked)
-            }
+            onChange={(checked) => updateIntegration('syncScheduling', checked)}
             label={UI_TEXT.TOGGLE_LABELS.SYNC_SCHEDULING}
             description={UI_TEXT.DESCRIPTIONS.SYNC_SCHEDULING}
             disabled={!settings.aiEnabled}

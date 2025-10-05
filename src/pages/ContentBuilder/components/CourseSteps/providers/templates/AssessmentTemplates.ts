@@ -1,7 +1,4 @@
-import {
-  QuestionTypeInfo,
-  AssessmentTemplate,
-} from '../types/assessmentTypes';
+import { QuestionTypeInfo, AssessmentTemplate } from '../types/assessmentTypes';
 
 export class AssessmentTemplates {
   /**

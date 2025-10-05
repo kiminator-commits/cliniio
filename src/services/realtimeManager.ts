@@ -1,4 +1,4 @@
-import { supabase } from '@/services/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 // RealtimeSubscription is not exported from @supabase/supabase-js in current version
 
 class RealtimeManager {

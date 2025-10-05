@@ -55,10 +55,10 @@ export const useStatusTypesStore = create<StatusTypesState>()(
           const mockStatusTypes: StatusType[] = [
             {
               id: '1',
-              name: 'Active',
+              name: 'Available',
               color: '#10B981',
               icon: 'check-circle',
-              description: 'Item is active and in use',
+              description: 'Item is available and ready for use',
               isDefault: true,
               isCore: true,
               isPublished: true,
@@ -69,10 +69,10 @@ export const useStatusTypesStore = create<StatusTypesState>()(
             },
             {
               id: '2',
-              name: 'Inactive',
+              name: 'In Use',
               color: '#6B7280',
               icon: 'pause-circle',
-              description: 'Item is inactive or not in use',
+              description: 'Item is currently in use',
               isDefault: true,
               isCore: true,
               isPublished: true,

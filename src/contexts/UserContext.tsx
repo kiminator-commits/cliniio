@@ -3,11 +3,12 @@ import React, {
   useContext,
   useState,
   ReactNode,
-  useEffect,
+  useEffect as _useEffect,
   useCallback,
 } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { logger } from '../utils/_core/logger';
+import { facilityConfigService } from '../services/facilityConfigService';
 
 interface User {
   id: string;
@@ -24,6 +25,8 @@ interface UserContextType {
   setCurrentUser: (user: User | null) => void;
   getUserDisplayName: () => string;
   refreshUserData: () => Promise<void>;
+  initializeUserContext: () => Promise<void>;
+  clearUserData: () => void;
   isLoading: boolean;
 }
 
@@ -32,25 +35,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    // Try to get user from localStorage on initialization
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        // Check if user data is still valid (not expired)
-        if (parsed && parsed.id) {
-          return parsed;
-        }
-      } catch (err) {
-        console.error(err);
-        console.warn('Failed to parse saved user data');
-      }
-    }
-    return null;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [_hasInitialized, setHasInitialized] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
   // Increase cache duration to 30 minutes to reduce frequent re-authentication
@@ -71,6 +59,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const handleSetCurrentUser = (user: User | null) => {
+    console.log(
+      '🔄 UserContext: handleSetCurrentUser called with:',
+      user ? `${user.name} (${user.email})` : 'null'
+    );
     setCurrentUser(user);
     if (user) {
       localStorage.setItem('currentUser', JSON.stringify(user));
@@ -86,6 +78,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     if (isLoading) {
       return;
     }
+
+    // Check if user has been explicitly logged out (no auth token)
+    const authToken =
+      localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    if (!authToken) {
+      console.log(
+        '🚫 UserContext: No auth token found, skipping refreshUserData'
+      );
+      return;
+    }
+
+    console.log('🔄 UserContext: Starting refreshUserData...');
 
     // Check if we have recent cached data
     const now = Date.now();
@@ -152,6 +156,57 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
             '❌ UserContext: Failed to fetch user profile:',
             profileError
           );
+
+          // If user profile doesn't exist, create it
+          if (profileError.code === 'PGRST116') {
+            // No rows returned
+            console.log('🔄 UserContext: Creating missing user profile...');
+            const { error: createError } = await supabase.from('users').insert({
+              id: user.id,
+              email: user.email!,
+              first_name: user.email!.split('@')[0],
+              last_name: '',
+              role: 'user',
+              facility_id: facilityConfigService.getDefaultFacilityId(), // Use configured default facility
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+
+            if (createError) {
+              console.error(
+                '❌ UserContext: Failed to create user profile:',
+                createError
+              );
+              return;
+            }
+
+            console.log('✅ UserContext: User profile created successfully');
+            // Retry fetching the profile
+            const { data: retryProfile } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+
+            if (retryProfile) {
+              // Continue with the created profile
+              const transformedUser: User = {
+                id: retryProfile.id as string,
+                name:
+                  `${retryProfile.first_name || ''} ${retryProfile.last_name || ''}`.trim() ||
+                  (retryProfile.email as string)?.split('@')[0] ||
+                  'User',
+                email: retryProfile.email as string,
+                role: retryProfile.role as string,
+                avatar_url: retryProfile.avatar_url as string | null,
+                facility_id: retryProfile.facility_id as string,
+              };
+
+              handleSetCurrentUser(transformedUser);
+              return;
+            }
+          }
+
           return;
         }
 
@@ -207,35 +262,112 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [isLoading, currentUser, lastFetchTime, CACHE_DURATION]);
 
-  // Optimize initialization to be non-blocking
-  useEffect(() => {
-    if (!hasInitialized) {
-      const now = Date.now();
+  // Clear all user data on logout
+  const clearUserData = useCallback(() => {
+    console.log('🧹 UserContext: Starting clearUserData...');
+    logger.info('🧹 UserContext: Clearing all user data on logout');
 
-      // If we have cached user data that's still valid, use it immediately
-      if (currentUser && now - lastFetchTime < CACHE_DURATION) {
-        setHasInitialized(true);
-        return;
+    setCurrentUser(null);
+    setIsInitialized(false);
+    setHasInitialized(false);
+    setLastFetchTime(0);
+    setIsLoading(false);
+
+    // Clear any cached user data from localStorage
+    const localStorageKeys = [
+      'currentUser',
+      'userProfile',
+      'userData',
+      'user_preferences',
+      'sb-user',
+      'user_data',
+    ];
+    localStorageKeys.forEach((key) => {
+      const hadValue = localStorage.getItem(key);
+      if (hadValue) {
+        console.log(
+          `🗑️ Clearing localStorage.${key}:`,
+          hadValue.substring(0, 100) + '...'
+        );
+        localStorage.removeItem(key);
       }
+    });
 
-      // Defer authentication to avoid blocking initial render
-      const timer = setTimeout(() => {
-        if (process.env.NODE_ENV === 'development' || currentUser) {
-          refreshUserData();
-        } else {
-          setHasInitialized(true);
-        }
-      }, 100); // Small delay to avoid blocking render
+    // Clear any cached user data from sessionStorage
+    const sessionStorageKeys = [
+      'currentUser',
+      'userProfile',
+      'userData',
+      'user_preferences',
+      'user_id',
+      'user_email',
+      'user_role',
+    ];
+    sessionStorageKeys.forEach((key) => {
+      const hadValue = sessionStorage.getItem(key);
+      if (hadValue) {
+        console.log(
+          `🗑️ Clearing sessionStorage.${key}:`,
+          hadValue.substring(0, 100) + '...'
+        );
+        sessionStorage.removeItem(key);
+      }
+    });
 
-      return () => clearTimeout(timer);
+    console.log('✅ UserContext: clearUserData completed');
+    logger.info('✅ UserContext: All user data cleared successfully');
+  }, []);
+
+  // Manual initialization method - only called after successful login
+  const initializeUserContext = useCallback(async () => {
+    if (isInitialized || isLoading) {
+      return;
     }
-  }, [
-    hasInitialized,
-    currentUser,
-    lastFetchTime,
-    CACHE_DURATION,
-    refreshUserData,
-  ]);
+
+    // Check if user has been explicitly logged out (no auth token)
+    const authToken =
+      localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    if (!authToken) {
+      console.log(
+        '🚫 UserContext: No auth token found, skipping initializeUserContext'
+      );
+      return;
+    }
+
+    logger.info('🔄 UserContext: Starting user data refresh...');
+    await refreshUserData();
+    setIsInitialized(true);
+  }, [isInitialized, isLoading, refreshUserData]);
+
+  // Remove automatic initialization - only initialize when manually called
+  // useEffect(() => {
+  //   if (!hasInitialized) {
+  //     const now = Date.now();
+  //
+  //     // If we have cached user data that's still valid, use it immediately
+  //     if (currentUser && now - lastFetchTime < CACHE_DURATION) {
+  //       setHasInitialized(true);
+  //       return;
+  //     }
+  //
+  //     // Defer authentication to avoid blocking initial render
+  //     const timer = setTimeout(() => {
+  //       if (process.env.NODE_ENV === 'development' || currentUser) {
+  //         refreshUserData();
+  //       } else {
+  //         setHasInitialized(true);
+  //       }
+  //     }, 100); // Small delay to avoid blocking render
+  //
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [
+  //   hasInitialized,
+  //   currentUser,
+  //   lastFetchTime,
+  //   CACHE_DURATION,
+  //   refreshUserData,
+  // ]);
 
   return (
     <UserContext.Provider
@@ -244,6 +376,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         setCurrentUser: handleSetCurrentUser,
         getUserDisplayName,
         refreshUserData,
+        initializeUserContext,
+        clearUserData,
         isLoading,
       }}
     >

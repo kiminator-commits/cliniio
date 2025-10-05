@@ -51,8 +51,10 @@ export class BITrendAnalysisProvider {
       const riskTrend = this.determineRiskTrend(
         incidents as Array<Record<string, unknown> & { created_at: string }>
       );
-      const nextWeekPrediction = await BIPredictionProvider.predictNextWeek(facilityId);
-      const nextMonthPrediction = await BIPredictionProvider.predictNextMonth(facilityId);
+      const nextWeekPrediction =
+        await BIPredictionProvider.predictNextWeek(facilityId);
+      const nextMonthPrediction =
+        await BIPredictionProvider.predictNextMonth(facilityId);
 
       // Calculate confidence based on data consistency
       const confidence = this.calculateTrendConfidence(monthlyData);
@@ -179,16 +181,26 @@ export class BITrendAnalysisProvider {
       }
 
       // Analyze weekly trend (last 8 weeks vs previous 8 weeks)
-      const weeklyTrend = this.analyzeWeeklyTrend(incidents as Array<Record<string, unknown> & { created_at: string }>);
-      
+      const weeklyTrend = this.analyzeWeeklyTrend(
+        incidents as Array<Record<string, unknown> & { created_at: string }>
+      );
+
       // Analyze monthly trend (last 3 months vs previous 3 months)
-      const monthlyTrend = this.analyzeMonthlyTrend(incidents as Array<Record<string, unknown> & { created_at: string }>);
-      
+      const monthlyTrend = this.analyzeMonthlyTrend(
+        incidents as Array<Record<string, unknown> & { created_at: string }>
+      );
+
       // Analyze quarterly trend (last quarter vs previous quarter)
-      const quarterlyTrend = this.analyzeQuarterlyTrend(incidents as Array<Record<string, unknown> & { created_at: string }>);
+      const quarterlyTrend = this.analyzeQuarterlyTrend(
+        incidents as Array<Record<string, unknown> & { created_at: string }>
+      );
 
       // Calculate overall confidence
-      const confidence = this.calculatePatternConfidence(weeklyTrend, monthlyTrend, quarterlyTrend);
+      const confidence = this.calculatePatternConfidence(
+        weeklyTrend,
+        monthlyTrend,
+        quarterlyTrend
+      );
 
       return {
         weeklyTrend,
@@ -210,18 +222,22 @@ export class BITrendAnalysisProvider {
   /**
    * Analyze weekly trend
    */
-  private static analyzeWeeklyTrend(incidents: Array<Record<string, unknown> & { created_at: string }>): 'decreasing' | 'stable' | 'increasing' {
+  private static analyzeWeeklyTrend(
+    incidents: Array<Record<string, unknown> & { created_at: string }>
+  ): 'decreasing' | 'stable' | 'increasing' {
     const now = Date.now();
     const recent = incidents.filter(
-      (i) => new Date(i.created_at as string) > new Date(now - 8 * 7 * 24 * 60 * 60 * 1000)
+      (i) =>
+        new Date(i.created_at as string) >
+        new Date(now - 8 * 7 * 24 * 60 * 60 * 1000)
     );
-    const earlier = incidents.filter(
-      (i) => {
-        const date = new Date(i.created_at as string);
-        return date > new Date(now - 16 * 7 * 24 * 60 * 60 * 1000) && 
-               date <= new Date(now - 8 * 7 * 24 * 60 * 60 * 1000);
-      }
-    );
+    const earlier = incidents.filter((i) => {
+      const date = new Date(i.created_at as string);
+      return (
+        date > new Date(now - 16 * 7 * 24 * 60 * 60 * 1000) &&
+        date <= new Date(now - 8 * 7 * 24 * 60 * 60 * 1000)
+      );
+    });
 
     if (recent.length > earlier.length * 1.2) return 'increasing';
     if (recent.length < earlier.length * 0.8) return 'decreasing';
@@ -231,18 +247,22 @@ export class BITrendAnalysisProvider {
   /**
    * Analyze monthly trend
    */
-  private static analyzeMonthlyTrend(incidents: Array<Record<string, unknown> & { created_at: string }>): 'decreasing' | 'stable' | 'increasing' {
+  private static analyzeMonthlyTrend(
+    incidents: Array<Record<string, unknown> & { created_at: string }>
+  ): 'decreasing' | 'stable' | 'increasing' {
     const now = Date.now();
     const recent = incidents.filter(
-      (i) => new Date(i.created_at as string) > new Date(now - 3 * 30 * 24 * 60 * 60 * 1000)
+      (i) =>
+        new Date(i.created_at as string) >
+        new Date(now - 3 * 30 * 24 * 60 * 60 * 1000)
     );
-    const earlier = incidents.filter(
-      (i) => {
-        const date = new Date(i.created_at as string);
-        return date > new Date(now - 6 * 30 * 24 * 60 * 60 * 1000) && 
-               date <= new Date(now - 3 * 30 * 24 * 60 * 60 * 1000);
-      }
-    );
+    const earlier = incidents.filter((i) => {
+      const date = new Date(i.created_at as string);
+      return (
+        date > new Date(now - 6 * 30 * 24 * 60 * 60 * 1000) &&
+        date <= new Date(now - 3 * 30 * 24 * 60 * 60 * 1000)
+      );
+    });
 
     if (recent.length > earlier.length * 1.2) return 'increasing';
     if (recent.length < earlier.length * 0.8) return 'decreasing';
@@ -252,18 +272,22 @@ export class BITrendAnalysisProvider {
   /**
    * Analyze quarterly trend
    */
-  private static analyzeQuarterlyTrend(incidents: Array<Record<string, unknown> & { created_at: string }>): 'decreasing' | 'stable' | 'increasing' {
+  private static analyzeQuarterlyTrend(
+    incidents: Array<Record<string, unknown> & { created_at: string }>
+  ): 'decreasing' | 'stable' | 'increasing' {
     const now = Date.now();
     const recent = incidents.filter(
-      (i) => new Date(i.created_at as string) > new Date(now - 3 * 90 * 24 * 60 * 60 * 1000)
+      (i) =>
+        new Date(i.created_at as string) >
+        new Date(now - 3 * 90 * 24 * 60 * 60 * 1000)
     );
-    const earlier = incidents.filter(
-      (i) => {
-        const date = new Date(i.created_at as string);
-        return date > new Date(now - 6 * 90 * 24 * 60 * 60 * 1000) && 
-               date <= new Date(now - 3 * 90 * 24 * 60 * 60 * 1000);
-      }
-    );
+    const earlier = incidents.filter((i) => {
+      const date = new Date(i.created_at as string);
+      return (
+        date > new Date(now - 6 * 90 * 24 * 60 * 60 * 1000) &&
+        date <= new Date(now - 3 * 90 * 24 * 60 * 60 * 1000)
+      );
+    });
 
     if (recent.length > earlier.length * 1.2) return 'increasing';
     if (recent.length < earlier.length * 0.8) return 'decreasing';
@@ -281,7 +305,7 @@ export class BITrendAnalysisProvider {
     // Higher confidence when trends are consistent across time periods
     const trends = [weeklyTrend, monthlyTrend, quarterlyTrend];
     const uniqueTrends = new Set(trends).size;
-    
+
     // Lower confidence for inconsistent trends
     if (uniqueTrends === 1) return 0.9; // All trends are the same
     if (uniqueTrends === 2) return 0.7; // Two different trends

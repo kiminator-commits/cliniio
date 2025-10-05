@@ -140,7 +140,23 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
 
       try {
         // Get current facility ID
-        const facilityId = await BIFailureService.getCurrentFacilityId();
+        let facilityId;
+        try {
+          facilityId = await BIFailureService.getCurrentFacilityId();
+        } catch (error) {
+          console.error(
+            '❌ Failed to resolve facility ID in GlobalBIFailureProvider:',
+            error
+          );
+          return;
+        }
+
+        if (!facilityId) {
+          console.error(
+            '❌ No valid facility ID found. BI Failure Provider initialization aborted.'
+          );
+          return;
+        }
 
         // Initialize state from database
         await BIFailureService.initializeBIFailureState(facilityId);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { useLoginForm } from './hooks/useLoginForm';
 import { useLoginStore } from '@/stores/useLoginStore';
 import LoginHeader from './LoginHeader';
@@ -7,23 +7,34 @@ import EmailField from './components/EmailField';
 import PasswordField from './components/PasswordField';
 import CheckboxFields from './components/CheckboxFields';
 import OtpField from './components/OtpField';
-import LoginProgressIndicator from './components/LoginProgressIndicator';
-import LoadingIndicator from './components/LoadingIndicator';
 import SecurityWarnings from './components/SecurityWarnings';
 import OfflineWarning from './components/OfflineWarning';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+
+// Lazy load heavy components
+const UserFriendlyErrorHandler = lazy(
+  () => import('../../components/UserFriendlyErrorHandler')
+);
+
+// Loading fallback for lazy components
+const ErrorHandlerFallback = () => (
+  <div className="rounded-lg border p-4 bg-red-50 border-red-200">
+    <div className="flex items-center">
+      <div className="text-sm text-red-800">Loading error handler...</div>
+    </div>
+  </div>
+);
 
 const LoginForm: React.FC = () => {
   const {
     formData,
     errors,
     loading,
-    loadingStep,
     handleChange,
     handleSubmit,
     handleForgotPassword,
   } = useLoginForm();
-  
+
   const { csrfToken, isSecureMode } = useLoginStore();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -46,7 +57,7 @@ const LoginForm: React.FC = () => {
       if (!isSecureMode) return true; // Skip validation in non-secure mode
       return !!csrfToken && csrfToken.length > 0;
     };
-    
+
     const logSecurityEvent = (event: string, user: string, reason?: string) => {
       console.log(
         `[SECURITY] ${event} for user: ${user}`,
@@ -58,7 +69,9 @@ const LoginForm: React.FC = () => {
       sanitizedEmail,
       sanitizedPassword,
       validateCsrfToken,
-      logSecurityEvent
+      logSecurityEvent,
+      formData.rememberMe,
+      formData.rememberDevice
     );
   };
 
@@ -71,13 +84,9 @@ const LoginForm: React.FC = () => {
           <form className="mt-8 space-y-6" onSubmit={handleFormSubmit}>
             {/* Hidden CSRF token field for secure authentication */}
             {isSecureMode && csrfToken && (
-              <input
-                type="hidden"
-                name="csrfToken"
-                value={csrfToken}
-              />
+              <input type="hidden" name="csrfToken" value={csrfToken} />
             )}
-            
+
             <div className="space-y-4">
               <EmailField
                 formData={formData}
@@ -110,15 +119,20 @@ const LoginForm: React.FC = () => {
             <OfflineWarning />
 
             {errors.submit && (
-              <div className="rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      {errors.submit}
-                    </h3>
-                  </div>
-                </div>
-              </div>
+              <Suspense fallback={<ErrorHandlerFallback />}>
+                <UserFriendlyErrorHandler
+                  error={errors.submit}
+                  context="login"
+                  onRetry={() => {
+                    // Clear the error and allow retry
+                    useLoginStore.getState().setErrors({});
+                  }}
+                  onDismiss={() => {
+                    // Clear the error
+                    useLoginStore.getState().setErrors({});
+                  }}
+                />
+              </Suspense>
             )}
 
             <div>
@@ -127,23 +141,9 @@ const LoginForm: React.FC = () => {
                 disabled={loading}
                 className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#4ECDC4] hover:bg-[#3db8b0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4ECDC4] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
-                {loading ? (
-                  <LoadingIndicator
-                    loading={loading}
-                    loadingStep={loadingStep}
-                  />
-                ) : (
-                  'Sign in'
-                )}
+                Sign in
               </button>
             </div>
-
-            {loading && loadingStep && (
-              <LoginProgressIndicator
-                loading={loading}
-                loadingStep={loadingStep}
-              />
-            )}
 
             <div className="text-center">
               <button

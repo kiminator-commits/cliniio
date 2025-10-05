@@ -1,378 +1,260 @@
-import type {
-  GamificationStats,
-  LeaderboardData,
-  ChallengeData,
-  MetricsData,
-} from '../types/home';
 import { supabase } from '../lib/supabaseClient';
+import { logger } from '../utils/_core/logger';
 
-// Database row interfaces
-interface UserGamificationStatsRow {
-  current_streak: number;
-  total_points: number;
-  total_tasks: number;
-  completed_tasks: number;
-  best_streak: number;
+export interface LevelProgression {
+  currentLevel: number;
+  nextLevel: number;
+  pointsToNextLevel: number;
+  totalPoints: number;
+  rank: number;
+  rankPercentile: number;
 }
 
-interface UserLeaderboardRow {
-  user_id: string;
-  total_points: number;
-  current_streak: number;
+export interface GamificationUpdate {
+  userId: string;
+  facilityId: string;
+  pointsEarned: number;
+  taskTitle: string;
+  taskCategory: string;
 }
 
-interface UserRow {
-  id: string;
-  full_name: string | null;
-}
+class GamificationService {
+  /**
+   * Calculate level based on total points
+   */
+  calculateLevel(totalPoints: number): number {
+    // Level progression: Level 1 = 0-99, Level 2 = 100-249, Level 3 = 250-499, etc.
+    if (totalPoints < 100) return 1;
+    if (totalPoints < 250) return 2;
+    if (totalPoints < 500) return 3;
+    if (totalPoints < 750) return 4;
+    if (totalPoints < 1000) return 5;
 
-interface ChallengeRow {
-  title: string;
-  description: string;
-  points: number;
-  difficulty: string;
-}
+    // For higher levels, use exponential progression
+    return Math.floor(Math.log(totalPoints / 100) / Math.log(1.5)) + 5;
+  }
 
-interface MetricsRow {
-  metric_name: string;
-  metric_value: number;
-}
+  /**
+   * Calculate points needed for next level
+   */
+  calculatePointsToNextLevel(
+    currentLevel: number,
+    totalPoints: number
+  ): number {
+    const nextLevelThreshold = this.getLevelThreshold(currentLevel + 1);
+    return Math.max(0, nextLevelThreshold - totalPoints);
+  }
 
-export interface GamificationServiceResponse {
-  gamificationData: GamificationStats;
-  leaderboardData: LeaderboardData;
-  challengeData: ChallengeData;
-  metricsData: MetricsData;
-}
+  /**
+   * Get points threshold for a specific level
+   */
+  getLevelThreshold(level: number): number {
+    if (level <= 1) return 0;
+    if (level <= 5) {
+      const thresholds = [0, 100, 250, 500, 750, 1000];
+      return thresholds[level - 1];
+    }
 
-export interface GamificationService {
-  fetchGamificationData(): Promise<GamificationStats>;
-  fetchLeaderboardData(): Promise<LeaderboardData>;
-  fetchChallengeData(): Promise<ChallengeData>;
-  fetchMetricsData(): Promise<MetricsData>;
-  fetchAllData(): Promise<GamificationServiceResponse>;
-}
+    // Exponential progression for higher levels
+    return Math.floor(100 * Math.pow(1.5, level - 5));
+  }
 
-/**
- * Gamification service for managing gamification data
- */
-class GamificationServiceImpl implements GamificationService {
-  private cachedData: Partial<GamificationServiceResponse> = {};
-
-  private async getCurrentFacilityId(): Promise<string> {
+  /**
+   * Calculate user rank within facility
+   */
+  async calculateUserRank(
+    userId: string,
+    facilityId: string
+  ): Promise<{ rank: number; percentile: number }> {
     try {
-      const { FacilityService } = await import('./facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
-      return facilityId;
+      // Get all users in facility with their total points
+      const { data: facilityUsers, error } = await supabase
+        .from('home_challenge_completions')
+        .select('user_id, points_earned')
+        .eq('facility_id', facilityId);
+
+      if (error) {
+        console.error('Error fetching facility users for ranking:', error);
+        return { rank: 1, percentile: 100 };
+      }
+
+      // Calculate total points per user
+      const userPointsMap = new Map<string, number>();
+      facilityUsers?.forEach((completion) => {
+        const userId = completion.user_id as string;
+        const points = completion.points_earned as number;
+        userPointsMap.set(userId, (userPointsMap.get(userId) || 0) + points);
+      });
+
+      // Sort users by points (descending)
+      const sortedUsers = Array.from(userPointsMap.entries()).sort(
+        ([, a], [, b]) => b - a
+      );
+
+      // Find current user's rank
+      const userIndex = sortedUsers.findIndex(([id]) => id === userId);
+      const rank = userIndex === -1 ? sortedUsers.length : userIndex + 1;
+      const percentile = Math.round(
+        (1 - (rank - 1) / sortedUsers.length) * 100
+      );
+
+      return { rank, percentile };
     } catch (error) {
-      console.error('Failed to get current facility ID:', error);
+      console.error('Error calculating user rank:', error);
+      return { rank: 1, percentile: 100 };
+    }
+  }
+
+  /**
+   * Update gamification data after task completion
+   */
+  async updateGamificationData(
+    update: GamificationUpdate
+  ): Promise<LevelProgression> {
+    try {
+      // Get current user's total points
+      const { data: completions, error } = await supabase
+        .from('home_challenge_completions')
+        .select('points_earned')
+        .eq('user_id', update.userId)
+        .eq('facility_id', update.facilityId);
+
+      if (error) {
+        console.error('Error fetching user completions:', error);
+        throw error;
+      }
+
+      const totalPoints = (completions || []).reduce(
+        (sum, completion) => sum + (completion.points_earned as number),
+        0
+      );
+
+      // Calculate level progression
+      const currentLevel = this.calculateLevel(totalPoints);
+      const nextLevel = currentLevel + 1;
+      const pointsToNextLevel = this.calculatePointsToNextLevel(
+        currentLevel,
+        totalPoints
+      );
+
+      // Calculate rank
+      const { rank, percentile } = await this.calculateUserRank(
+        update.userId,
+        update.facilityId
+      );
+
+      const progression: LevelProgression = {
+        currentLevel,
+        nextLevel,
+        pointsToNextLevel,
+        totalPoints,
+        rank,
+        rankPercentile: percentile,
+      };
+
+      // Log the update
+      logger.info('Gamification update:', {
+        userId: update.userId,
+        pointsEarned: update.pointsEarned,
+        totalPoints,
+        currentLevel,
+        rank,
+        taskTitle: update.taskTitle,
+      });
+
+      return progression;
+    } catch (error) {
+      console.error('Error updating gamification data:', error);
       throw error;
     }
   }
 
-  private async getCurrentUserId(): Promise<string | null> {
+  /**
+   * Check if user leveled up
+   */
+  async checkLevelUp(
+    userId: string,
+    facilityId: string,
+    previousPoints: number
+  ): Promise<boolean> {
     try {
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data?.user) {
-        console.error('Error getting user:', error);
-        return null;
-      }
-      return data.user.id;
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      return null;
-    }
-  }
-
-  async fetchGamificationData(): Promise<GamificationStats> {
-    if (this.cachedData.gamificationData) {
-      return this.cachedData.gamificationData;
-    }
-
-    try {
-      const userId = await this.getCurrentUserId();
-      if (!userId) {
-        return this.getDefaultGamificationData();
-      }
-
-      try {
-        const { data } = await supabase.auth.getUser();
-        if (data?.user?.id) {
-          const { calculateEnhancedLevel } = await import(
-            '../utils/enhancedGamification'
-          );
-          const facilityId = await this.getCurrentFacilityId();
-          const enhancedData = await calculateEnhancedLevel(userId, facilityId);
-
-          const gamificationData: GamificationStats = {
-            streak: enhancedData.totalExperience > 0 ? 1 : 0,
-            level: enhancedData.coreLevel,
-            rank: enhancedData.rank,
-            totalScore: enhancedData.totalExperience,
-            stats: {
-              toolsSterilized: 0,
-              inventoryChecks: 0,
-              perfectDays: 0,
-              totalTasks: 0,
-              completedTasks: 0,
-              currentStreak: enhancedData.totalExperience > 0 ? 1 : 0,
-              bestStreak: enhancedData.totalExperience > 0 ? 1 : 0,
-            },
-          };
-
-          this.cachedData.gamificationData = gamificationData;
-          return gamificationData;
-        }
-      } catch {
-        // TODO: handle error
-      }
-
-      const facilityId = await this.getCurrentFacilityId();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from('user_gamification_stats')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('facility_id', facilityId)
-        .single();
-
-      if (error || !data) {
-        return this.getDefaultGamificationData();
-      }
-
-      const statsData = data as UserGamificationStatsRow;
-      const gamificationData: GamificationStats = {
-        streak: statsData.current_streak ?? 0,
-        level: 1, // Calculate level based on total_points
-        rank: 999, // This would need to be calculated separately
-        totalScore: statsData.total_points ?? 0,
-        stats: {
-          toolsSterilized: 0, // Not available in this table
-          inventoryChecks: 0, // Not available in this table
-          perfectDays: 0, // Not available in this table
-          totalTasks: statsData.total_tasks ?? 0,
-          completedTasks: statsData.completed_tasks ?? 0,
-          currentStreak: statsData.current_streak ?? 0,
-          bestStreak: statsData.best_streak ?? 0,
-        },
-      };
-
-      this.cachedData.gamificationData = gamificationData;
-      return gamificationData;
-    } catch (error) {
-      console.error('Error fetching gamification data:', error);
-      return this.getDefaultGamificationData();
-    }
-  }
-
-  private getDefaultGamificationData(): GamificationStats {
-    return {
-      streak: 0,
-      level: 1,
-      rank: 999,
-      totalScore: 0,
-      stats: {
-        toolsSterilized: 0,
-        inventoryChecks: 0,
-        perfectDays: 0,
-        totalTasks: 0,
-        completedTasks: 0,
-        currentStreak: 0,
-        bestStreak: 0,
-      },
-    };
-  }
-
-  async fetchLeaderboardData(): Promise<LeaderboardData> {
-    if (this.cachedData.leaderboardData) {
-      return this.cachedData.leaderboardData;
-    }
-
-    try {
-      const facilityId = await this.getCurrentFacilityId();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from('user_gamification_stats')
-        .select('user_id, total_points')
-        .eq('facility_id', facilityId)
-        .order('total_points', { ascending: false })
-        .limit(10);
-
-      if (error || !data) {
-        return this.getDefaultLeaderboardData();
-      }
-
-      const leaderboardData = data as UserLeaderboardRow[];
-      const userIds = leaderboardData.map(
-        (item: UserLeaderboardRow) => item.user_id
-      );
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: users, error: usersError } = await (supabase as any)
-        .from('users')
-        .select('id, full_name')
-        .in('id', userIds);
-
-      if (usersError || !users) {
-        return this.getDefaultLeaderboardData();
-      }
-
-      const userData = users as UserRow[];
-      const userMap = new Map(
-        userData.map((user: UserRow) => [user.id, user.full_name ?? ''])
-      );
-
-      const leaderboardDataResult: LeaderboardData = {
-        rank: 999,
-        topUsers: leaderboardData.map((item: UserLeaderboardRow) => ({
-          name: userMap.get(item.user_id) || 'Unknown User',
-          score: item.total_points ?? 0,
-          avatar: (userMap.get(item.user_id) || 'UU')
-            .substring(0, 2)
-            .toUpperCase(),
-        })),
-      };
-
-      this.cachedData.leaderboardData = leaderboardDataResult;
-      return leaderboardDataResult;
-    } catch (error) {
-      console.error('Error fetching leaderboard data:', error);
-      return this.getDefaultLeaderboardData();
-    }
-  }
-
-  private getDefaultLeaderboardData(): LeaderboardData {
-    return { rank: 999, topUsers: [] };
-  }
-
-  async fetchChallengeData(): Promise<ChallengeData> {
-    if (this.cachedData.challengeData) {
-      return this.cachedData.challengeData;
-    }
-
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from('home_challenges')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error || !data) {
-        return this.getDefaultChallengeData();
-      }
-
-      const challengeDataArray = data as ChallengeRow[];
-      const challengeData: ChallengeData = {
-        title: challengeDataArray[0]?.title ?? 'Default Challenge',
-        description:
-          challengeDataArray[0]?.description ?? 'Complete daily tasks',
-        reward: challengeDataArray[0]?.points?.toString() ?? '10',
-        difficulty: challengeDataArray[0]?.difficulty ?? 'easy',
-      };
-
-      this.cachedData.challengeData = challengeData;
-      return challengeData;
-    } catch (error) {
-      console.error('Error fetching challenge data:', error);
-      return this.getDefaultChallengeData();
-    }
-  }
-
-  private getDefaultChallengeData(): ChallengeData {
-    return {
-      title: 'Default Challenge',
-      description: 'Complete daily tasks',
-      reward: '10',
-      difficulty: 'easy',
-    };
-  }
-
-  async fetchMetricsData(): Promise<MetricsData> {
-    if (this.cachedData.metricsData) {
-      return this.cachedData.metricsData;
-    }
-
-    try {
-      const userId = await this.getCurrentUserId();
-      const facilityId = await this.getCurrentFacilityId();
-      if (!userId || !facilityId) {
-        return this.getDefaultMetricsData();
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from('performance_metrics')
-        .select('*')
+      const { data: completions, error } = await supabase
+        .from('home_challenge_completions')
+        .select('points_earned')
         .eq('user_id', userId)
         .eq('facility_id', facilityId);
 
-      if (error || !data) {
-        return this.getDefaultMetricsData();
+      if (error) {
+        console.error(
+          'Error fetching user completions for level check:',
+          error
+        );
+        return false;
       }
 
-      // Convert key-value pairs to structured data
-      const metricsDataArray = data as MetricsRow[];
-      const metricsMap = new Map(
-        metricsDataArray.map((item: MetricsRow) => [
-          item.metric_name,
-          item.metric_value,
-        ])
+      const currentPoints = (completions || []).reduce(
+        (sum, completion) => sum + (completion.points_earned as number),
+        0
       );
 
-      const metricsData: MetricsData = {
-        timeSaved: {
-          daily: metricsMap.get('time_saved_daily') ?? 0,
-          monthly: metricsMap.get('time_saved_monthly') ?? 0,
-        },
-        costSavings: {
-          monthly: metricsMap.get('cost_savings_monthly') ?? 0,
-          annual: metricsMap.get('cost_savings_annual') ?? 0,
-        },
-        aiEfficiency: {
-          timeSavings: metricsMap.get('ai_time_savings') ?? 0,
-          proactiveMgmt: metricsMap.get('ai_proactive_mgmt') ?? 0,
-        },
-        teamPerformance: {
-          skills: metricsMap.get('team_skills_score') ?? 0,
-          inventory: metricsMap.get('team_inventory_score') ?? 0,
-          sterilization: metricsMap.get('team_sterilization_score') ?? 0,
-        },
-      };
+      const previousLevel = this.calculateLevel(previousPoints);
+      const currentLevel = this.calculateLevel(currentPoints);
 
-      this.cachedData.metricsData = metricsData;
-      return metricsData;
+      return currentLevel > previousLevel;
     } catch (error) {
-      console.error('Error fetching metrics data:', error);
-      return this.getDefaultMetricsData();
+      console.error('Error checking level up:', error);
+      return false;
     }
   }
 
-  private getDefaultMetricsData(): MetricsData {
-    return {
-      timeSaved: { daily: 0, monthly: 0 },
-      costSavings: { monthly: 0, annual: 0 },
-      aiEfficiency: { timeSavings: 0, proactiveMgmt: 0 },
-      teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },
-    };
-  }
+  /**
+   * Get gamification summary for user
+   */
+  async getGamificationSummary(
+    userId: string,
+    facilityId: string
+  ): Promise<LevelProgression> {
+    try {
+      const { data: completions, error } = await supabase
+        .from('home_challenge_completions')
+        .select('points_earned')
+        .eq('user_id', userId)
+        .eq('facility_id', facilityId);
 
-  async fetchAllData(): Promise<GamificationServiceResponse> {
-    const [gamificationData, leaderboardData, challengeData, metricsData] =
-      await Promise.all([
-        this.fetchGamificationData(),
-        this.fetchLeaderboardData(),
-        this.fetchChallengeData(),
-        this.fetchMetricsData(),
-      ]);
-    return { gamificationData, leaderboardData, challengeData, metricsData };
-  }
+      if (error) {
+        console.error('Error fetching gamification summary:', error);
+        throw error;
+      }
 
-  clearCache(): void {
-    this.cachedData = {};
+      const totalPoints = (completions || []).reduce(
+        (sum, completion) => sum + (completion.points_earned as number),
+        0
+      );
+
+      const currentLevel = this.calculateLevel(totalPoints);
+      const nextLevel = currentLevel + 1;
+      const pointsToNextLevel = this.calculatePointsToNextLevel(
+        currentLevel,
+        totalPoints
+      );
+      const { rank, percentile } = await this.calculateUserRank(
+        userId,
+        facilityId
+      );
+
+      return {
+        currentLevel,
+        nextLevel,
+        pointsToNextLevel,
+        totalPoints,
+        rank,
+        rankPercentile: percentile,
+      };
+    } catch (error) {
+      console.error('Error getting gamification summary:', error);
+      throw error;
+    }
   }
 }
 
-export const gamificationService = new GamificationServiceImpl();
-export const createGamificationService = (): GamificationService =>
-  new GamificationServiceImpl();
+export const gamificationService = new GamificationService();

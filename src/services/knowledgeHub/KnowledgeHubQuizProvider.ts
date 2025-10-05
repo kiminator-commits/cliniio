@@ -2,7 +2,11 @@
 // KNOWLEDGE HUB QUIZ PROVIDER - Quiz Operations
 // ============================================================================
 
-import { ContentItem, ContentCategory, ContentStatus } from '../../pages/KnowledgeHub/types';
+import {
+  ContentItem,
+  ContentCategory,
+  ContentStatus,
+} from '../../pages/KnowledgeHub/types';
 import {
   Quiz,
   QuizQuestion,
@@ -16,7 +20,9 @@ export class KnowledgeHubQuizProvider {
    */
   static async getQuizzes(): Promise<ContentItem[]> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       const quizzes = await QuizService.getAllQuizzes();
 
       return quizzes.map((quiz) => ({
@@ -52,7 +58,9 @@ export class KnowledgeHubQuizProvider {
     quizId: string
   ): Promise<{ quiz: Quiz; questions: QuizQuestion[] } | null> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       return await QuizService.getQuizWithQuestions(quizId);
     } catch (error) {
       console.error('Failed to get quiz by ID:', error);
@@ -65,7 +73,9 @@ export class KnowledgeHubQuizProvider {
    */
   static async startQuizAttempt(quizId: string): Promise<QuizAttempt | null> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       return await QuizService.startQuizAttempt(quizId);
     } catch (error) {
       console.error('Failed to start quiz attempt:', error);
@@ -81,7 +91,9 @@ export class KnowledgeHubQuizProvider {
     answers: QuizAnswer[]
   ): Promise<{ success: boolean; score: number; passed: boolean }> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       return await QuizService.submitQuizAttempt(attemptId, answers);
     } catch (error) {
       console.error('Failed to submit quiz answers:', error);
@@ -94,7 +106,9 @@ export class KnowledgeHubQuizProvider {
    */
   static async getUserQuizAttempts(): Promise<QuizAttempt[]> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       return await QuizService.getUserQuizAttempts();
     } catch (error) {
       console.error('Failed to get user quiz attempts:', error);
@@ -113,7 +127,9 @@ export class KnowledgeHubQuizProvider {
     time_limit_minutes?: number;
   }): Promise<Quiz | null> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       return await QuizService.createQuiz(quizData);
     } catch (error) {
       console.error('Failed to create quiz:', error);
@@ -129,7 +145,9 @@ export class KnowledgeHubQuizProvider {
     quizData: Partial<Quiz>
   ): Promise<Quiz | null> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       return await QuizService.updateQuiz(quizId, quizData);
     } catch (error) {
       console.error('Failed to update quiz:', error);
@@ -142,7 +160,9 @@ export class KnowledgeHubQuizProvider {
    */
   static async deleteQuiz(quizId: string): Promise<boolean> {
     try {
-      const { QuizService } = await import('../../pages/KnowledgeHub/services/quizService');
+      const { QuizService } = await import(
+        '../../pages/KnowledgeHub/services/quizService'
+      );
       return await QuizService.deleteQuiz(quizId);
     } catch (error) {
       console.error('Failed to delete quiz:', error);

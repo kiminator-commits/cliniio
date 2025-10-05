@@ -5,6 +5,7 @@ import {
   mdiCalendar,
   mdiCheckCircle,
   mdiAlertCircle,
+  mdiRefresh,
 } from '@mdi/js';
 import { formatBIDueDate } from '../../../utils/calculateNextBIDue';
 import { BITestResult } from '../../../store/slices/types/biWorkflowTypes';
@@ -12,6 +13,7 @@ import { BITestResult } from '../../../store/slices/types/biWorkflowTypes';
 interface BITestResultsProps {
   recentTests: BITestResult[];
   nextTestDue: Date | null;
+  refreshBIResults?: () => Promise<void>;
 }
 
 /**
@@ -21,6 +23,7 @@ interface BITestResultsProps {
 export const BITestResults: React.FC<BITestResultsProps> = ({
   recentTests,
   nextTestDue,
+  refreshBIResults,
 }) => {
   const getBiStatusColor = (status: string) => {
     switch (status) {
@@ -57,9 +60,21 @@ export const BITestResults: React.FC<BITestResultsProps> = ({
       className="bg-gray-50 rounded-lg p-4"
       style={{ borderLeft: '4px solid rgba(78, 205, 196, 0.5)' }}
     >
-      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-        <Icon path={mdiTestTube} size={1} className="text-orange-600" />
-        BI Test Results
+      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon path={mdiTestTube} size={1} className="text-orange-600" />
+          BI Test Results
+        </div>
+        {refreshBIResults && (
+          <button
+            onClick={refreshBIResults}
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            title="Refresh BI Results"
+          >
+            <Icon path={mdiRefresh} size={0.7} />
+            Refresh
+          </button>
+        )}
       </h3>
 
       {/* Next Test Due */}
@@ -85,7 +100,12 @@ export const BITestResults: React.FC<BITestResultsProps> = ({
 
       {/* Recent Results */}
       <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-700">Recent Results</h4>
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-medium text-gray-700">Recent Results</h4>
+          <span className="text-xs text-gray-500">
+            {recentTests.length} tests
+          </span>
+        </div>
         {recentTests.length > 0 ? (
           recentTests.map((test, index) => (
             <div
@@ -118,6 +138,9 @@ export const BITestResults: React.FC<BITestResultsProps> = ({
               className="mx-auto mb-2 opacity-50"
             />
             <p className="text-sm">No recent BI tests</p>
+            <p className="text-xs mt-1">
+              Try refreshing if you just completed a test
+            </p>
           </div>
         )}
       </div>

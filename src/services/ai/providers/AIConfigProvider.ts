@@ -68,7 +68,9 @@ export class AIConfigProvider {
         errors.push('Max tasks per user must be at least 1');
       }
       if (config.maxTasksPerUser > 20) {
-        warnings.push('Max tasks per user is very high, may impact user productivity');
+        warnings.push(
+          'Max tasks per user is very high, may impact user productivity'
+        );
       }
     }
 
@@ -89,13 +91,19 @@ export class AIConfigProvider {
 
       // Check priority ordering
       if (weights.urgent && weights.high && weights.urgent <= weights.high) {
-        warnings.push('Urgent priority weight should be higher than high priority');
+        warnings.push(
+          'Urgent priority weight should be higher than high priority'
+        );
       }
       if (weights.high && weights.medium && weights.high <= weights.medium) {
-        warnings.push('High priority weight should be higher than medium priority');
+        warnings.push(
+          'High priority weight should be higher than medium priority'
+        );
       }
       if (weights.medium && weights.low && weights.medium <= weights.low) {
-        warnings.push('Medium priority weight should be higher than low priority');
+        warnings.push(
+          'Medium priority weight should be higher than low priority'
+        );
       }
     }
 
@@ -106,7 +114,9 @@ export class AIConfigProvider {
         } else {
           categories.forEach((category) => {
             if (!isRoleCompatibleWithCategory(role, category)) {
-              warnings.push(`Role ${role} may not be compatible with category ${category}`);
+              warnings.push(
+                `Role ${role} may not be compatible with category ${category}`
+              );
             }
           });
         }
@@ -115,10 +125,16 @@ export class AIConfigProvider {
 
     if (config.timeConstraints) {
       const constraints = config.timeConstraints;
-      if (constraints.maxTaskDuration !== undefined && constraints.maxTaskDuration < 5) {
+      if (
+        constraints.maxTaskDuration !== undefined &&
+        constraints.maxTaskDuration < 5
+      ) {
         errors.push('Max task duration must be at least 5 minutes');
       }
-      if (constraints.minTaskDuration !== undefined && constraints.minTaskDuration < 1) {
+      if (
+        constraints.minTaskDuration !== undefined &&
+        constraints.minTaskDuration < 1
+      ) {
         errors.push('Min task duration must be at least 1 minute');
       }
       if (
@@ -175,11 +191,14 @@ export class AIConfigProvider {
         });
       }
 
-      if (facilityStats.averageTasksPerUser > currentConfig.maxTasksPerUser * 0.9) {
+      if (
+        facilityStats.averageTasksPerUser >
+        currentConfig.maxTasksPerUser * 0.9
+      ) {
         recommendations.push({
           category: 'workload',
           title: 'High User Workload',
-          description: `Users are consistently at ${(facilityStats.averageTasksPerUser / currentConfig.maxTasksPerUser * 100).toFixed(1)}% capacity. Consider increasing max tasks or adding more users.`,
+          description: `Users are consistently at ${((facilityStats.averageTasksPerUser / currentConfig.maxTasksPerUser) * 100).toFixed(1)}% capacity. Consider increasing max tasks or adding more users.`,
           priority: 'medium',
           suggestedValue: currentConfig.maxTasksPerUser + 1,
         });
@@ -202,7 +221,8 @@ export class AIConfigProvider {
         recommendations.push({
           category: 'priority',
           title: 'Priority Weight Ordering',
-          description: 'Urgent priority weight should be higher than high priority to ensure proper task prioritization.',
+          description:
+            'Urgent priority weight should be higher than high priority to ensure proper task prioritization.',
           priority: 'medium',
           suggestedValue: { ...weights, urgent: weights.high + 1 },
         });
@@ -210,11 +230,15 @@ export class AIConfigProvider {
     }
 
     // Role recommendations
-    if (!currentConfig.rolePreferences || Object.keys(currentConfig.rolePreferences).length === 0) {
+    if (
+      !currentConfig.rolePreferences ||
+      Object.keys(currentConfig.rolePreferences).length === 0
+    ) {
       recommendations.push({
         category: 'role',
         title: 'Missing Role Preferences',
-        description: 'No role preferences configured. Consider setting up role-category mappings for better task assignment.',
+        description:
+          'No role preferences configured. Consider setting up role-category mappings for better task assignment.',
         priority: 'low',
         suggestedValue: {
           technician: ['equipment', 'compliance'],
@@ -232,7 +256,9 @@ export class AIConfigProvider {
   /**
    * Get default configuration for facility type
    */
-  getDefaultConfigForFacilityType(facilityType: 'small' | 'medium' | 'large'): AdminTaskConfig {
+  getDefaultConfigForFacilityType(
+    facilityType: 'small' | 'medium' | 'large'
+  ): AdminTaskConfig {
     const baseConfig = getDefaultConfig();
 
     switch (facilityType) {
@@ -313,13 +339,15 @@ export class AIConfigProvider {
   /**
    * Get configuration history
    */
-  async getConfigurationHistory(facilityId: string): Promise<Array<{
-    id: string;
-    config: AdminTaskConfig;
-    updatedAt: Date;
-    updatedBy: string;
-    changes: string[];
-  }>> {
+  async getConfigurationHistory(facilityId: string): Promise<
+    Array<{
+      id: string;
+      config: AdminTaskConfig;
+      updatedAt: Date;
+      updatedBy: string;
+      changes: string[];
+    }>
+  > {
     try {
       return await AdminTaskConfigService.getConfigHistory(facilityId);
     } catch (error) {
@@ -398,16 +426,28 @@ export class AIConfigProvider {
     aiEnabled: boolean;
     complexity: 'simple' | 'moderate' | 'complex';
   } {
-    const priorityCount = config.priorityWeights ? Object.keys(config.priorityWeights).length : 0;
-    const rolePreferencesCount = config.rolePreferences ? Object.keys(config.rolePreferences).length : 0;
+    const priorityCount = config.priorityWeights
+      ? Object.keys(config.priorityWeights).length
+      : 0;
+    const rolePreferencesCount = config.rolePreferences
+      ? Object.keys(config.rolePreferences).length
+      : 0;
     const timeConstraintsEnabled = !!config.timeConstraints;
     const aiEnabled = config.aiEnabled !== false; // Default to true
 
     let complexity: 'simple' | 'moderate' | 'complex' = 'simple';
-    if (priorityCount > 2 || rolePreferencesCount > 3 || timeConstraintsEnabled) {
+    if (
+      priorityCount > 2 ||
+      rolePreferencesCount > 3 ||
+      timeConstraintsEnabled
+    ) {
       complexity = 'moderate';
     }
-    if (priorityCount > 3 || rolePreferencesCount > 5 || (timeConstraintsEnabled && config.timeConstraints?.maxTaskDuration)) {
+    if (
+      priorityCount > 3 ||
+      rolePreferencesCount > 5 ||
+      (timeConstraintsEnabled && config.timeConstraints?.maxTaskDuration)
+    ) {
       complexity = 'complex';
     }
 

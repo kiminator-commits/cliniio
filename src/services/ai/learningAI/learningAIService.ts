@@ -86,7 +86,9 @@ export class LearningAIService {
         throw new Error('Personalized recommendations AI is not enabled');
       }
 
-      return await this.recommendationService.generatePersonalizedRecommendations(userId);
+      return await this.recommendationService.generatePersonalizedRecommendations(
+        userId
+      );
     } catch (error) {
       console.error('Error generating personalized recommendations:', error);
       return null;
@@ -260,5 +262,4 @@ export class LearningAIService {
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     return await getUserProfileData(this.facilityId, userId);
   }
-
 }

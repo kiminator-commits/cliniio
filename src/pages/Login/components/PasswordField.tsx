@@ -9,12 +9,14 @@ interface PasswordFieldProps {
     field: keyof LoginFormData
   ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
+  showStrengthIndicator?: boolean;
 }
 
 const PasswordField: React.FC<PasswordFieldProps> = ({
   formData,
   handleChange,
   disabled = false,
+  showStrengthIndicator = false,
 }) => {
   const [passwordTouched, setPasswordTouched] = useState(false);
 
@@ -68,8 +70,10 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
         />
       </div>
 
-      {/* Enhanced Password Strength Indicator */}
-      <PasswordStrengthIndicator password={formData.password} />
+      {/* Enhanced Password Strength Indicator - only show when creating new password */}
+      {showStrengthIndicator && (
+        <PasswordStrengthIndicator password={formData.password} />
+      )}
 
       {passwordError && (
         <div className="mt-2 flex items-center space-x-2">

@@ -1,22 +1,31 @@
-import type { LearningAISettings, LearningAISettingsRow, UserProfile } from '../../types/learningAITypes';
+import type {
+  LearningAISettings,
+  LearningAISettingsRow,
+  UserProfile,
+} from '../../types/learningAITypes';
 import type { Json } from '../../types/database.types';
 import { DEFAULT_VALUES } from '../ai/learningAI/learningAIConfig';
 
 /**
  * Transform database row data to LearningAISettings interface
  */
-export function transformSettingsData(settingsData: LearningAISettingsRow): LearningAISettings {
+export function transformSettingsData(
+  settingsData: LearningAISettingsRow
+): LearningAISettings {
   return {
     id: settingsData.id ?? '',
     facility_id: settingsData.facility_id ?? '',
     ai_enabled: settingsData.ai_enabled ?? false,
     ai_version: settingsData.ai_version ?? '',
-    personalized_recommendations: settingsData.personalized_recommendations ?? false,
+    personalized_recommendations:
+      settingsData.personalized_recommendations ?? false,
     skill_gap_analysis: settingsData.skill_gap_analysis ?? false,
-    learning_path_optimization: settingsData.learning_path_optimization ?? false,
+    learning_path_optimization:
+      settingsData.learning_path_optimization ?? false,
     performance_prediction: settingsData.performance_prediction ?? false,
     adaptive_difficulty: settingsData.adaptive_difficulty ?? false,
-    learning_analytics_enabled: settingsData.learning_analytics_enabled ?? false,
+    learning_analytics_enabled:
+      settingsData.learning_analytics_enabled ?? false,
     behavior_tracking: settingsData.behavior_tracking ?? false,
     progress_prediction: settingsData.progress_prediction ?? false,
     engagement_metrics: settingsData.engagement_metrics ?? false,
@@ -26,8 +35,10 @@ export function transformSettingsData(settingsData: LearningAISettingsRow): Lear
     data_retention_days: settingsData.data_retention_days ?? 0,
     model_version: settingsData.model_version ?? '',
     data_sharing_enabled: settingsData.data_sharing_enabled ?? false,
-    local_ai_processing_enabled: settingsData.local_ai_processing_enabled ?? false,
-    encrypted_data_transmission: settingsData.encrypted_data_transmission ?? false,
+    local_ai_processing_enabled:
+      settingsData.local_ai_processing_enabled ?? false,
+    encrypted_data_transmission:
+      settingsData.encrypted_data_transmission ?? false,
     ai_model_training: settingsData.ai_model_training ?? false,
     created_at: settingsData.created_at ?? '',
     updated_at: settingsData.updated_at ?? '',
@@ -55,11 +66,15 @@ export function transformUserProfileData(profileData: {
     user_id: profileData.user_id ?? '',
     role: profileData.role ?? DEFAULT_VALUES.USER_ROLE,
     department: profileData.department ?? DEFAULT_VALUES.DEPARTMENT,
-    experience_level: (profileData.experience_level as 'expert' | 'senior' | 'entry' | 'mid') ?? DEFAULT_VALUES.EXPERIENCE_LEVEL,
+    experience_level:
+      (profileData.experience_level as 'expert' | 'senior' | 'entry' | 'mid') ??
+      DEFAULT_VALUES.EXPERIENCE_LEVEL,
     skill_areas: (profileData.skill_areas as string[]) ?? [],
     learning_goals: (profileData.learning_goals as string[]) ?? [],
-    preferred_learning_style: profileData.preferred_learning_style ?? DEFAULT_VALUES.LEARNING_STYLE,
-    time_availability: profileData.time_availability ?? DEFAULT_VALUES.TIME_AVAILABILITY,
+    preferred_learning_style:
+      profileData.preferred_learning_style ?? DEFAULT_VALUES.LEARNING_STYLE,
+    time_availability:
+      profileData.time_availability ?? DEFAULT_VALUES.TIME_AVAILABILITY,
     last_updated: profileData.updated_at ?? profileData.created_at ?? '',
   };
 }
@@ -67,8 +82,14 @@ export function transformUserProfileData(profileData: {
 /**
  * Validate if a feature is enabled in settings
  */
-export function validateFeatureEnabled(settings: LearningAISettings | null, featurePath: string): boolean {
-  return settings !== null && settings[featurePath as keyof LearningAISettings] === true;
+export function validateFeatureEnabled(
+  settings: LearningAISettings | null,
+  featurePath: string
+): boolean {
+  return (
+    settings !== null &&
+    settings[featurePath as keyof LearningAISettings] === true
+  );
 }
 
 /**
@@ -81,9 +102,14 @@ export function areSettingsValid(settings: LearningAISettings | null): boolean {
 /**
  * Get nested property from object using dot notation
  */
-export function getNestedProperty(obj: Record<string, unknown>, path: string): unknown {
+export function getNestedProperty(
+  obj: Record<string, unknown>,
+  path: string
+): unknown {
   return path.split('.').reduce((current, key) => {
-    return current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined;
+    return current && typeof current === 'object'
+      ? (current as Record<string, unknown>)[key]
+      : undefined;
   }, obj);
 }
 
@@ -97,7 +123,9 @@ export function calculateProcessingTime(startTime: number): number {
 /**
  * Format recommendation reasoning for display
  */
-export function formatRecommendationReasoning(reasoning: string[] | string): string {
+export function formatRecommendationReasoning(
+  reasoning: string[] | string
+): string {
   if (Array.isArray(reasoning)) {
     return reasoning.join('; ');
   }
@@ -108,7 +136,7 @@ export function formatRecommendationReasoning(reasoning: string[] | string): str
  * Parse recommendation reasoning from string to array
  */
 export function parseRecommendationReasoning(reasoning: string): string[] {
-  return reasoning.split('; ').filter(item => item.trim().length > 0);
+  return reasoning.split('; ').filter((item) => item.trim().length > 0);
 }
 
 /**
@@ -159,7 +187,11 @@ export function formatLearningTime(minutes: number): string {
  * Validate learning path sequence
  */
 export function validateLearningPath(path: string[]): boolean {
-  return Array.isArray(path) && path.length > 0 && path.every(item => typeof item === 'string' && item.trim().length > 0);
+  return (
+    Array.isArray(path) &&
+    path.length > 0 &&
+    path.every((item) => typeof item === 'string' && item.trim().length > 0)
+  );
 }
 
 /**
@@ -187,17 +219,26 @@ export function formatSkillGapPriority(priority: number): string {
 /**
  * Calculate skill gap severity
  */
-export function calculateSkillGapSeverity(current: number, required: number): number {
+export function calculateSkillGapSeverity(
+  current: number,
+  required: number
+): number {
   return Math.max(0, required - current);
 }
 
 /**
  * Format performance metrics for display
  */
-export function formatPerformanceMetrics(metrics: Record<string, number>): Record<string, string> {
+export function formatPerformanceMetrics(
+  metrics: Record<string, number>
+): Record<string, string> {
   const formatted: Record<string, string> = {};
   for (const [key, value] of Object.entries(metrics)) {
-    if (key.includes('score') || key.includes('rate') || key.includes('probability')) {
+    if (
+      key.includes('score') ||
+      key.includes('rate') ||
+      key.includes('probability')
+    ) {
       formatted[key] = formatConfidenceScore(value);
     } else if (key.includes('time')) {
       formatted[key] = formatLearningTime(value);
@@ -237,7 +278,9 @@ export function calculateLearningEfficiencyScore(
 /**
  * Format engagement trends for display
  */
-export function formatEngagementTrends(trends: Record<string, unknown>): Record<string, string> {
+export function formatEngagementTrends(
+  trends: Record<string, unknown>
+): Record<string, string> {
   const formatted: Record<string, string> = {};
   for (const [key, value] of Object.entries(trends)) {
     if (typeof value === 'number') {
@@ -270,11 +313,13 @@ export function calculateRetentionProbability(
 /**
  * Format difficulty level for display
  */
-export function formatDifficultyLevel(level: 'beginner' | 'intermediate' | 'advanced'): string {
+export function formatDifficultyLevel(
+  level: 'beginner' | 'intermediate' | 'advanced'
+): string {
   const levelMap = {
     beginner: 'Beginner',
     intermediate: 'Intermediate',
-    advanced: 'Advanced'
+    advanced: 'Advanced',
   };
   return levelMap[level] || 'Unknown';
 }
@@ -288,7 +333,7 @@ export function calculateOptimalStudyDuration(
   preferredStyle: string
 ): number {
   let baseDuration = 30; // Default 30 minutes
-  
+
   // Adjust based on experience level
   switch (experienceLevel) {
     case 'expert':
@@ -304,20 +349,20 @@ export function calculateOptimalStudyDuration(
       baseDuration = 25;
       break;
   }
-  
+
   // Adjust based on time availability
   if (timeAvailability < 30) {
     baseDuration = Math.min(baseDuration, 20);
   } else if (timeAvailability > 120) {
     baseDuration = Math.min(baseDuration, 60);
   }
-  
+
   // Adjust based on learning style
   if (preferredStyle === 'visual') {
     baseDuration += 5;
   } else if (preferredStyle === 'kinesthetic') {
     baseDuration += 10;
   }
-  
+
   return Math.max(15, Math.min(90, baseDuration));
 }

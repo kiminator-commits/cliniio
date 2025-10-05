@@ -623,7 +623,10 @@ export class UnifiedDatabaseAdapter {
     }
   }
 
-  async getRecentUserActivity(userId?: string, limit?: number): Promise<Record<string, unknown>[]> {
+  async getRecentUserActivity(
+    userId?: string,
+    limit?: number
+  ): Promise<Record<string, unknown>[]> {
     try {
       let query = supabase
         .from('activity_feed')

@@ -50,13 +50,19 @@ export const login = async (
       if (password === '123') {
         throw new Error('Password does not meet security requirements');
       }
-      if (email === 'test@example.com' && password === 'password123' && process.env.NODE_ENV === 'test') {
+      if (
+        email === 'test@example.com' &&
+        password === 'password123' &&
+        process.env.NODE_ENV === 'test'
+      ) {
         // Check for specific security test scenarios
         if (localStorage.getItem('test-rate-limit') === 'true') {
           throw new Error('Too many attempts. Please try again later.');
         }
         if (localStorage.getItem('test-account-lockout') === 'true') {
-          throw new Error('Account temporarily locked due to multiple failed attempts');
+          throw new Error(
+            'Account temporarily locked due to multiple failed attempts'
+          );
         }
         if (localStorage.getItem('test-network-error') === 'true') {
           throw new Error('Network error');
@@ -100,7 +106,7 @@ export const login = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify({
         email: email.trim().toLowerCase(),
@@ -181,8 +187,8 @@ export const validateToken = async (token: string) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         token,
@@ -222,7 +228,7 @@ export const refreshSession = async (): Promise<{ expiry: string }> => {
   // Use mock refresh in development
   if (shouldUseMockAuth()) {
     console.log('🔧 Using mock session refresh for development');
-    
+
     // Simulate error cases for testing
     if (process.env.NODE_ENV === 'test') {
       // Check if localStorage has a flag for refresh errors
@@ -239,7 +245,7 @@ export const refreshSession = async (): Promise<{ expiry: string }> => {
         throw new Error('Session missing expiry information');
       }
     }
-    
+
     const mockSession = createDevSession();
     return { expiry: mockSession.expiry };
   }
@@ -255,8 +261,8 @@ export const refreshSession = async (): Promise<{ expiry: string }> => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${currentToken}`,
+      Accept: 'application/json',
+      Authorization: `Bearer ${currentToken}`,
     },
     body: JSON.stringify({
       refreshToken: currentToken,
@@ -286,7 +292,7 @@ export const logout = async (): Promise<void> => {
     // Use mock logout in development
     if (shouldUseMockAuth()) {
       console.log('🔧 Using mock logout for development');
-      
+
       // Simulate error cases for testing
       if (process.env.NODE_ENV === 'test') {
         if (localStorage.getItem('test-logout-error') === 'true') {
@@ -297,16 +303,19 @@ export const logout = async (): Promise<void> => {
         }
         if (localStorage.getItem('test-logout-session-error') === 'true') {
           // Simulate session deactivation failure
-          console.warn('Failed to deactivate user session:', new Error('Session deactivation failed'));
+          console.warn(
+            'Failed to deactivate user session:',
+            new Error('Session deactivation failed')
+          );
         }
       }
-      
+
       // Clear any test flags
       localStorage.removeItem('test-no-session');
       localStorage.removeItem('test-refresh-error');
       localStorage.removeItem('test-refresh-no-session');
       localStorage.removeItem('test-logout-error');
-      
+
       console.log('Logout successful');
       return;
     }
@@ -321,8 +330,8 @@ export const logout = async (): Promise<void> => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${sessionToken}`,
+            Accept: 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
           },
           body: JSON.stringify({
             csrfToken: generateCSRFToken(),

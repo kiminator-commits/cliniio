@@ -1,4 +1,4 @@
-import { supabase } from '@/services/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { logger } from '../_core/logger';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../types/supabase/index';

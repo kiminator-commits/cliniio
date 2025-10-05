@@ -25,6 +25,7 @@ export async function POST(req: Request) {
       courses:
         'You are a healthcare training specialist. Generate relevant course suggestions for sterilization professionals.',
       help: 'You are a healthcare facility management expert. Provide clear, actionable guidance for sterilization procedures.',
+      home: 'You are a Cliniio dashboard assistant. ONLY answer questions about the home dashboard, metrics, tasks, gamification, navigation, and general system overview. For any specialized topics (sterilization, inventory, cleaning, settings, reports, training), redirect users to the appropriate page or their clinic administrator.',
       default:
         'You are a healthcare AI assistant for Cliniio, a sterilization facility management system.',
     };

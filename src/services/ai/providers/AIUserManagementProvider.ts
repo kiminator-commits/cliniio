@@ -61,7 +61,10 @@ export class AIUserManagementProvider {
   /**
    * Get users by role
    */
-  async getUsersByRole(facilityId: string, role: string): Promise<FacilityUser[]> {
+  async getUsersByRole(
+    facilityId: string,
+    role: string
+  ): Promise<FacilityUser[]> {
     const users = await this.getFacilityUsers(facilityId);
     return users.filter((user) => user.role === role);
   }
@@ -69,7 +72,10 @@ export class AIUserManagementProvider {
   /**
    * Get users by department
    */
-  async getUsersByDepartment(facilityId: string, department: string): Promise<FacilityUser[]> {
+  async getUsersByDepartment(
+    facilityId: string,
+    department: string
+  ): Promise<FacilityUser[]> {
     const users = await this.getFacilityUsers(facilityId);
     return users.filter((user) => user.department === department);
   }
@@ -100,7 +106,11 @@ export class AIUserManagementProvider {
       {
         role: 'inventory_manager',
         description: 'Inventory management and supply specialist',
-        capabilities: ['inventory_management', 'supply_ordering', 'stock_control'],
+        capabilities: [
+          'inventory_management',
+          'supply_ordering',
+          'stock_control',
+        ],
         compatibleCategories: ['operational'],
       },
       {
@@ -124,9 +134,9 @@ export class AIUserManagementProvider {
   isRoleCompatibleWithCategory(role: string, category: string): boolean {
     const roles = this.getAvailableRoles();
     const userRole = roles.find((r) => r.role === role);
-    
+
     if (!userRole) return false;
-    
+
     return userRole.compatibleCategories.includes(category);
   }
 
@@ -171,14 +181,16 @@ export class AIUserManagementProvider {
         return categoryMatches.reduce((best, current) => {
           const bestWorkload = currentWorkloads.get(best.id);
           const currentWorkload = currentWorkloads.get(current.id);
-          
+
           if (!bestWorkload) return current;
           if (!currentWorkload) return best;
-          
-          return currentWorkload.utilization < bestWorkload.utilization ? current : best;
+
+          return currentWorkload.utilization < bestWorkload.utilization
+            ? current
+            : best;
         });
       }
-      
+
       return categoryMatches[0];
     }
 
@@ -187,11 +199,13 @@ export class AIUserManagementProvider {
       return availableUsers.reduce((best, current) => {
         const bestWorkload = currentWorkloads.get(best.id);
         const currentWorkload = currentWorkloads.get(current.id);
-        
+
         if (!bestWorkload) return current;
         if (!currentWorkload) return best;
-        
-        return currentWorkload.utilization < bestWorkload.utilization ? current : best;
+
+        return currentWorkload.utilization < bestWorkload.utilization
+          ? current
+          : best;
       });
     }
 
@@ -250,7 +264,7 @@ export class AIUserManagementProvider {
       const workload = workloads.get(user.id);
       if (workload) {
         totalUtilization += workload.utilization;
-        
+
         if (workload.utilization > 100) {
           overloadedUsers++;
         } else if (workload.utilization < 50) {
@@ -267,11 +281,13 @@ export class AIUserManagementProvider {
         }
 
         // Track by role
-        workloadByRole[user.role] = (workloadByRole[user.role] || 0) + workload.utilization;
+        workloadByRole[user.role] =
+          (workloadByRole[user.role] || 0) + workload.utilization;
       }
     });
 
-    const averageUtilization = totalUsers > 0 ? totalUtilization / totalUsers : 0;
+    const averageUtilization =
+      totalUsers > 0 ? totalUtilization / totalUsers : 0;
 
     return {
       totalUsers,
@@ -332,8 +348,16 @@ export class AIUserManagementProvider {
       priority: 'low' | 'medium' | 'high';
     }> = [];
 
-    const overloadedUsers = this.getOverloadedUsers(users, workloads, maxTasksPerUser);
-    const usersWithCapacity = this.getUsersWithCapacity(users, workloads, maxTasksPerUser);
+    const overloadedUsers = this.getOverloadedUsers(
+      users,
+      workloads,
+      maxTasksPerUser
+    );
+    const usersWithCapacity = this.getUsersWithCapacity(
+      users,
+      workloads,
+      maxTasksPerUser
+    );
 
     if (overloadedUsers.length > 0) {
       if (usersWithCapacity.length > 0) {
@@ -351,15 +375,17 @@ export class AIUserManagementProvider {
       }
     }
 
-    const averageUtilization = Array.from(workloads.values()).reduce(
-      (sum, workload) => sum + workload.utilization,
-      0
-    ) / workloads.size;
+    const averageUtilization =
+      Array.from(workloads.values()).reduce(
+        (sum, workload) => sum + workload.utilization,
+        0
+      ) / workloads.size;
 
     if (averageUtilization > 90) {
       recommendations.push({
         type: 'reduce_tasks',
-        description: 'Overall utilization is very high. Consider reducing task load or adding resources',
+        description:
+          'Overall utilization is very high. Consider reducing task load or adding resources',
         priority: 'medium',
       });
     }
@@ -376,19 +402,21 @@ export class AIUserManagementProvider {
   async getUserPerformanceMetrics(
     facilityId: string,
     _timeRange?: { start: Date; end: Date }
-  ): Promise<{
-    userId: string;
-    userName: string;
-    role: string;
-    tasksCompleted: number;
-    averageCompletionTime: number;
-    pointsEarned: number;
-    efficiency: number;
-  }[]> {
+  ): Promise<
+    {
+      userId: string;
+      userName: string;
+      role: string;
+      tasksCompleted: number;
+      averageCompletionTime: number;
+      pointsEarned: number;
+      efficiency: number;
+    }[]
+  > {
     // This would typically query task completion data
     // For now, return mock data structure
     const users = await this.getFacilityUsers(facilityId);
-    
+
     return users.map((user) => ({
       userId: user.id,
       userName: user.full_name,
@@ -454,7 +482,7 @@ export class AIUserManagementProvider {
   } {
     try {
       const users = JSON.parse(jsonData) as FacilityUser[];
-      
+
       if (!Array.isArray(users)) {
         return {
           success: false,

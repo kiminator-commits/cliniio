@@ -1,5 +1,11 @@
-// Secure authentication service that uses the new server-side endpoint
-import { createClient } from '@supabase/supabase-js';
+// Secure authentication service that uses direct Supabase authentication
+import { supabase } from '@/lib/supabaseClient';
+import { getEnvVar } from '@/lib/getEnv';
+import {
+  DEV_AUTH_CONFIG as _DEV_AUTH_CONFIG,
+  isDevModeWithoutSupabase as _isDevModeWithoutSupabase,
+} from '@/config/devAuthConfig';
+import { isDevelopment } from '@/lib/getEnv';
 
 interface SecureLoginCredentials {
   email: string;
@@ -35,20 +41,21 @@ interface SecureAuthServiceConfig {
 
 class SecureAuthService {
   private config: SecureAuthServiceConfig;
-  private supabaseClient: unknown;
 
   constructor(config: Partial<SecureAuthServiceConfig> = {}) {
+    // Use Supabase URL for Edge Functions, fallback to configured URL
+    const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', '');
+    const baseUrl =
+      config.baseUrl ||
+      (supabaseUrl
+        ? `${supabaseUrl}/functions/v1/auth-login-simple`
+        : '/api/auth-login-simple');
+
     this.config = {
-      baseUrl: config.baseUrl || '/functions/v1/auth-login',
+      baseUrl,
       timeout: config.timeout || 30000,
       retryAttempts: config.retryAttempts || 3,
     };
-
-    // Initialize Supabase client for token validation only
-    this.supabaseClient = createClient(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_ANON_KEY
-    );
   }
 
   /**
@@ -96,49 +103,61 @@ class SecureAuthService {
   /**
    * Perform secure login using server-side authentication
    */
-  async secureLogin(credentials: SecureLoginCredentials): Promise<SecureLoginResponse> {
+  async secureLogin(
+    credentials: SecureLoginCredentials
+  ): Promise<SecureLoginResponse> {
     const startTime = performance.now();
-    
+
     try {
-      // Generate and store CSRF token if not provided
-      let csrfToken = credentials.csrfToken;
-      if (!csrfToken) {
-        csrfToken = this.generateCSRFToken();
-        this.storeCSRFToken(csrfToken);
+      // Use direct Supabase authentication instead of Edge Function
+      console.log('🔧 Using direct Supabase authentication');
+
+      // Use the shared Supabase client
+      const supabaseClient = supabase;
+
+      // Authenticate user directly with Supabase
+      const { data: authData, error: authError } =
+        await supabaseClient.auth.signInWithPassword({
+          email: credentials.email.trim().toLowerCase(),
+          password: credentials.password,
+        });
+
+      if (authError) {
+        throw new Error(authError.message);
       }
 
-      // Validate CSRF token
-      const storedToken = this.getStoredCSRFToken();
-      if (!this.validateCSRFToken(csrfToken, storedToken)) {
-        throw new Error('Invalid security token. Please refresh the page and try again.');
+      if (!authData.user || !authData.session) {
+        throw new Error('Authentication failed - no user or session returned');
       }
 
-      // Prepare request
-      const requestBody = {
-        email: credentials.email.trim().toLowerCase(),
-        password: credentials.password,
-        csrfToken,
-        rememberMe: credentials.rememberMe || false,
+      // Skip role lookup during login to avoid database errors
+      // Role will be fetched later by UserContext
+      const userRole = 'user'; // Default role
+
+      const response: SecureLoginResponse = {
+        success: true,
+        data: {
+          accessToken: authData.session.access_token,
+          refreshToken: authData.session.refresh_token,
+          expiresIn: authData.session.expires_in,
+          user: {
+            id: authData.user.id,
+            email: authData.user.email!,
+            role: userRole,
+          },
+        },
       };
 
-      // Make request to secure authentication endpoint
-      const response = await this.makeSecureRequest(requestBody);
-
-      if (response.success && response.data) {
-        // Store tokens securely
-        this.storeTokens(response.data);
-        
-        // Log successful authentication
-        console.log(`[AUTH] Login successful for ${credentials.email} in ${(performance.now() - startTime).toFixed(2)}ms`);
-        
-        return response;
-      } else {
-        throw new Error(response.error || 'Authentication failed');
+      if (isDevelopment()) {
+        console.log(
+          `[PERF] SecureAuthService: Direct Supabase login completed in ${(performance.now() - startTime).toFixed(2)}ms`
+        );
       }
 
+      return response;
     } catch (error) {
       console.error(`[AUTH] Login failed for ${credentials.email}:`, error);
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Authentication failed',
@@ -149,7 +168,9 @@ class SecureAuthService {
   /**
    * Make secure request to authentication endpoint
    */
-  private async makeSecureRequest(requestBody: Record<string, unknown>): Promise<SecureLoginResponse> {
+  private async makeSecureRequest(
+    requestBody: Record<string, unknown>
+  ): Promise<SecureLoginResponse> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
 
@@ -158,7 +179,7 @@ class SecureAuthService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
         },
         body: JSON.stringify(requestBody),
@@ -170,29 +191,42 @@ class SecureAuthService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        
+
         if (response.status === 429) {
           // Rate limit exceeded
           return {
             success: false,
-            error: errorData.message || 'Too many login attempts. Please try again later.',
+            error:
+              errorData.message ||
+              'Too many login attempts. Please try again later.',
             rateLimitInfo: errorData.rateLimitInfo,
           };
         }
-        
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+
+        if (response.status === 401) {
+          // Authentication failed
+          return {
+            success: false,
+            error: errorData.message || 'Invalid email or password',
+          };
+        }
+
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       const data = await response.json();
       return data;
-
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       if (error.name === 'AbortError') {
-        throw new Error('Request timeout. Please check your connection and try again.');
+        throw new Error(
+          'Request timeout. Please check your connection and try again.'
+        );
       }
-      
+
       throw error;
     }
   }
@@ -209,14 +243,16 @@ class SecureAuthService {
       // Store in sessionStorage for security
       sessionStorage.setItem('access_token', tokens.accessToken);
       sessionStorage.setItem('refresh_token', tokens.refreshToken);
-      sessionStorage.setItem('token_expires', (Date.now() + tokens.expiresIn * 1000).toString());
-      
+      sessionStorage.setItem(
+        'token_expires',
+        (Date.now() + tokens.expiresIn * 1000).toString()
+      );
+
       // Also store in Supabase client for compatibility
-      this.supabaseClient.auth.setSession({
+      supabase.auth.setSession({
         access_token: tokens.accessToken,
         refresh_token: tokens.refreshToken,
       });
-      
     } catch (error) {
       console.error('Failed to store authentication tokens:', error);
       throw new Error('Failed to store authentication tokens');
@@ -230,18 +266,17 @@ class SecureAuthService {
     try {
       const token = sessionStorage.getItem('access_token');
       const expires = sessionStorage.getItem('token_expires');
-      
+
       if (!token || !expires) {
         return false;
       }
-      
+
       if (Date.now() > parseInt(expires)) {
         // Token expired, try to refresh
         return await this.refreshToken();
       }
-      
+
       return true;
-      
     } catch (error) {
       console.error('Token validation failed:', error);
       return false;
@@ -254,31 +289,30 @@ class SecureAuthService {
   async refreshToken(): Promise<boolean> {
     try {
       const refreshToken = sessionStorage.getItem('refresh_token');
-      
+
       if (!refreshToken) {
         return false;
       }
-      
-      const { data, error } = await this.supabaseClient.auth.refreshSession({
+
+      const { data, error } = await supabase.auth.refreshSession({
         refresh_token: refreshToken,
       });
-      
+
       if (error || !data.session) {
-        this.clearTokens();
+        await this.clearTokens();
         return false;
       }
-      
+
       this.storeTokens({
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token,
         expiresIn: data.session.expires_in,
       });
-      
+
       return true;
-      
     } catch (error) {
       console.error('Token refresh failed:', error);
-      this.clearTokens();
+      await this.clearTokens();
       return false;
     }
   }
@@ -286,15 +320,14 @@ class SecureAuthService {
   /**
    * Clear all stored tokens
    */
-  clearTokens(): void {
+  async clearTokens(): Promise<void> {
     try {
       sessionStorage.removeItem('access_token');
       sessionStorage.removeItem('refresh_token');
       sessionStorage.removeItem('token_expires');
       sessionStorage.removeItem('csrf_token');
-      
-      this.supabaseClient.auth.signOut();
-      
+
+      await supabase.auth.signOut();
     } catch (error) {
       console.error('Failed to clear tokens:', error);
     }
@@ -306,17 +339,50 @@ class SecureAuthService {
   async getCurrentUser(): Promise<unknown> {
     try {
       const isValid = await this.validateStoredToken();
-      
+
       if (!isValid) {
         return null;
       }
-      
-      const { data: { user } } = await this.supabaseClient.auth.getUser();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       return user;
-      
     } catch (error) {
       console.error('Failed to get current user:', error);
       return null;
+    }
+  }
+
+  /**
+   * Validate token - used by ProtectedRoute
+   */
+  async validateToken(token?: string): Promise<boolean> {
+    try {
+      if (token) {
+        // Validate specific token
+        const { data, error } = await supabase.auth.getUser(token);
+        return !error && !!data.user;
+      } else {
+        // Validate stored token
+        return await this.validateStoredToken();
+      }
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Logout - used by DrawerMenu
+   */
+  async logout(): Promise<void> {
+    try {
+      await this.clearTokens();
+      console.log('[AUTH] Logout completed successfully');
+    } catch (error) {
+      console.error('[AUTH] Logout error:', error);
+      throw error;
     }
   }
 }
@@ -325,4 +391,8 @@ class SecureAuthService {
 export const secureAuthService = new SecureAuthService();
 
 // Export types and class for testing
-export { SecureAuthService, type SecureLoginCredentials, type SecureLoginResponse };
+export {
+  SecureAuthService,
+  type SecureLoginCredentials,
+  type SecureLoginResponse,
+};

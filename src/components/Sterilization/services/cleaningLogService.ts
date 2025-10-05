@@ -1,9 +1,10 @@
 import { supabase } from '../../../lib/supabaseClient';
 import { BITestResult } from '../../../store/slices/types/biWorkflowTypes';
-import { ToolStatus } from '@/types/toolTypes';
+import { ToolStatus as _ToolStatus } from '@/types/toolTypes';
+import { SterilizationCycle } from '../../../types/supabase/sterilization';
 
 export interface FilterOptions {
-  status: 'all' | ToolStatus;
+  status: 'all' | 'in_progress' | 'completed' | 'failed';
   date: string;
 }
 
@@ -22,7 +23,7 @@ export interface CleaningLog {
   id: string;
   room_id: string;
   room_name: string;
-  status: ToolStatus;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
   cleaning_type: string;
   scheduled_time: string;
   started_time?: string;
@@ -38,23 +39,43 @@ export interface CleaningLog {
 
 export class CleaningLogService {
   /**
-   * Fetch cleaning logs from the environmental_cleans_enhanced table
+   * Fetch sterilization cleaning logs from sterilization_cycles table
    */
   static async fetchCleaningLogs(): Promise<CleaningLog[]> {
     try {
       const { data, error } = await supabase
-        .from('environmental_cleans_enhanced')
+        .from('sterilization_cycles')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching cleaning logs:', error);
+        console.error('Error fetching sterilization cycles:', error);
         throw error;
       }
 
-      return (data as unknown as CleaningLog[]) || [];
+      // Transform sterilization cycles to cleaning log format
+      const cleaningLogs: CleaningLog[] = (data || []).map(
+        (cycle: SterilizationCycle) => {
+          return {
+            id: cycle.id,
+            room_id: cycle.id, // Use cycle ID as room_id for compatibility
+            room_name: `Cycle ${cycle.id.slice(0, 8)}`, // Generate cycle name
+            status: cycle.status || 'in_progress', // Use actual sterilization cycle status
+            cleaning_type: 'sterilization',
+            scheduled_time: cycle.start_time,
+            started_time: cycle.start_time,
+            completed_time: cycle.completed_at,
+            operator_id: cycle.operator_id,
+            notes: cycle.notes || '',
+            created_at: cycle.created_at,
+            updated_at: cycle.updated_at,
+          };
+        }
+      );
+
+      return cleaningLogs;
     } catch (error) {
-      console.error('Failed to fetch cleaning logs:', error);
+      console.error('Failed to fetch sterilization cycles:', error);
       return [];
     }
   }
@@ -68,8 +89,15 @@ export class CleaningLogService {
   ): CleaningLog[] {
     return logs.filter((log) => {
       // Status filter
-      const statusMatch =
-        options.status === 'all' || log.status === options.status;
+      let statusMatch = false;
+      if (options.status === 'all') {
+        statusMatch = true;
+      } else if (options.status === 'in_progress') {
+        // Include both 'pending' and 'in_progress' for "In Progress" filter
+        statusMatch = log.status === 'pending' || log.status === 'in_progress';
+      } else {
+        statusMatch = log.status === options.status;
+      }
 
       // Date filter
       const dateMatch =
@@ -87,8 +115,8 @@ export class CleaningLogService {
   static calculateStats(logs: CleaningLog[]): CycleStats {
     return {
       totalCycles: logs.length,
-      completed: logs.filter((log) => log.status === 'clean').length,
-      failed: logs.filter((log) => log.status === 'problem').length,
+      completed: logs.filter((log) => log.status === 'completed').length,
+      failed: logs.filter((log) => log.status === 'failed').length,
       totalTools: logs.length, // Each log represents one cleaning cycle
     };
   }
@@ -195,5 +223,67 @@ export class CleaningLogService {
   static getComplianceScoreDisplay(score?: number): string {
     if (!score) return 'N/A';
     return `${Math.round(score * 100)}%`;
+  }
+
+  /**
+   * Export cleaning logs to CSV
+   */
+  static exportToCSV(logs: CleaningLog[]): void {
+    if (!logs || logs.length === 0) {
+      alert('No data to export');
+      return;
+    }
+
+    try {
+      // Define CSV headers
+      const headers = [
+        'Cycle ID',
+        'Room Name',
+        'Status',
+        'Cleaning Type',
+        'Scheduled Time',
+        'Started Time',
+        'Completed Time',
+        'Operator ID',
+        'Notes',
+        'Created At',
+        'Updated At',
+      ];
+
+      // Convert logs to CSV rows
+      const csvRows = logs.map((log) => [
+        log.id,
+        log.room_name,
+        log.status,
+        log.cleaning_type,
+        log.scheduled_time || '',
+        log.started_time || '',
+        log.completed_time || '',
+        log.operator_id || '',
+        log.notes || '',
+        log.created_at,
+        log.updated_at,
+      ]);
+
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(','),
+        ...csvRows.map((row) => row.map((field) => `"${field}"`).join(',')),
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `cleaning_logs_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export cleaning logs:', error);
+      alert('Failed to export data. Please try again.');
+    }
   }
 }

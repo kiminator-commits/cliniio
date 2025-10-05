@@ -4,9 +4,7 @@ import {
   _InventoryItemRow,
   InventoryInflationForecast,
 } from '../forecastingAnalyticsTypes';
-import {
-  INVENTORY_INFLATION_CONFIG,
-} from '../forecastingAnalyticsConfig';
+import { INVENTORY_INFLATION_CONFIG } from '../forecastingAnalyticsConfig';
 
 export class InventoryInflationForecastService {
   private static instance: InventoryInflationForecastService;
@@ -20,7 +18,8 @@ export class InventoryInflationForecastService {
 
   static getInstance(): InventoryInflationForecastService {
     if (!InventoryInflationForecastService.instance) {
-      InventoryInflationForecastService.instance = new InventoryInflationForecastService();
+      InventoryInflationForecastService.instance =
+        new InventoryInflationForecastService();
     }
     return InventoryInflationForecastService.instance;
   }
@@ -56,7 +55,10 @@ export class InventoryInflationForecastService {
       }
 
       // Filter by date (last 365 days)
-      const oneYearAgo = new Date(Date.now() - INVENTORY_INFLATION_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000);
+      const oneYearAgo = new Date(
+        Date.now() -
+          INVENTORY_INFLATION_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000
+      );
       inventoryData = inventoryData.filter(
         (item) => item.created_at && new Date(item.created_at) >= oneYearAgo
       );
@@ -111,7 +113,10 @@ export class InventoryInflationForecastService {
             priceIncrease,
             inflationRate,
             projectedYearEndPrice:
-              currentPrice * (1 + (inflationRate / 100) * INVENTORY_INFLATION_CONFIG.PROJECTION_MONTHS), // Project 6 months
+              currentPrice *
+              (1 +
+                (inflationRate / 100) *
+                  INVENTORY_INFLATION_CONFIG.PROJECTION_MONTHS), // Project 6 months
             cheaperSupplierExists: false, // This should come from supplier comparison data
             alternativeSupplier: undefined,
             costSavings: 0,

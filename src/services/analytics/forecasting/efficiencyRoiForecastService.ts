@@ -17,7 +17,8 @@ export class EfficiencyRoiForecastService {
 
   static getInstance(): EfficiencyRoiForecastService {
     if (!EfficiencyRoiForecastService.instance) {
-      EfficiencyRoiForecastService.instance = new EfficiencyRoiForecastService();
+      EfficiencyRoiForecastService.instance =
+        new EfficiencyRoiForecastService();
     }
     return EfficiencyRoiForecastService.instance;
   }

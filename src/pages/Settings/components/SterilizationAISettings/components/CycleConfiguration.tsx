@@ -5,7 +5,10 @@ import { SterilizationAISettings as SterilizationAISettingsType } from '../../..
 
 interface CycleConfigurationProps {
   settings: SterilizationAISettingsType;
-  onInputChange: (field: keyof SterilizationAISettingsType, value: string | number | boolean) => void;
+  onInputChange: (
+    field: keyof SterilizationAISettingsType,
+    value: string | number | boolean
+  ) => void;
 }
 
 const CycleConfiguration: React.FC<CycleConfigurationProps> = ({
@@ -20,10 +23,7 @@ const CycleConfiguration: React.FC<CycleConfigurationProps> = ({
       </h5>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <label
-          htmlFor="cycleOptimization"
-          className="flex items-center gap-3"
-        >
+        <label htmlFor="cycleOptimization" className="flex items-center gap-3">
           <input
             id="cycleOptimization"
             type="checkbox"
@@ -79,10 +79,7 @@ const CycleConfiguration: React.FC<CycleConfigurationProps> = ({
           </span>
         </label>
 
-        <label
-          htmlFor="batchOptimization"
-          className="flex items-center gap-3"
-        >
+        <label htmlFor="batchOptimization" className="flex items-center gap-3">
           <input
             id="batchOptimization"
             type="checkbox"
@@ -90,9 +87,7 @@ const CycleConfiguration: React.FC<CycleConfigurationProps> = ({
             onChange={(e) =>
               onInputChange('batch_optimization', e.target.checked)
             }
-            disabled={
-              !settings.ai_enabled || !settings.smart_workflow_enabled
-            }
+            disabled={!settings.ai_enabled || !settings.smart_workflow_enabled}
             className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 disabled:opacity-50"
           />
           <div>
@@ -132,7 +127,8 @@ const CycleConfiguration: React.FC<CycleConfigurationProps> = ({
             </p>
           </div>
           <span className="sr-only">
-            Auto Optimization - Automatically optimize cycles based on historical data
+            Auto Optimization - Automatically optimize cycles based on
+            historical data
           </span>
         </label>
       </div>

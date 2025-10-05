@@ -12,8 +12,8 @@ export function logAndRethrowError(context: string, error: unknown): never {
  * Log error with context and return fallback value
  */
 export function logErrorAndReturnFallback<T>(
-  context: string, 
-  error: unknown, 
+  context: string,
+  error: unknown,
   fallback: T
 ): T {
   console.error(`${context}:`, error);
@@ -49,8 +49,14 @@ export function handleTaskCompletionError(error: unknown): never {
 /**
  * Handle performance metrics errors
  */
-export function handlePerformanceMetricsError(error: unknown): PerformanceUpdate {
-  return logErrorAndReturnFallback('Error getting performance metrics', error, getDefaultPerformanceUpdate());
+export function handlePerformanceMetricsError(
+  error: unknown
+): PerformanceUpdate {
+  return logErrorAndReturnFallback(
+    'Error getting performance metrics',
+    error,
+    getDefaultPerformanceUpdate()
+  );
 }
 
 /**
@@ -64,5 +70,9 @@ export function handleFacilityIdError(error: unknown): never {
  * Handle performance update errors
  */
 export function handlePerformanceUpdateError(error: unknown): void {
-  logErrorAndReturnFallback('Error updating performance metrics', error, undefined);
+  logErrorAndReturnFallback(
+    'Error updating performance metrics',
+    error,
+    undefined
+  );
 }

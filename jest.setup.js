@@ -71,35 +71,39 @@ global.import = {
 // Mock fetch for authentication service tests
 global.fetch = vi.fn().mockImplementation((url, _options) => {
   // Handle relative URLs by converting them to absolute URLs
-  const _absoluteUrl = url.startsWith('/') ? `http://localhost:3000${url}` : url;
-  
+  const _absoluteUrl = url.startsWith('/')
+    ? `http://localhost:3000${url}`
+    : url;
+
   // Mock different responses based on URL
   if (url.includes('/auth-login')) {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({
-        success: true,
-        token: 'mock-token',
-        expiry: new Date(Date.now() + 3600000).toISOString(),
-      }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          token: 'mock-token',
+          expiry: new Date(Date.now() + 3600000).toISOString(),
+        }),
       text: () => Promise.resolve('OK'),
     });
   }
-  
+
   if (url.includes('/auth-validate')) {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({
-        success: true,
-        valid: true,
-        user: { id: 'test-user', email: 'test@example.com' },
-      }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          valid: true,
+          user: { id: 'test-user', email: 'test@example.com' },
+        }),
       text: () => Promise.resolve('OK'),
     });
   }
-  
+
   // Default response
   return Promise.resolve({
     ok: true,
@@ -240,8 +244,12 @@ vi.mock('./src/lib/supabase', () => ({
     }),
   },
   isSupabaseConfigured: vi.fn().mockReturnValue(true),
-  getSupabaseUrl: vi.fn().mockReturnValue('https://mock-supabase-url.supabase.co'),
-  handleSupabaseError: vi.fn().mockImplementation((error) => new Error(error?.message || 'Mock error')),
+  getSupabaseUrl: vi
+    .fn()
+    .mockReturnValue('https://mock-supabase-url.supabase.co'),
+  handleSupabaseError: vi
+    .fn()
+    .mockImplementation((error) => new Error(error?.message || 'Mock error')),
 }));
 
 // Mock PackagingService to prevent authentication errors

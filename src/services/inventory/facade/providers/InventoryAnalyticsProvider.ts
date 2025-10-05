@@ -40,7 +40,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'item_created', `Inventory item created: ${itemName}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'item_created',
+      `Inventory item created: ${itemName}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('create_item', 'inventory', {
       itemId,
       itemName,
@@ -64,7 +70,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'item_updated', `Inventory item updated: ${itemId}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'item_updated',
+      `Inventory item updated: ${itemId}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('update_item', 'inventory', {
       itemId,
       updates,
@@ -86,7 +98,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'item_deleted', `Inventory item deleted: ${itemId}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'item_deleted',
+      `Inventory item deleted: ${itemId}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('delete_item', 'inventory', { itemId });
     this.trackAnalyticsEvent('inventory_item_deleted', event.properties);
   }
@@ -106,7 +124,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'category_created', `Category created: ${category}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'category_created',
+      `Category created: ${category}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('create_category', 'inventory', { category });
     this.trackAnalyticsEvent('inventory_category_created', event.properties);
   }
@@ -126,7 +150,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'category_deleted', `Category deleted: ${category}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'category_deleted',
+      `Category deleted: ${category}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('delete_category', 'inventory', { category });
     this.trackAnalyticsEvent('inventory_category_deleted', event.properties);
   }
@@ -174,7 +204,11 @@ export class InventoryAnalyticsProvider {
   /**
    * Track search operations
    */
-  trackSearch(query: string, resultCount: number, filters?: Record<string, unknown>): void {
+  trackSearch(
+    query: string,
+    resultCount: number,
+    filters?: Record<string, unknown>
+  ): void {
     const event: AnalyticsEvent = {
       eventType: 'inventory_search',
       category: 'inventory',
@@ -189,7 +223,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'search_performed', `Search: "${query}" returned ${resultCount} results`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'search_performed',
+      `Search: "${query}" returned ${resultCount} results`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('search_items', 'inventory', {
       query,
       resultCount,
@@ -214,7 +254,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'filter_applied', `Filter applied, returned ${resultCount} results`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'filter_applied',
+      `Filter applied, returned ${resultCount} results`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('filter_items', 'inventory', {
       filters,
       resultCount,
@@ -237,7 +283,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'item_duplicated', `Item duplicated: ${originalItemId} -> ${newItemId}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'item_duplicated',
+      `Item duplicated: ${originalItemId} -> ${newItemId}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('duplicate_item', 'inventory', {
       originalItemId,
       newItemId,
@@ -260,7 +312,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'item_archived', `Item archived: ${itemId}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'item_archived',
+      `Item archived: ${itemId}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('archive_item', 'inventory', {
       itemId,
       reason,
@@ -282,7 +340,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'item_restored', `Item restored: ${itemId}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'item_restored',
+      `Item restored: ${itemId}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('restore_item', 'inventory', { itemId });
     this.trackAnalyticsEvent('inventory_item_restored', event.properties);
   }
@@ -290,7 +354,11 @@ export class InventoryAnalyticsProvider {
   /**
    * Track category merge
    */
-  trackCategoryMerged(sourceCategory: string, targetCategory: string, itemsUpdated: number): void {
+  trackCategoryMerged(
+    sourceCategory: string,
+    targetCategory: string,
+    itemsUpdated: number
+  ): void {
     const event: AnalyticsEvent = {
       eventType: 'inventory_category_merged',
       category: 'inventory',
@@ -333,7 +401,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'adapter_initialized', `Adapter initialized: ${adapterType}`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'adapter_initialized',
+      `Adapter initialized: ${adapterType}`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('initialize_adapter', 'inventory', { adapterType });
     this.trackAnalyticsEvent('inventory_adapter_initialized', event.properties);
   }
@@ -341,7 +415,11 @@ export class InventoryAnalyticsProvider {
   /**
    * Track error events
    */
-  trackError(operation: string, error: Error, context?: Record<string, unknown>): void {
+  trackError(
+    operation: string,
+    error: Error,
+    context?: Record<string, unknown>
+  ): void {
     const event: AnalyticsEvent = {
       eventType: 'inventory_error',
       category: 'inventory',
@@ -356,7 +434,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'error_occurred', `Error in ${operation}: ${error.message}`, 'error', event.properties);
+    this.logEvent(
+      'inventory',
+      'error_occurred',
+      `Error in ${operation}: ${error.message}`,
+      'error',
+      event.properties
+    );
     this.trackUserAction('error_occurred', 'inventory', {
       operation,
       errorMessage: error.message,
@@ -368,7 +452,11 @@ export class InventoryAnalyticsProvider {
   /**
    * Track performance metrics
    */
-  trackPerformance(operation: string, duration: number, itemCount?: number): void {
+  trackPerformance(
+    operation: string,
+    duration: number,
+    itemCount?: number
+  ): void {
     const event: AnalyticsEvent = {
       eventType: 'inventory_performance',
       category: 'inventory',
@@ -383,7 +471,13 @@ export class InventoryAnalyticsProvider {
       },
     };
 
-    this.logEvent('inventory', 'performance_metric', `${operation} took ${duration}ms`, 'info', event.properties);
+    this.logEvent(
+      'inventory',
+      'performance_metric',
+      `${operation} took ${duration}ms`,
+      'info',
+      event.properties
+    );
     this.trackUserAction('performance_metric', 'inventory', {
       operation,
       duration,
@@ -408,14 +502,21 @@ export class InventoryAnalyticsProvider {
   /**
    * Private method to track user actions
    */
-  private trackUserAction(action: string, module: string, properties?: Record<string, unknown>): void {
+  private trackUserAction(
+    action: string,
+    module: string,
+    properties?: Record<string, unknown>
+  ): void {
     trackUserAction(action, module, properties);
   }
 
   /**
    * Private method to track analytics events
    */
-  private trackAnalyticsEvent(eventName: string, properties?: Record<string, unknown>): void {
+  private trackAnalyticsEvent(
+    eventName: string,
+    properties?: Record<string, unknown>
+  ): void {
     trackAnalyticsEvent(eventName, properties);
   }
 
@@ -447,7 +548,13 @@ export class InventoryAnalyticsProvider {
    * Track custom event
    */
   trackCustomEvent(event: AnalyticsEvent): void {
-    this.logEvent(event.category, event.action, event.label || event.action, 'info', event.properties);
+    this.logEvent(
+      event.category,
+      event.action,
+      event.label || event.action,
+      'info',
+      event.properties
+    );
     this.trackUserAction(event.action, event.category, event.properties);
     this.trackAnalyticsEvent(event.eventType, event.properties);
   }

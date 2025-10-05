@@ -102,7 +102,9 @@ export class CategoryAnalyzer {
     const suggestedTags: string[] = [];
 
     // 1. Check direct category mapping
-    const directMapping = this.mappingService.findMapping(content.category || '');
+    const directMapping = this.mappingService.findMapping(
+      content.category || ''
+    );
 
     if (directMapping) {
       bestCategory = directMapping.knowledgeHubCategory;
@@ -160,7 +162,9 @@ export class CategoryAnalyzer {
 
     // 5. Department-based categorization
     if (content.department) {
-      const deptCategory = this.mappingService.getDepartmentCategory(content.department);
+      const deptCategory = this.mappingService.getDepartmentCategory(
+        content.department
+      );
       if (deptCategory && bestConfidence < 0.8) {
         bestCategory = deptCategory;
         bestConfidence = 0.8;

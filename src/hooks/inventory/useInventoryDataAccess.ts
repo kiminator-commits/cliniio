@@ -5,7 +5,7 @@ import {
 import { InventoryItem } from '@/types/inventoryTypes';
 
 export const useInventoryDataAccess = () => {
-  // Initialize data fetching
+  // Initialize data fetching with lazy loading
   useInitializeInventoryData();
 
   const centralizedData = useCentralizedInventoryData();

@@ -21,7 +21,8 @@ export class AdminStaffingForecastService {
 
   static getInstance(): AdminStaffingForecastService {
     if (!AdminStaffingForecastService.instance) {
-      AdminStaffingForecastService.instance = new AdminStaffingForecastService();
+      AdminStaffingForecastService.instance =
+        new AdminStaffingForecastService();
     }
     return AdminStaffingForecastService.instance;
   }
@@ -51,7 +52,10 @@ export class AdminStaffingForecastService {
           .eq('facility_id', filters.facilityId as string)
           .gte(
             'created_at',
-            new Date(Date.now() - ADMIN_STAFFING_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000).toISOString()
+            new Date(
+              Date.now() -
+                ADMIN_STAFFING_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000
+            ).toISOString()
           )
           .order('created_at', { ascending: false });
 
@@ -74,17 +78,23 @@ export class AdminStaffingForecastService {
       ).length;
 
       const currentWorkload = totalCycles;
-      const projectedWorkload = Math.round(totalCycles * ADMIN_STAFFING_CONFIG.GROWTH_RATE); // 10% growth projection
+      const projectedWorkload = Math.round(
+        totalCycles * ADMIN_STAFFING_CONFIG.GROWTH_RATE
+      ); // 10% growth projection
       const workloadExcess = Math.max(0, projectedWorkload - currentWorkload);
-      const qualityIncidents = Math.floor(incompleteCycles * ADMIN_STAFFING_CONFIG.INCIDENT_RATE); // Estimate based on incomplete cycles
+      const qualityIncidents = Math.floor(
+        incompleteCycles * ADMIN_STAFFING_CONFIG.INCIDENT_RATE
+      ); // Estimate based on incomplete cycles
       const resolutionLag =
         incompleteCycles > 0
           ? Math.max(1, Math.floor(incompleteCycles / 2))
           : 0;
 
       let priority: 'low' | 'medium' | 'high';
-      if (workloadExcess > ADMIN_STAFFING_CONFIG.HIGH_WORKLOAD_THRESHOLD) priority = PRIORITY_CONFIG.HIGH;
-      else if (workloadExcess > ADMIN_STAFFING_CONFIG.MEDIUM_WORKLOAD_THRESHOLD) priority = PRIORITY_CONFIG.MEDIUM;
+      if (workloadExcess > ADMIN_STAFFING_CONFIG.HIGH_WORKLOAD_THRESHOLD)
+        priority = PRIORITY_CONFIG.HIGH;
+      else if (workloadExcess > ADMIN_STAFFING_CONFIG.MEDIUM_WORKLOAD_THRESHOLD)
+        priority = PRIORITY_CONFIG.MEDIUM;
       else priority = PRIORITY_CONFIG.LOW;
 
       const forecasts: AdminStaffingForecast[] = [

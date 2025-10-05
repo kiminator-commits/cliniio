@@ -31,10 +31,10 @@ async function getRedisClient() {
 
   try {
     const { createClient } = await import('https://esm.sh/redis@4.6.12');
-    
+
     const redisUrl = Deno.env.get('REDIS_URL') || 'redis://localhost:6379';
     redisClient = createClient({ url: redisUrl });
-    
+
     redisClient.on('error', (err: Error) => {
       console.error('Redis client error:', err);
     });
@@ -48,25 +48,46 @@ async function getRedisClient() {
 }
 
 // In-memory fallback storage
-const memoryStore = new Map<string, { count: number; resetTime: number; lockoutUntil?: number }>();
+const memoryStore = new Map<
+  string,
+  { count: number; resetTime: number; lockoutUntil?: number }
+>();
 
 export function getClientId(req: Request): string {
-  const ip = req.headers.get('x-forwarded-for') || 
-             req.headers.get('x-real-ip') || 
-             'unknown';
+  const ip =
+    req.headers.get('x-forwarded-for') ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
   const userAgent = req.headers.get('user-agent') || 'unknown';
-  
+
   const identifier = `${ip}-${userAgent}`;
-  return btoa(identifier).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+  return btoa(identifier)
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .substring(0, 16);
 }
 
 export function getRateLimitConfig(): RateLimitConfig {
   return {
-    maxAttemptsPerEmail: parseInt(Deno.env.get('RATE_LIMIT_MAX_EMAIL') || DEFAULT_CONFIG.maxAttemptsPerEmail.toString()),
-    maxAttemptsPerIP: parseInt(Deno.env.get('RATE_LIMIT_MAX_IP') || DEFAULT_CONFIG.maxAttemptsPerIP.toString()),
-    windowSizeMinutes: parseInt(Deno.env.get('RATE_LIMIT_WINDOW') || DEFAULT_CONFIG.windowSizeMinutes.toString()),
-    lockoutDurationMinutes: parseInt(Deno.env.get('RATE_LIMIT_LOCKOUT') || DEFAULT_CONFIG.lockoutDurationMinutes.toString()),
-    progressiveDelaySeconds: parseInt(Deno.env.get('RATE_LIMIT_DELAY') || DEFAULT_CONFIG.progressiveDelaySeconds.toString()),
+    maxAttemptsPerEmail: parseInt(
+      Deno.env.get('RATE_LIMIT_MAX_EMAIL') ||
+        DEFAULT_CONFIG.maxAttemptsPerEmail.toString()
+    ),
+    maxAttemptsPerIP: parseInt(
+      Deno.env.get('RATE_LIMIT_MAX_IP') ||
+        DEFAULT_CONFIG.maxAttemptsPerIP.toString()
+    ),
+    windowSizeMinutes: parseInt(
+      Deno.env.get('RATE_LIMIT_WINDOW') ||
+        DEFAULT_CONFIG.windowSizeMinutes.toString()
+    ),
+    lockoutDurationMinutes: parseInt(
+      Deno.env.get('RATE_LIMIT_LOCKOUT') ||
+        DEFAULT_CONFIG.lockoutDurationMinutes.toString()
+    ),
+    progressiveDelaySeconds: parseInt(
+      Deno.env.get('RATE_LIMIT_DELAY') ||
+        DEFAULT_CONFIG.progressiveDelaySeconds.toString()
+    ),
   };
 }
 
@@ -85,11 +106,11 @@ async function checkRedisRateLimit(
     const now = Date.now();
     const windowMs = config.windowSizeMinutes * 60 * 1000;
     const lockoutMs = config.lockoutDurationMinutes * 60 * 1000;
-    
+
     // Check if currently locked out
     const lockoutKey = `${key}:lockout`;
     const lockoutUntil = await redis.get(lockoutKey);
-    
+
     if (lockoutUntil && parseInt(lockoutUntil) > now) {
       return {
         allowed: false,
@@ -101,7 +122,7 @@ async function checkRedisRateLimit(
     }
 
     // Get current attempt count
-    const count = await redis.get(key) || '0';
+    const count = (await redis.get(key)) || '0';
     const attemptCount = parseInt(count);
 
     if (isSuccess) {
@@ -117,13 +138,17 @@ async function checkRedisRateLimit(
 
     if (isFailedAttempt) {
       const newCount = attemptCount + 1;
-      
+
       if (newCount >= config.maxAttemptsPerEmail) {
         // Lock out the account
         const lockoutEnd = now + lockoutMs;
-        await redis.setex(lockoutKey, config.lockoutDurationMinutes * 60, lockoutEnd.toString());
+        await redis.setex(
+          lockoutKey,
+          config.lockoutDurationMinutes * 60,
+          lockoutEnd.toString()
+        );
         await redis.del(key); // Clear attempt counter
-        
+
         return {
           allowed: false,
           remainingAttempts: 0,
@@ -133,8 +158,12 @@ async function checkRedisRateLimit(
         };
       } else {
         // Increment counter
-        await redis.setex(key, config.windowSizeMinutes * 60, newCount.toString());
-        
+        await redis.setex(
+          key,
+          config.windowSizeMinutes * 60,
+          newCount.toString()
+        );
+
         return {
           allowed: true,
           remainingAttempts: config.maxAttemptsPerEmail - newCount,
@@ -159,7 +188,6 @@ async function checkRedisRateLimit(
       remainingAttempts: config.maxAttemptsPerEmail - attemptCount,
       resetTime: now + windowMs,
     };
-
   } catch (error) {
     console.error('Redis rate limit check failed:', error);
     return checkMemoryRateLimit(key, config, isFailedAttempt, isSuccess);
@@ -175,8 +203,11 @@ function checkMemoryRateLimit(
   const now = Date.now();
   const windowMs = config.windowSizeMinutes * 60 * 1000;
   const lockoutMs = config.lockoutDurationMinutes * 60 * 1000;
-  
-  const current = memoryStore.get(key) || { count: 0, resetTime: now + windowMs };
+
+  const current = memoryStore.get(key) || {
+    count: 0,
+    resetTime: now + windowMs,
+  };
 
   // Check if currently locked out
   if (current.lockoutUntil && current.lockoutUntil > now) {
@@ -208,14 +239,14 @@ function checkMemoryRateLimit(
 
   if (isFailedAttempt) {
     current.count++;
-    
+
     if (current.count >= config.maxAttemptsPerEmail) {
       // Lock out the account
       current.lockoutUntil = now + lockoutMs;
       current.count = 0;
-      
+
       memoryStore.set(key, current);
-      
+
       return {
         allowed: false,
         remainingAttempts: 0,
@@ -254,22 +285,35 @@ export async function checkRateLimit(
   isSuccess: boolean = false
 ): Promise<RateLimitResult> {
   const config = getRateLimitConfig();
-  
+
   // Check both email and IP limits
   const emailKey = `auth:email:${email.toLowerCase()}`;
   const ipKey = `auth:ip:${ipAddress}`;
-  
-  const emailResult = await checkRedisRateLimit(emailKey, config, isFailedAttempt, isSuccess);
-  const ipResult = await checkRedisRateLimit(ipKey, config, isFailedAttempt, isSuccess);
-  
+
+  const emailResult = await checkRedisRateLimit(
+    emailKey,
+    config,
+    isFailedAttempt,
+    isSuccess
+  );
+  const ipResult = await checkRedisRateLimit(
+    ipKey,
+    config,
+    isFailedAttempt,
+    isSuccess
+  );
+
   // Return the most restrictive result
   if (!emailResult.allowed || !ipResult.allowed) {
     return emailResult.resetTime < ipResult.resetTime ? emailResult : ipResult;
   }
-  
+
   return {
     allowed: true,
-    remainingAttempts: Math.min(emailResult.remainingAttempts, ipResult.remainingAttempts),
+    remainingAttempts: Math.min(
+      emailResult.remainingAttempts,
+      ipResult.remainingAttempts
+    ),
     resetTime: Math.min(emailResult.resetTime, ipResult.resetTime),
   };
 }

@@ -195,7 +195,7 @@ describe('Service Coverage Tests', () => {
       // In test mode, the logout function uses mock authentication, not Supabase
       // So we test that the mock logout completes successfully
       await expect(logout()).resolves.not.toThrow();
-      
+
       // Verify that the logout function completes without errors
       // The mock logout just logs and returns, which is the expected behavior
     });

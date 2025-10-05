@@ -5,6 +5,7 @@ import { useUser } from '@/contexts/UserContext';
 import { SecureAuthService } from '@/services/secureAuthService';
 import { trackEvent } from '@/services/analytics';
 import { LOGIN_CONFIG, LOGIN_ERRORS } from '@/constants/loginConstants';
+import { deviceManager } from '@/services/deviceManager';
 
 export const useLoginForm = () => {
   const navigate = useNavigate();
@@ -47,7 +48,9 @@ export const useLoginForm = () => {
     sanitizedEmail: string,
     sanitizedPassword: string,
     validateCsrfToken: () => boolean,
-    logSecurityEvent: (event: string, user: string, reason?: string) => void
+    logSecurityEvent: (event: string, user: string, reason?: string) => void,
+    rememberMe: boolean = false,
+    rememberDevice: boolean = false
   ) => {
     if (loading) return;
 
@@ -72,32 +75,67 @@ export const useLoginForm = () => {
         timestamp: new Date().toISOString(),
       });
 
-      // Log security event
-      logSecurityEvent('login_attempt', sanitizedEmail);
-
-      // Update progress
-      setLoadingStep(LOGIN_CONFIG.PROGRESS_STEPS.AUTHENTICATING);
+      // Check if device is already trusted (for faster login)
+      const _isTrustedDevice = false;
+      if (rememberDevice) {
+        try {
+          // We'll check this after we get the user ID from successful auth
+          console.log('🔍 Checking if device is already trusted...');
+        } catch (error) {
+          console.warn('Failed to check trusted device:', error);
+        }
+      }
 
       // Use secure authentication
       const authService = new SecureAuthService();
       const response = await authService.secureLogin({
         email: sanitizedEmail,
         password: sanitizedPassword,
+        rememberMe: rememberMe,
       });
 
       if (response.success && response.data) {
         // Update progress
         setLoadingStep(LOGIN_CONFIG.PROGRESS_STEPS.VERIFYING);
 
-        // Set auth token with secure expiry
-        const expiry = new Date(Date.now() + response.data.expiresIn * 1000).toISOString();
-        setAuthToken(response.data.accessToken, expiry);
+        // Set auth token with secure expiry and remember me setting
+        const expiry = new Date(
+          Date.now() + response.data.expiresIn * 1000
+        ).toISOString();
+        setAuthToken(response.data.accessToken, expiry, rememberMe);
 
         // Refresh user data
         try {
           await refreshUserData();
         } catch (error) {
           console.warn('Failed to refresh user data:', error);
+        }
+
+        // Handle device trust if requested
+        if (rememberDevice) {
+          try {
+            const deviceFingerprint = deviceManager.generateDeviceFingerprint();
+            const userId = response.data.user?.id;
+
+            if (userId) {
+              // Check if device is already trusted
+              const alreadyTrusted =
+                await deviceManager.isDeviceTrusted(userId);
+
+              if (!alreadyTrusted) {
+                await deviceManager.storeTrustedDevice(
+                  userId,
+                  deviceFingerprint
+                );
+                console.log('✅ Device marked as trusted');
+              } else {
+                console.log('✅ Device already trusted');
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to store trusted device:', error);
+            // Don't fail login if device storage fails
+          }
         }
 
         // Track successful login
@@ -124,11 +162,12 @@ export const useLoginForm = () => {
       }
     } catch (error) {
       console.error('Secure login error:', error);
-      
+
       // Increment failed attempts for security tracking
       incrementFailedAttempts();
-      
-      const errorMessage = error instanceof Error ? error.message : LOGIN_ERRORS.unexpectedError;
+
+      const errorMessage =
+        error instanceof Error ? error.message : LOGIN_ERRORS.unexpectedError;
       setErrors({ submit: errorMessage });
 
       // Track failed login

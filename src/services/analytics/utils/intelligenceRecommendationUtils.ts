@@ -1,7 +1,7 @@
-import { 
-  IntelligenceRecommendation, 
-  OptimizationTip, 
-  RiskAlert 
+import {
+  IntelligenceRecommendation,
+  OptimizationTip,
+  RiskAlert,
 } from '../../../types/intelligenceRecommendationTypes';
 
 /**

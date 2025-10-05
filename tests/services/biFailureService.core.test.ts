@@ -32,7 +32,7 @@ vi.mock('../../src/services/supabaseClient', () => {
       eq: vi.fn().mockResolvedValue(finalResponse),
       gte: mockGte,
     });
-    
+
     return {
       select: vi.fn().mockReturnValue({
         single: mockSingle,
@@ -68,11 +68,19 @@ vi.mock('../../src/services/supabaseClient', () => {
         })),
       })),
       auth: {
-        getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
-        getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
-        signInWithPassword: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        getUser: vi
+          .fn()
+          .mockResolvedValue({ data: { user: null }, error: null }),
+        getSession: vi
+          .fn()
+          .mockResolvedValue({ data: { session: null }, error: null }),
+        signInWithPassword: vi
+          .fn()
+          .mockResolvedValue({ data: { user: null }, error: null }),
         signOut: vi.fn().mockResolvedValue({ error: null }),
-        onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+        onAuthStateChange: vi.fn(() => ({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        })),
       },
       // Add missing properties that Supabase might need
       get: vi.fn().mockResolvedValue({ data: [], error: null }),

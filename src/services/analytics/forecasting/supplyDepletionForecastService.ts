@@ -17,7 +17,8 @@ export class SupplyDepletionForecastService {
 
   static getInstance(): SupplyDepletionForecastService {
     if (!SupplyDepletionForecastService.instance) {
-      SupplyDepletionForecastService.instance = new SupplyDepletionForecastService();
+      SupplyDepletionForecastService.instance =
+        new SupplyDepletionForecastService();
     }
     return SupplyDepletionForecastService.instance;
   }

@@ -1,15 +1,18 @@
-import {
-  Assessment,
-  AssessmentScore,
-} from '../types/assessmentTypes';
+import { Assessment, AssessmentScore } from '../types/assessmentTypes';
 
 export class AssessmentScoring {
   /**
    * Calculate assessment score
    */
-  calculateScore(assessment: Assessment, answers: Record<string, string>): AssessmentScore {
+  calculateScore(
+    assessment: Assessment,
+    answers: Record<string, string>
+  ): AssessmentScore {
     let totalScore = 0;
-    const maxScore = assessment.questions.reduce((sum, question) => sum + question.points, 0);
+    const maxScore = assessment.questions.reduce(
+      (sum, question) => sum + question.points,
+      0
+    );
     const questionScores: Record<string, number> = {};
 
     assessment.questions.forEach((question) => {

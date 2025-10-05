@@ -144,9 +144,8 @@ export async function getLearningProgressMetrics(): Promise<Record<
     }
 
     return {
-      totalCompleted: (
-        progress?.filter((p) => p.status === 'completed') || []
-      ).length,
+      totalCompleted: (progress?.filter((p) => p.status === 'completed') || [])
+        .length,
       totalInProgress: (
         progress?.filter((p) => p.status === 'in_progress') || []
       ).length,

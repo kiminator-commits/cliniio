@@ -361,7 +361,10 @@ export class AuthLoginProvider {
   /**
    * Get rate limiter for cleanup
    */
-  getRateLimiter(): Map<string, { attempts: number; lastAttempt: number; blocked: boolean }> {
+  getRateLimiter(): Map<
+    string,
+    { attempts: number; lastAttempt: number; blocked: boolean }
+  > {
     return this.rateLimiter;
   }
 

@@ -26,6 +26,9 @@ export interface CreateChallengeCompletionData {
 }
 
 class ChallengeService {
+  private lastLogTime: number = 0; // Prevent duplicate logs in StrictMode
+  private lastRawLogTime: number = 0; // Separate throttling for raw data logs
+
   private async getCachedUser() {
     const { FacilityService } = await import('@/services/facilityService');
     const { userId, facilityId } =
@@ -46,6 +49,12 @@ class ChallengeService {
     } = await supabase.auth.getUser();
 
     if (!user) {
+      return null;
+    }
+
+    // CRITICAL: Wait for authentication to be fully established before database calls
+    const session = await supabase.auth.getSession();
+    if (!session.data.session) {
       return null;
     }
 
@@ -105,17 +114,11 @@ class ChallengeService {
         (user as UserRow).facility_id
       );
 
-      // First, let's check if the table exists and what's in it
-      const { data: allData, error: allError } = await supabase
-        .from('home_challenges')
-        .select('*');
-
-      logger.debug('challengeService: All challenges in table:', allData);
-      logger.debug('challengeService: All challenges error:', allError);
-
+      // Single optimized query instead of duplicate queries
       const { data, error } = await supabase
         .from('home_challenges')
         .select('*')
+        .eq('facility_id', (user as UserRow).facility_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -123,7 +126,13 @@ class ChallengeService {
         return [];
       }
 
-      logger.debug('challengeService: Raw challenges data:', data);
+      // Only log once per calculation to avoid StrictMode duplicate logs
+      const now = Date.now();
+      if (now - this.lastRawLogTime > 1000) {
+        // Only log once per second
+        logger.debug('challengeService: Raw challenges data:', data);
+        this.lastRawLogTime = now;
+      }
 
       // Transform the data to match the Challenge interface
       const challenges: Challenge[] = (data as Record<string, unknown>[]).map(
@@ -149,7 +158,12 @@ class ChallengeService {
         challenge.completed = completedIds.has(challenge.id);
       });
 
-      logger.debug('challengeService: Transformed challenges:', challenges);
+      // Only log once per calculation to avoid StrictMode duplicate logs
+      if (now - this.lastLogTime > 1000) {
+        // Only log once per second
+        logger.debug('challengeService: Transformed challenges:', challenges);
+        this.lastLogTime = now;
+      }
       return challenges;
     } catch (error) {
       console.error('Error in fetchChallenges:', error);

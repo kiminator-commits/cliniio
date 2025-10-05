@@ -36,9 +36,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
           </button>
           <button
             onClick={
-              isListening
-                ? onStopSpeechRecognition
-                : onStartSpeechRecognition
+              isListening ? onStopSpeechRecognition : onStartSpeechRecognition
             }
             className={`px-3 py-1 rounded-md text-sm flex items-center gap-1 ${
               isListening

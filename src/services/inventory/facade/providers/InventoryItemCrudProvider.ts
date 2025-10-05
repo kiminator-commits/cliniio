@@ -54,7 +54,9 @@ export class InventoryItemCrudProvider {
     const result = await InventoryErrorHandler.handleOperation(
       'createItem',
       async () => {
-        const result = await this.adapter.addInventoryItem(item as InventoryItem);
+        const result = await this.adapter.addInventoryItem(
+          item as InventoryItem
+        );
         cacheInvalidationService.invalidateRelated(
           'inventory:create',
           result.id
@@ -144,31 +146,34 @@ export class InventoryItemCrudProvider {
   async deleteItem(
     id: string
   ): Promise<{ success: boolean; error: string | null }> {
-    const result = await InventoryErrorHandler.handleOperation('deleteItem', async () => {
-      await this.adapter.deleteInventoryItem(id);
-      cacheInvalidationService.invalidateRelated('inventory:delete', id);
+    const result = await InventoryErrorHandler.handleOperation(
+      'deleteItem',
+      async () => {
+        await this.adapter.deleteInventoryItem(id);
+        cacheInvalidationService.invalidateRelated('inventory:delete', id);
 
-      // Track inventory item deletion
-      logEvent(
-        'inventory',
-        'item_deleted',
-        `Inventory item deleted: ${id}`,
-        'info',
-        {
+        // Track inventory item deletion
+        logEvent(
+          'inventory',
+          'item_deleted',
+          `Inventory item deleted: ${id}`,
+          'info',
+          {
+            itemId: id,
+            adapterType: this.adapterType,
+          }
+        );
+
+        trackUserAction('delete_item', 'inventory', { itemId: id });
+
+        trackAnalyticsEvent('inventory_item_deleted', {
           itemId: id,
           adapterType: this.adapterType,
-        }
-      );
+        });
 
-      trackUserAction('delete_item', 'inventory', { itemId: id });
-
-      trackAnalyticsEvent('inventory_item_deleted', {
-        itemId: id,
-        adapterType: this.adapterType,
-      });
-
-      return true;
-    });
+        return true;
+      }
+    );
 
     return { success: result, error: null };
   }
@@ -278,7 +283,10 @@ export class InventoryItemCrudProvider {
         };
 
         const result = await this.adapter.addInventoryItem(duplicatedItem);
-        cacheInvalidationService.invalidateRelated('inventory:create', result.id);
+        cacheInvalidationService.invalidateRelated(
+          'inventory:create',
+          result.id
+        );
 
         // Track item duplication
         logEvent(

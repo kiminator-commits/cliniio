@@ -2,7 +2,11 @@ import { InventoryItem, LocalInventoryItem } from './types';
 import { InventoryDataAdapter } from '../adapters/InventoryDataAdapter';
 // import { inventoryAdapterFactory } from '../adapters/InventoryAdapterFactory';
 import { InventoryErrorHandler } from '../InventoryErrorHandler';
-import { InventoryCategoryProvider, categorizeItems, withNormalizedCategory } from './providers/InventoryCategoryProvider';
+import {
+  InventoryCategoryProvider,
+  categorizeItems,
+  withNormalizedCategory,
+} from './providers/InventoryCategoryProvider';
 import { InventoryItemCrudProvider } from './providers/InventoryItemCrudProvider';
 import { InventoryBulkOperationsProvider } from './providers/InventoryBulkOperationsProvider';
 import { InventorySearchFilterProvider } from './providers/InventorySearchFilterProvider';
@@ -43,15 +47,24 @@ export class InventoryRepository {
       if (typeof this.currentAdapter.initialize === 'function') {
         await this.currentAdapter.initialize();
       }
-      
+
       // Initialize providers
-      this.categoryProvider = new InventoryCategoryProvider(adapter, adapterType);
-      this.itemCrudProvider = new InventoryItemCrudProvider(adapter, adapterType);
-      this.bulkOperationsProvider = new InventoryBulkOperationsProvider(adapter, adapterType);
+      this.categoryProvider = new InventoryCategoryProvider(
+        adapter,
+        adapterType
+      );
+      this.itemCrudProvider = new InventoryItemCrudProvider(
+        adapter,
+        adapterType
+      );
+      this.bulkOperationsProvider = new InventoryBulkOperationsProvider(
+        adapter,
+        adapterType
+      );
       this.searchFilterProvider = new InventorySearchFilterProvider(adapter);
       this.analyticsProvider = new InventoryAnalyticsProvider(adapterType);
       this.statsProvider = new InventoryStatsProvider(adapter, adapterType);
-      
+
       this.initialized = true;
       console.info('[InventoryRepository] Initialized successfully.');
     }
@@ -104,7 +117,12 @@ export class InventoryRepository {
         const allItemIds = new Set();
         const duplicateIds = new Set();
 
-        [categorized.tools, categorized.supplies, categorized.equipment, categorized.officeHardware].forEach((category) => {
+        [
+          categorized.tools,
+          categorized.supplies,
+          categorized.equipment,
+          categorized.officeHardware,
+        ].forEach((category) => {
           category.forEach((item) => {
             if (allItemIds.has(item.id)) {
               duplicateIds.add(item.id);

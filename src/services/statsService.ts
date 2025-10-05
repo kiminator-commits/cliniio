@@ -19,6 +19,7 @@ class StatsService {
   private cachedStats: CumulativeStats | null = null;
   private cacheTimestamp: number = 0;
   private readonly CACHE_DURATION = 30000; // 30 seconds cache
+  private lastLogTime: number = 0; // Prevent duplicate logs in StrictMode
 
   private async getCachedUser() {
     try {
@@ -37,15 +38,18 @@ class StatsService {
   }
 
   async fetchCumulativeStats(): Promise<CumulativeStats> {
+    console.log('🔍 statsService: fetchCumulativeStats called');
+
     // Check cache first
     const now = Date.now();
     if (this.cachedStats && now - this.cacheTimestamp < this.CACHE_DURATION) {
-      logger.debug('statsService: Returning cached stats');
+      console.log('📊 statsService: Returning cached stats');
       return this.cachedStats;
     }
 
     try {
       const user = await this.getCachedUser();
+      console.log('👤 statsService: Got user:', user);
 
       if (!user) {
         logger.debug(
@@ -74,7 +78,31 @@ class StatsService {
         facilityId
       );
 
-      // Calculate stats from existing tables
+      // First try to get stats from user_gamification_stats table
+      console.log(
+        '🔍 statsService: Trying to fetch from gamification table for facility:',
+        facilityId
+      );
+      const gamificationStats =
+        await this.fetchGamificationStatsFromTable(facilityId);
+      if (gamificationStats) {
+        console.log(
+          '✅ statsService: Found gamification stats in database:',
+          gamificationStats
+        );
+
+        // Cache the results
+        this.cachedStats = gamificationStats;
+        this.cacheTimestamp = now;
+
+        return gamificationStats;
+      } else {
+        console.log(
+          '❌ statsService: No gamification stats found, falling back to calculations'
+        );
+      }
+
+      // Fallback to calculating stats from existing tables
       const baseStats = await this.calculateStatsFromExistingTables(
         user.id,
         facilityId
@@ -92,7 +120,12 @@ class StatsService {
         bestStreak: streaks.bestStreak,
       };
 
-      logger.debug('statsService: Calculated stats:', stats);
+      // Only log once per calculation to avoid StrictMode duplicate logs
+      if (now - this.lastLogTime > 1000) {
+        // Only log once per second
+        logger.debug('statsService: Calculated stats:', stats);
+        this.lastLogTime = now;
+      }
 
       // Cache the results
       this.cachedStats = stats;
@@ -102,6 +135,47 @@ class StatsService {
     } catch (error) {
       console.error('Error in fetchCumulativeStats:', error);
       return this.getDefaultStats();
+    }
+  }
+
+  private async fetchGamificationStatsFromTable(
+    facilityId: string
+  ): Promise<CumulativeStats | null> {
+    try {
+      console.log('🔍 Fetching gamification stats for facility:', facilityId);
+
+      const { data, error } = await supabase
+        .from('user_gamification_stats')
+        .select('*')
+        .eq('facility_id', facilityId)
+        .single();
+
+      console.log('📊 Gamification stats query result:', { data, error });
+
+      if (error || !data) {
+        logger.debug('statsService: No gamification stats found in database');
+        return null;
+      }
+
+      // Convert database data to CumulativeStats format
+      const stats = {
+        toolsSterilized: 0, // Not stored in gamification stats
+        inventoryChecks: 0, // Not stored in gamification stats
+        perfectDays: 0, // Not stored in gamification stats
+        totalTasks: data.total_tasks || 0,
+        completedTasks: data.completed_tasks || 0,
+        currentStreak: data.current_streak || 0,
+        bestStreak: data.best_streak || 0,
+        totalPoints: data.total_points || 0,
+        challengesCompleted: 0, // Not stored in gamification stats
+        totalChallenges: 0, // Not stored in gamification stats
+      };
+
+      console.log('✅ Converted gamification stats:', stats);
+      return stats;
+    } catch (error) {
+      console.error('❌ Error fetching gamification stats from table:', error);
+      return null;
     }
   }
 
@@ -159,12 +233,19 @@ class StatsService {
     completions: Record<string, unknown>[],
     totalChallenges: number
   ): Promise<CumulativeStats> {
-    // Calculate total points and completed challenges
+    // Calculate total points and completed challenges (including daily tasks)
     const totalPoints = completions.reduce(
       (sum, completion) => sum + ((completion.points_earned as number) || 0),
       0
     );
     const challengesCompleted = completions.length;
+
+    // Separate daily tasks from regular challenges
+    const dailyTasksCompleted = completions.filter(
+      (completion) => completion.completion_type === 'daily_task'
+    ).length;
+    const regularChallengesCompleted =
+      challengesCompleted - dailyTasksCompleted;
 
     // Calculate category-based stats
     const categoryStats = this.calculateCategoryStats(completions);
@@ -196,12 +277,12 @@ class StatsService {
       toolsSterilized: sterilizationStats.toolsSterilized, // Real data from sterilization_cycles
       inventoryChecks: categoryStats.quality, // Keep challenge-based for now
       perfectDays: Math.floor(challengesCompleted / 3), // Rough estimate based on daily completion rate
-      totalTasks: totalChallenges,
-      completedTasks: challengesCompleted,
+      totalTasks: totalChallenges + dailyTasksCompleted, // Include daily tasks in total
+      completedTasks: challengesCompleted, // All completed tasks (challenges + daily tasks)
       currentStreak: streakData.currentStreak,
       bestStreak: streakData.bestStreak,
       totalPoints,
-      challengesCompleted,
+      challengesCompleted: regularChallengesCompleted, // Only regular challenges
       totalChallenges,
       enhancedLevel: enhancedLevel || undefined, // Add enhanced level data
     };
@@ -279,11 +360,10 @@ class StatsService {
     totalChallenges: number;
   }> {
     try {
-      // Get activity feed entries for the user
-      const { data: activities, error } = await supabase
-        .from('activity_feed')
+      // Get tasks from the home-daily_operations_tasks table
+      const { data: tasks, error } = await supabase
+        .from('home-daily_operations_tasks')
         .select('*')
-        .eq('user_id', userId)
         .eq('facility_id', facilityId)
         .gte(
           'created_at',
@@ -291,7 +371,7 @@ class StatsService {
         ); // Last 30 days
 
       if (error) {
-        console.error('Error fetching activity stats:', error);
+        console.error('Error fetching task stats:', error);
         return {
           perfectDays: 0,
           totalTasks: 0,
@@ -302,31 +382,34 @@ class StatsService {
         };
       }
 
-      const totalTasks = activities?.length || 0;
+      const totalTasks = tasks?.length || 0;
       const completedTasks =
-        activities?.filter(
-          (activity) =>
-            activity.activity_type === 'completed' ||
-            activity.activity_type === 'task_completed'
-        ).length || 0;
+        tasks?.filter((task) => task.completed).length || 0;
 
-      // Calculate perfect days (days with at least 3 completed activities)
-      const dailyActivityCounts =
-        activities?.reduce(
-          (acc, activity) => {
-            const date = new Date(activity.created_at).toDateString();
-            acc[date] = (acc[date] || 0) + 1;
+      // Calculate perfect days (days with at least 3 completed tasks)
+      const dailyTaskCounts =
+        tasks?.reduce(
+          (acc, task) => {
+            if (task.completed) {
+              const date = new Date(
+                task.completed_at || task.created_at
+              ).toDateString();
+              acc[date] = (acc[date] || 0) + 1;
+            }
             return acc;
           },
           {} as Record<string, number>
         ) || {};
 
-      const perfectDays = Object.values(dailyActivityCounts).filter(
+      const perfectDays = Object.values(dailyTaskCounts).filter(
         (count) => count >= 3
       ).length;
 
-      // Calculate points (simplified - 10 points per completed activity)
-      const totalPoints = completedTasks * 10;
+      // Calculate points from actual task points
+      const totalPoints =
+        tasks?.reduce((sum, task) => {
+          return sum + (task.completed ? task.points || 0 : 0);
+        }, 0) || 0;
 
       return {
         perfectDays,

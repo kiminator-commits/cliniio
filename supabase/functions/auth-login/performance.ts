@@ -63,8 +63,13 @@ class PerformanceOptimizer {
     return metric;
   }
 
-  endOperation(requestId: string, success: boolean, error?: string, metadata?: any): void {
-    const metric = this.metrics.find(m => m.requestId === requestId);
+  endOperation(
+    requestId: string,
+    success: boolean,
+    error?: string,
+    metadata?: any
+  ): void {
+    const metric = this.metrics.find((m) => m.requestId === requestId);
     if (!metric) return;
 
     metric.endTime = Date.now();
@@ -93,7 +98,7 @@ class PerformanceOptimizer {
     const result = await operation();
 
     // Cache the result
-    const expires = Date.now() + ((ttlSeconds || this.config.ttlSeconds) * 1000);
+    const expires = Date.now() + (ttlSeconds || this.config.ttlSeconds) * 1000;
     this.cache.set(key, { value: result, expires });
 
     // Cleanup if cache is too large
@@ -116,9 +121,11 @@ class PerformanceOptimizer {
         return await operation();
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, attempt)));
+          await new Promise((resolve) =>
+            setTimeout(resolve, delayMs * Math.pow(2, attempt))
+          );
         }
       }
     }
@@ -147,10 +154,10 @@ class PerformanceOptimizer {
 
     for (let i = 0; i < items.length; i += batchSize) {
       const batch = items.slice(i, i + batchSize);
-      const batchPromises = batch.map(item => operation(item));
-      
+      const batchPromises = batch.map((item) => operation(item));
+
       const batchResults = await Promise.allSettled(batchPromises);
-      
+
       for (const result of batchResults) {
         if (result.status === 'fulfilled') {
           results.push(result.value);
@@ -161,7 +168,7 @@ class PerformanceOptimizer {
 
       // Add delay between batches to prevent overwhelming the system
       if (i + batchSize < items.length && delayMs > 0) {
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
 
@@ -177,29 +184,30 @@ class PerformanceOptimizer {
     slowestOperations: PerformanceMetrics[];
     errorRate: number;
   } {
-    const cutoff = Date.now() - (timeRangeMinutes * 60 * 1000);
-    const recentMetrics = this.metrics.filter(m => m.startTime >= cutoff);
+    const cutoff = Date.now() - timeRangeMinutes * 60 * 1000;
+    const recentMetrics = this.metrics.filter((m) => m.startTime >= cutoff);
 
     const totalOperations = recentMetrics.length;
-    const successfulOperations = recentMetrics.filter(m => m.success).length;
+    const successfulOperations = recentMetrics.filter((m) => m.success).length;
     const failedOperations = totalOperations - successfulOperations;
-    
+
     const totalDuration = recentMetrics
-      .filter(m => m.duration)
+      .filter((m) => m.duration)
       .reduce((sum, m) => sum + (m.duration || 0), 0);
     const averageDuration = totalDuration / totalOperations || 0;
 
     const operationsByType: Record<string, number> = {};
-    recentMetrics.forEach(m => {
+    recentMetrics.forEach((m) => {
       operationsByType[m.operation] = (operationsByType[m.operation] || 0) + 1;
     });
 
     const slowestOperations = recentMetrics
-      .filter(m => m.duration)
+      .filter((m) => m.duration)
       .sort((a, b) => (b.duration || 0) - (a.duration || 0))
       .slice(0, 10);
 
-    const errorRate = totalOperations > 0 ? failedOperations / totalOperations : 0;
+    const errorRate =
+      totalOperations > 0 ? failedOperations / totalOperations : 0;
 
     return {
       totalOperations,
@@ -281,8 +289,10 @@ class DatabaseOptimizer {
   private async createConnection(): Promise<any> {
     // This would create a new database connection
     // For Supabase, this would be a new client instance
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    
+    const { createClient } = await import(
+      'https://esm.sh/@supabase/supabase-js@2'
+    );
+
     return createClient(
       Deno.env.get('SUPABASE_URL') || '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
@@ -297,7 +307,9 @@ class DatabaseOptimizer {
     }
   }
 
-  async withConnection<T>(operation: (connection: any) => Promise<T>): Promise<T> {
+  async withConnection<T>(
+    operation: (connection: any) => Promise<T>
+  ): Promise<T> {
     const connection = await this.getConnection();
     try {
       return await operation(connection);

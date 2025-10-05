@@ -281,7 +281,8 @@ export class SupabaseAdapter implements InventoryDataAdapter {
       };
     } catch (error) {
       // Handle errors from getAllItems
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       return {
         data: [],
         error: errorMessage,

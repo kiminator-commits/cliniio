@@ -448,7 +448,9 @@ export class TypedMockDeleteQueryBuilder<T = unknown>
   }
 }
 
-export class TypedMockTableQueryBuilder<T = unknown> implements TableQueryBuilder<T> {
+export class TypedMockTableQueryBuilder<T = unknown>
+  implements TableQueryBuilder<T>
+{
   private config: MockConfig;
 
   constructor(config: MockConfig = {}) {

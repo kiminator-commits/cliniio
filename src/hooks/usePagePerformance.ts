@@ -35,13 +35,20 @@ export const usePagePerformance = ({
   const dataFetchTime = useRef<number>();
 
   // Defer logging to avoid blocking renders
-  const deferredLog = useCallback((message: string) => {
-    if (process.env.NODE_ENV === 'development') {
-      setTimeout(() => {
-        logger.perf(message);
-      }, 0);
-    }
-  }, []);
+  const deferredLog = useCallback(
+    (message: string) => {
+      // Only log performance for pages, not for every component
+      if (
+        process.env.NODE_ENV === 'development' &&
+        pageName.startsWith('Page-')
+      ) {
+        setTimeout(() => {
+          logger.perf(message);
+        }, 0);
+      }
+    },
+    [pageName]
+  );
 
   // Use useLayoutEffect for more accurate mount timing
   useLayoutEffect(() => {
@@ -98,12 +105,18 @@ export const usePagePerformance = ({
       };
 
       // Defer total performance logging and bottleneck analysis
-      if (process.env.NODE_ENV === 'development') {
+      if (
+        process.env.NODE_ENV === 'development' &&
+        pageName.startsWith('Page-')
+      ) {
         setTimeout(() => {
-          logger.perf(
-            `${pageName} total time: ${totalTime.toFixed(2)}ms`,
-            metrics
-          );
+          // Only log if there are actual performance issues
+          if (totalTime > 500 || currentMountTime > 1000) {
+            logger.perf(
+              `${pageName} total time: ${totalTime.toFixed(2)}ms`,
+              metrics
+            );
+          }
 
           // Identify bottlenecks with performance monitor thresholds
           const bottlenecks = [];

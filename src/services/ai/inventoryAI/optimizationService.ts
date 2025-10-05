@@ -1,6 +1,9 @@
 import { supabase } from '../../../lib/supabaseClient';
 import { InventoryAIProviderService } from './provider';
-import type { CostOptimizationResult, SmartCategorizationResult } from './types';
+import type {
+  CostOptimizationResult,
+  SmartCategorizationResult,
+} from './types';
 import { DATA_ANALYSIS_PERIOD } from './inventoryAIConfig';
 
 export class OptimizationService {

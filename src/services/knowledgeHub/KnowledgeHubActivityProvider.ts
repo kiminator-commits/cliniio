@@ -11,7 +11,10 @@ export class KnowledgeHubActivityProvider {
   /**
    * Get recent user activity
    */
-  static async getRecentUserActivity(userId?: string, limit?: number): Promise<Record<string, unknown>[]> {
+  static async getRecentUserActivity(
+    userId?: string,
+    limit?: number
+  ): Promise<Record<string, unknown>[]> {
     try {
       const adapter = new UnifiedDatabaseAdapter();
       return await adapter.getRecentUserActivity(userId, limit);

@@ -140,9 +140,7 @@ export class HomeDataFetchProvider {
 
     if (challengesError) {
       logger.error('Error fetching challenges:', challengesError);
-      throw new Error(
-        `Failed to fetch challenges: ${challengesError.message}`
-      );
+      throw new Error(`Failed to fetch challenges: ${challengesError.message}`);
     }
 
     // Transform the data to match expected format
@@ -159,8 +157,7 @@ export class HomeDataFetchProvider {
           id: challenge.id as string,
           title: challenge.title as string,
           description: challenge.description as string,
-          category:
-            (challenge as { category?: string }).category || 'General',
+          category: (challenge as { category?: string }).category || 'General',
           difficulty:
             (challenge as { difficulty?: string }).difficulty || 'Medium',
           points: challenge.points as number,

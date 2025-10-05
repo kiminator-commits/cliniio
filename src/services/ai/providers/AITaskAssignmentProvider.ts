@@ -304,7 +304,10 @@ Each task should reference a gapId from the operational gaps. Do not include any
         warnings.push(`Assignment ${index + 1}: No tasks assigned`);
       }
 
-      if (assignment.tasks && assignment.tasks.length > config.maxTasksPerUser) {
+      if (
+        assignment.tasks &&
+        assignment.tasks.length > config.maxTasksPerUser
+      ) {
         errors.push(
           `Assignment ${index + 1}: Exceeds max tasks per user (${assignment.tasks.length} > ${config.maxTasksPerUser})`
         );
@@ -312,23 +315,33 @@ Each task should reference a gapId from the operational gaps. Do not include any
 
       assignment.tasks?.forEach((task, taskIndex) => {
         if (!task.title) {
-          errors.push(`Assignment ${index + 1}, Task ${taskIndex + 1}: Missing title`);
+          errors.push(
+            `Assignment ${index + 1}, Task ${taskIndex + 1}: Missing title`
+          );
         }
 
         if (!task.category) {
-          errors.push(`Assignment ${index + 1}, Task ${taskIndex + 1}: Missing category`);
+          errors.push(
+            `Assignment ${index + 1}, Task ${taskIndex + 1}: Missing category`
+          );
         }
 
         if (!task.priority) {
-          errors.push(`Assignment ${index + 1}, Task ${taskIndex + 1}: Missing priority`);
+          errors.push(
+            `Assignment ${index + 1}, Task ${taskIndex + 1}: Missing priority`
+          );
         }
 
         if (task.points <= 0) {
-          warnings.push(`Assignment ${index + 1}, Task ${taskIndex + 1}: Zero or negative points`);
+          warnings.push(
+            `Assignment ${index + 1}, Task ${taskIndex + 1}: Zero or negative points`
+          );
         }
 
         if (task.estimatedDuration <= 0) {
-          warnings.push(`Assignment ${index + 1}, Task ${taskIndex + 1}: Zero or negative duration`);
+          warnings.push(
+            `Assignment ${index + 1}, Task ${taskIndex + 1}: Zero or negative duration`
+          );
         }
       });
     });
@@ -353,8 +366,12 @@ Each task should reference a gapId from the operational gaps. Do not include any
     totalEstimatedDuration: number;
   } {
     const totalAssignments = assignments.length;
-    const totalTasks = assignments.reduce((sum, assignment) => sum + assignment.tasks.length, 0);
-    const averageTasksPerUser = totalAssignments > 0 ? totalTasks / totalAssignments : 0;
+    const totalTasks = assignments.reduce(
+      (sum, assignment) => sum + assignment.tasks.length,
+      0
+    );
+    const averageTasksPerUser =
+      totalAssignments > 0 ? totalTasks / totalAssignments : 0;
 
     const tasksByPriority: Record<string, number> = {};
     const tasksByCategory: Record<string, number> = {};
@@ -363,8 +380,10 @@ Each task should reference a gapId from the operational gaps. Do not include any
 
     assignments.forEach((assignment) => {
       assignment.tasks.forEach((task) => {
-        tasksByPriority[task.priority] = (tasksByPriority[task.priority] || 0) + 1;
-        tasksByCategory[task.category] = (tasksByCategory[task.category] || 0) + 1;
+        tasksByPriority[task.priority] =
+          (tasksByPriority[task.priority] || 0) + 1;
+        tasksByCategory[task.category] =
+          (tasksByCategory[task.category] || 0) + 1;
         totalPoints += task.points;
         totalEstimatedDuration += task.estimatedDuration;
       });
@@ -389,13 +408,22 @@ Each task should reference a gapId from the operational gaps. Do not include any
     config: AdminTaskConfig
   ): DailyTaskAssignment[] {
     // Calculate current workload for each user
-    const userWorkloads = new Map<string, { taskCount: number; totalPoints: number; totalDuration: number }>();
-    
+    const userWorkloads = new Map<
+      string,
+      { taskCount: number; totalPoints: number; totalDuration: number }
+    >();
+
     assignments.forEach((assignment) => {
       const workload = {
         taskCount: assignment.tasks.length,
-        totalPoints: assignment.tasks.reduce((sum, task) => sum + task.points, 0),
-        totalDuration: assignment.tasks.reduce((sum, task) => sum + task.estimatedDuration, 0),
+        totalPoints: assignment.tasks.reduce(
+          (sum, task) => sum + task.points,
+          0
+        ),
+        totalDuration: assignment.tasks.reduce(
+          (sum, task) => sum + task.estimatedDuration,
+          0
+        ),
       };
       userWorkloads.set(assignment.userId, workload);
     });
@@ -408,24 +436,26 @@ Each task should reference a gapId from the operational gaps. Do not include any
 
     // Simple redistribution logic - move excess tasks to users with capacity
     overloadedUsers.forEach((userId) => {
-      const assignment = optimizedAssignments.find(a => a.userId === userId);
+      const assignment = optimizedAssignments.find((a) => a.userId === userId);
       if (!assignment) return;
 
       const excessTasks = assignment.tasks.slice(config.maxTasksPerUser);
       assignment.tasks = assignment.tasks.slice(0, config.maxTasksPerUser);
 
       // Find users with capacity and redistribute excess tasks
-      const availableUsers = optimizedAssignments.filter(a => 
-        a.tasks.length < config.maxTasksPerUser && a.userId !== userId
+      const availableUsers = optimizedAssignments.filter(
+        (a) => a.tasks.length < config.maxTasksPerUser && a.userId !== userId
       );
 
       excessTasks.forEach((task) => {
         if (availableUsers.length > 0) {
           const targetUser = availableUsers[0];
           targetUser.tasks.push(task);
-          
+
           // Update available users list
-          const index = availableUsers.findIndex(u => u.userId === targetUser.userId);
+          const index = availableUsers.findIndex(
+            (u) => u.userId === targetUser.userId
+          );
           if (index >= 0 && targetUser.tasks.length >= config.maxTasksPerUser) {
             availableUsers.splice(index, 1);
           }
@@ -453,7 +483,7 @@ Each task should reference a gapId from the operational gaps. Do not include any
   } {
     try {
       const assignments = JSON.parse(jsonData) as DailyTaskAssignment[];
-      
+
       if (!Array.isArray(assignments)) {
         return {
           success: false,
@@ -469,7 +499,9 @@ Each task should reference a gapId from the operational gaps. Do not include any
           errors.push(`Assignment ${index + 1}: Missing userId`);
         }
         if (!assignment.tasks || !Array.isArray(assignment.tasks)) {
-          errors.push(`Assignment ${index + 1}: Missing or invalid tasks array`);
+          errors.push(
+            `Assignment ${index + 1}: Missing or invalid tasks array`
+          );
         }
       });
 

@@ -221,9 +221,7 @@ export class SecurityThreatIndicatorProvider {
   /**
    * Validate threat indicator
    */
-  validateThreatIndicator(
-    indicator: Partial<ThreatIndicator>
-  ): {
+  validateThreatIndicator(indicator: Partial<ThreatIndicator>): {
     isValid: boolean;
     errors: string[];
   } {
@@ -269,7 +267,9 @@ export class SecurityThreatIndicatorProvider {
         }
 
         if (condition.timeWindow !== undefined && condition.timeWindow < 0) {
-          errors.push(`Condition ${index + 1}: Time window must be non-negative`);
+          errors.push(
+            `Condition ${index + 1}: Time window must be non-negative`
+          );
         }
 
         if (condition.count !== undefined && condition.count < 1) {
@@ -318,7 +318,9 @@ export class SecurityThreatIndicatorProvider {
     };
 
     this.threatIndicators.set(duplicatedIndicator.id, duplicatedIndicator);
-    logger.info(`Threat indicator duplicated: ${originalIndicator.name} -> ${duplicatedIndicator.name}`);
+    logger.info(
+      `Threat indicator duplicated: ${originalIndicator.name} -> ${duplicatedIndicator.name}`
+    );
 
     return duplicatedIndicator;
   }
@@ -357,11 +359,15 @@ export class SecurityThreatIndicatorProvider {
           this.threatIndicators.set(newIndicator.id, newIndicator);
           imported++;
         } else {
-          errors.push(`Indicator ${index + 1}: ${validation.errors.join(', ')}`);
+          errors.push(
+            `Indicator ${index + 1}: ${validation.errors.join(', ')}`
+          );
         }
       });
 
-      logger.info(`Imported ${imported} threat indicators`, { errors: errors.length });
+      logger.info(`Imported ${imported} threat indicators`, {
+        errors: errors.length,
+      });
 
       return {
         success: errors.length === 0,

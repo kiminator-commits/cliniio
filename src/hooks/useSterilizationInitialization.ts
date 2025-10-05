@@ -14,12 +14,18 @@ export const useSterilizationInitialization = () => {
   const { availableTools, setAvailableTools, loadCycles } =
     useSterilizationStore();
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Start as false to prevent blocking
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeStore = async () => {
-      if (!currentUser || isInitialized || facilityLoading) return;
+      if (isInitialized || facilityLoading) return;
+
+      // Wait for user authentication to complete
+      if (!currentUser) {
+        console.log('⏳ Waiting for user authentication...');
+        return;
+      }
 
       try {
         setIsLoading(true);
@@ -58,6 +64,40 @@ export const useSterilizationInitialization = () => {
     getCurrentFacilityId,
     facilityLoading,
   ]);
+
+  // Non-blocking analytics initialization - runs immediately
+  useEffect(() => {
+    if (isInitialized) return;
+
+    const initializeAnalyticsImmediately = async () => {
+      try {
+        // Don't set loading to true to prevent blocking UI
+        setError(null);
+
+        // Try to get facility ID from context
+        const facilityId = getCurrentFacilityId();
+        if (!facilityId) {
+          console.log(
+            '⚠️ No facility ID available, skipping sterilization initialization'
+          );
+          return;
+        }
+
+        // Load sterilization cycles for analytics (read-only) - no user auth required
+        await loadCycles(facilityId);
+
+        // Mark as initialized for analytics (tools will still require user auth)
+        setIsInitialized(true);
+        console.log('✅ Sterilization analytics initialized successfully');
+      } catch (err) {
+        console.error('Failed to initialize sterilization analytics:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      }
+    };
+
+    // Start immediately, don't wait for timeout
+    initializeAnalyticsImmediately();
+  }, [isInitialized, loadCycles, getCurrentFacilityId]);
 
   return {
     isInitialized,

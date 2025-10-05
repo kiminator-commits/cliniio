@@ -2,13 +2,13 @@
 // This file provides enhanced mock functionality and re-exports from modules
 
 // Re-export all functionality from extracted modules
-export {
-  PostgrestErrorTypes,
-  generateMockError,
-} from './errorSimulation';
+export { PostgrestErrorTypes, generateMockError } from './errorSimulation';
 
 // Explicitly export the interfaces
-export type { ErrorSimulationConfig, EnhancedMockConfig } from './errorSimulation';
+export type {
+  ErrorSimulationConfig,
+  EnhancedMockConfig,
+} from './errorSimulation';
 
 export {
   generateUUID,
@@ -31,4 +31,3 @@ export {
   createErrorTestingMockConfig,
   createPerformanceTestingMockConfig,
 } from './configUtilities';
-

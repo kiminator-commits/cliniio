@@ -4,9 +4,7 @@ import {
   _SterilizationCycleRow,
   ToolReplacementForecast,
 } from '../forecastingAnalyticsTypes';
-import {
-  TOOL_REPLACEMENT_CONFIG,
-} from '../forecastingAnalyticsConfig';
+import { TOOL_REPLACEMENT_CONFIG } from '../forecastingAnalyticsConfig';
 
 export class ToolReplacementForecastService {
   private static instance: ToolReplacementForecastService;
@@ -20,7 +18,8 @@ export class ToolReplacementForecastService {
 
   static getInstance(): ToolReplacementForecastService {
     if (!ToolReplacementForecastService.instance) {
-      ToolReplacementForecastService.instance = new ToolReplacementForecastService();
+      ToolReplacementForecastService.instance =
+        new ToolReplacementForecastService();
     }
     return ToolReplacementForecastService.instance;
   }
@@ -51,7 +50,10 @@ export class ToolReplacementForecastService {
           .eq('facility_id', filters.facilityId as string)
           .gte(
             'created_at',
-            new Date(Date.now() - TOOL_REPLACEMENT_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000).toISOString()
+            new Date(
+              Date.now() -
+                TOOL_REPLACEMENT_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000
+            ).toISOString()
           )
           .order('created_at', { ascending: false });
 
@@ -81,13 +83,24 @@ export class ToolReplacementForecastService {
           ).length;
           const estimatedLifecycle = Math.min(
             TOOL_REPLACEMENT_CONFIG.MAX_LIFECYCLE,
-            Math.max(TOOL_REPLACEMENT_CONFIG.MIN_LIFECYCLE, Math.floor(cycleCount * TOOL_REPLACEMENT_CONFIG.LIFECYCLE_MULTIPLIER))
+            Math.max(
+              TOOL_REPLACEMENT_CONFIG.MIN_LIFECYCLE,
+              Math.floor(
+                cycleCount * TOOL_REPLACEMENT_CONFIG.LIFECYCLE_MULTIPLIER
+              )
+            )
           );
 
           // Calculate realistic dates based on actual data
-          const avgCyclesPerDay = cycleCount / TOOL_REPLACEMENT_CONFIG.ANALYSIS_DAYS;
+          const avgCyclesPerDay =
+            cycleCount / TOOL_REPLACEMENT_CONFIG.ANALYSIS_DAYS;
           const remainingCycles = Math.max(0, 100 - estimatedLifecycle);
-          const daysUntilEOL = remainingCycles / Math.max(TOOL_REPLACEMENT_CONFIG.MAX_CYCLES_PER_DAY, avgCyclesPerDay);
+          const daysUntilEOL =
+            remainingCycles /
+            Math.max(
+              TOOL_REPLACEMENT_CONFIG.MAX_CYCLES_PER_DAY,
+              avgCyclesPerDay
+            );
           const predictedEndOfLife = new Date(
             Date.now() + daysUntilEOL * 24 * 60 * 60 * 1000
           )
@@ -97,12 +110,23 @@ export class ToolReplacementForecastService {
           // Calculate confidence based on data quality
           const confidence = Math.min(
             TOOL_REPLACEMENT_CONFIG.MAX_CONFIDENCE,
-            Math.max(TOOL_REPLACEMENT_CONFIG.MIN_CONFIDENCE, TOOL_REPLACEMENT_CONFIG.CONFIDENCE_BASE + cycleCount / 100)
+            Math.max(
+              TOOL_REPLACEMENT_CONFIG.MIN_CONFIDENCE,
+              TOOL_REPLACEMENT_CONFIG.CONFIDENCE_BASE + cycleCount / 100
+            )
           );
 
           // Calculate reorder date (30 days before EOL)
           const reorderDate = new Date(
-            Date.now() + Math.max(TOOL_REPLACEMENT_CONFIG.MIN_REORDER_DAYS, daysUntilEOL - TOOL_REPLACEMENT_CONFIG.REORDER_DAYS_BEFORE_EOL) * 24 * 60 * 60 * 1000
+            Date.now() +
+              Math.max(
+                TOOL_REPLACEMENT_CONFIG.MIN_REORDER_DAYS,
+                daysUntilEOL - TOOL_REPLACEMENT_CONFIG.REORDER_DAYS_BEFORE_EOL
+              ) *
+                24 *
+                60 *
+                60 *
+                1000
           )
             .toISOString()
             .split('T')[0];

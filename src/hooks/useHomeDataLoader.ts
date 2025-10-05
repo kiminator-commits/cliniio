@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { aiDailyTaskService } from '../services/aiDailyTaskService';
+
+/**
+ * ⚠️ SECURITY NOTE: This hook SHOULD ONLY be used after authentication validation.
+ * It fetches user-specific data and assumes the user is logged in.
+ * Always verify authentication before calling this hook to prevent data leaks.
+ */
 import {
   homeMetricsService,
   HomePerformanceMetrics,
@@ -8,8 +14,10 @@ import { homeSterilizationIntegration } from '../services/homeSterilizationInteg
 import { homeIntegrationService } from '../services/homeIntegrationService';
 import { useFacility } from '../contexts/FacilityContext';
 import { HomeTask } from '../types/homeTypes';
-import { leaderboardService } from '../services/leaderboardService';
 import { HomeData } from '../types/homeDataTypes';
+import { performanceMetricsCache } from '../services/performanceMetricsCache';
+import { statsService } from '../services/statsService';
+import { leaderboardService } from '../services/leaderboardService';
 
 // Fallback data for demo purposes
 const FALLBACK_TASKS: HomeTask[] = [
@@ -60,6 +68,7 @@ const FALLBACK_TASKS: HomeTask[] = [
 const FALLBACK_METRICS = {
   aiMetrics: {
     timeSaved: { daily: 0, monthly: 0 },
+    aiTimeSaved: { daily: 0, monthly: 0 },
     aiEfficiency: { timeSavings: 0, proactiveMgmt: 0 },
     gamificationStats: {
       totalTasks: 0,
@@ -70,14 +79,14 @@ const FALLBACK_METRICS = {
     },
   },
   sterilizationMetrics: {
-    cyclesCompleted: '24',
-    successRate: '98.5%',
-    equipmentStatus: 'All Operational',
+    cyclesCompleted: 0,
+    successRate: '0%',
+    equipmentStatus: 'No Data',
   },
   integrationMetrics: {
-    systemHealth: 'Excellent',
-    uptime: '99.9%',
-    lastSync: '2 minutes ago',
+    systemHealth: 'No Data',
+    uptime: '0%',
+    lastSync: 'Never',
   },
 };
 
@@ -102,6 +111,7 @@ export const useHomeDataLoader = (): HomeData => {
       userRank: 1,
       totalUsers: 0,
     },
+    gamificationData: null,
     loading: true,
     error: null,
   });
@@ -161,61 +171,94 @@ export const useHomeDataLoader = (): HomeData => {
         facilityId = 'demo-facility-id';
       }
 
-      // Load ALL data in parallel for fastest possible loading
-      const [
-        allDailyTasks,
-        sterilizationMetrics,
-        integrationMetrics,
-        aiMetrics,
-        leaderboardData,
-      ] = await Promise.allSettled([
-        aiDailyTaskService.getFacilityDailyTasks(facilityId),
-        homeSterilizationIntegration.getSterilizationMetrics(),
-        homeIntegrationService.getAllMetrics(),
-        homeMetricsService.getHomeMetrics(), // Use working service
-        leaderboardService.fetchLeaderboardData(),
-      ]);
+      // Load essential data in parallel including gamification data
+      const [allDailyTasks, freshMetrics, gamificationStats, leaderboardData] =
+        await Promise.allSettled([
+          aiDailyTaskService.getFacilityDailyTasks(facilityId),
+          performanceMetricsCache.fetchAndCacheMetricsOnLogin(), // Fetch fresh metrics
+          statsService.fetchCumulativeStats(), // Load gamification data during initial load
+          leaderboardService.fetchLeaderboardData(), // Load leaderboard for rank-based level calculation
+        ]);
 
       // Extract results with fallbacks
       const tasks =
         allDailyTasks.status === 'fulfilled'
           ? allDailyTasks.value
           : FALLBACK_TASKS;
-      const ai =
-        aiMetrics.status === 'fulfilled'
-          ? {
-              ...aiMetrics.value,
-              costSavings: aiMetrics.value.costSavings || {
-                monthly: 0,
-                annual: 0,
-              },
-              teamPerformance: aiMetrics.value.teamPerformance || {
-                skills: 0,
-                inventory: 0,
-                sterilization: 0,
-              },
-            }
-          : {
-              ...FALLBACK_METRICS.aiMetrics,
-              costSavings: { monthly: 0, annual: 0 },
-              teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },
-            };
+
+      // Use fresh metrics if available, otherwise fallback
+      const metrics =
+        freshMetrics.status === 'fulfilled' && freshMetrics.value
+          ? freshMetrics.value
+          : null;
+
+      const ai = metrics?.aiMetrics || {
+        ...FALLBACK_METRICS.aiMetrics,
+        costSavings: { monthly: 0, annual: 0 },
+        teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },
+      };
       const sterilization =
-        sterilizationMetrics.status === 'fulfilled'
-          ? sterilizationMetrics.value
-          : FALLBACK_METRICS.sterilizationMetrics;
+        metrics?.sterilizationMetrics || FALLBACK_METRICS.sterilizationMetrics;
       const integration =
-        integrationMetrics.status === 'fulfilled'
-          ? integrationMetrics.value
-          : FALLBACK_METRICS.integrationMetrics;
-      const leaderboard =
-        leaderboardData.status === 'fulfilled'
-          ? leaderboardData.value
-          : {
-              users: [],
-              userRank: 1,
-              totalUsers: 0,
-            };
+        metrics?.integrationMetrics || FALLBACK_METRICS.integrationMetrics;
+      // Leaderboard will load when modal opens - use fallback for now
+      const leaderboard = {
+        users: [],
+        userRank: 1,
+        totalUsers: 0,
+      };
+
+      // Process gamification data with leaderboard-based level calculation
+      const gamificationData =
+        gamificationStats.status === 'fulfilled' && gamificationStats.value
+          ? (() => {
+              const stats = gamificationStats.value;
+              const leaderboard =
+                leaderboardData.status === 'fulfilled' && leaderboardData.value
+                  ? leaderboardData.value
+                  : { userRank: 1, totalUsers: 1 };
+
+              // Validate and sanitize all values
+              const safeStreak = Math.max(0, stats.currentStreak || 0);
+              const safeTotalPoints = Math.max(0, stats.totalPoints || 0);
+
+              // Calculate level based on leaderboard rank (higher rank = higher level)
+              const safeUserRank = Math.max(1, leaderboard.userRank || 1);
+              const safeTotalUsers = Math.max(1, leaderboard.totalUsers || 1);
+
+              // Level calculation: Top 10% = Level 10+, Top 25% = Level 7+, Top 50% = Level 5+, etc.
+              const rankPercentile = safeUserRank / safeTotalUsers;
+              let safeLevel;
+              if (rankPercentile <= 0.1) {
+                safeLevel = Math.max(
+                  10,
+                  Math.floor(10 + (0.1 - rankPercentile) * 50)
+                ); // Level 10-15 for top 10%
+              } else if (rankPercentile <= 0.25) {
+                safeLevel = Math.max(
+                  7,
+                  Math.floor(7 + (0.25 - rankPercentile) * 20)
+                ); // Level 7-10 for top 25%
+              } else if (rankPercentile <= 0.5) {
+                safeLevel = Math.max(
+                  5,
+                  Math.floor(5 + (0.5 - rankPercentile) * 8)
+                ); // Level 5-7 for top 50%
+              } else {
+                safeLevel = Math.max(
+                  1,
+                  Math.floor(1 + (1 - rankPercentile) * 4)
+                ); // Level 1-5 for bottom 50%
+              }
+
+              return {
+                streak: safeStreak,
+                level: safeLevel,
+                rank: safeUserRank,
+                totalScore: safeTotalPoints,
+              };
+            })()
+          : null;
 
       // Convert tasks to HomeTask format
       const homeTasks: HomeTask[] =
@@ -261,7 +304,9 @@ export const useHomeDataLoader = (): HomeData => {
           unknown
         >,
         integrationMetrics: integration,
+        aiImpactMetrics: metrics?.aiImpactMetrics || null, // Add AI impact metrics
         leaderboardData: leaderboard,
+        gamificationData: gamificationData,
         loading: false, // Show dashboard now with tile structure visible
         error: null,
       });
@@ -298,11 +343,13 @@ export const useHomeDataLoader = (): HomeData => {
             string,
             unknown
           >,
+        aiImpactMetrics: null, // Add AI impact metrics fallback
         leaderboardData: {
           users: [],
           userRank: 1,
           totalUsers: 0,
         },
+        gamificationData: null,
         loading: false,
         error: null, // Don't show error, just use fallback data
       });

@@ -1,5 +1,8 @@
 import { logger } from '../../../utils/_core/logger';
-import { SecurityViolation, SecurityViolationFilter } from '../types/securityTypes';
+import {
+  SecurityViolation,
+  SecurityViolationFilter,
+} from '../types/securityTypes';
 import { SecurityEventLogger } from '../logging/SecurityEventLogger';
 
 export class SecurityViolationManager {
@@ -64,7 +67,9 @@ export class SecurityViolationManager {
   /**
    * Get security violations
    */
-  getSecurityViolations(filter: SecurityViolationFilter = {}): SecurityViolation[] {
+  getSecurityViolations(
+    filter: SecurityViolationFilter = {}
+  ): SecurityViolation[] {
     let filteredViolations = [...this.violations];
 
     if (filter.violationType && filter.violationType.length > 0) {

@@ -137,7 +137,9 @@ export class BIRecommendationsProvider {
   /**
    * Analyze incident patterns for recommendations
    */
-  static analyzeIncidentPatterns(incidents: Array<Record<string, unknown> & { created_at: string }>): IncidentPatterns {
+  static analyzeIncidentPatterns(
+    incidents: Array<Record<string, unknown> & { created_at: string }>
+  ): IncidentPatterns {
     const patterns: IncidentPatterns = {
       highFrequencyPeriods: [],
       commonRootCauses: [],
@@ -217,7 +219,8 @@ export class BIRecommendationsProvider {
           id: 'immediate-action',
           type: 'reactive' as const,
           title: 'Immediate Action Required',
-          description: 'Critical risk level detected. Implement immediate corrective actions and emergency protocols.',
+          description:
+            'Critical risk level detected. Implement immediate corrective actions and emergency protocols.',
           priority: 'critical' as const,
           estimatedImpact: 'high' as const,
           confidence: 0.95,
@@ -227,7 +230,8 @@ export class BIRecommendationsProvider {
           id: 'management-review',
           type: 'reactive' as const,
           title: 'Management Review Required',
-          description: 'Schedule immediate management review of all processes and procedures.',
+          description:
+            'Schedule immediate management review of all processes and procedures.',
           priority: 'critical' as const,
           estimatedImpact: 'high' as const,
           confidence: 0.9,
@@ -240,7 +244,8 @@ export class BIRecommendationsProvider {
           id: 'enhanced-monitoring',
           type: 'preventive' as const,
           title: 'Enhanced Monitoring Protocol',
-          description: 'Implement enhanced monitoring and frequent status checks.',
+          description:
+            'Implement enhanced monitoring and frequent status checks.',
           priority: 'high' as const,
           estimatedImpact: 'high' as const,
           confidence: 0.85,
@@ -253,7 +258,8 @@ export class BIRecommendationsProvider {
           id: 'standard-review',
           type: 'preventive' as const,
           title: 'Standard Review Process',
-          description: 'Conduct standard review of processes and implement preventive measures.',
+          description:
+            'Conduct standard review of processes and implement preventive measures.',
           priority: 'medium' as const,
           estimatedImpact: 'medium' as const,
           confidence: 0.75,
@@ -266,7 +272,8 @@ export class BIRecommendationsProvider {
           id: 'maintenance-schedule',
           type: 'preventive' as const,
           title: 'Maintain Current Standards',
-          description: 'Continue current preventive maintenance schedule and monitoring.',
+          description:
+            'Continue current preventive maintenance schedule and monitoring.',
           priority: 'low' as const,
           estimatedImpact: 'low' as const,
           confidence: 0.7,

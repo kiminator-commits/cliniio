@@ -4,15 +4,25 @@
  */
 
 import { InventoryItem } from '@/types/inventoryTypes';
-import { InventoryItemData, BulkOperationResult } from '@/types/inventoryActionTypes';
-import { ExportOptions, ImportOptions, ImportResult } from '../../pages/Inventory/services/inventoryExportService';
+import {
+  InventoryItemData,
+  BulkOperationResult,
+} from '@/types/inventoryActionTypes';
+import {
+  ExportOptions,
+  ImportOptions,
+  ImportResult,
+} from '../../pages/Inventory/services/inventoryExportService';
 import { BulkOperationConfig } from '../../pages/Inventory/services/inventoryBulkProgressService';
 import { InventoryExportService } from '../../pages/Inventory/services/inventoryExportService';
 import { InventoryImportService } from '../../pages/Inventory/services/inventoryImportService';
 import { InventoryBulkProgressService } from '../../pages/Inventory/services/inventoryBulkProgressService';
 import { logEvent, trackUserAction } from '@/utils/monitoring';
 import { trackEvent as trackAnalyticsEvent } from '@/services/analytics';
-import { validateItemData, buildInventoryPayload } from './inventoryActionUtils';
+import {
+  validateItemData,
+  buildInventoryPayload,
+} from './inventoryActionUtils';
 import {
   createItem,
   updateItem,
@@ -154,7 +164,9 @@ export async function handleBulkOperation(
         break;
       case 'export':
         if (!options?.exportOptions) {
-          throw new Error('Export options are required for bulk export operation');
+          throw new Error(
+            'Export options are required for bulk export operation'
+          );
         }
         result = await processBulkExport(itemIds, options.exportOptions);
         break;
@@ -165,7 +177,8 @@ export async function handleBulkOperation(
     onSuccess?.(result);
     return result;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Bulk operation failed';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Bulk operation failed';
     onError?.(errorMessage);
     throw new Error(errorMessage);
   }
@@ -198,7 +211,10 @@ export async function handleBulkImport(
       );
     }
 
-    const importResult = await InventoryImportService.importItems(file, options);
+    const importResult = await InventoryImportService.importItems(
+      file,
+      options
+    );
 
     logEvent(
       'inventory',
@@ -219,7 +235,8 @@ export async function handleBulkImport(
     return importResult;
   } catch (error) {
     console.error('Bulk import failed:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Bulk import failed';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Bulk import failed';
     onError?.(errorMessage);
     throw new Error(errorMessage);
   }
@@ -446,8 +463,7 @@ async function processBulkUpdate(
       const { results, failed, errors, metrics } =
         await InventoryBulkProgressService.processBulkOperation(
           itemIds,
-          async (id) =>
-            await updateItem(id, buildInventoryPayload(updateData)),
+          async (id) => await updateItem(id, buildInventoryPayload(updateData)),
           {
             ...progressConfig,
             enableCaching: true,
@@ -567,7 +583,10 @@ async function processBulkExport(
 /**
  * Validate import options
  */
-function validateImportOptions(options: ImportOptions): { isValid: boolean; errors: string[] } {
+function validateImportOptions(options: ImportOptions): {
+  isValid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (typeof options.validateData !== 'boolean') {

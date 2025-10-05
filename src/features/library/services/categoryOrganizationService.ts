@@ -98,7 +98,6 @@ export class CategoryOrganizationService {
     return this.metadataService.getCategoryMetadata(category);
   }
 
-
   /**
    * Update content category in Knowledge Hub
    */
@@ -107,7 +106,11 @@ export class CategoryOrganizationService {
     newCategory: ContentCategory,
     userId?: string
   ): Promise<boolean> {
-    return this.databaseService.updateContentCategory(contentId, newCategory, userId);
+    return this.databaseService.updateContentCategory(
+      contentId,
+      newCategory,
+      userId
+    );
   }
 
   /**

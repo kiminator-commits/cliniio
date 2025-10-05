@@ -31,7 +31,10 @@ export class KnowledgeArticleService {
 
       return (data as unknown as KnowledgeArticle[]) || [];
     } catch (error) {
-      console.error('KnowledgeArticleService.getKnowledgeArticles error:', error);
+      console.error(
+        'KnowledgeArticleService.getKnowledgeArticles error:',
+        error
+      );
       throw error;
     }
   }

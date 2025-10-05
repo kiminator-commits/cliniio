@@ -51,7 +51,9 @@ export class ServiceValidationTest {
    * Run comprehensive validation of all services
    */
   async runFullValidation(): Promise<ValidationSummary> {
-    console.log('[ServiceValidation] Starting comprehensive service validation...');
+    console.log(
+      '[ServiceValidation] Starting comprehensive service validation...'
+    );
     this.results = [];
 
     const startTime = Date.now();
@@ -81,7 +83,7 @@ export class ServiceValidationTest {
    */
   private async validateUnifiedAIService(): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Test basic AI functionality
       const response = await UnifiedAIService.askAI(
@@ -90,13 +92,13 @@ export class ServiceValidationTest {
       );
 
       const responseTime = Date.now() - startTime;
-      
+
       this.results.push({
         serviceName: 'UnifiedAIService',
         status: 'success',
         message: 'AI service responding correctly',
         details: { responseLength: response.length },
-        responseTime
+        responseTime,
       });
 
       // Test service status
@@ -105,15 +107,14 @@ export class ServiceValidationTest {
         serviceName: 'UnifiedAIService Status',
         status: 'success',
         message: 'Service status check successful',
-        details: status
+        details: status,
       });
-
     } catch (error) {
       this.results.push({
         serviceName: 'UnifiedAIService',
         status: 'error',
         message: `AI service validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       });
     }
   }
@@ -123,22 +124,23 @@ export class ServiceValidationTest {
    */
   private async validateSecureAuthService(): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Test service instantiation
       const authService = new SecureAuthService();
-      
+
       // Test CSRF token generation
       const csrfToken = authService.generateCSRFToken();
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       this.results.push({
         serviceName: 'SecureAuthService',
         status: 'success',
-        message: 'Auth service instantiation and CSRF token generation successful',
+        message:
+          'Auth service instantiation and CSRF token generation successful',
         details: { csrfTokenLength: csrfToken.length },
-        responseTime
+        responseTime,
       });
 
       // Test token validation (without actual token)
@@ -147,22 +149,22 @@ export class ServiceValidationTest {
         this.results.push({
           serviceName: 'SecureAuthService Validation',
           status: 'warning',
-          message: 'Token validation with invalid token should fail but did not'
+          message:
+            'Token validation with invalid token should fail but did not',
         });
       } catch {
         this.results.push({
           serviceName: 'SecureAuthService Validation',
           status: 'success',
-          message: 'Token validation correctly rejects invalid tokens'
+          message: 'Token validation correctly rejects invalid tokens',
         });
       }
-
     } catch (error) {
       this.results.push({
         serviceName: 'SecureAuthService',
         status: 'error',
         message: `Auth service validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       });
     }
   }
@@ -172,37 +174,36 @@ export class ServiceValidationTest {
    */
   private async validateKnowledgeHubService(): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Test knowledge articles retrieval
       const articles = await KnowledgeHubService.getKnowledgeArticles();
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       this.results.push({
         serviceName: 'KnowledgeHubService',
         status: 'success',
         message: 'Knowledge hub service responding correctly',
         details: { articlesCount: articles.length },
-        responseTime
+        responseTime,
       });
 
       // Test user activity (with optional parameters)
       const activity = await KnowledgeHubService.getRecentUserActivity();
-      
+
       this.results.push({
         serviceName: 'KnowledgeHubService Activity',
         status: 'success',
         message: 'User activity retrieval successful',
-        details: { activityCount: activity.length }
+        details: { activityCount: activity.length },
       });
-
     } catch (error) {
       this.results.push({
         serviceName: 'KnowledgeHubService',
         status: 'error',
         message: `Knowledge hub service validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       });
     }
   }
@@ -212,22 +213,22 @@ export class ServiceValidationTest {
    */
   private async validateBIFailureService(): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Test service instantiation and basic methods
       const facilityId = 'test-facility';
-      
+
       // Test getting active incidents (should return empty array for test facility)
       const incidents = await BIFailureService.getActiveIncidents(facilityId);
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       this.results.push({
         serviceName: 'BIFailureService',
         status: 'success',
         message: 'BI Failure service responding correctly',
         details: { incidentsCount: incidents.length },
-        responseTime
+        responseTime,
       });
 
       // Test analytics summary
@@ -236,20 +237,19 @@ export class ServiceValidationTest {
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
         new Date().toISOString()
       );
-      
+
       this.results.push({
         serviceName: 'BIFailureService Analytics',
         status: 'success',
         message: 'Analytics summary retrieval successful',
-        details: analytics
+        details: analytics,
       });
-
     } catch (error) {
       this.results.push({
         serviceName: 'BIFailureService',
         status: 'error',
         message: `BI Failure service validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       });
     }
   }
@@ -259,30 +259,30 @@ export class ServiceValidationTest {
    */
   private async validateInventoryService(): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Test inventory service facade
-      const inventoryData = await InventoryServiceFacade.fetchAllInventoryData();
-      
+      const inventoryData =
+        await InventoryServiceFacade.fetchAllInventoryData();
+
       const responseTime = Date.now() - startTime;
-      
+
       this.results.push({
         serviceName: 'InventoryServiceFacade',
         status: 'success',
         message: 'Inventory service responding correctly',
-        details: { 
+        details: {
           itemsCount: inventoryData.items?.length || 0,
-          categoriesCount: inventoryData.categories?.length || 0
+          categoriesCount: inventoryData.categories?.length || 0,
         },
-        responseTime
+        responseTime,
       });
-
     } catch (error) {
       this.results.push({
         serviceName: 'InventoryServiceFacade',
         status: 'error',
         message: `Inventory service validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       });
     }
   }
@@ -292,39 +292,38 @@ export class ServiceValidationTest {
    */
   private async validateServiceRegistry(): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       const registry = ServiceRegistry.getInstance();
-      
+
       // Test service registration and retrieval
       const serviceNames = registry.getServiceNames();
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       this.results.push({
         serviceName: 'ServiceRegistry',
         status: 'success',
         message: 'Service registry responding correctly',
         details: { registeredServices: serviceNames },
-        responseTime
+        responseTime,
       });
 
       // Test performance metrics
       const metrics = registry.getPerformanceMetrics();
-      
+
       this.results.push({
         serviceName: 'ServiceRegistry Performance',
         status: 'success',
         message: 'Performance metrics retrieval successful',
-        details: { metricsCount: metrics.length }
+        details: { metricsCount: metrics.length },
       });
-
     } catch (error) {
       this.results.push({
         serviceName: 'ServiceRegistry',
         status: 'error',
         message: `Service registry validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       });
     }
   }
@@ -334,43 +333,42 @@ export class ServiceValidationTest {
    */
   private async validatePerformanceMonitoring(): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Test performance monitor
       const allMetrics = servicePerformanceMonitor.getAllMetrics();
       const thresholds = servicePerformanceMonitor.getThresholds();
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       this.results.push({
         serviceName: 'ServicePerformanceMonitor',
         status: 'success',
         message: 'Performance monitoring responding correctly',
-        details: { 
+        details: {
           metricsCount: allMetrics.length,
-          thresholds: thresholds
+          thresholds: thresholds,
         },
-        responseTime
+        responseTime,
       });
 
       // Test threshold update
       servicePerformanceMonitor.updateThresholds({
         maxResponseTime: 10000,
-        maxErrorRate: 15
+        maxErrorRate: 15,
       });
-      
+
       this.results.push({
         serviceName: 'ServicePerformanceMonitor Thresholds',
         status: 'success',
-        message: 'Threshold update successful'
+        message: 'Threshold update successful',
       });
-
     } catch (error) {
       this.results.push({
         serviceName: 'ServicePerformanceMonitor',
         status: 'error',
         message: `Performance monitoring validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
       });
     }
   }
@@ -383,17 +381,25 @@ export class ServiceValidationTest {
    * Generate validation summary
    */
   private generateSummary(_totalTime: number): ValidationSummary {
-    const successfulServices = this.results.filter(r => r.status === 'success').length;
-    const failedServices = this.results.filter(r => r.status === 'error').length;
-    const warningServices = this.results.filter(r => r.status === 'warning').length;
-    
+    const successfulServices = this.results.filter(
+      (r) => r.status === 'success'
+    ).length;
+    const failedServices = this.results.filter(
+      (r) => r.status === 'error'
+    ).length;
+    const warningServices = this.results.filter(
+      (r) => r.status === 'warning'
+    ).length;
+
     const responseTimes = this.results
-      .filter(r => r.responseTime !== undefined)
-      .map(r => r.responseTime!);
-    
-    const averageResponseTime = responseTimes.length > 0 
-      ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
-      : 0;
+      .filter((r) => r.responseTime !== undefined)
+      .map((r) => r.responseTime!);
+
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) /
+          responseTimes.length
+        : 0;
 
     return {
       totalServices: this.results.length,
@@ -401,7 +407,7 @@ export class ServiceValidationTest {
       failedServices,
       warningServices,
       averageResponseTime: Math.round(averageResponseTime),
-      results: [...this.results]
+      results: [...this.results],
     };
   }
 
@@ -409,30 +415,52 @@ export class ServiceValidationTest {
    * Log validation results
    */
   private logResults(summary: ValidationSummary): void {
-    console.log('\n[ServiceValidation] ===========================================');
+    console.log(
+      '\n[ServiceValidation] ==========================================='
+    );
     console.log('[ServiceValidation] SERVICE VALIDATION SUMMARY');
-    console.log('[ServiceValidation] ===========================================');
-    console.log(`[ServiceValidation] Total Services Tested: ${summary.totalServices}`);
-    console.log(`[ServiceValidation] Successful: ${summary.successfulServices}`);
+    console.log(
+      '[ServiceValidation] ==========================================='
+    );
+    console.log(
+      `[ServiceValidation] Total Services Tested: ${summary.totalServices}`
+    );
+    console.log(
+      `[ServiceValidation] Successful: ${summary.successfulServices}`
+    );
     console.log(`[ServiceValidation] Failed: ${summary.failedServices}`);
     console.log(`[ServiceValidation] Warnings: ${summary.warningServices}`);
-    console.log(`[ServiceValidation] Average Response Time: ${summary.averageResponseTime}ms`);
-    console.log('[ServiceValidation] ===========================================');
+    console.log(
+      `[ServiceValidation] Average Response Time: ${summary.averageResponseTime}ms`
+    );
+    console.log(
+      '[ServiceValidation] ==========================================='
+    );
 
     // Log individual results
-    summary.results.forEach(result => {
-      const statusIcon = result.status === 'success' ? '✅' : 
-                        result.status === 'warning' ? '⚠️' : '❌';
-      console.log(`[ServiceValidation] ${statusIcon} ${result.serviceName}: ${result.message}`);
+    summary.results.forEach((result) => {
+      const statusIcon =
+        result.status === 'success'
+          ? '✅'
+          : result.status === 'warning'
+            ? '⚠️'
+            : '❌';
+      console.log(
+        `[ServiceValidation] ${statusIcon} ${result.serviceName}: ${result.message}`
+      );
       if (result.responseTime) {
-        console.log(`[ServiceValidation]    Response Time: ${result.responseTime}ms`);
+        console.log(
+          `[ServiceValidation]    Response Time: ${result.responseTime}ms`
+        );
       }
       if (result.details) {
         console.log(`[ServiceValidation]    Details:`, result.details);
       }
     });
 
-    console.log('[ServiceValidation] ===========================================\n');
+    console.log(
+      '[ServiceValidation] ===========================================\n'
+    );
   }
 
   /**

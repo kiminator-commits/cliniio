@@ -74,9 +74,7 @@ export const createStorageService = (config: MockConfig) => ({
         };
       },
 
-      async remove(
-        _paths: string[]
-      ): Promise<SupabaseResponse<StorageFile[]>> {
+      async remove(_paths: string[]): Promise<SupabaseResponse<StorageFile[]>> {
         if (config.shouldError) {
           return {
             data: null,

@@ -69,7 +69,11 @@ export class ChecklistItemProvider {
   /**
    * Get item by ID
    */
-  getItemById(checklists: Checklist[], checklistId: string, itemId: string): ChecklistItem | null {
+  getItemById(
+    checklists: Checklist[],
+    checklistId: string,
+    itemId: string
+  ): ChecklistItem | null {
     const checklist = checklists.find((c) => c.id === checklistId);
     if (!checklist) return null;
 
@@ -131,7 +135,7 @@ export class ChecklistItemProvider {
 
       const items = [...checklist.items];
       const currentIndex = items.findIndex((item) => item.id === itemId);
-      
+
       if (currentIndex <= 0) return checklist;
 
       // Swap with previous item
@@ -161,8 +165,9 @@ export class ChecklistItemProvider {
 
       const items = [...checklist.items];
       const currentIndex = items.findIndex((item) => item.id === itemId);
-      
-      if (currentIndex === -1 || currentIndex >= items.length - 1) return checklist;
+
+      if (currentIndex === -1 || currentIndex >= items.length - 1)
+        return checklist;
 
       // Swap with next item
       [items[currentIndex], items[currentIndex + 1]] = [
@@ -192,12 +197,12 @@ export class ChecklistItemProvider {
 
       const items = [...checklist.items];
       const currentIndex = items.findIndex((item) => item.id === itemId);
-      
+
       if (currentIndex === -1) return checklist;
 
       // Remove item from current position
       const [movedItem] = items.splice(currentIndex, 1);
-      
+
       // Insert at new position
       items.splice(newPosition, 0, movedItem);
 
@@ -262,13 +267,15 @@ export class ChecklistItemProvider {
         totalItems++;
         if (item.completed) completedItems++;
         if (item.skipped) skippedItems++;
-        if (item.requiredInventory && item.requiredInventory.length > 0) itemsWithInventory++;
+        if (item.requiredInventory && item.requiredInventory.length > 0)
+          itemsWithInventory++;
         if (item.sdsId) itemsWithSDS++;
       });
     });
 
     const pendingItems = totalItems - completedItems - skippedItems;
-    const completionRate = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+    const completionRate =
+      totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
     return {
       totalItems,
@@ -293,10 +300,13 @@ export class ChecklistItemProvider {
     isFullyCompleted: boolean;
   } {
     const totalItems = checklist.items.length;
-    const completedItems = checklist.items.filter((item) => item.completed).length;
+    const completedItems = checklist.items.filter(
+      (item) => item.completed
+    ).length;
     const skippedItems = checklist.items.filter((item) => item.skipped).length;
     const pendingItems = totalItems - completedItems - skippedItems;
-    const completionRate = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+    const completionRate =
+      totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
     const isFullyCompleted = completedItems === totalItems;
 
     return {
@@ -335,16 +345,24 @@ export class ChecklistItemProvider {
           errors.push(`Inventory item ${index + 1}: Name is required`);
         }
         if (inventory.required <= 0) {
-          errors.push(`Inventory item ${index + 1}: Required quantity must be greater than 0`);
+          errors.push(
+            `Inventory item ${index + 1}: Required quantity must be greater than 0`
+          );
         }
         if (inventory.available < 0) {
-          errors.push(`Inventory item ${index + 1}: Available quantity cannot be negative`);
+          errors.push(
+            `Inventory item ${index + 1}: Available quantity cannot be negative`
+          );
         }
         if (inventory.used < 0) {
-          errors.push(`Inventory item ${index + 1}: Used quantity cannot be negative`);
+          errors.push(
+            `Inventory item ${index + 1}: Used quantity cannot be negative`
+          );
         }
         if (inventory.used > inventory.available) {
-          errors.push(`Inventory item ${index + 1}: Used quantity cannot exceed available quantity`);
+          errors.push(
+            `Inventory item ${index + 1}: Used quantity cannot exceed available quantity`
+          );
         }
       });
     }
@@ -358,7 +376,10 @@ export class ChecklistItemProvider {
   /**
    * Search items
    */
-  searchItems(checklists: Checklist[], query: string): Array<{
+  searchItems(
+    checklists: Checklist[],
+    query: string
+  ): Array<{
     checklist: Checklist;
     item: ChecklistItem;
     matchType: 'title' | 'instructions' | 'inventory';
@@ -408,10 +429,17 @@ export class ChecklistItemProvider {
       if (filters.category && checklist.category !== filters.category) return;
 
       checklist.items.forEach((item) => {
-        if (filters.completed !== undefined && item.completed !== filters.completed) return;
-        if (filters.skipped !== undefined && item.skipped !== filters.skipped) return;
+        if (
+          filters.completed !== undefined &&
+          item.completed !== filters.completed
+        )
+          return;
+        if (filters.skipped !== undefined && item.skipped !== filters.skipped)
+          return;
         if (filters.hasInventory !== undefined) {
-          const hasInventory = !!(item.requiredInventory && item.requiredInventory.length > 0);
+          const hasInventory = !!(
+            item.requiredInventory && item.requiredInventory.length > 0
+          );
           if (hasInventory !== filters.hasInventory) return;
         }
         if (filters.hasSDS !== undefined) {

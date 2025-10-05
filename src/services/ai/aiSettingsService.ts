@@ -2,7 +2,10 @@
 import { useFacility } from '../../contexts/FacilityContext';
 
 // Provider imports
-import { AISettingsConfigProvider, UnifiedAISettings } from './aiSettings/AISettingsConfigProvider';
+import {
+  AISettingsConfigProvider,
+  UnifiedAISettings,
+} from './aiSettings/AISettingsConfigProvider';
 import { AISettingsModelProvider } from './aiSettings/AISettingsModelProvider';
 import { AISettingsApiKeyProvider } from './aiSettings/AISettingsApiKeyProvider';
 import { AISettingsToggleProvider } from './aiSettings/AISettingsToggleProvider';
@@ -41,7 +44,8 @@ export class AISettingsService {
     settings: Partial<UnifiedAISettings>
   ): Promise<boolean> {
     const modelResult = await this.modelProvider.saveUnifiedSettings(settings);
-    const persistenceResult = await this.persistenceProvider.saveToUnifiedTable(settings);
+    const persistenceResult =
+      await this.persistenceProvider.saveToUnifiedTable(settings);
     return modelResult && persistenceResult;
   }
 
@@ -64,7 +68,6 @@ export class AISettingsService {
   }> {
     return this.modelProvider.getServiceStatus();
   }
-
 }
 
 // Hook for using AI Settings

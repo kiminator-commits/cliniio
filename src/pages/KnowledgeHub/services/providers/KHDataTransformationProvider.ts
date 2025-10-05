@@ -82,7 +82,9 @@ export class KHDataTransformationProvider {
   /**
    * Safely transform raw database row to KnowledgeHubCourse
    */
-  static transformRawRowToCourse(row: Record<string, unknown>): KnowledgeHubCourse {
+  static transformRawRowToCourse(
+    row: Record<string, unknown>
+  ): KnowledgeHubCourse {
     return {
       id: String(row.id || ''),
       title: String(row.title || ''),
@@ -114,7 +116,9 @@ export class KHDataTransformationProvider {
   /**
    * Transform multiple raw rows to ContentItems
    */
-  static transformRawRowsToContentItems(rows: Record<string, unknown>[]): ContentItem[] {
+  static transformRawRowsToContentItems(
+    rows: Record<string, unknown>[]
+  ): ContentItem[] {
     return rows.map((row) => {
       const courseData = this.transformRawRowToCourse(row);
       return this.transformRowToContentItem(courseData);
@@ -146,7 +150,10 @@ export class KHDataTransformationProvider {
       errors.push('Status is required');
     }
 
-    if (!data.difficulty_level || safeString(data.difficulty_level).trim() === '') {
+    if (
+      !data.difficulty_level ||
+      safeString(data.difficulty_level).trim() === ''
+    ) {
       errors.push('Difficulty level is required');
     }
 
@@ -163,7 +170,9 @@ export class KHDataTransformationProvider {
   /**
    * Sanitize course data for database insertion
    */
-  static sanitizeCourseDataForInsert(data: Partial<KnowledgeHubCourse>): Record<string, unknown> {
+  static sanitizeCourseDataForInsert(
+    data: Partial<KnowledgeHubCourse>
+  ): Record<string, unknown> {
     return {
       title: data.title,
       description: data.description,

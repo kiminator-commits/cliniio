@@ -90,7 +90,7 @@ export class CategoryMetadataService {
     ];
 
     const result: Record<string, CategoryMetadata> = {};
-    categories.forEach(category => {
+    categories.forEach((category) => {
       result[category] = this.getCategoryMetadata(category);
     });
 

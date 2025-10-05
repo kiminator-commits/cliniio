@@ -27,7 +27,7 @@ vi.mock('@/lib/supabaseClient', () => ({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ 
+            single: vi.fn().mockResolvedValue({
               data: {
                 id: '550e8400-e29b-41d4-a716-446655440001',
                 name: 'Test Item',
@@ -40,27 +40,29 @@ vi.mock('@/lib/supabaseClient', () => ({
                 facility_id: '550e8400-e29b-41d4-a716-446655440002',
                 created_at: '2024-01-01T00:00:00Z',
                 updated_at: '2024-01-01T00:00:00Z',
-              }, 
-              error: null 
+              },
+              error: null,
             }),
-            order: vi.fn().mockResolvedValue({ 
-              data: [{
-                id: '550e8400-e29b-41d4-a716-446655440001',
-                name: 'Test Item',
-                category: 'Test Category',
-                location: 'Test Location',
-                status: 'active',
-                quantity: 10,
-                unit_cost: 100.0,
-                user_id: '550e8400-e29b-41d4-a716-446655440000',
-                facility_id: '550e8400-e29b-41d4-a716-446655440002',
-                created_at: '2024-01-01T00:00:00Z',
-                updated_at: '2024-01-01T00:00:00Z',
-              }], 
-              error: null 
+            order: vi.fn().mockResolvedValue({
+              data: [
+                {
+                  id: '550e8400-e29b-41d4-a716-446655440001',
+                  name: 'Test Item',
+                  category: 'Test Category',
+                  location: 'Test Location',
+                  status: 'active',
+                  quantity: 10,
+                  unit_cost: 100.0,
+                  user_id: '550e8400-e29b-41d4-a716-446655440000',
+                  facility_id: '550e8400-e29b-41d4-a716-446655440002',
+                  created_at: '2024-01-01T00:00:00Z',
+                  updated_at: '2024-01-01T00:00:00Z',
+                },
+              ],
+              error: null,
             }),
           }),
-          single: vi.fn().mockResolvedValue({ 
+          single: vi.fn().mockResolvedValue({
             data: {
               id: '550e8400-e29b-41d4-a716-446655440001',
               name: 'Test Item',
@@ -73,27 +75,29 @@ vi.mock('@/lib/supabaseClient', () => ({
               facility_id: '550e8400-e29b-41d4-a716-446655440002',
               created_at: '2024-01-01T00:00:00Z',
               updated_at: '2024-01-01T00:00:00Z',
-            }, 
-            error: null 
+            },
+            error: null,
           }),
-          order: vi.fn().mockResolvedValue({ 
-            data: [{
-              id: '550e8400-e29b-41d4-a716-446655440001',
-              name: 'Test Item',
-              category: 'Test Category',
-              location: 'Test Location',
-              status: 'active',
-              quantity: 10,
-              unit_cost: 100.0,
-              user_id: '550e8400-e29b-41d4-a716-446655440000',
-              facility_id: '550e8400-e29b-41d4-a716-446655440002',
-              created_at: '2024-01-01T00:00:00Z',
-              updated_at: '2024-01-01T00:00:00Z',
-            }], 
-            error: null 
+          order: vi.fn().mockResolvedValue({
+            data: [
+              {
+                id: '550e8400-e29b-41d4-a716-446655440001',
+                name: 'Test Item',
+                category: 'Test Category',
+                location: 'Test Location',
+                status: 'active',
+                quantity: 10,
+                unit_cost: 100.0,
+                user_id: '550e8400-e29b-41d4-a716-446655440000',
+                facility_id: '550e8400-e29b-41d4-a716-446655440002',
+                created_at: '2024-01-01T00:00:00Z',
+                updated_at: '2024-01-01T00:00:00Z',
+              },
+            ],
+            error: null,
           }),
         }),
-        single: vi.fn().mockResolvedValue({ 
+        single: vi.fn().mockResolvedValue({
           data: {
             id: '550e8400-e29b-41d4-a716-446655440001',
             name: 'Test Item',
@@ -106,29 +110,31 @@ vi.mock('@/lib/supabaseClient', () => ({
             facility_id: '550e8400-e29b-41d4-a716-446655440002',
             created_at: '2024-01-01T00:00:00Z',
             updated_at: '2024-01-01T00:00:00Z',
-          }, 
-          error: null 
+          },
+          error: null,
         }),
-        order: vi.fn().mockResolvedValue({ 
-          data: [{
-            id: '550e8400-e29b-41d4-a716-446655440001',
-            name: 'Test Item',
-            category: 'Test Category',
-            location: 'Test Location',
-            status: 'active',
-            quantity: 10,
-            unit_cost: 100.0,
-            user_id: '550e8400-e29b-41d4-a716-446655440000',
-            facility_id: '550e8400-e29b-41d4-a716-446655440002',
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-01T00:00:00Z',
-          }], 
-          error: null 
+        order: vi.fn().mockResolvedValue({
+          data: [
+            {
+              id: '550e8400-e29b-41d4-a716-446655440001',
+              name: 'Test Item',
+              category: 'Test Category',
+              location: 'Test Location',
+              status: 'active',
+              quantity: 10,
+              unit_cost: 100.0,
+              user_id: '550e8400-e29b-41d4-a716-446655440000',
+              facility_id: '550e8400-e29b-41d4-a716-446655440002',
+              created_at: '2024-01-01T00:00:00Z',
+              updated_at: '2024-01-01T00:00:00Z',
+            },
+          ],
+          error: null,
         }),
       }),
       insert: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ 
+          single: vi.fn().mockResolvedValue({
             data: {
               id: '550e8400-e29b-41d4-a716-446655440003',
               name: 'New Item',
@@ -140,8 +146,8 @@ vi.mock('@/lib/supabaseClient', () => ({
               facility_id: '550e8400-e29b-41d4-a716-446655440001',
               created_at: '2024-01-01T00:00:00Z',
               updated_at: '2024-01-01T00:00:00Z',
-            }, 
-            error: null 
+            },
+            error: null,
           }),
         }),
       }),
@@ -178,7 +184,7 @@ vi.mock('@/lib/supabase', () => ({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ 
+            single: vi.fn().mockResolvedValue({
               data: {
                 id: '550e8400-e29b-41d4-a716-446655440001',
                 name: 'Test Item',
@@ -191,27 +197,29 @@ vi.mock('@/lib/supabase', () => ({
                 facility_id: '550e8400-e29b-41d4-a716-446655440002',
                 created_at: '2024-01-01T00:00:00Z',
                 updated_at: '2024-01-01T00:00:00Z',
-              }, 
-              error: null 
+              },
+              error: null,
             }),
-            order: vi.fn().mockResolvedValue({ 
-              data: [{
-                id: '550e8400-e29b-41d4-a716-446655440001',
-                name: 'Test Item',
-                category: 'Test Category',
-                location: 'Test Location',
-                status: 'active',
-                quantity: 10,
-                unit_cost: 100.0,
-                user_id: '550e8400-e29b-41d4-a716-446655440000',
-                facility_id: '550e8400-e29b-41d4-a716-446655440002',
-                created_at: '2024-01-01T00:00:00Z',
-                updated_at: '2024-01-01T00:00:00Z',
-              }], 
-              error: null 
+            order: vi.fn().mockResolvedValue({
+              data: [
+                {
+                  id: '550e8400-e29b-41d4-a716-446655440001',
+                  name: 'Test Item',
+                  category: 'Test Category',
+                  location: 'Test Location',
+                  status: 'active',
+                  quantity: 10,
+                  unit_cost: 100.0,
+                  user_id: '550e8400-e29b-41d4-a716-446655440000',
+                  facility_id: '550e8400-e29b-41d4-a716-446655440002',
+                  created_at: '2024-01-01T00:00:00Z',
+                  updated_at: '2024-01-01T00:00:00Z',
+                },
+              ],
+              error: null,
             }),
           }),
-          single: vi.fn().mockResolvedValue({ 
+          single: vi.fn().mockResolvedValue({
             data: {
               id: '550e8400-e29b-41d4-a716-446655440001',
               name: 'Test Item',
@@ -224,27 +232,29 @@ vi.mock('@/lib/supabase', () => ({
               facility_id: '550e8400-e29b-41d4-a716-446655440002',
               created_at: '2024-01-01T00:00:00Z',
               updated_at: '2024-01-01T00:00:00Z',
-            }, 
-            error: null 
+            },
+            error: null,
           }),
-          order: vi.fn().mockResolvedValue({ 
-            data: [{
-              id: '550e8400-e29b-41d4-a716-446655440001',
-              name: 'Test Item',
-              category: 'Test Category',
-              location: 'Test Location',
-              status: 'active',
-              quantity: 10,
-              unit_cost: 100.0,
-              user_id: '550e8400-e29b-41d4-a716-446655440000',
-              facility_id: '550e8400-e29b-41d4-a716-446655440002',
-              created_at: '2024-01-01T00:00:00Z',
-              updated_at: '2024-01-01T00:00:00Z',
-            }], 
-            error: null 
+          order: vi.fn().mockResolvedValue({
+            data: [
+              {
+                id: '550e8400-e29b-41d4-a716-446655440001',
+                name: 'Test Item',
+                category: 'Test Category',
+                location: 'Test Location',
+                status: 'active',
+                quantity: 10,
+                unit_cost: 100.0,
+                user_id: '550e8400-e29b-41d4-a716-446655440000',
+                facility_id: '550e8400-e29b-41d4-a716-446655440002',
+                created_at: '2024-01-01T00:00:00Z',
+                updated_at: '2024-01-01T00:00:00Z',
+              },
+            ],
+            error: null,
           }),
         }),
-        single: vi.fn().mockResolvedValue({ 
+        single: vi.fn().mockResolvedValue({
           data: {
             id: '550e8400-e29b-41d4-a716-446655440001',
             name: 'Test Item',
@@ -257,29 +267,31 @@ vi.mock('@/lib/supabase', () => ({
             facility_id: '550e8400-e29b-41d4-a716-446655440002',
             created_at: '2024-01-01T00:00:00Z',
             updated_at: '2024-01-01T00:00:00Z',
-          }, 
-          error: null 
+          },
+          error: null,
         }),
-        order: vi.fn().mockResolvedValue({ 
-          data: [{
-            id: '550e8400-e29b-41d4-a716-446655440001',
-            name: 'Test Item',
-            category: 'Test Category',
-            location: 'Test Location',
-            status: 'active',
-            quantity: 10,
-            unit_cost: 100.0,
-            user_id: '550e8400-e29b-41d4-a716-446655440000',
-            facility_id: '550e8400-e29b-41d4-a716-446655440002',
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-01T00:00:00Z',
-          }], 
-          error: null 
+        order: vi.fn().mockResolvedValue({
+          data: [
+            {
+              id: '550e8400-e29b-41d4-a716-446655440001',
+              name: 'Test Item',
+              category: 'Test Category',
+              location: 'Test Location',
+              status: 'active',
+              quantity: 10,
+              unit_cost: 100.0,
+              user_id: '550e8400-e29b-41d4-a716-446655440000',
+              facility_id: '550e8400-e29b-41d4-a716-446655440002',
+              created_at: '2024-01-01T00:00:00Z',
+              updated_at: '2024-01-01T00:00:00Z',
+            },
+          ],
+          error: null,
         }),
       }),
       insert: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ 
+          single: vi.fn().mockResolvedValue({
             data: {
               id: '550e8400-e29b-41d4-a716-446655440003',
               name: 'New Item',
@@ -291,8 +303,8 @@ vi.mock('@/lib/supabase', () => ({
               facility_id: '550e8400-e29b-41d4-a716-446655440001',
               created_at: '2024-01-01T00:00:00Z',
               updated_at: '2024-01-01T00:00:00Z',
-            }, 
-            error: null 
+            },
+            error: null,
           }),
         }),
       }),
@@ -494,10 +506,12 @@ describe('Supabase Integration Tests', () => {
       const mockRepository = {
         isInitialized: true,
         fetchAllInventoryData: vi.fn().mockResolvedValue({
-          tools: mockItems.filter(item => item.category === 'Tools'),
-          supplies: mockItems.filter(item => item.category === 'Supplies'),
-          equipment: mockItems.filter(item => item.category === 'Equipment'),
-          officeHardware: mockItems.filter(item => item.category === 'Office Hardware'),
+          tools: mockItems.filter((item) => item.category === 'Tools'),
+          supplies: mockItems.filter((item) => item.category === 'Supplies'),
+          equipment: mockItems.filter((item) => item.category === 'Equipment'),
+          officeHardware: mockItems.filter(
+            (item) => item.category === 'Office Hardware'
+          ),
           categories: ['Tools', 'Supplies', 'Equipment', 'Office Hardware'],
           isLoading: false,
           error: null,
@@ -559,8 +573,7 @@ describe('Supabase Integration Tests', () => {
       const originalRepository = inventoryServiceFacade['repository'];
       inventoryServiceFacade['repository'] = mockRepository as any;
 
-      const result =
-        await inventoryServiceFacade.createItem(newItem);
+      const result = await inventoryServiceFacade.createItem(newItem);
 
       expect(result.error).toBeNull();
       expect(result.data).not.toBeNull();
@@ -614,7 +627,7 @@ describe('Supabase Integration Tests', () => {
       // Check if the facade has real-time capabilities
       expect(inventoryServiceFacade).toBeDefined();
       expect(typeof inventoryServiceFacade.getAllItems).toBe('function');
-      
+
       // The service uses RealtimeManager internally
       expect(true).toBe(true); // Placeholder for real-time functionality
     });

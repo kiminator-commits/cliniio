@@ -55,7 +55,7 @@ class AuthenticationPenetrationTester {
 
   private async testBruteForceAttacks(): Promise<void> {
     const testName = 'Brute Force Attack Resistance';
-    
+
     try {
       // Test rapid login attempts
       const attempts = Array.from({ length: 20 }, (_, i) => ({
@@ -64,12 +64,16 @@ class AuthenticationPenetrationTester {
       }));
 
       const results = await Promise.allSettled(
-        attempts.map(creds => this.makeLoginRequest(creds))
+        attempts.map((creds) => this.makeLoginRequest(creds))
       );
 
-      const failures = results.filter(r => r.status === 'fulfilled' && !r.value.success);
-      const rateLimited = failures.filter(r => 
-        r.value.error?.includes('rate limit') || r.value.error?.includes('too many')
+      const failures = results.filter(
+        (r) => r.status === 'fulfilled' && !r.value.success
+      );
+      const rateLimited = failures.filter(
+        (r) =>
+          r.value.error?.includes('rate limit') ||
+          r.value.error?.includes('too many')
       );
 
       if (rateLimited.length >= 5) {
@@ -106,7 +110,7 @@ class AuthenticationPenetrationTester {
 
   private async testSQLInjection(): Promise<void> {
     const testName = 'SQL Injection Prevention';
-    
+
     const sqlPayloads = [
       "'; DROP TABLE users; --",
       "' OR '1'='1",
@@ -125,7 +129,11 @@ class AuthenticationPenetrationTester {
         });
 
         // Check if SQL injection was successful
-        if (result.success || result.error?.includes('SQL') || result.error?.includes('database')) {
+        if (
+          result.success ||
+          result.error?.includes('SQL') ||
+          result.error?.includes('database')
+        ) {
           vulnerabilities++;
         }
       } catch {
@@ -158,7 +166,7 @@ class AuthenticationPenetrationTester {
 
   private async testXSSAttacks(): Promise<void> {
     const testName = 'Cross-Site Scripting (XSS) Prevention';
-    
+
     const xssPayloads = [
       '<script>alert("XSS")</script>',
       '"><script>alert("XSS")</script>',
@@ -177,7 +185,10 @@ class AuthenticationPenetrationTester {
         });
 
         // Check if XSS payload was reflected
-        if (result.error?.includes(payload) || result.message?.includes(payload)) {
+        if (
+          result.error?.includes(payload) ||
+          result.message?.includes(payload)
+        ) {
           vulnerabilities++;
         }
       } catch {
@@ -210,19 +221,25 @@ class AuthenticationPenetrationTester {
 
   private async testCSRFAttacks(): Promise<void> {
     const testName = 'Cross-Site Request Forgery (CSRF) Prevention';
-    
+
     try {
       // Test without CSRF token
-      const resultWithoutToken = await this.makeLoginRequest({
-        email: this.testCredentials.email,
-        password: this.testCredentials.password,
-      }, { includeCSRF: false });
+      const resultWithoutToken = await this.makeLoginRequest(
+        {
+          email: this.testCredentials.email,
+          password: this.testCredentials.password,
+        },
+        { includeCSRF: false }
+      );
 
       // Test with invalid CSRF token
-      const resultWithInvalidToken = await this.makeLoginRequest({
-        email: this.testCredentials.email,
-        password: this.testCredentials.password,
-      }, { csrfToken: 'invalid_token' });
+      const resultWithInvalidToken = await this.makeLoginRequest(
+        {
+          email: this.testCredentials.email,
+          password: this.testCredentials.password,
+        },
+        { csrfToken: 'invalid_token' }
+      );
 
       if (!resultWithoutToken.success && !resultWithInvalidToken.success) {
         this.addTestResult({
@@ -258,14 +275,14 @@ class AuthenticationPenetrationTester {
 
   private async testSessionHijacking(): Promise<void> {
     const testName = 'Session Hijacking Prevention';
-    
+
     try {
       // Test session token security
       const result = await this.makeLoginRequest(this.testCredentials);
-      
+
       if (result.success && result.data?.accessToken) {
         const token = result.data.accessToken;
-        
+
         // Check token format (should be JWT)
         const tokenParts = token.split('.');
         if (tokenParts.length === 3) {
@@ -311,18 +328,21 @@ class AuthenticationPenetrationTester {
 
   private async testTokenManipulation(): Promise<void> {
     const testName = 'Token Manipulation Prevention';
-    
+
     try {
       // Test with modified token
       const result = await this.makeLoginRequest(this.testCredentials);
-      
+
       if (result.success && result.data?.accessToken) {
         const originalToken = result.data.accessToken;
         const modifiedToken = originalToken.slice(0, -5) + 'XXXXX';
-        
+
         // Try to use modified token
-        const modifiedResult = await this.makeRequestWithToken('/protected-endpoint', modifiedToken);
-        
+        const modifiedResult = await this.makeRequestWithToken(
+          '/protected-endpoint',
+          modifiedToken
+        );
+
         if (!modifiedResult.success) {
           this.addTestResult({
             testName,
@@ -358,12 +378,15 @@ class AuthenticationPenetrationTester {
 
   private async testRateLimitBypass(): Promise<void> {
     const testName = 'Rate Limit Bypass Prevention';
-    
+
     try {
       // Test different bypass techniques
       const bypassTechniques = [
         { name: 'IP Rotation', test: () => this.testIPRotation() },
-        { name: 'Header Manipulation', test: () => this.testHeaderManipulation() },
+        {
+          name: 'Header Manipulation',
+          test: () => this.testHeaderManipulation(),
+        },
         { name: 'Request Timing', test: () => this.testRequestTiming() },
       ];
 
@@ -414,7 +437,7 @@ class AuthenticationPenetrationTester {
 
   private async testInputValidation(): Promise<void> {
     const testName = 'Input Validation Security';
-    
+
     const maliciousInputs = [
       { field: 'email', value: 'a'.repeat(1000) }, // Very long email
       { field: 'password', value: 'a'.repeat(10000) }, // Very long password
@@ -428,9 +451,9 @@ class AuthenticationPenetrationTester {
       try {
         const credentials = { ...this.testCredentials };
         credentials[input.field] = input.value;
-        
+
         const result = await this.makeLoginRequest(credentials);
-        
+
         // If request succeeds with malicious input, validation failed
         if (result.success || !result.error?.includes('Invalid input')) {
           validationFailures++;
@@ -465,13 +488,14 @@ class AuthenticationPenetrationTester {
 
   private async testErrorHandling(): Promise<void> {
     const testName = 'Error Handling Security';
-    
+
     try {
       // Test various error conditions
       const errorTests = [
         () => this.makeLoginRequest({ email: '', password: '' }),
         () => this.makeLoginRequest({ email: 'invalid', password: 'invalid' }),
-        () => this.makeRequestWithToken('/nonexistent-endpoint', 'invalid_token'),
+        () =>
+          this.makeRequestWithToken('/nonexistent-endpoint', 'invalid_token'),
       ];
 
       let informationLeakage = 0;
@@ -479,19 +503,23 @@ class AuthenticationPenetrationTester {
       for (const test of errorTests) {
         try {
           const result = await test();
-          
+
           // Check for information leakage
-          if (result.error?.includes('database') || 
-              result.error?.includes('SQL') || 
-              result.error?.includes('connection') ||
-              result.error?.includes('internal')) {
+          if (
+            result.error?.includes('database') ||
+            result.error?.includes('SQL') ||
+            result.error?.includes('connection') ||
+            result.error?.includes('internal')
+          ) {
             informationLeakage++;
           }
         } catch {
           // Check error message for information leakage
-          if (error.message?.includes('database') || 
-              error.message?.includes('SQL') || 
-              error.message?.includes('connection')) {
+          if (
+            error.message?.includes('database') ||
+            error.message?.includes('SQL') ||
+            error.message?.includes('connection')
+          ) {
             informationLeakage++;
           }
         }
@@ -531,7 +559,7 @@ class AuthenticationPenetrationTester {
 
   private async testAuthenticationBypass(): Promise<void> {
     const testName = 'Authentication Bypass Prevention';
-    
+
     try {
       // Test various bypass techniques
       const bypassAttempts = [
@@ -588,7 +616,7 @@ class AuthenticationPenetrationTester {
 
   private async testPrivilegeEscalation(): Promise<void> {
     const testName = 'Privilege Escalation Prevention';
-    
+
     try {
       // Test privilege escalation attempts
       const escalationAttempts = [
@@ -644,11 +672,17 @@ class AuthenticationPenetrationTester {
 
   private async testTimingAttacks(): Promise<void> {
     const testName = 'Timing Attack Prevention';
-    
+
     try {
       // Test timing differences between valid and invalid credentials
-      const validCredentials = { email: 'valid@example.com', password: 'valid_password' };
-      const invalidCredentials = { email: 'invalid@example.com', password: 'invalid_password' };
+      const validCredentials = {
+        email: 'valid@example.com',
+        password: 'valid_password',
+      };
+      const invalidCredentials = {
+        email: 'invalid@example.com',
+        password: 'invalid_password',
+      };
 
       const validTimes: number[] = [];
       const invalidTimes: number[] = [];
@@ -665,12 +699,15 @@ class AuthenticationPenetrationTester {
       }
 
       // Calculate average times
-      const avgValidTime = validTimes.reduce((a, b) => a + b, 0) / validTimes.length;
-      const avgInvalidTime = invalidTimes.reduce((a, b) => a + b, 0) / invalidTimes.length;
+      const avgValidTime =
+        validTimes.reduce((a, b) => a + b, 0) / validTimes.length;
+      const avgInvalidTime =
+        invalidTimes.reduce((a, b) => a + b, 0) / invalidTimes.length;
 
       const timeDifference = Math.abs(avgValidTime - avgInvalidTime);
 
-      if (timeDifference < 100) { // Less than 100ms difference
+      if (timeDifference < 100) {
+        // Less than 100ms difference
         this.addTestResult({
           testName,
           severity: 'low',
@@ -703,7 +740,10 @@ class AuthenticationPenetrationTester {
   }
 
   // Helper methods
-  private async makeLoginRequest(credentials: any, _options: any = {}): Promise<any> {
+  private async makeLoginRequest(
+    credentials: any,
+    _options: any = {}
+  ): Promise<any> {
     // Mock implementation for testing
     return {
       success: false,
@@ -712,7 +752,10 @@ class AuthenticationPenetrationTester {
     };
   }
 
-  private async makeRequestWithToken(_endpoint: string, _token: string): Promise<any> {
+  private async makeRequestWithToken(
+    _endpoint: string,
+    _token: string
+  ): Promise<any> {
     // Mock implementation for testing
     return {
       success: false,
@@ -741,13 +784,21 @@ class AuthenticationPenetrationTester {
   }
 
   private generateReport(): PenetrationTestSuite {
-    const criticalIssues = this.testResults.filter(r => r.severity === 'critical' && !r.passed).length;
-    const highIssues = this.testResults.filter(r => r.severity === 'high' && !r.passed).length;
-    const mediumIssues = this.testResults.filter(r => r.severity === 'medium' && !r.passed).length;
-    const lowIssues = this.testResults.filter(r => r.severity === 'low' && !r.passed).length;
+    const criticalIssues = this.testResults.filter(
+      (r) => r.severity === 'critical' && !r.passed
+    ).length;
+    const highIssues = this.testResults.filter(
+      (r) => r.severity === 'high' && !r.passed
+    ).length;
+    const mediumIssues = this.testResults.filter(
+      (r) => r.severity === 'medium' && !r.passed
+    ).length;
+    const lowIssues = this.testResults.filter(
+      (r) => r.severity === 'low' && !r.passed
+    ).length;
 
     const totalTests = this.testResults.length;
-    const passedTests = this.testResults.filter(r => r.passed).length;
+    const passedTests = this.testResults.filter((r) => r.passed).length;
     const overallScore = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
 
     return {
@@ -789,11 +840,15 @@ describe('Authentication Penetration Tests', () => {
   it('should provide actionable security recommendations', async () => {
     const report = await penetrationTester.runAllTests();
 
-    report.tests.forEach(test => {
+    report.tests.forEach((test) => {
       expect(test.recommendations).toBeDefined();
       expect(test.recommendations.length).toBeGreaterThan(0);
     });
   });
 });
 
-export { AuthenticationPenetrationTester, type PenetrationTestResult, type PenetrationTestSuite };
+export {
+  AuthenticationPenetrationTester,
+  type PenetrationTestResult,
+  type PenetrationTestSuite,
+};

@@ -60,6 +60,8 @@ export class BIWorkflowService {
   // REAL-TIME SUBSCRIPTIONS
   // ========================================
 
-  static subscribeToBITestChanges = BISubscriptionService.subscribeToBITestChanges;
-  static subscribeToCycleChanges = BISubscriptionService.subscribeToCycleChanges;
+  static subscribeToBITestChanges =
+    BISubscriptionService.subscribeToBITestChanges;
+  static subscribeToCycleChanges =
+    BISubscriptionService.subscribeToCycleChanges;
 }

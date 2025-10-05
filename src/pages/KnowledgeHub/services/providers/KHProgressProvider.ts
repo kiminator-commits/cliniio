@@ -115,20 +115,21 @@ export class KHProgressProvider {
       return await this.updateUserProgress(userId, contentId, progressData);
     } catch (error) {
       console.error('Error marking content as completed:', error);
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to mark content as completed', {
-        severity: ErrorSeverity.MEDIUM,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to mark content as completed',
+        {
+          severity: ErrorSeverity.MEDIUM,
+          context: { originalError: error },
+        }
+      );
     }
   }
 
   /**
    * Start content (mark as in progress)
    */
-  async startContent(
-    userId: string,
-    contentId: string
-  ): Promise<UserProgress> {
+  async startContent(userId: string, contentId: string): Promise<UserProgress> {
     try {
       const progressData: Partial<UserProgress> = {
         progress_percentage: 0,
@@ -157,9 +158,13 @@ export class KHProgressProvider {
   ): Promise<UserProgress> {
     try {
       if (percentage < 0 || percentage > 100) {
-        throw new ApiError(ErrorType.VALIDATION_ERROR, 'Progress percentage must be between 0 and 100', {
-          severity: ErrorSeverity.LOW,
-        });
+        throw new ApiError(
+          ErrorType.VALIDATION_ERROR,
+          'Progress percentage must be between 0 and 100',
+          {
+            severity: ErrorSeverity.LOW,
+          }
+        );
       }
 
       const progressData: Partial<UserProgress> = {
@@ -178,10 +183,14 @@ export class KHProgressProvider {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to update progress percentage', {
-        severity: ErrorSeverity.MEDIUM,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to update progress percentage',
+        {
+          severity: ErrorSeverity.MEDIUM,
+          context: { originalError: error },
+        }
+      );
     }
   }
 
@@ -249,9 +258,13 @@ export class KHProgressProvider {
   ): Promise<UserProgress> {
     try {
       if (rating < 1 || rating > 5) {
-        throw new ApiError(ErrorType.VALIDATION_ERROR, 'Rating must be between 1 and 5', {
-          severity: ErrorSeverity.LOW,
-        });
+        throw new ApiError(
+          ErrorType.VALIDATION_ERROR,
+          'Rating must be between 1 and 5',
+          {
+            severity: ErrorSeverity.LOW,
+          }
+        );
       }
 
       const progressData: Partial<UserProgress> = {
@@ -307,13 +320,24 @@ export class KHProgressProvider {
 
       const progressData = data || [];
       const totalContent = progressData.length;
-      const completedContent = progressData.filter(p => p.progress_percentage === 100).length;
-      const inProgressContent = progressData.filter(p => p.progress_percentage > 0 && p.progress_percentage < 100).length;
-      const bookmarkedContent = progressData.filter(p => p.bookmarked).length;
-      const totalTimeSpent = progressData.reduce((sum, p) => sum + (p.time_spent_minutes || 0), 0);
-      const ratings = progressData.filter(p => p.rating).map(p => p.rating);
-      const averageRating = ratings.length > 0 ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length : 0;
-      const completionRate = totalContent > 0 ? (completedContent / totalContent) * 100 : 0;
+      const completedContent = progressData.filter(
+        (p) => p.progress_percentage === 100
+      ).length;
+      const inProgressContent = progressData.filter(
+        (p) => p.progress_percentage > 0 && p.progress_percentage < 100
+      ).length;
+      const bookmarkedContent = progressData.filter((p) => p.bookmarked).length;
+      const totalTimeSpent = progressData.reduce(
+        (sum, p) => sum + (p.time_spent_minutes || 0),
+        0
+      );
+      const ratings = progressData.filter((p) => p.rating).map((p) => p.rating);
+      const averageRating =
+        ratings.length > 0
+          ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
+          : 0;
+      const completionRate =
+        totalContent > 0 ? (completedContent / totalContent) * 100 : 0;
 
       return {
         totalContent,
@@ -397,10 +421,14 @@ export class KHProgressProvider {
       if (error) throw error;
     } catch (error) {
       console.error('Error deleting user progress:', error);
-      throw new ApiError(ErrorType.NETWORK_ERROR, 'Failed to delete user progress', {
-        severity: ErrorSeverity.MEDIUM,
-        context: { originalError: error },
-      });
+      throw new ApiError(
+        ErrorType.NETWORK_ERROR,
+        'Failed to delete user progress',
+        {
+          severity: ErrorSeverity.MEDIUM,
+          context: { originalError: error },
+        }
+      );
     }
   }
 }

@@ -13,8 +13,10 @@ export const UI_TEXT = {
   },
   MESSAGES: {
     LOADING: 'Loading AI settings...',
-    FACILITY_NOT_AVAILABLE: 'Facility not available. Please select a facility first.',
-    FAILED_TO_LOAD: 'Failed to load AI settings. Please try refreshing the page.',
+    FACILITY_NOT_AVAILABLE:
+      'Facility not available. Please select a facility first.',
+    FAILED_TO_LOAD:
+      'Failed to load AI settings. Please try refreshing the page.',
     SAVE_SUCCESS: 'AI settings saved and applied successfully!',
     SAVE_ERROR: 'Failed to save AI settings',
     RESET_SUCCESS: 'Settings reset to defaults',
@@ -89,7 +91,8 @@ export const UI_TEXT = {
     SMART_HELP_SYSTEM: 'Smart Help System',
   },
   DESCRIPTIONS: {
-    MASTER_AI_TOGGLE: 'Master toggle for all AI-powered features across the system',
+    MASTER_AI_TOGGLE:
+      'Master toggle for all AI-powered features across the system',
     TOOL_CONDITION_ASSESSMENT: 'AI-powered tool wear and condition analysis',
     BARCODE_QUALITY_DETECTION: 'Automatic barcode readability assessment',
     DAMAGE_DETECTION: 'AI detection of tool damage and defects',
@@ -130,8 +133,8 @@ export const UI_TEXT = {
     SMART_HELP_SYSTEM: 'AI-powered contextual help and guidance',
   },
   STATUS: {
-    ACTIVE: 'Active',
-    INACTIVE: 'Inactive',
+    ACTIVE: 'Available',
+    INACTIVE: 'In Use',
   },
 } as const;
 

@@ -1,6 +1,7 @@
 import { DistributedCache } from './DistributedCache';
 import { Facility } from '../facilityService';
 import { logger } from '../../utils/_core/logger';
+import { isDevelopment } from '../../lib/getEnv';
 
 export interface CachedFacility {
   facility: Facility;
@@ -22,7 +23,11 @@ export class DistributedFacilityCache {
       const cached = await this.cache.get<CachedFacility>(key);
 
       if (cached && this.isCacheValid(cached)) {
-        logger.debug(`Facility cache hit for ID: ${facilityId}`);
+        // Only log cache hits in development, and less frequently
+        if (isDevelopment() && Math.random() < 0.1) {
+          // Only log 10% of cache hits
+          logger.debug(`Facility cache hit for ID: ${facilityId}`);
+        }
         return cached.facility;
       }
 
@@ -47,7 +52,11 @@ export class DistributedFacilityCache {
       };
 
       await this.cache.set(key, cached, { ttl: this.CACHE_DURATION });
-      logger.debug(`Facility cached for ID: ${facilityId}`);
+      // Only log caching in development, and less frequently
+      if (isDevelopment() && Math.random() < 0.1) {
+        // Only log 10% of cache operations
+        logger.debug(`Facility cached for ID: ${facilityId}`);
+      }
     } catch (error) {
       logger.error('Error setting facility in cache:', error);
     }

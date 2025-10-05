@@ -1,9 +1,21 @@
 import { logger } from '../../../../utils/_core/logger';
-import { BIRiskAnalysisProvider, RiskFactor } from './providers/BIRiskAnalysisProvider';
+import {
+  BIRiskAnalysisProvider,
+  RiskFactor,
+} from './providers/BIRiskAnalysisProvider';
 import { BIPredictionProvider } from './providers/BIPredictionProvider';
-import { BIRecommendationsProvider, PredictiveRecommendation } from './providers/BIRecommendationsProvider';
-import { BITrendAnalysisProvider, TrendAnalysis } from './providers/BITrendAnalysisProvider';
-import { BISeasonalAnalysisProvider, SeasonalPattern } from './providers/BISeasonalAnalysisProvider';
+import {
+  BIRecommendationsProvider,
+  PredictiveRecommendation,
+} from './providers/BIRecommendationsProvider';
+import {
+  BITrendAnalysisProvider,
+  TrendAnalysis,
+} from './providers/BITrendAnalysisProvider';
+import {
+  BISeasonalAnalysisProvider,
+  SeasonalPattern,
+} from './providers/BISeasonalAnalysisProvider';
 import { BIDataProcessingProvider } from './providers/BIDataProcessingProvider';
 
 // Re-export interfaces for backward compatibility
@@ -64,6 +76,4 @@ export class BIFailurePredictiveService {
       throw new Error('Failed to generate predictive insights');
     }
   }
-
-
 }

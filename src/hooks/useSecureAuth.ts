@@ -60,15 +60,15 @@ export const useSecureAuth = () => {
     initializationRef.current = true;
 
     try {
-      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
+      setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       // Check if migration is needed
       if (!authMigrationService.isMigrationComplete()) {
         const migrationStatus = authMigrationService.getMigrationStatus();
-        
+
         if (!migrationStatus.isComplete && !migrationStatus.errors.length) {
           // Run migration
-          setAuthState(prev => ({
+          setAuthState((prev) => ({
             ...prev,
             migrationStatus: {
               isComplete: false,
@@ -79,8 +79,8 @@ export const useSecureAuth = () => {
           }));
 
           const migrationResult = await authMigrationService.runMigration();
-          
-          setAuthState(prev => ({
+
+          setAuthState((prev) => ({
             ...prev,
             migrationStatus: {
               isComplete: migrationResult.isComplete,
@@ -91,10 +91,11 @@ export const useSecureAuth = () => {
           }));
 
           if (!migrationResult.isComplete) {
-            setAuthState(prev => ({
+            setAuthState((prev) => ({
               ...prev,
               isLoading: false,
-              error: 'Authentication migration failed. Please refresh the page.',
+              error:
+                'Authentication migration failed. Please refresh the page.',
             }));
             return;
           }
@@ -103,9 +104,11 @@ export const useSecureAuth = () => {
 
       // Check authentication status
       const isAuthenticated = await secureAuthService.isAuthenticated();
-      const user = isAuthenticated ? await secureAuthService.getCurrentUser() : null;
+      const user = isAuthenticated
+        ? await secureAuthService.getCurrentUser()
+        : null;
 
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         isAuthenticated,
         user,
@@ -117,13 +120,15 @@ export const useSecureAuth = () => {
       if (isAuthenticated) {
         startTokenValidation();
       }
-
     } catch (error) {
       console.error('Authentication initialization failed:', error);
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Authentication initialization failed',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Authentication initialization failed',
       }));
     }
   }, [startTokenValidation]);
@@ -134,17 +139,20 @@ export const useSecureAuth = () => {
       clearInterval(tokenValidationInterval.current);
     }
 
-    tokenValidationInterval.current = setInterval(async () => {
-      try {
-        const isValid = await secureAuthService.validateToken();
-        if (!isValid) {
+    tokenValidationInterval.current = setInterval(
+      async () => {
+        try {
+          const isValid = await secureAuthService.validateToken();
+          if (!isValid) {
+            await logout();
+          }
+        } catch (error) {
+          console.warn('Token validation failed:', error);
           await logout();
         }
-      } catch (error) {
-        console.warn('Token validation failed:', error);
-        await logout();
-      }
-    }, 5 * 60 * 1000); // Check every 5 minutes
+      },
+      5 * 60 * 1000
+    ); // Check every 5 minutes
   }, [logout]);
 
   // Stop token validation
@@ -156,63 +164,67 @@ export const useSecureAuth = () => {
   }, []);
 
   // Login function
-  const login = useCallback(async (credentials: LoginCredentials): Promise<LoginResult> => {
-    try {
-      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
+  const login = useCallback(
+    async (credentials: LoginCredentials): Promise<LoginResult> => {
+      try {
+        setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const result = await secureAuthService.authenticate(credentials);
+        const result = await secureAuthService.authenticate(credentials);
 
-      if (result.success && result.data) {
-        const user = await secureAuthService.getCurrentUser();
-        
-        setAuthState(prev => ({
+        if (result.success && result.data) {
+          const user = await secureAuthService.getCurrentUser();
+
+          setAuthState((prev) => ({
+            ...prev,
+            isAuthenticated: true,
+            user,
+            isLoading: false,
+            error: null,
+          }));
+
+          // Start token validation
+          startTokenValidation();
+
+          return { success: true };
+        } else {
+          setAuthState((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: result.error || 'Login failed',
+          }));
+
+          return {
+            success: false,
+            error: result.error || 'Login failed',
+            rateLimitInfo: result.rateLimitInfo,
+          };
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Login failed';
+
+        setAuthState((prev) => ({
           ...prev,
-          isAuthenticated: true,
-          user,
           isLoading: false,
-          error: null,
-        }));
-
-        // Start token validation
-        startTokenValidation();
-
-        return { success: true };
-      } else {
-        setAuthState(prev => ({
-          ...prev,
-          isLoading: false,
-          error: result.error || 'Login failed',
+          error: errorMessage,
         }));
 
         return {
           success: false,
-          error: result.error || 'Login failed',
-          rateLimitInfo: result.rateLimitInfo,
+          error: errorMessage,
         };
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
-      
-      setAuthState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: errorMessage,
-      }));
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
-  }, [startTokenValidation]);
+    },
+    [startTokenValidation]
+  );
 
   // Logout function
   const logout = useCallback(async () => {
     try {
-      setAuthState(prev => ({ ...prev, isLoading: true }));
+      setAuthState((prev) => ({ ...prev, isLoading: true }));
 
       await secureAuthService.logout();
-      
+
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
@@ -228,10 +240,9 @@ export const useSecureAuth = () => {
 
       // Stop token validation
       stopTokenValidation();
-
     } catch (error) {
       console.error('Logout failed:', error);
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         isLoading: false,
         error: 'Logout failed',
@@ -243,10 +254,10 @@ export const useSecureAuth = () => {
   const refreshToken = useCallback(async (): Promise<boolean> => {
     try {
       const success = await secureAuthService.refreshToken();
-      
+
       if (success) {
         const user = await secureAuthService.getCurrentUser();
-        setAuthState(prev => ({
+        setAuthState((prev) => ({
           ...prev,
           isAuthenticated: true,
           user,
@@ -274,13 +285,16 @@ export const useSecureAuth = () => {
   }, []);
 
   // Report security event function
-  const reportSecurityEvent = useCallback(async (eventType: string, details: unknown): Promise<void> => {
-    try {
-      await secureAuthService.reportSecurityEvent(eventType, details);
-    } catch (error) {
-      console.warn('Failed to report security event:', error);
-    }
-  }, []);
+  const reportSecurityEvent = useCallback(
+    async (eventType: string, details: unknown): Promise<void> => {
+      try {
+        await secureAuthService.reportSecurityEvent(eventType, details);
+      } catch (error) {
+        console.warn('Failed to report security event:', error);
+      }
+    },
+    []
+  );
 
   // Get access token function
   const getAccessToken = useCallback((): string | null => {
@@ -288,14 +302,20 @@ export const useSecureAuth = () => {
   }, []);
 
   // Check if user has specific role
-  const hasRole = useCallback((role: string): boolean => {
-    return authState.user?.role === role;
-  }, [authState.user]);
+  const hasRole = useCallback(
+    (role: string): boolean => {
+      return authState.user?.role === role;
+    },
+    [authState.user]
+  );
 
   // Check if user has any of the specified roles
-  const hasAnyRole = useCallback((roles: string[]): boolean => {
-    return authState.user ? roles.includes(authState.user.role) : false;
-  }, [authState.user]);
+  const hasAnyRole = useCallback(
+    (roles: string[]): boolean => {
+      return authState.user ? roles.includes(authState.user.role) : false;
+    },
+    [authState.user]
+  );
 
   // Initialize on mount
   useEffect(() => {
@@ -324,7 +344,7 @@ export const useSecureAuth = () => {
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
@@ -342,7 +362,7 @@ export const useSecureAuth = () => {
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };

@@ -8,7 +8,10 @@ import FormGroup from './FormGroup';
 
 interface SecurityPrivacyProps {
   settings: UnifiedAISettings;
-  updatePrivacy: (key: keyof UnifiedAISettings['privacy'], value: boolean) => void;
+  updatePrivacy: (
+    key: keyof UnifiedAISettings['privacy'],
+    value: boolean
+  ) => void;
 }
 
 const SecurityPrivacy: React.FC<SecurityPrivacyProps> = ({
@@ -29,9 +32,7 @@ const SecurityPrivacy: React.FC<SecurityPrivacyProps> = ({
           <ToggleSwitch
             id="dataAnonymization"
             checked={settings.privacy.dataAnonymization}
-            onChange={(checked) =>
-              updatePrivacy('dataAnonymization', checked)
-            }
+            onChange={(checked) => updatePrivacy('dataAnonymization', checked)}
             label={UI_TEXT.TOGGLE_LABELS.DATA_ANONYMIZATION}
             description={UI_TEXT.DESCRIPTIONS.DATA_ANONYMIZATION}
             disabled={!settings.aiEnabled}

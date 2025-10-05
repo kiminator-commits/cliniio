@@ -9,7 +9,11 @@ import {
   MockConfig,
   PartialSupabaseClient,
 } from '../types/supabaseMockTypes';
-import { createMockUser, createMockSession, createMockError } from './mockGenerators';
+import {
+  createMockUser,
+  createMockSession,
+  createMockError,
+} from './mockGenerators';
 import { TypedMockTableQueryBuilder } from './queryBuilders';
 import { TypedMockRealtimeChannel } from './realtimeChannel';
 import { createAuthService } from './authService';

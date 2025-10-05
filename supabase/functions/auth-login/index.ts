@@ -1,7 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCorsHeaders, isValidOrigin } from './cors.ts';
-import { checkRateLimit, getClientId, getRateLimitConfig } from './rateLimiting.ts';
+import {
+  checkRateLimit,
+  getClientId,
+  getRateLimitConfig,
+} from './rateLimiting.ts';
 import { logSecurityEvent, detectSuspiciousActivity } from './security.ts';
 import { validateLoginInput } from './validation.ts';
 import { getDistributedRateLimiter } from './redisCluster.ts';
@@ -42,7 +46,7 @@ serve(async (req) => {
   const startTime = Date.now();
   const origin = req.headers.get('origin');
   const clientId = getClientId(req);
-  
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     const corsHeaders = getCorsHeaders(origin);
@@ -99,7 +103,7 @@ serve(async (req) => {
   try {
     // Parse request body
     const body: LoginRequest = await req.json();
-    
+
     // Validate input
     const validationResult = validateLoginInput(body);
     if (!validationResult.isValid) {
@@ -131,22 +135,24 @@ serve(async (req) => {
     }
 
     const { email, password, csrfToken, rememberMe } = body;
-    const ipAddress = req.headers.get('x-forwarded-for') || 
-                     req.headers.get('x-real-ip') || 
-                     'unknown';
+    const ipAddress =
+      req.headers.get('x-forwarded-for') ||
+      req.headers.get('x-real-ip') ||
+      'unknown';
 
     // Enhanced distributed rate limiting
     const distributedRateLimiter = await getDistributedRateLimiter();
-    const rateLimitResult = await distributedRateLimiter.checkDistributedRateLimit(
-      email, 
-      ipAddress, 
-      clientId
-    );
-    
+    const rateLimitResult =
+      await distributedRateLimiter.checkDistributedRateLimit(
+        email,
+        ipAddress,
+        clientId
+      );
+
     if (!rateLimitResult.allowed) {
       const monitoringService = getSecurityMonitoringService();
       monitoringService.recordRateLimitHit();
-      
+
       await logSecurityEvent({
         type: 'rate_limit_exceeded',
         severity: 'high',
@@ -165,7 +171,9 @@ serve(async (req) => {
         JSON.stringify({
           success: false,
           error: 'Rate limit exceeded',
-          message: rateLimitResult.message || 'Too many login attempts. Please try again later.',
+          message:
+            rateLimitResult.message ||
+            'Too many login attempts. Please try again later.',
           rateLimitInfo: {
             remainingAttempts: 0,
             resetTime: rateLimitResult.resetTime,
@@ -185,11 +193,11 @@ serve(async (req) => {
     // Threat intelligence analysis
     const threatIntelligence = getThreatIntelligenceService();
     const threatAnalysis = await threatIntelligence.analyzeThreat(ipAddress);
-    
+
     if (threatAnalysis.isThreat && threatAnalysis.threatLevel === 'critical') {
       const monitoringService = getSecurityMonitoringService();
       monitoringService.recordThreatDetection();
-      
+
       await logSecurityEvent({
         type: 'threat_detected',
         severity: 'critical',
@@ -220,16 +228,24 @@ serve(async (req) => {
     }
 
     // Detect suspicious activity patterns
-    const suspiciousActivity = await detectSuspiciousActivity(email, ipAddress, clientId);
+    const suspiciousActivity = await detectSuspiciousActivity(
+      email,
+      ipAddress,
+      clientId
+    );
     if (suspiciousActivity.detected) {
       const monitoringService = getSecurityMonitoringService();
-      monitoringService.recordSecurityEvent('suspicious_activity', suspiciousActivity.severity, {
-        clientId,
-        email,
-        ipAddress,
-        patterns: suspiciousActivity.patterns,
-      });
-      
+      monitoringService.recordSecurityEvent(
+        'suspicious_activity',
+        suspiciousActivity.severity,
+        {
+          clientId,
+          email,
+          ipAddress,
+          patterns: suspiciousActivity.patterns,
+        }
+      );
+
       await logSecurityEvent({
         type: 'suspicious_activity',
         severity: suspiciousActivity.severity,
@@ -250,7 +266,8 @@ serve(async (req) => {
           JSON.stringify({
             success: false,
             error: 'Security violation detected',
-            message: 'This request has been blocked due to suspicious activity.',
+            message:
+              'This request has been blocked due to suspicious activity.',
           }),
           {
             status: 403,
@@ -311,12 +328,17 @@ serve(async (req) => {
       const auditTrail = getImmutableAuditTrail();
       const eventCorrelator = getSecurityEventCorrelator();
       const auditMonitoring = getAuditMonitoringService();
-      
+
       monitoringService.recordLoginAttempt(false, processingTime);
-      
+
       // Record failed attempt with enhanced rate limiting
-      await distributedRateLimiter.checkDistributedRateLimit(email, ipAddress, clientId, true);
-      
+      await distributedRateLimiter.checkDistributedRateLimit(
+        email,
+        ipAddress,
+        clientId,
+        true
+      );
+
       // Create comprehensive audit event
       const auditEventId = await auditTrail.recordEvent(
         'login_failure',
@@ -378,7 +400,7 @@ serve(async (req) => {
         ipAddress,
         userAgent: req.headers.get('user-agent') || 'Unknown',
       });
-      
+
       await logSecurityEvent({
         type: 'login_failure',
         severity: 'medium',
@@ -449,12 +471,18 @@ serve(async (req) => {
     const auditTrail = getImmutableAuditTrail();
     const eventCorrelator = getSecurityEventCorrelator();
     const auditMonitoring = getAuditMonitoringService();
-    
+
     monitoringService.recordLoginAttempt(true, processingTime);
-    
+
     // Reset rate limiting on successful login
-    await distributedRateLimiter.checkDistributedRateLimit(email, ipAddress, clientId, false, true);
-    
+    await distributedRateLimiter.checkDistributedRateLimit(
+      email,
+      ipAddress,
+      clientId,
+      false,
+      true
+    );
+
     // Create comprehensive audit event for successful login
     const auditEventId = await auditTrail.recordEvent(
       'login_success',
@@ -516,7 +544,7 @@ serve(async (req) => {
       ipAddress,
       userAgent: req.headers.get('user-agent') || 'Unknown',
     });
-    
+
     await logSecurityEvent({
       type: 'login_success',
       severity: 'low',
@@ -548,20 +576,16 @@ serve(async (req) => {
       },
     };
 
-    return new Response(
-      JSON.stringify(response),
-      {
-        status: 200,
-        headers: {
-          ...getCorsHeaders(origin),
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
-      }
-    );
-
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        ...getCorsHeaders(origin),
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    });
   } catch (error) {
     await logSecurityEvent({
       type: 'server_error',

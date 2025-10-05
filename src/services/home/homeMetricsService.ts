@@ -1,12 +1,17 @@
 import { supabase } from '../../lib/supabaseClient';
 import {
-  getTimeSavingsAggregates,
   getCostSavingsAggregates,
   getTeamPerformanceAggregates,
 } from '../aiTaskPerformanceService';
+import { operationalTimeSavingsService } from '../operationalTimeSavingsService';
+import { aiTimeSavingsService } from '../aiTimeSavingsService';
 
 export interface HomePerformanceMetrics {
   timeSaved: {
+    daily: number;
+    monthly: number;
+  };
+  aiTimeSaved: {
     daily: number;
     monthly: number;
   };
@@ -128,24 +133,40 @@ class HomeMetricsService {
       // const startOfMonth = new Date().toISOString().slice(0, 7); // Removed unused variable
 
       // Fetch metrics in parallel for better performance
+      console.log(
+        '🏠 HomeMetricsService: Fetching metrics for facility:',
+        facilityId
+      );
+
       const [
-        timeSavingsData,
+        operationalTimeSavings,
+        aiTimeSavings,
         costSavingsData,
         teamPerformanceData,
         dailyMetrics,
         gamificationStats,
       ] = await Promise.all([
-        getTimeSavingsAggregates(),
+        operationalTimeSavingsService.getOperationalTimeSavings(),
+        aiTimeSavingsService.getAITimeSavings(),
         getCostSavingsAggregates(),
         getTeamPerformanceAggregates(),
         this.getDailyMetrics(today, facilityId),
         this.getGamificationStats(today, facilityId),
       ]);
 
+      console.log(
+        '📊 HomeMetricsService: Received operational time savings:',
+        operationalTimeSavings
+      );
+
       const result = {
         timeSaved: {
-          daily: timeSavingsData.daily_time_saved,
-          monthly: timeSavingsData.monthly_time_saved,
+          daily: operationalTimeSavings.daily_time_saved,
+          monthly: operationalTimeSavings.monthly_time_saved,
+        },
+        aiTimeSaved: {
+          daily: aiTimeSavings.daily_time_saved,
+          monthly: aiTimeSavings.monthly_time_saved,
         },
         costSavings: {
           monthly: costSavingsData.monthly_cost_savings,
@@ -159,9 +180,9 @@ class HomeMetricsService {
           ),
         },
         teamPerformance: {
-          skills: teamPerformanceData.skills,
-          inventory: teamPerformanceData.inventory,
-          sterilization: teamPerformanceData.sterilization,
+          skills: teamPerformanceData.skills_score,
+          inventory: teamPerformanceData.inventory_score,
+          sterilization: teamPerformanceData.sterilization_score,
         },
         gamificationStats: {
           totalTasks: this.calculateTotalTasks(gamificationStats),
@@ -291,6 +312,7 @@ class HomeMetricsService {
   private getDefaultMetrics(): HomePerformanceMetrics {
     return {
       timeSaved: { daily: 0, monthly: 0 },
+      aiTimeSaved: { daily: 0, monthly: 0 },
       costSavings: { monthly: 0, annual: 0 },
       aiEfficiency: { timeSavings: 0, proactiveMgmt: 0 },
       teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },

@@ -41,9 +41,7 @@ export const SDSTab: React.FC<SDSTabProps> = ({
               color="#4ECDC4"
               className="mr-2"
             />
-            <h2 className="text-xl font-semibold text-[#5b5b5b]">
-              SDS Sheets
-            </h2>
+            <h2 className="text-xl font-semibold text-[#5b5b5b]">SDS Sheets</h2>
           </div>
           <button
             onClick={() => onTabChange('checklists')}

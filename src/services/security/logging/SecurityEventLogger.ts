@@ -6,7 +6,9 @@ export class SecurityEventLogger {
   /**
    * Log a security event
    */
-  logSecurityEvent(event: Omit<SecurityEvent, 'id' | 'timestamp'>): SecurityEvent {
+  logSecurityEvent(
+    event: Omit<SecurityEvent, 'id' | 'timestamp'>
+  ): SecurityEvent {
     const securityEvent: SecurityEvent = {
       ...event,
       id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

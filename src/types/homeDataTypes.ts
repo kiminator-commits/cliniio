@@ -12,7 +12,14 @@ export interface HomeData {
     | SterilizationHomeMetrics
     | null;
   integrationMetrics: Record<string, unknown> | HomeIntegrationMetrics | null;
+  aiImpactMetrics: Record<string, unknown> | null; // Add AI impact metrics to interface
   leaderboardData: LeaderboardData;
+  gamificationData: {
+    streak: number;
+    level: number;
+    rank: number;
+    totalScore: number;
+  } | null;
   loading: boolean;
   error: string | null;
 }

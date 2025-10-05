@@ -1,7 +1,7 @@
 /**
  * @deprecated This service is unused and will be removed
  * Use the main aiService.ts and specialized AI services instead
- * 
+ *
  * Vercel AI Service for Cliniio Analytics & Forecasting
  * Handles AI-powered insights, predictions, and recommendations
  */

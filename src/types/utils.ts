@@ -13,7 +13,7 @@ export type StatusType =
   | 'Low Stock'
   | 'Out of Stock'
   | 'Available'
-  | 'Active'
+  | 'In Use'
   | 'Operational';
 
 export type RoomStatusType =
@@ -28,4 +28,5 @@ export type RoomStatusType =
   | 'OutOfService'
   | 'Unassigned'
   | 'Available'
-  | 'PublicAreas';
+  | 'PublicAreas'
+  | 'IN USE';

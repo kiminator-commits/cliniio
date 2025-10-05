@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef as _useRef } from 'react';
 import Icon from '@mdi/react';
 import {
   mdiAlertCircle,
@@ -6,22 +6,30 @@ import {
   mdiPackage,
   mdiClipboardList,
 } from '@mdi/js';
+import { useLocation } from 'react-router-dom';
 import { useSterilizationStore } from '../../store/sterilizationStore';
+import { useUser } from '../../contexts/UserContext';
 import { BIFailureResolutionModal } from '../BIFailureResolution';
 
 interface GlobalBIFailureBannerProps {
   onDismiss?: () => void;
 }
 
-const GlobalBIFailureBanner: React.FC<GlobalBIFailureBannerProps> = ({
+// Inner component that only renders when not on login pages
+const BIFailureBannerContent: React.FC<GlobalBIFailureBannerProps> = ({
   onDismiss,
 }) => {
-  const { biFailureActive, biFailureDetails } = useSterilizationStore();
   const [showResolutionModal, setShowResolutionModal] = useState(false);
+  const [isWorkflowMinimized, setIsWorkflowMinimized] = useState(false);
 
-  // Debug logging
-  // Debug logging removed for production
+  // These hooks are only called when we're not on login pages
+  const { biFailureActive, biFailureDetails } = useSterilizationStore();
+  const { currentUser: _currentUser } = useUser();
 
+  // Debug logging to understand what's happening (only log once per state change)
+  // Debug logging removed for production cleanliness
+
+  // Return null if no BI failure active
   if (!biFailureActive) {
     return null;
   }
@@ -41,7 +49,9 @@ const GlobalBIFailureBanner: React.FC<GlobalBIFailureBannerProps> = ({
               </h3>
               <span className="text-sm bg-red-700 px-2 py-1 rounded">
                 {biFailureDetails?.date
-                  ? new Date(biFailureDetails.date).toLocaleDateString()
+                  ? biFailureDetails.date instanceof Date
+                    ? biFailureDetails.date.toLocaleDateString()
+                    : new Date(biFailureDetails.date).toLocaleDateString()
                   : 'Today'}
               </span>
             </div>
@@ -57,16 +67,25 @@ const GlobalBIFailureBanner: React.FC<GlobalBIFailureBannerProps> = ({
         <div className="flex items-center gap-4">
           {/* Resolution Workflow Button */}
           <button
-            onClick={() => setShowResolutionModal(true)}
+            onClick={() => {
+              setShowResolutionModal(true);
+              setIsWorkflowMinimized(false);
+            }}
             className="flex items-center gap-2 bg-red-700 hover:bg-red-800 px-3 py-1 rounded-lg transition-colors"
-            title="View resolution workflow"
+            title={
+              isWorkflowMinimized
+                ? 'Resume workflow'
+                : 'View resolution workflow'
+            }
           >
             <Icon path={mdiClipboardList} size={1} className="text-white" />
-            <span className="text-sm font-medium">Resolution Workflow</span>
+            <span className="text-sm font-medium">
+              {isWorkflowMinimized ? 'Resume Workflow' : 'Resolution Workflow'}
+            </span>
           </button>
 
           {/* Affected Tools Count */}
-          {biFailureDetails?.affectedToolsCount && (
+          {biFailureDetails?.affectedToolsCount !== undefined && (
             <div className="flex items-center gap-2 bg-red-700 px-3 py-1 rounded-lg">
               <Icon path={mdiPackage} size={1} className="text-white" />
               <span className="text-sm font-medium">
@@ -92,9 +111,33 @@ const GlobalBIFailureBanner: React.FC<GlobalBIFailureBannerProps> = ({
       <BIFailureResolutionModal
         isOpen={showResolutionModal}
         onClose={() => setShowResolutionModal(false)}
+        onMinimize={() => {
+          setIsWorkflowMinimized(true);
+          setShowResolutionModal(false);
+        }}
+        isMinimized={isWorkflowMinimized}
       />
     </div>
   );
+};
+
+// Main component that conditionally renders the banner content
+const GlobalBIFailureBanner: React.FC<GlobalBIFailureBannerProps> = ({
+  onDismiss,
+}) => {
+  const location = useLocation();
+
+  // Check if we're on login/auth pages
+  const isLoginPage =
+    location.pathname === '/login' || location.pathname.startsWith('/auth');
+
+  // Don't render anything on login pages - this prevents hooks from being called
+  if (isLoginPage) {
+    return null;
+  }
+
+  // Only render the content component when not on login pages
+  return <BIFailureBannerContent onDismiss={onDismiss} />;
 };
 
 export default GlobalBIFailureBanner;

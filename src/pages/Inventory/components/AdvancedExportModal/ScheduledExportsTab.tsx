@@ -1,5 +1,8 @@
 import React from 'react';
-import { ExportTemplate, ExportSchedule } from '../../services/inventoryExportTemplateService';
+import {
+  ExportTemplate,
+  ExportSchedule,
+} from '../../services/inventoryExportTemplateService';
 import { ScheduleForm } from './ScheduleForm';
 
 interface ScheduleFormData {
@@ -55,9 +58,7 @@ export const ScheduledExportsTab: React.FC<ScheduledExportsTabProps> = ({
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900">
-          Scheduled Exports
-        </h3>
+        <h3 className="text-lg font-medium text-gray-900">Scheduled Exports</h3>
         <button
           onClick={() => onShowScheduleForm(true)}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -84,19 +85,16 @@ export const ScheduledExportsTab: React.FC<ScheduledExportsTabProps> = ({
           >
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="font-medium text-gray-900">
-                  {schedule.name}
-                </h4>
+                <h4 className="font-medium text-gray-900">{schedule.name}</h4>
                 <p className="text-sm text-gray-600">
                   {schedule.schedule} at {schedule.time}
                   {schedule.schedule === 'weekly' &&
                     schedule.dayOfWeek !== undefined && (
                       <span> on {getDayName(schedule.dayOfWeek)}</span>
                     )}
-                  {schedule.schedule === 'monthly' &&
-                    schedule.dayOfMonth && (
-                      <span> on day {schedule.dayOfMonth}</span>
-                    )}
+                  {schedule.schedule === 'monthly' && schedule.dayOfMonth && (
+                    <span> on day {schedule.dayOfMonth}</span>
+                  )}
                 </p>
                 <p className="text-sm text-gray-600">
                   Recipients: {schedule.recipients.join(', ')}

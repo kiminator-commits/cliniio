@@ -5,5 +5,8 @@ type Props = {
 };
 
 export const PointsDisplay = ({ points }: Props) => {
-  return <div className="text-xl font-bold">{points} pts</div>;
+  // Hardened value with bounds checking
+  const safePoints = Math.max(0, points || 0);
+
+  return <div className="text-xl font-bold text-[#4ECDC4]">{safePoints}</div>;
 };

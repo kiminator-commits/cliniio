@@ -1,6 +1,9 @@
 import { securityAuditService } from '../SecurityAuditService';
 import { logger } from '../../../utils/_core/logger';
-import { ThreatIndicator, ThreatCondition } from './SecurityThreatIndicatorProvider';
+import {
+  ThreatIndicator,
+  ThreatCondition,
+} from './SecurityThreatIndicatorProvider';
 // import { SecurityIncident } from './SecurityIncidentProvider';
 
 export class SecurityMonitoringProvider {
@@ -55,7 +58,9 @@ export class SecurityMonitoringProvider {
     return {
       isActive: this.isMonitoring,
       interval: this.MONITORING_INTERVAL,
-      nextCheck: this.isMonitoring ? new Date(Date.now() + this.MONITORING_INTERVAL) : undefined,
+      nextCheck: this.isMonitoring
+        ? new Date(Date.now() + this.MONITORING_INTERVAL)
+        : undefined,
     };
   }
 
@@ -107,7 +112,10 @@ export class SecurityMonitoringProvider {
       };
     }
 
-    const shouldTrigger = this.shouldTriggerIndicator(indicator, matchingEvents);
+    const shouldTrigger = this.shouldTriggerIndicator(
+      indicator,
+      matchingEvents
+    );
 
     return {
       triggered: shouldTrigger,
@@ -309,7 +317,10 @@ export class SecurityMonitoringProvider {
     );
 
     const largeDataAccess = dataAccessEvents.filter((e) => {
-      const recordCount = this.getEventValue(e, 'details.recordCount') as number;
+      const recordCount = this.getEventValue(
+        e,
+        'details.recordCount'
+      ) as number;
       return recordCount && recordCount > 1000;
     });
 
@@ -362,7 +373,9 @@ export class SecurityMonitoringProvider {
     // For now, return mock data
     return {
       isActive: this.isMonitoring,
-      uptime: this.isMonitoring ? Date.now() - (this.monitoringTimer ? Date.now() : 0) : 0,
+      uptime: this.isMonitoring
+        ? Date.now() - (this.monitoringTimer ? Date.now() : 0)
+        : 0,
       checksPerformed: 0, // Would track this
       lastCheckTime: this.isMonitoring ? new Date() : undefined,
       averageCheckDuration: 150, // ms
@@ -404,7 +417,7 @@ export class SecurityMonitoringProvider {
       indicator.conditions.forEach((condition) => {
         const eventValue = this.getEventValue(event, condition.field);
         const passed = this.evaluateThreatConditions([condition], event);
-        
+
         eventEvaluations.push({
           condition,
           passed,
@@ -445,11 +458,15 @@ export class SecurityMonitoringProvider {
     const warnings: string[] = [];
 
     if (this.MONITORING_INTERVAL < 10000) {
-      warnings.push('Monitoring interval is very short, may impact performance');
+      warnings.push(
+        'Monitoring interval is very short, may impact performance'
+      );
     }
 
     if (this.MONITORING_INTERVAL > 300000) {
-      warnings.push('Monitoring interval is very long, may miss time-sensitive threats');
+      warnings.push(
+        'Monitoring interval is very long, may miss time-sensitive threats'
+      );
     }
 
     return {

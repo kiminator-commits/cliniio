@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ChecklistDataProvider, ChecklistItem, Checklist } from './providers/ChecklistDataProvider';
+import {
+  ChecklistDataProvider,
+  ChecklistItem,
+  Checklist,
+} from './providers/ChecklistDataProvider';
 import { ChecklistItemProvider } from './providers/ChecklistItemProvider';
 import { ChecklistScheduleProvider } from './providers/ChecklistScheduleProvider';
 import { ChecklistInventoryProvider } from './providers/ChecklistInventoryProvider';
@@ -50,7 +54,7 @@ export const useChecklistStore = create<ChecklistStore>()(
         set((state) => {
           const updatedChecklist = dataProvider.updateChecklist(id, updates);
           if (!updatedChecklist) return state;
-          
+
           return {
             checklists: state.checklists.map((checklist) =>
               checklist.id === id ? updatedChecklist : checklist
@@ -62,7 +66,7 @@ export const useChecklistStore = create<ChecklistStore>()(
         set((state) => {
           const success = dataProvider.deleteChecklist(id);
           if (!success) return state;
-          
+
           return {
             checklists: state.checklists.filter(
               (checklist) => checklist.id !== id
@@ -105,7 +109,7 @@ export const useChecklistStore = create<ChecklistStore>()(
         set((state) => {
           const updatedChecklist = dataProvider.publishChecklist(id);
           if (!updatedChecklist) return state;
-          
+
           return {
             checklists: state.checklists.map((checklist) =>
               checklist.id === id ? updatedChecklist : checklist

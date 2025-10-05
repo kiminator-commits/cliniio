@@ -12,7 +12,11 @@ interface StolenItem {
 interface StolenItemsSectionProps {
   stolenItems: StolenItem[];
   onAddStolenItem: () => void;
-  onUpdateStolenItem: (index: number, field: string, value: string | number) => void;
+  onUpdateStolenItem: (
+    index: number,
+    field: string,
+    value: string | number
+  ) => void;
   onClearStolenItems: () => void;
 }
 
@@ -49,9 +53,7 @@ export const StolenItemsSection: React.FC<StolenItemsSectionProps> = ({
             type="text"
             placeholder="Item"
             value={item.item}
-            onChange={(e) =>
-              onUpdateStolenItem(index, 'item', e.target.value)
-            }
+            onChange={(e) => onUpdateStolenItem(index, 'item', e.target.value)}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
           />
           <input
@@ -71,9 +73,7 @@ export const StolenItemsSection: React.FC<StolenItemsSectionProps> = ({
             type="text"
             placeholder="Notes"
             value={item.data?.notes}
-            onChange={(e) =>
-              onUpdateStolenItem(index, 'notes', e.target.value)
-            }
+            onChange={(e) => onUpdateStolenItem(index, 'notes', e.target.value)}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>

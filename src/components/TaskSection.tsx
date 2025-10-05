@@ -8,6 +8,7 @@ import { TasksList } from './TasksList';
 import VirtualizedTasksList from './VirtualizedTasksList';
 import FilterSection from '@/components/FilterSection';
 import { Task } from '../store/homeStore';
+import { filterTasksByCategoryAndType } from '../utils/homeContentUtils';
 
 interface TaskSectionProps {
   tasks: Task[] | undefined;
@@ -36,10 +37,16 @@ const TaskSection: React.FC<TaskSectionProps> = ({
   onTypeChange,
   isLoading = false,
 }) => {
+  // Filter tasks based on selected category and type
+  const filteredTasks = useMemo(() => {
+    if (!tasks) return undefined;
+    return filterTasksByCategoryAndType(tasks, selectedCategory, selectedType);
+  }, [tasks, selectedCategory, selectedType]);
+
   // Determine if we should use virtualization based on task count
   const shouldUseVirtualization = useMemo(() => {
-    return tasks && tasks.length > 50; // Use virtualization for 50+ tasks
-  }, [tasks]);
+    return filteredTasks && filteredTasks.length > 50; // Use virtualization for 50+ tasks
+  }, [filteredTasks]);
 
   if (isLoading) {
     return (
@@ -100,9 +107,9 @@ const TaskSection: React.FC<TaskSectionProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <span
-            className={`px-3 py-1 text-sm ${HOME_UI_CONSTANTS.COLORS.TEXT_SECONDARY} border border-gray-300 rounded-${HOME_UI_CONSTANTS.BORDER.RADIUS} hidden sm:inline-block`}
+            className={`px-3 py-2 text-sm font-semibold bg-[#4ECDC4] bg-opacity-10 text-[#4ECDC4] border border-[#4ECDC4] border-opacity-30 rounded-lg`}
           >
-            Available: {availablePoints} Points
+            📊 Total Available: {availablePoints} Points
           </span>
           <button
             onClick={onToggleFilters}
@@ -124,7 +131,7 @@ const TaskSection: React.FC<TaskSectionProps> = ({
       <div className="flex-1 min-h-0 overflow-y-auto h-full">
         {shouldUseVirtualization ? (
           <VirtualizedTasksList
-            tasks={tasks}
+            tasks={filteredTasks}
             onTaskComplete={onTaskComplete}
             onTaskUpdate={onTaskUpdate}
             itemHeight={120}
@@ -132,7 +139,7 @@ const TaskSection: React.FC<TaskSectionProps> = ({
           />
         ) : (
           <TasksList
-            tasks={tasks}
+            tasks={filteredTasks}
             onTaskComplete={onTaskComplete}
             onTaskUpdate={onTaskUpdate}
           />

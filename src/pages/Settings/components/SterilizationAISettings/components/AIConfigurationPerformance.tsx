@@ -51,9 +51,7 @@ const AIConfigurationPerformance: React.FC<AIConfigurationPerformanceProps> = ({
             <span>
               {STERILIZATION_AI_CONSTANTS.AI_CONFIDENCE_THRESHOLD_MIN * 100}%
             </span>
-            <span>
-              {Math.round(settings.ai_confidence_threshold * 100)}%
-            </span>
+            <span>{Math.round(settings.ai_confidence_threshold * 100)}%</span>
             <span>
               {STERILIZATION_AI_CONSTANTS.AI_CONFIDENCE_THRESHOLD_MAX * 100}%
             </span>
@@ -72,10 +70,7 @@ const AIConfigurationPerformance: React.FC<AIConfigurationPerformanceProps> = ({
             type="number"
             value={settings.ai_data_retention_days}
             onChange={(e) =>
-              onInputChange(
-                'ai_data_retention_days',
-                parseInt(e.target.value)
-              )
+              onInputChange('ai_data_retention_days', parseInt(e.target.value))
             }
             disabled={!settings.ai_enabled}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50"
@@ -95,10 +90,7 @@ const AIConfigurationPerformance: React.FC<AIConfigurationPerformanceProps> = ({
             type="checkbox"
             checked={settings.real_time_processing_enabled}
             onChange={(e) =>
-              onInputChange(
-                'real_time_processing_enabled',
-                e.target.checked
-              )
+              onInputChange('real_time_processing_enabled', e.target.checked)
             }
             disabled={!settings.ai_enabled}
             className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50"

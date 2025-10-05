@@ -79,7 +79,7 @@ class HomeDataService {
   }): Promise<HomePageData> {
     const rawData = await this.fetchProvider.fetchFreshData(user);
     const metrics = this.metricsProvider.calculateMetrics(rawData.tasks);
-    
+
     return {
       tasks: rawData.tasks,
       availablePoints: metrics.availablePoints,
@@ -165,7 +165,11 @@ class HomeDataService {
     const startTime = performance.now();
 
     // Check if we have cached data that's still valid (using stale-while-revalidate)
-    if (this.cacheProvider.getCachedData() && !this.isDataExpired() && page === 1) {
+    if (
+      this.cacheProvider.getCachedData() &&
+      !this.isDataExpired() &&
+      page === 1
+    ) {
       if (isDevelopment()) {
         logger.info(
           `[PERF] HomeDataService: Returning cached data in ${(performance.now() - startTime).toFixed(2)}ms`
@@ -180,7 +184,11 @@ class HomeDataService {
       const cachedData = this.cacheProvider.getCachedData()!;
       return {
         ...cachedData,
-        pagination: this.metricsProvider.calculatePagination(1, pageSize, cachedData.tasks.length),
+        pagination: this.metricsProvider.calculatePagination(
+          1,
+          pageSize,
+          cachedData.tasks.length
+        ),
       };
     }
 
@@ -193,12 +201,24 @@ class HomeDataService {
           availablePoints: 0,
           completedTasksCount: 0,
           totalTasksCount: 0,
-          pagination: this.metricsProvider.calculatePagination(page, pageSize, 0),
+          pagination: this.metricsProvider.calculatePagination(
+            page,
+            pageSize,
+            0
+          ),
         };
       }
 
-      const fetchResult = await this.fetchProvider.fetchOptimizedData(user, page, pageSize);
-      const pagination = this.metricsProvider.calculatePagination(page, pageSize, fetchResult.totalCount);
+      const fetchResult = await this.fetchProvider.fetchOptimizedData(
+        user,
+        page,
+        pageSize
+      );
+      const pagination = this.metricsProvider.calculatePagination(
+        page,
+        pageSize,
+        fetchResult.totalCount
+      );
 
       const result: import('../types/homeTypes').HomePageData & {
         pagination: import('../types/homeTypes').PaginationInfo;
@@ -265,7 +285,10 @@ class HomeDataService {
     }
     const optimizedTime = performance.now() - optimizedStart;
 
-    const improvement = this.metricsProvider.calculatePerformanceImprovement(originalTime, optimizedTime);
+    const improvement = this.metricsProvider.calculatePerformanceImprovement(
+      originalTime,
+      optimizedTime
+    );
 
     if (isDevelopment()) {
       logger.info(`[PERF] Query Performance Comparison:`);

@@ -103,7 +103,9 @@ export class BIPredictionProvider {
   /**
    * Group incidents by month for analysis
    */
-  static groupIncidentsByMonth(incidents: BIIncident[]): { [key: string]: number } {
+  static groupIncidentsByMonth(incidents: BIIncident[]): {
+    [key: string]: number;
+  } {
     const monthlyData: { [key: string]: number } = {};
 
     incidents.forEach((incident) => {

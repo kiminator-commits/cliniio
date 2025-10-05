@@ -191,6 +191,16 @@ export class SupabaseAuthService {
         };
       }
 
+      // CRITICAL: Wait for authentication to be fully established before database calls
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        return {
+          user: null,
+          session: null,
+          error: 'No active session',
+        };
+      }
+
       // Get user profile from our users table
       const { data: userProfile, error: profileError } = await supabase
         .from('users')

@@ -3,7 +3,10 @@ import type { LearningAISettings } from '../../../types/learningAITypes';
 /**
  * Check if a feature is enabled in the AI settings
  */
-export function isFeatureEnabled(settings: LearningAISettings, featurePath: string): boolean {
+export function isFeatureEnabled(
+  settings: LearningAISettings,
+  featurePath: string
+): boolean {
   const featureValue = getNestedProperty(
     settings as unknown as Record<string, unknown>,
     featurePath
@@ -37,16 +40,18 @@ export function calculateProcessingTime(startTime: number): number {
 /**
  * Format recommendation reasoning array to string for database storage
  */
-export function formatRecommendationReasoning(reasoning: string[] | string): string {
-  return Array.isArray(reasoning)
-    ? reasoning.join('; ')
-    : reasoning;
+export function formatRecommendationReasoning(
+  reasoning: string[] | string
+): string {
+  return Array.isArray(reasoning) ? reasoning.join('; ') : reasoning;
 }
 
 /**
  * Parse recommendation reasoning string from database to array
  */
-export function parseRecommendationReasoning(reasoning: string | string[]): string[] {
+export function parseRecommendationReasoning(
+  reasoning: string | string[]
+): string[] {
   return typeof reasoning === 'string'
     ? reasoning.split('; ')
     : (reasoning ?? []);

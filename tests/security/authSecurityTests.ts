@@ -171,7 +171,9 @@ describe('Authentication Security Tests', () => {
         }),
       });
 
-      const result = await secureApiClient.post('/test-endpoint', { data: 'test' });
+      const result = await secureApiClient.post('/test-endpoint', {
+        data: 'test',
+      });
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('signature');
@@ -255,7 +257,7 @@ describe('Authentication Security Tests', () => {
   describe('Input Validation Security', () => {
     it('should sanitize email input', async () => {
       const maliciousEmail = 'test@example.com<script>alert("xss")</script>';
-      
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -269,14 +271,14 @@ describe('Authentication Security Tests', () => {
 
       const callArgs = mockFetch.mock.calls[0];
       const requestBody = JSON.parse(callArgs[1].body);
-      
+
       expect(requestBody.email).toBe('test@example.com');
       expect(requestBody.email).not.toContain('<script>');
     });
 
     it('should validate password strength', async () => {
       const weakPasswords = ['123', 'password', 'abc'];
-      
+
       for (const weakPassword of weakPasswords) {
         mockFetch.mockResolvedValueOnce({
           ok: false,
@@ -300,7 +302,7 @@ describe('Authentication Security Tests', () => {
 
     it('should prevent SQL injection attempts', async () => {
       const sqlInjectionEmail = "test@example.com'; DROP TABLE users; --";
-      
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -314,7 +316,7 @@ describe('Authentication Security Tests', () => {
 
       const callArgs = mockFetch.mock.calls[0];
       const requestBody = JSON.parse(callArgs[1].body);
-      
+
       // Should be sanitized and not contain SQL injection
       expect(requestBody.email).not.toContain("'; DROP TABLE");
     });
@@ -402,8 +404,12 @@ describe('Authentication Security Tests', () => {
 
       await authMigrationService.runMigration();
 
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('sb-access-token');
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('sb-refresh-token');
+      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+        'sb-access-token'
+      );
+      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+        'sb-refresh-token'
+      );
     });
 
     it('should rollback migration on failure', async () => {
@@ -446,8 +452,12 @@ describe('Authentication Security Tests', () => {
 
       await secureAuthService.logout();
 
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('access_token');
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('refresh_token');
+      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith(
+        'access_token'
+      );
+      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith(
+        'refresh_token'
+      );
     });
   });
 
@@ -494,10 +504,10 @@ describe('Authentication Security Tests', () => {
       });
 
       const results = await Promise.allSettled(promises);
-      
+
       // All requests should complete without race conditions
       expect(results).toHaveLength(10);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.status).toBe('fulfilled');
       });
     });

@@ -198,20 +198,26 @@ export class ChecklistInventoryProvider {
   /**
    * Get inventory usage summary
    */
-  getInventoryUsageSummary(checklists: Checklist[]): Record<string, {
-    totalRequired: number;
-    totalUsed: number;
-    totalAvailable: number;
-    remaining: number;
-    usageRate: number;
-  }> {
-    const summary: Record<string, {
+  getInventoryUsageSummary(checklists: Checklist[]): Record<
+    string,
+    {
       totalRequired: number;
       totalUsed: number;
       totalAvailable: number;
       remaining: number;
       usageRate: number;
-    }> = {};
+    }
+  > {
+    const summary: Record<
+      string,
+      {
+        totalRequired: number;
+        totalUsed: number;
+        totalAvailable: number;
+        remaining: number;
+        usageRate: number;
+      }
+    > = {};
 
     checklists.forEach((checklist) => {
       checklist.items.forEach((item) => {
@@ -229,10 +235,13 @@ export class ChecklistInventoryProvider {
 
             summary[inv.id].totalRequired += inv.required;
             summary[inv.id].totalUsed += inv.used;
-            summary[inv.id].remaining = summary[inv.id].totalAvailable - summary[inv.id].totalUsed;
-            summary[inv.id].usageRate = summary[inv.id].totalAvailable > 0 
-              ? (summary[inv.id].totalUsed / summary[inv.id].totalAvailable) * 100 
-              : 0;
+            summary[inv.id].remaining =
+              summary[inv.id].totalAvailable - summary[inv.id].totalUsed;
+            summary[inv.id].usageRate =
+              summary[inv.id].totalAvailable > 0
+                ? (summary[inv.id].totalUsed / summary[inv.id].totalAvailable) *
+                  100
+                : 0;
           });
         }
       });
@@ -395,7 +404,8 @@ export class ChecklistInventoryProvider {
       }
     });
 
-    const averageUsageRate = totalAvailable > 0 ? (totalUsed / totalAvailable) * 100 : 0;
+    const averageUsageRate =
+      totalAvailable > 0 ? (totalUsed / totalAvailable) * 100 : 0;
 
     const mostUsedItems = inventoryItems
       .map((inventoryId) => ({
@@ -464,11 +474,16 @@ export class ChecklistInventoryProvider {
   /**
    * Get inventory name by ID
    */
-  private getInventoryName(inventoryId: string, checklists: Checklist[]): string {
+  private getInventoryName(
+    inventoryId: string,
+    checklists: Checklist[]
+  ): string {
     for (const checklist of checklists) {
       for (const item of checklist.items) {
         if (item.requiredInventory) {
-          const inventory = item.requiredInventory.find((inv) => inv.id === inventoryId);
+          const inventory = item.requiredInventory.find(
+            (inv) => inv.id === inventoryId
+          );
           if (inventory) return inventory.name;
         }
       }
@@ -513,13 +528,20 @@ export class ChecklistInventoryProvider {
       const errors: string[] = [];
       const updatedChecklists = [...checklists];
 
-      if (inventoryData.requirements && Array.isArray(inventoryData.requirements)) {
-        inventoryData.requirements.forEach((requirement: InventoryRequirement, index: number) => {
-          const validation = this.validateInventoryRequirement(requirement);
-          if (!validation.isValid) {
-            errors.push(`Requirement ${index + 1}: ${validation.errors.join(', ')}`);
+      if (
+        inventoryData.requirements &&
+        Array.isArray(inventoryData.requirements)
+      ) {
+        inventoryData.requirements.forEach(
+          (requirement: InventoryRequirement, index: number) => {
+            const validation = this.validateInventoryRequirement(requirement);
+            if (!validation.isValid) {
+              errors.push(
+                `Requirement ${index + 1}: ${validation.errors.join(', ')}`
+              );
+            }
           }
-        });
+        );
       }
 
       return {

@@ -42,11 +42,10 @@ export class EnvironmentalCleanCrudProvider {
   /**
    * Create environmental clean with audit logging
    */
-  static async createEnvironmentalClean(
-    data: Partial<Room>
-  ): Promise<Room> {
+  static async createEnvironmentalClean(data: Partial<Room>): Promise<Room> {
     try {
-      const room = await EnvironmentalCleanService.createEnvironmentalClean(data);
+      const room =
+        await EnvironmentalCleanService.createEnvironmentalClean(data);
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'create', { room });
@@ -143,10 +142,11 @@ export class EnvironmentalCleanCrudProvider {
     action: string;
   }): Promise<{ success: boolean }> {
     try {
-      const result = await EnvironmentalCleanBatchProvider.batchEnvironmentalCleanAction({
-        ids,
-        action,
-      });
+      const result =
+        await EnvironmentalCleanBatchProvider.batchEnvironmentalCleanAction({
+          ids,
+          action,
+        });
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'batch_action', { ids, action });
@@ -160,7 +160,9 @@ export class EnvironmentalCleanCrudProvider {
 
       return result;
     } catch (error) {
-      usageTrackingService.trackItemView('environmentalClean_batch_action_error');
+      usageTrackingService.trackItemView(
+        'environmentalClean_batch_action_error'
+      );
       const friendlyError = createUserFriendlyError(
         error,
         'batchEnvironmentalCleanAction'

@@ -21,9 +21,7 @@ const ReportingExport: React.FC<ReportingExportProps> = ({
       <ToggleSwitch
         id="exportCapabilities"
         checked={settings.analytics.exportCapabilities}
-        onChange={(checked) =>
-          updateAnalytics('exportCapabilities', checked)
-        }
+        onChange={(checked) => updateAnalytics('exportCapabilities', checked)}
         label={UI_TEXT.TOGGLE_LABELS.EXPORT_CAPABILITIES}
         description={UI_TEXT.DESCRIPTIONS.EXPORT_CAPABILITIES}
         disabled={!settings.aiEnabled}

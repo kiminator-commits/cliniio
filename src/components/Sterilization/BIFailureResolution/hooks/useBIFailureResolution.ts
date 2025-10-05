@@ -3,6 +3,80 @@ import { useSterilizationStore } from '@/store/sterilizationStore';
 import { BIFailureIncidentService } from '@/services/bi/failure/BIFailureIncidentService';
 import { CreateBIFailureParams } from '@/services/bi/failure/BIFailureValidationService';
 import { BIFailureError } from '@/services/bi/failure/BIFailureError';
+import { supabase } from '@/lib/supabaseClient';
+
+/**
+ * Shows a Cliniio-style success notification
+ */
+const showSuccessNotification = (title: string, message: string) => {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `
+    fixed top-4 right-4 z-[10000] bg-white border-l-4 border-green-500 
+    shadow-lg rounded-lg p-4 max-w-md transform transition-all duration-300 
+    animate-slide-in-right
+  `;
+  notification.style.cssText = `
+    animation: slideInRight 0.3s ease-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  `;
+
+  notification.innerHTML = `
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="ml-3 flex-1">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-medium text-gray-800">${title}</h3>
+          <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" class="ml-2 text-gray-400 hover:text-gray-600">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </div>
+        <p class="mt-1 text-sm text-gray-600">${message}</p>
+      </div>
+    </div>
+  `;
+
+  // Add CSS animation keyframes if not already present
+  if (!document.getElementById('cliniio-notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'cliniio-notification-styles';
+    style.textContent = `
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Add to DOM
+  document.body.appendChild(notification);
+
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.style.transform = 'translateX(100%)';
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 300);
+    }
+  }, 5000);
+};
 
 /**
  * Get current operator ID from Supabase auth service
@@ -116,18 +190,130 @@ export const useBIFailureResolution = ({
         throw new Error('No BI failure incident to resolve');
       }
 
-      // Since the sterilization store doesn't maintain incident IDs, we'll create a new incident
-      // and then immediately resolve it, or use a session-based approach
-      const incidentId =
-        sessionStorage.getItem('currentBIFailureIncidentId') ||
-        `temp-${Date.now()}`;
+      // Check if we have a stored incident ID that exists in the database
+      const storedIncidentId = sessionStorage.getItem(
+        'currentBIFailureIncidentId'
+      );
 
-      const _result = await BIFailureIncidentService.resolveIncident({
-        incidentId: incidentId,
-        resolvedByOperatorId: operatorId,
-        resolutionNotes,
-      });
+      if (storedIncidentId) {
+        // Try to resolve the existing incident
+        const _result = await BIFailureIncidentService.resolveIncident({
+          incidentId: storedIncidentId,
+          resolvedByOperatorId: operatorId,
+          resolutionNotes,
+        });
 
+        console.log('✅ BI Failure Resolution completed:', {
+          incidentId: storedIncidentId,
+          resolvedByOperatorId: operatorId,
+          resolutionNotes,
+          timestamp: new Date().toISOString(),
+        });
+
+        // Show success notification
+        showSuccessNotification(
+          'BI Failure Incident Resolved',
+          'The BI failure incident has been successfully resolved and logged in the system.'
+        );
+
+        // Refresh BI test results to ensure analytics shows the latest data
+        setTimeout(() => {
+          const sterilizationStore = useSterilizationStore.getState();
+          if (sterilizationStore.loadBITestResults) {
+            sterilizationStore.loadBITestResults(
+              '550e8400-e29b-41d4-a716-446655440000'
+            );
+            console.log(
+              '🔄 Refreshed BI test results after incident resolution'
+            );
+          }
+        }, 1000);
+      } else {
+        // Create a new BI failure incident first, then resolve it
+        const facilityId = '550e8400-e29b-41d4-a716-446655440000'; // Default facility
+
+        // Create incident directly in database with correct schema
+        const { data: incidentData, error: createError } = await supabase
+          .from('bi_failure_incidents')
+          .insert({
+            facility_id: facilityId,
+            user_id: operatorId,
+            incident_type: 'bi_test_failure',
+            severity: 'high',
+            status: 'open',
+            description: 'BI Test Failure - Contamination Detected',
+            failure_reason:
+              'Biological indicator test failed, indicating sterilization failure',
+            metadata: {
+              affected_tools_count: biFailureDetails?.affectedToolsCount || 1,
+              affected_batch_ids: biFailureDetails?.affectedBatchIds || [
+                'DEFAULT-BATCH',
+              ],
+            },
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          throw new Error(`Failed to create incident: ${createError.message}`);
+        }
+
+        // Now resolve the newly created incident
+        const _result = await BIFailureIncidentService.resolveIncident({
+          incidentId: incidentData.id,
+          resolvedByOperatorId: operatorId,
+          resolutionNotes,
+        });
+
+        // Add activity log entry for the resolved incident
+        const sterilizationStore = useSterilizationStore.getState();
+        if (sterilizationStore.addActivity) {
+          sterilizationStore.addActivity({
+            id: `bi-incident-resolved-${incidentData.id}`,
+            type: 'incident-resolution',
+            title: 'BI Failure Incident Resolved',
+            time: new Date(),
+            toolCount: biFailureDetails?.affectedToolsCount || 1,
+            color: 'bg-blue-500',
+            metadata: {
+              incidentId: incidentData.id,
+              operatorId: operatorId,
+              resolutionNotes: resolutionNotes,
+            },
+          });
+        }
+
+        // Show success notification
+        showSuccessNotification(
+          'BI Failure Incident Resolved',
+          'The BI failure incident has been successfully resolved and logged in the system.'
+        );
+
+        // Refresh BI test results to ensure analytics shows the latest data
+        setTimeout(() => {
+          const sterilizationStore = useSterilizationStore.getState();
+          if (sterilizationStore.loadBITestResults) {
+            sterilizationStore.loadBITestResults(
+              '550e8400-e29b-41d4-a716-446655440000'
+            );
+            console.log(
+              '🔄 Refreshed BI test results after incident resolution'
+            );
+          }
+        }, 1000);
+
+        console.log('✅ BI Failure Resolution completed:', {
+          incidentId: incidentData.id,
+          resolvedByOperatorId: operatorId,
+          resolutionNotes,
+          timestamp: new Date().toISOString(),
+        });
+
+        // Store the real incident ID for future reference
+        sessionStorage.setItem('currentBIFailureIncidentId', incidentData.id);
+      }
+
+      // Update local state to reflect resolution
       deactivateBIFailure();
       onSuccess();
       onClose();

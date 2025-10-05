@@ -7,7 +7,7 @@ export const LOGGING_CONFIG = {
 
   // Enable/disable specific log categories
   CATEGORIES: {
-    PERFORMANCE: true,
+    PERFORMANCE: true, // Keep performance logs enabled
     SECURITY: true,
     AUDIT: true,
     REALTIME: false, // Disable verbose realtime logs
@@ -26,6 +26,10 @@ export const LOGGING_CONFIG = {
 // Environment-specific overrides
 if (import.meta.env.DEV) {
   // In development, you can override these settings
+  // To reduce console noise, set to INFO level
+  // LOGGING_CONFIG.DEFAULT_LEVEL = 'INFO';
+  // To enable verbose logging for debugging, uncomment:
   // LOGGING_CONFIG.DEFAULT_LEVEL = 'DEBUG';
+  // LOGGING_CONFIG.CATEGORIES.PERFORMANCE = true;
   // LOGGING_CONFIG.CATEGORIES.REALTIME = true;
 }

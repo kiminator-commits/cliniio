@@ -32,7 +32,10 @@ import {
 // Types and constants
 import { InventoryItem } from '@/types/inventoryTypes';
 import { ToolStatus } from '@/types/toolTypes';
-import { InventoryItemData, BulkOperationResult } from '@/types/inventoryActionTypes';
+import {
+  InventoryItemData,
+  BulkOperationResult,
+} from '@/types/inventoryActionTypes';
 import { ExportOptions } from './inventoryExportService';
 import { BulkOperationConfig } from './inventoryBulkProgressService';
 import { ImportOptions, ImportResult } from './inventoryImportService';
@@ -42,7 +45,6 @@ import { ImportOptions, ImportResult } from './inventoryImportService';
  * Orchestrates calls to extracted utilities, providers, and external services
  */
 export class InventoryActionService {
-
   /**
    * Handle item creation
    */
@@ -233,5 +235,4 @@ export class InventoryActionService {
   ): Promise<{ data: unknown[] | null; error: unknown }> {
     return await getEquipmentMaintenanceByFacilityDb(facilityId);
   }
-
 }

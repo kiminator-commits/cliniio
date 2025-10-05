@@ -5,7 +5,9 @@
 import { ContentCategory } from '../../pages/KnowledgeHub/types';
 
 // Helper function to convert string category to ContentCategory
-export const convertStringToContentCategory = (category: string): ContentCategory => {
+export const convertStringToContentCategory = (
+  category: string
+): ContentCategory => {
   const validCategories: ContentCategory[] = [
     'Courses',
     'Procedures',

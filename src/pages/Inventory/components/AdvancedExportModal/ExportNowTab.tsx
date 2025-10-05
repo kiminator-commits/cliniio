@@ -31,9 +31,7 @@ export const ExportNowTab: React.FC<ExportNowTabProps> = ({
           id="export-template"
           value={selectedTemplate?.id || ''}
           onChange={(e) => {
-            const template = templates.find(
-              (t) => t.id === e.target.value
-            );
+            const template = templates.find((t) => t.id === e.target.value);
             onTemplateSelect(template || null);
           }}
           className="w-full border border-gray-300 rounded-md px-3 py-2"
@@ -58,8 +56,7 @@ export const ExportNowTab: React.FC<ExportNowTabProps> = ({
           )}
           <div className="text-sm text-gray-600">
             <p>
-              <strong>Format:</strong>{' '}
-              {selectedTemplate.format.toUpperCase()}
+              <strong>Format:</strong> {selectedTemplate.format.toUpperCase()}
             </p>
             <p>
               <strong>Fields:</strong> {selectedTemplate.fields.length}
@@ -67,8 +64,7 @@ export const ExportNowTab: React.FC<ExportNowTabProps> = ({
             {selectedTemplate.filters &&
               selectedTemplate.filters.length > 0 && (
                 <p>
-                  <strong>Filters:</strong>{' '}
-                  {selectedTemplate.filters.length}
+                  <strong>Filters:</strong> {selectedTemplate.filters.length}
                 </p>
               )}
           </div>

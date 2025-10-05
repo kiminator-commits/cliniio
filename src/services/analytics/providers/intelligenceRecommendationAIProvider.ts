@@ -1,6 +1,6 @@
 /**
  * AI Model Provider for Intelligence Recommendation Service
- * 
+ *
  * This provider handles all direct AI model calls and external AI service integrations.
  * It abstracts the AI model interactions from the main service logic.
  */

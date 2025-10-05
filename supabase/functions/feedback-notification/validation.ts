@@ -14,7 +14,10 @@ export interface ValidationResult {
 }
 
 // Sanitize string input
-export const sanitizeString = (input: any, maxLength: number = 1000): string => {
+export const sanitizeString = (
+  input: any,
+  maxLength: number = 1000
+): string => {
   if (typeof input !== 'string') {
     return '';
   }

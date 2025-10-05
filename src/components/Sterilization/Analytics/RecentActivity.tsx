@@ -28,7 +28,8 @@ interface ActivityItem {
     | 'bath-2-change'
     | 'autoclave-cycle-started'
     | 'tool-problem-flagged'
-    | 'batch-id-created';
+    | 'batch-id-created'
+    | 'incident-resolution';
   title: string;
   description?: string;
   time: string;
@@ -71,6 +72,8 @@ const getActivityIcon = (type: ActivityItem['type']) => {
       return mdiAlert;
     case 'batch-id-created':
       return mdiPackageVariant;
+    case 'incident-resolution':
+      return mdiCheckCircle;
     default:
       return mdiBellRing;
   }
@@ -83,15 +86,30 @@ const getActivityIcon = (type: ActivityItem['type']) => {
 export const RecentActivity: React.FC<RecentActivityProps> = ({
   activities,
 }) => {
+  const shouldScrollEnabled = activities.length > 10;
+  const maxHeight = shouldScrollEnabled ? '400px' : 'auto';
+
   return (
     <div
       className="bg-gray-50 rounded-lg p-4"
       style={{ borderLeft: '4px solid rgba(78, 205, 196, 0.5)' }}
     >
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">
-        Recent Activity
+      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+        <span>Recent Activity</span>
+        {shouldScrollEnabled && (
+          <span className="text-xs text-gray-500 font-normal">
+            {activities.length} activities
+          </span>
+        )}
       </h3>
-      <div className="space-y-3">
+      <div
+        className="space-y-3 overflow-y-auto pr-2"
+        style={{
+          maxHeight,
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#cbd5e0 #f7fafc',
+        }}
+      >
         {activities.map((activity, index) => (
           <div
             key={index}

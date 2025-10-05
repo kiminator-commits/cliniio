@@ -11,7 +11,10 @@ import {
 import { KnowledgeArticleService } from './services/KnowledgeArticleService';
 import { KnowledgeCategoryService } from './services/KnowledgeCategoryService';
 import { LearningPathService } from './services/LearningPathService';
-import { BulkOperationService, BulkOperation } from './services/BulkOperationService';
+import {
+  BulkOperationService,
+  BulkOperation,
+} from './services/BulkOperationService';
 import { UserActivityService } from './services/UserActivityService';
 
 /**
@@ -38,7 +41,9 @@ export class KnowledgeDataService {
    * @deprecated Use KnowledgeHubService.getKnowledgeArticles() instead
    */
   static async getKnowledgeArticles(): Promise<KnowledgeArticle[]> {
-    console.warn('KnowledgeDataService.getKnowledgeArticles() is deprecated. Use KnowledgeHubService.getKnowledgeArticles() instead.');
+    console.warn(
+      'KnowledgeDataService.getKnowledgeArticles() is deprecated. Use KnowledgeHubService.getKnowledgeArticles() instead.'
+    );
     const service = new KnowledgeDataService();
     return service.articleService.getKnowledgeArticles();
   }
@@ -78,7 +83,10 @@ export class KnowledgeDataService {
     status: LearningPathStatus
   ): Promise<BulkUpdateResult> {
     const service = new KnowledgeDataService();
-    return service.learningPathService.bulkUpdateLearningPathsStatus(pathwayIds, status);
+    return service.learningPathService.bulkUpdateLearningPathsStatus(
+      pathwayIds,
+      status
+    );
   }
 
   /**
@@ -116,7 +124,9 @@ export class KnowledgeDataService {
     }>;
   }> {
     const service = new KnowledgeDataService();
-    return service.bulkOperationService.bulkOperationWithTransaction(operations);
+    return service.bulkOperationService.bulkOperationWithTransaction(
+      operations
+    );
   }
 
   /**
@@ -127,7 +137,9 @@ export class KnowledgeDataService {
     userId: string,
     limit: number = 10
   ): Promise<RecentUpdate[]> {
-    console.warn('KnowledgeDataService.getRecentUserActivity() is deprecated. Use KnowledgeHubService.getRecentUserActivity() instead.');
+    console.warn(
+      'KnowledgeDataService.getRecentUserActivity() is deprecated. Use KnowledgeHubService.getRecentUserActivity() instead.'
+    );
     const service = new KnowledgeDataService();
     return service.userActivityService.getRecentUserActivity(userId, limit);
   }

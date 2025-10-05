@@ -57,7 +57,7 @@ class SecureAuthenticationService {
     try {
       // Load stored tokens
       await this.loadStoredTokens();
-      
+
       // Validate existing token
       if (this.tokenInfo) {
         const isValid = await this.validateToken();
@@ -83,7 +83,14 @@ class SecureAuthenticationService {
       const userEmail = sessionStorage.getItem('user_email');
       const userRole = sessionStorage.getItem('user_role');
 
-      if (accessToken && refreshToken && expiresAt && userId && userEmail && userRole) {
+      if (
+        accessToken &&
+        refreshToken &&
+        expiresAt &&
+        userId &&
+        userEmail &&
+        userRole
+      ) {
         this.tokenInfo = {
           accessToken,
           refreshToken,
@@ -105,8 +112,8 @@ class SecureAuthenticationService {
     user: { id: string; email: string; role: string };
   }): Promise<void> {
     try {
-      const expiresAt = Date.now() + (tokenData.expiresIn * 1000);
-      
+      const expiresAt = Date.now() + tokenData.expiresIn * 1000;
+
       this.tokenInfo = {
         accessToken: tokenData.accessToken,
         refreshToken: tokenData.refreshToken,
@@ -123,7 +130,6 @@ class SecureAuthenticationService {
       sessionStorage.setItem('user_id', tokenData.user.id);
       sessionStorage.setItem('user_email', tokenData.user.email);
       sessionStorage.setItem('user_role', tokenData.user.role);
-
     } catch (error) {
       console.error('Failed to store tokens:', error);
       throw new Error('Failed to store authentication tokens');
@@ -133,7 +139,7 @@ class SecureAuthenticationService {
   private async clearTokens(): Promise<void> {
     try {
       this.tokenInfo = null;
-      
+
       sessionStorage.removeItem('access_token');
       sessionStorage.removeItem('refresh_token');
       sessionStorage.removeItem('token_expires');
@@ -142,7 +148,6 @@ class SecureAuthenticationService {
       sessionStorage.removeItem('user_role');
       sessionStorage.removeItem('csrf_token');
       sessionStorage.removeItem('api_signing_key');
-      
     } catch (error) {
       console.error('Failed to clear tokens:', error);
     }
@@ -182,7 +187,7 @@ class SecureAuthenticationService {
         ctx.font = '14px Arial';
         ctx.fillText('Device fingerprint', 2, 2);
       }
-      
+
       const fingerprint = [
         navigator.userAgent,
         navigator.language,
@@ -190,8 +195,10 @@ class SecureAuthenticationService {
         new Date().getTimezoneOffset(),
         canvas.toDataURL(),
       ].join('|');
-      
-      return btoa(fingerprint).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+
+      return btoa(fingerprint)
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substring(0, 32);
     } catch {
       return 'unknown_device';
     }
@@ -209,10 +216,14 @@ class SecureAuthenticationService {
   private generateSessionId(): string {
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join(
+      ''
+    );
   }
 
-  async authenticate(credentials: AuthenticationCredentials): Promise<AuthenticationResult> {
+  async authenticate(
+    credentials: AuthenticationCredentials
+  ): Promise<AuthenticationResult> {
     if (!this.isInitialized) {
       await this.waitForInitialization();
     }
@@ -228,7 +239,9 @@ class SecureAuthenticationService {
       // Validate CSRF token
       const storedToken = this.getStoredCSRFToken();
       if (!storedToken || csrfToken !== storedToken) {
-        throw new Error('Invalid security token. Please refresh the page and try again.');
+        throw new Error(
+          'Invalid security token. Please refresh the page and try again.'
+        );
       }
 
       // Prepare authentication request
@@ -246,9 +259,11 @@ class SecureAuthenticationService {
       if (response.success && response.data) {
         // Store tokens securely
         await this.storeTokens(response.data);
-        
-        console.log(`[AUTH] Authentication successful for ${credentials.email}`);
-        
+
+        console.log(
+          `[AUTH] Authentication successful for ${credentials.email}`
+        );
+
         return {
           success: true,
           data: response.data,
@@ -256,10 +271,12 @@ class SecureAuthenticationService {
       } else {
         throw new Error(response.error || 'Authentication failed');
       }
-
     } catch (error) {
-      console.error(`[AUTH] Authentication failed for ${credentials.email}:`, error);
-      
+      console.error(
+        `[AUTH] Authentication failed for ${credentials.email}:`,
+        error
+      );
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Authentication failed',
@@ -279,7 +296,7 @@ class SecureAuthenticationService {
     }
 
     this.refreshPromise = this.performTokenRefresh();
-    
+
     try {
       const result = await this.refreshPromise;
       return result;
@@ -294,7 +311,9 @@ class SecureAuthenticationService {
     }
 
     try {
-      const response = await secureApiClient.refreshToken(this.tokenInfo.refreshToken);
+      const response = await secureApiClient.refreshToken(
+        this.tokenInfo.refreshToken
+      );
 
       if (response.success && response.data) {
         // Update stored tokens
@@ -316,7 +335,6 @@ class SecureAuthenticationService {
         await this.clearTokens();
         return false;
       }
-
     } catch (error) {
       console.error('[AUTH] Token refresh error:', error);
       await this.clearTokens();
@@ -402,8 +420,8 @@ class SecureAuthenticationService {
     const maxWait = 5000; // 5 seconds
     const startTime = Date.now();
 
-    while (!this.isInitialized && (Date.now() - startTime) < maxWait) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    while (!this.isInitialized && Date.now() - startTime < maxWait) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     if (!this.isInitialized) {
@@ -415,7 +433,9 @@ class SecureAuthenticationService {
   generateSecureToken(length: number = 32): string {
     const array = new Uint8Array(length);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join(
+      ''
+    );
   }
 
   async hashPassword(password: string): Promise<string> {
@@ -423,7 +443,7 @@ class SecureAuthenticationService {
     const data = encoder.encode(password);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
   // Session management
@@ -443,7 +463,10 @@ class SecureAuthenticationService {
   }
 
   // Security event reporting
-  async reportSecurityEvent(eventType: string, details: Record<string, unknown>): Promise<void> {
+  async reportSecurityEvent(
+    eventType: string,
+    details: Record<string, unknown>
+  ): Promise<void> {
     try {
       await secureApiClient.post('/security-event', {
         eventType,
@@ -461,4 +484,9 @@ class SecureAuthenticationService {
 export const secureAuthService = new SecureAuthenticationService();
 
 // Export types and class for testing
-export { SecureAuthenticationService, type AuthenticationCredentials, type AuthenticationResult, type TokenInfo };
+export {
+  SecureAuthenticationService,
+  type AuthenticationCredentials,
+  type AuthenticationResult,
+  type TokenInfo,
+};

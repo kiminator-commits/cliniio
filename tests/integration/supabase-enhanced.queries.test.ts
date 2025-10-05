@@ -189,7 +189,7 @@ describe('Enhanced Supabase Integration Tests - Queries and Filtering', () => {
       // Mock the repository methods directly
       const facade = inventoryServiceFacade as any;
       const repository = facade.repository;
-      
+
       const mockGetCategories = vi
         .spyOn(repository, 'getCategories')
         .mockResolvedValue({ data: testCategories, error: null });

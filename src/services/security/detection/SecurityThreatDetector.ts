@@ -39,7 +39,10 @@ export class SecurityThreatDetector {
   /**
    * Check for brute force attacks
    */
-  private checkForBruteForce(event: SecurityEvent, allEvents: SecurityEvent[]): void {
+  private checkForBruteForce(
+    event: SecurityEvent,
+    allEvents: SecurityEvent[]
+  ): void {
     const recentFailures = allEvents.filter(
       (e) =>
         e.eventType === 'authentication' &&
@@ -63,7 +66,10 @@ export class SecurityThreatDetector {
   /**
    * Check for unauthorized access attempts
    */
-  private checkForUnauthorizedAccess(event: SecurityEvent, allEvents: SecurityEvent[]): void {
+  private checkForUnauthorizedAccess(
+    event: SecurityEvent,
+    allEvents: SecurityEvent[]
+  ): void {
     const recentDenials = allEvents.filter(
       (e) =>
         e.eventType === 'authorization' &&

@@ -27,7 +27,7 @@ const getLogLevel = (): LogLevel => {
     return envLevel;
   }
 
-  return 'DEBUG';
+  return 'DEBUG'; // Keep debug level to see all logs
 };
 
 const currentLogLevel = getLogLevel();

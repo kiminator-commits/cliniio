@@ -11,6 +11,7 @@
 ### **Primary Services (Target Services)**
 
 #### 1. **InventoryServiceFacade** ✅ PRIMARY SERVICE
+
 ```typescript
 // Location: src/services/inventory/InventoryServiceFacade.ts
 // Pattern: Singleton Facade with Business Logic
@@ -39,6 +40,7 @@ API INTERFACE:
 ```
 
 #### 2. **SecureAuthService** ✅ PRIMARY SERVICE
+
 ```typescript
 // Location: src/services/secureAuthService.ts
 // Pattern: Class-based Service with Rate Limiting
@@ -65,6 +67,7 @@ API INTERFACE:
 ```
 
 #### 3. **KnowledgeHubService** ✅ PRIMARY SERVICE
+
 ```typescript
 // Location: src/pages/KnowledgeHub/services/knowledgeHubService.ts
 // Pattern: Static Facade with Provider Delegation
@@ -91,6 +94,7 @@ API INTERFACE:
 ```
 
 #### 4. **BIFailureNotificationService** ✅ PRIMARY SERVICE
+
 ```typescript
 // Location: src/services/bi/failure/BIFailureNotificationService.ts
 // Pattern: Static Service with Notification Workflow
@@ -118,6 +122,7 @@ API INTERFACE:
 ### **Deprecated Services (To Be Removed)**
 
 #### 1. **SupabaseInventoryService** ❌ DEPRECATED
+
 ```typescript
 // Location: src/services/supabase/inventoryService.ts
 // Pattern: Static Class with Deprecation Warnings
@@ -135,6 +140,7 @@ BUSINESS RISK: HIGH (core inventory functionality)
 ```
 
 #### 2. **authService** ❌ DEPRECATED
+
 ```typescript
 // Location: src/services/authService.ts
 // Pattern: Static Functions with Mock Support
@@ -152,6 +158,7 @@ BUSINESS RISK: HIGH (authentication security)
 ```
 
 #### 3. **KnowledgeDataService** ❌ DEPRECATED
+
 ```typescript
 // Location: src/pages/KnowledgeHub/services/data/knowledgeDataService.ts
 // Pattern: Service Composition with Individual Services
@@ -177,6 +184,7 @@ BUSINESS RISK: LOW (not in active use)
 **Target**: Move 27 files from `SupabaseInventoryService` to `InventoryServiceFacade`
 
 **Step 1: Update Imports**
+
 ```typescript
 // ❌ OLD (Deprecated)
 import { SupabaseInventoryService } from '@/services/supabase/inventoryService';
@@ -186,6 +194,7 @@ import { InventoryServiceFacade } from '@/services/inventory/InventoryServiceFac
 ```
 
 **Step 2: Update Method Calls**
+
 ```typescript
 // ❌ OLD (Deprecated)
 const response = await SupabaseInventoryService.getInventoryItems(filters);
@@ -200,9 +209,11 @@ const updated = await inventoryService.updateItem(id, updates);
 ```
 
 **Step 3: Handle Response Format Changes**
+
 ```typescript
 // ❌ OLD (Deprecated)
-const { data, error, count } = await SupabaseInventoryService.getInventoryItems();
+const { data, error, count } =
+  await SupabaseInventoryService.getInventoryItems();
 
 // ✅ NEW (Correct)
 const response = await inventoryService.getAllItems();
@@ -210,6 +221,7 @@ const { data, error, count } = response;
 ```
 
 **Files to Migrate (27 files)**:
+
 1. `src/hooks/inventory/useCentralizedInventoryData.ts`
 2. `src/hooks/inventory/useInventoryDataFetching.ts`
 3. `src/components/Inventory/InventoryTableSection.tsx`
@@ -245,6 +257,7 @@ const { data, error, count } = response;
 **Target**: Move 9 files from `authService` to `SecureAuthService`
 
 **Step 1: Update Imports**
+
 ```typescript
 // ❌ OLD (Deprecated)
 import { login, validateToken } from '@/services/authService';
@@ -254,6 +267,7 @@ import { SecureAuthService } from '@/services/secureAuthService';
 ```
 
 **Step 2: Update Method Calls**
+
 ```typescript
 // ❌ OLD (Deprecated)
 const { token, expiry } = await login(email, password);
@@ -266,6 +280,7 @@ const isValid = await authService.validateToken(response.data?.accessToken);
 ```
 
 **Step 3: Handle Response Format Changes**
+
 ```typescript
 // ❌ OLD (Deprecated)
 const { token, expiry } = await login(email, password);
@@ -279,6 +294,7 @@ if (response.success && response.data) {
 ```
 
 **Files to Migrate (9 files)**:
+
 1. `src/components/ProtectedRoute.tsx`
 2. `src/pages/Login/hooks/useLoginForm.ts`
 3. `src/components/Navigation/DrawerMenu.tsx`
@@ -298,6 +314,7 @@ if (response.success && response.data) {
 **Status**: ✅ No migration needed - services not yet adopted by components
 
 **Future Migration Pattern**:
+
 ```typescript
 // ❌ OLD (Deprecated)
 import { KnowledgeDataService } from '@/pages/KnowledgeHub/services/data/knowledgeDataService';
@@ -315,6 +332,7 @@ import { KnowledgeHubService } from '@/pages/KnowledgeHub/services/knowledgeHubS
 **Status**: ✅ No migration needed - services not yet adopted by components
 
 **Future Migration Pattern**:
+
 ```typescript
 // ❌ OLD (Deprecated)
 import { BIFailureNotificationService } from '@/services/bi/failure/BIFailureNotificationService';
@@ -329,6 +347,7 @@ import { BIFailureNotificationService } from '@/services/bi/failure/BIFailureNot
 ### **Service Pattern Standards**
 
 #### **1. Static Utilities (No State)**
+
 ```typescript
 // Use for: Pure operations that don't maintain state
 export class ServiceCrudOperations {
@@ -339,11 +358,12 @@ export class ServiceCrudOperations {
 ```
 
 #### **2. Regular Instances (May Have State)**
+
 ```typescript
 // Use for: Business logic services that may maintain state
 export class ServiceCoreService {
   private cacheManager: ServiceCacheManager;
-  
+
   constructor() {
     this.cacheManager = new ServiceCacheManager();
   }
@@ -351,13 +371,14 @@ export class ServiceCoreService {
 ```
 
 #### **3. Singletons (Shared Resources)**
+
 ```typescript
 // Use for: Infrastructure services that manage shared resources
 export class ServiceSupabaseService {
   private static instance: ServiceSupabaseService;
-  
+
   private constructor() {}
-  
+
   static getInstance(): ServiceSupabaseService {
     if (!ServiceSupabaseService.instance) {
       ServiceSupabaseService.instance = new ServiceSupabaseService();
@@ -385,14 +406,17 @@ export class ServiceSupabaseService {
 ## 🎯 Migration Priority Matrix
 
 ### **Phase 2A: Critical Services** (Week 1-2)
+
 1. **Inventory Services** - 27 files, HIGH business impact, HIGH complexity
 2. **Authentication Services** - 9 files, HIGH security risk, MEDIUM complexity
 
 ### **Phase 2B: Moderate Services** (Week 3-4)
+
 3. **KnowledgeHub Services** - 0 files, LOW risk, LOW complexity
 4. **BI Failure Services** - 0 files, LOW risk, LOW complexity
 
 ### **Phase 2C: Low Impact Services** (Week 5-6)
+
 5. **AI Services** - Consolidate scattered AI functionality
 6. **Utility Services** - Clean up remaining duplicates
 

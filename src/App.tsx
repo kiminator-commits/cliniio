@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy } from 'react';
 
 // ⚠️ TEMPORARY: force cleanup of stale realtime subscriptions
 // import '@/debug/runRealtimeCleanup';
@@ -20,7 +20,7 @@ import GlobalBIFailureBanner from './components/Sterilization/GlobalBIFailureBan
 // CRITICAL: Import realtime auto-optimizer to prevent database overload
 import './services/_core/realtimeCompatibility';
 
-// Direct imports for pages
+// Direct imports for critical pages only
 import HomePage from './pages/Home';
 import SterilizationPage from './pages/Sterilization/Sterilization';
 import ScannerPage from './pages/Sterilization/ScannerPage';
@@ -31,10 +31,13 @@ import EnvironmentalCleanScannerPage from './pages/EnvironmentalClean/ScannerPag
 import KnowledgeHubPage from './pages/KnowledgeHub';
 import LibraryPage from './pages/library/page';
 
-import SettingsPage from './pages/Settings';
-import ContentBuilderPage from './pages/ContentBuilder';
-import LoginPage from './pages/Login';
-import IntelligencePage from './pages/Intelligence';
+// Lazy load non-critical pages
+const SettingsPage = lazy(() => import('./pages/Settings'));
+const ContentBuilderPage = lazy(() => import('./pages/ContentBuilder'));
+const LoginPage = lazy(() => import('./pages/Login'));
+const IntelligencePage = lazy(() => import('./pages/Intelligence'));
+const AuthCallback = lazy(() => import('./components/AuthCallback'));
+const HelpArticlePage = lazy(() => import('./pages/Help/HelpArticlePage'));
 
 // BEGIN PostgREST runtime guard (safe, no-UI side effects)
 interface ExtendedWindow extends Window {
@@ -253,6 +256,7 @@ function App() {
               <NavigationProvider>
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route
                     path="/home"
                     element={
@@ -351,13 +355,17 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/help/article/:slug"
+                    element={<HelpArticlePage />}
+                  />
                   <Route path="/" element={<Navigate to="/home" replace />} />
                 </Routes>
+                <GlobalBIFailureBanner />
               </NavigationProvider>
             </Router>
           </FacilityProvider>
         </UserProvider>
-        <GlobalBIFailureBanner />
       </ErrorBoundary>
     </QueryClientProvider>
   );

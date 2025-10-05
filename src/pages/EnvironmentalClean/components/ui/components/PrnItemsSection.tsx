@@ -10,7 +10,11 @@ interface PrnItem {
 interface PrnItemsSectionProps {
   prnItems: PrnItem[];
   onAddPrnItem: () => void;
-  onUpdatePrnItem: (index: number, field: string, value: string | number) => void;
+  onUpdatePrnItem: (
+    index: number,
+    field: string,
+    value: string | number
+  ) => void;
   onClearPrnItems: () => void;
 }
 
@@ -47,9 +51,7 @@ export const PrnItemsSection: React.FC<PrnItemsSectionProps> = ({
             type="text"
             placeholder="Item"
             value={item.item}
-            onChange={(e) =>
-              onUpdatePrnItem(index, 'item', e.target.value)
-            }
+            onChange={(e) => onUpdatePrnItem(index, 'item', e.target.value)}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
           />
           <input
@@ -57,11 +59,7 @@ export const PrnItemsSection: React.FC<PrnItemsSectionProps> = ({
             placeholder="Qty"
             value={item.quantity}
             onChange={(e) =>
-              onUpdatePrnItem(
-                index,
-                'quantity',
-                parseInt(e.target.value) || 0
-              )
+              onUpdatePrnItem(index, 'quantity', parseInt(e.target.value) || 0)
             }
             className="w-20 px-3 py-2 border border-gray-300 rounded-md"
           />
@@ -69,9 +67,7 @@ export const PrnItemsSection: React.FC<PrnItemsSectionProps> = ({
             type="text"
             placeholder="Reason"
             value={item.reason}
-            onChange={(e) =>
-              onUpdatePrnItem(index, 'reason', e.target.value)
-            }
+            onChange={(e) => onUpdatePrnItem(index, 'reason', e.target.value)}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>

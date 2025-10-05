@@ -1,16 +1,33 @@
 // import { logger } from '../../utils/_core/logger';
-import { SecurityThreatIndicatorProvider, ThreatIndicator, ThreatCondition, ThreatAction } from './providers/SecurityThreatIndicatorProvider';
-import { SecurityIncidentProvider, SecurityIncident } from './providers/SecurityIncidentProvider';
+import {
+  SecurityThreatIndicatorProvider,
+  ThreatIndicator,
+  ThreatCondition,
+  ThreatAction,
+} from './providers/SecurityThreatIndicatorProvider';
+import {
+  SecurityIncidentProvider,
+  SecurityIncident,
+} from './providers/SecurityIncidentProvider';
 import { SecurityMonitoringProvider } from './providers/SecurityMonitoringProvider';
-import { SecurityMetricsProvider, SecurityMetrics } from './providers/SecurityMetricsProvider';
+import {
+  SecurityMetricsProvider,
+  SecurityMetrics,
+} from './providers/SecurityMetricsProvider';
 import { SecurityActionProvider } from './providers/SecurityActionProvider';
 
 // Re-export interfaces for backward compatibility
-export type { ThreatIndicator, ThreatCondition, ThreatAction, SecurityIncident, SecurityMetrics };
+export type {
+  ThreatIndicator,
+  ThreatCondition,
+  ThreatAction,
+  SecurityIncident,
+  SecurityMetrics,
+};
 
 export class SecurityMonitoringService {
   private static instance: SecurityMonitoringService;
-  
+
   // Provider instances
   private threatIndicatorProvider: SecurityThreatIndicatorProvider;
   private incidentProvider: SecurityIncidentProvider;
@@ -25,7 +42,7 @@ export class SecurityMonitoringService {
     this.monitoringProvider = new SecurityMonitoringProvider();
     this.metricsProvider = new SecurityMetricsProvider();
     this.actionProvider = new SecurityActionProvider();
-    
+
     // Start monitoring
     this.monitoringProvider.startMonitoring();
   }
@@ -118,7 +135,12 @@ export class SecurityMonitoringService {
     updatedBy: string,
     resolution?: string
   ): void {
-    this.incidentProvider.updateIncidentStatus(incidentId, status, updatedBy, resolution);
+    this.incidentProvider.updateIncidentStatus(
+      incidentId,
+      status,
+      updatedBy,
+      resolution
+    );
   }
 
   /**
@@ -133,8 +155,13 @@ export class SecurityMonitoringService {
    */
   getSecurityMetrics(timeRange?: { start: Date; end: Date }): SecurityMetrics {
     const incidents = this.incidentProvider.getAllIncidents();
-    const threatIndicators = this.threatIndicatorProvider.getAllThreatIndicators();
-    return this.metricsProvider.getSecurityMetrics(incidents, threatIndicators, timeRange);
+    const threatIndicators =
+      this.threatIndicatorProvider.getAllThreatIndicators();
+    return this.metricsProvider.getSecurityMetrics(
+      incidents,
+      threatIndicators,
+      timeRange
+    );
   }
 
   /**
@@ -165,8 +192,12 @@ export class SecurityMonitoringService {
     recommendations: unknown[];
   } {
     const incidents = this.incidentProvider.getAllIncidents();
-    const threatIndicators = this.threatIndicatorProvider.getAllThreatIndicators();
-    return this.metricsProvider.getSecurityDashboard(incidents, threatIndicators);
+    const threatIndicators =
+      this.threatIndicatorProvider.getAllThreatIndicators();
+    return this.metricsProvider.getSecurityDashboard(
+      incidents,
+      threatIndicators
+    );
   }
 
   /**

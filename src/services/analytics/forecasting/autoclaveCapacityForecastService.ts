@@ -22,7 +22,8 @@ export class AutoclaveCapacityForecastService {
 
   static getInstance(): AutoclaveCapacityForecastService {
     if (!AutoclaveCapacityForecastService.instance) {
-      AutoclaveCapacityForecastService.instance = new AutoclaveCapacityForecastService();
+      AutoclaveCapacityForecastService.instance =
+        new AutoclaveCapacityForecastService();
     }
     return AutoclaveCapacityForecastService.instance;
   }
@@ -52,7 +53,10 @@ export class AutoclaveCapacityForecastService {
         .not('autoclave_id', 'is', null)
         .gte(
           'created_at',
-          new Date(Date.now() - AUTOCLAVE_CAPACITY_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000).toISOString()
+          new Date(
+            Date.now() -
+              AUTOCLAVE_CAPACITY_CONFIG.ANALYSIS_DAYS * 24 * 60 * 60 * 1000
+          ).toISOString()
         )
         .order('created_at', { ascending: false });
 
@@ -68,7 +72,14 @@ export class AutoclaveCapacityForecastService {
         .eq('facility_id', filters.facilityId as string)
         .gte(
           'created_at',
-          new Date(Date.now() - AUTOCLAVE_CAPACITY_CONFIG.RECENT_ANALYSIS_DAYS * 24 * 60 * 60 * 1000).toISOString()
+          new Date(
+            Date.now() -
+              AUTOCLAVE_CAPACITY_CONFIG.RECENT_ANALYSIS_DAYS *
+                24 *
+                60 *
+                60 *
+                1000
+          ).toISOString()
         )
         .order('created_at', { ascending: false });
 
@@ -110,11 +121,16 @@ export class AutoclaveCapacityForecastService {
         ).length;
 
         // Calculate real load percentage based on actual cycle data
-        const avgCyclesPerDay = totalCycles / AUTOCLAVE_CAPACITY_CONFIG.ANALYSIS_DAYS;
-        const maxCapacityPerDay = AUTOCLAVE_CAPACITY_CONFIG.MAX_CAPACITY_PER_DAY;
+        const avgCyclesPerDay =
+          totalCycles / AUTOCLAVE_CAPACITY_CONFIG.ANALYSIS_DAYS;
+        const maxCapacityPerDay =
+          AUTOCLAVE_CAPACITY_CONFIG.MAX_CAPACITY_PER_DAY;
         const currentLoadPercentage = Math.min(
           AUTOCLAVE_CAPACITY_CONFIG.MAX_LOAD_PERCENTAGE,
-          Math.max(AUTOCLAVE_CAPACITY_CONFIG.MIN_LOAD_PERCENTAGE, Math.round((avgCyclesPerDay / maxCapacityPerDay) * 100))
+          Math.max(
+            AUTOCLAVE_CAPACITY_CONFIG.MIN_LOAD_PERCENTAGE,
+            Math.round((avgCyclesPerDay / maxCapacityPerDay) * 100)
+          )
         );
 
         // Calculate queue length from recent cycles (last 7 days)
@@ -135,7 +151,11 @@ export class AutoclaveCapacityForecastService {
               ? 'medium'
               : 'low';
         const daysUntilOverload =
-          usageTrend === 'high' ? AUTOCLAVE_CAPACITY_CONFIG.HIGH_OVERLOAD_DAYS : usageTrend === 'medium' ? AUTOCLAVE_CAPACITY_CONFIG.MEDIUM_OVERLOAD_DAYS : AUTOCLAVE_CAPACITY_CONFIG.LOW_OVERLOAD_DAYS;
+          usageTrend === 'high'
+            ? AUTOCLAVE_CAPACITY_CONFIG.HIGH_OVERLOAD_DAYS
+            : usageTrend === 'medium'
+              ? AUTOCLAVE_CAPACITY_CONFIG.MEDIUM_OVERLOAD_DAYS
+              : AUTOCLAVE_CAPACITY_CONFIG.LOW_OVERLOAD_DAYS;
         const predictedOverloadDate = new Date(
           Date.now() + daysUntilOverload * 24 * 60 * 60 * 1000
         )
@@ -149,13 +169,24 @@ export class AutoclaveCapacityForecastService {
           | 'optimize_schedule';
         let timeline: string;
 
-        if (currentLoadPercentage > AUTOCLAVE_CAPACITY_CONFIG.HIGH_LOAD_THRESHOLD || failedCycles > totalCycles * AUTOCLAVE_CAPACITY_CONFIG.HIGH_FAILURE_RATE) {
+        if (
+          currentLoadPercentage >
+            AUTOCLAVE_CAPACITY_CONFIG.HIGH_LOAD_THRESHOLD ||
+          failedCycles >
+            totalCycles * AUTOCLAVE_CAPACITY_CONFIG.HIGH_FAILURE_RATE
+        ) {
           recommendedAction = RECOMMENDED_ACTION_CONFIG.ADD_AUTOCLAVE;
           timeline = TIMELINE_CONFIG.IMMEDIATE;
-        } else if (currentLoadPercentage > AUTOCLAVE_CAPACITY_CONFIG.MEDIUM_LOAD_THRESHOLD || queueLength > AUTOCLAVE_CAPACITY_CONFIG.HIGH_QUEUE_THRESHOLD) {
+        } else if (
+          currentLoadPercentage >
+            AUTOCLAVE_CAPACITY_CONFIG.MEDIUM_LOAD_THRESHOLD ||
+          queueLength > AUTOCLAVE_CAPACITY_CONFIG.HIGH_QUEUE_THRESHOLD
+        ) {
           recommendedAction = RECOMMENDED_ACTION_CONFIG.EXTEND_HOURS;
           timeline = TIMELINE_CONFIG.Q1_2025;
-        } else if (currentLoadPercentage > AUTOCLAVE_CAPACITY_CONFIG.LOW_LOAD_THRESHOLD) {
+        } else if (
+          currentLoadPercentage > AUTOCLAVE_CAPACITY_CONFIG.LOW_LOAD_THRESHOLD
+        ) {
           recommendedAction = RECOMMENDED_ACTION_CONFIG.OPTIMIZE_SCHEDULE;
           timeline = TIMELINE_CONFIG.Q2_2025;
         } else {
@@ -170,7 +201,9 @@ export class AutoclaveCapacityForecastService {
           predictedOverloadDate,
           recommendedAction,
           timeline,
-          projectedPatientLoad: Math.round(completedCycles * AUTOCLAVE_CAPACITY_CONFIG.PATIENT_LOAD_MULTIPLIER), // Based on actual completed cycles
+          projectedPatientLoad: Math.round(
+            completedCycles * AUTOCLAVE_CAPACITY_CONFIG.PATIENT_LOAD_MULTIPLIER
+          ), // Based on actual completed cycles
         };
       });
 

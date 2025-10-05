@@ -3,7 +3,10 @@ import { LearningAIModelProvider } from '../../learningAI/LearningAIModelProvide
 import type { LearningPathOptimizationResult } from '../../../types/learningAITypes';
 import type { Json } from '../../../types/database.types';
 import type { LearningPathOptimizationRow } from '../../../types/learningAITypes';
-import { calculateProcessingTime, getCurrentTimestamp } from '../../learningAI/learningAIUtils';
+import {
+  calculateProcessingTime,
+  getCurrentTimestamp,
+} from '../../learningAI/learningAIUtils';
 
 export class PathwayAnalysisService {
   private facilityId: string;

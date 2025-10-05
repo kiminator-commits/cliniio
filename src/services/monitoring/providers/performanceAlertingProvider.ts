@@ -30,7 +30,12 @@ export class PerformanceAlertingProvider {
       value: metric.value,
       threshold: threshold.warning,
       severity,
-      message: createAlertMessage(metric.name, threshold.operator, threshold.warning, metric.value),
+      message: createAlertMessage(
+        metric.name,
+        threshold.operator,
+        threshold.warning,
+        metric.value
+      ),
       timestamp: new Date(),
       resolved: false,
     };

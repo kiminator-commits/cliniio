@@ -3,6 +3,7 @@ import { useSterilizationStore } from '../store/sterilizationStore';
 import { SterilizationService } from '../services/SterilizationService';
 import { ToolService } from '../services/toolService';
 import { WorkflowType } from '../config/workflowConfig';
+import { supabase } from '../lib/supabaseClient';
 
 export const useSterilizationScan = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -24,13 +25,27 @@ export const useSterilizationScan = () => {
     try {
       // For clean workflow, use Supabase service
       if (workflow === 'clean') {
-        // Simulate a barcode scan - in real implementation this would come from scanner
-        const demoBarcodes = ['FORC001', 'RETR001', 'SCAL002', 'ENT001'];
-        const randomBarcode =
-          demoBarcodes[Math.floor(Math.random() * demoBarcodes.length)];
+        // Get clean tools from database instead of hardcoded barcodes
+        const { data: cleanTools } = await supabase
+          .from('tools')
+          .select('barcode')
+          .eq('status', 'clean')
+          .eq('facility_id', '550e8400-e29b-41d4-a716-446655440000')
+          .limit(10);
 
-        const result =
-          await ToolService.scanToolForCleanWorkflow(randomBarcode);
+        // If no clean tools found, use mock data for testing
+        let barcodeToUse: string;
+        if (!cleanTools || cleanTools.length === 0) {
+          console.log(
+            '🧪 No clean tools found in database, using mock data for testing'
+          );
+          barcodeToUse = 'TEST-CLEAN-001'; // Mock barcode for testing
+        } else {
+          barcodeToUse =
+            cleanTools[Math.floor(Math.random() * cleanTools.length)].barcode;
+        }
+
+        const result = await ToolService.scanToolForCleanWorkflow(barcodeToUse);
         setScannedCode(result.tool?.barcode || '');
 
         if (result.success && result.tool) {

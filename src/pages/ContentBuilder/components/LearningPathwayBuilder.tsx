@@ -39,7 +39,9 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
   );
   const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [contentTypeFilter, setContentTypeFilter] = useState<string>(DEFAULTS.CONTENT_TYPE_FILTER);
+  const [contentTypeFilter, setContentTypeFilter] = useState<string>(
+    DEFAULTS.CONTENT_TYPE_FILTER
+  );
   const [isOrganizing, setIsOrganizing] = useState(false);
   const [showAddSectionModal, setShowAddSectionModal] = useState(false);
   const [showSmartOrganizeModal, setShowSmartOrganizeModal] = useState(false);
@@ -82,10 +84,18 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
       }
 
       const allContent = [
-        ...((coursesResult.data as CourseRow[]) || []).map(CONTENT_TRANSFORMATIONS.COURSE),
-        ...((policiesResult.data as PolicyRow[]) || []).map(CONTENT_TRANSFORMATIONS.POLICY),
-        ...((proceduresResult.data as ProcedureRow[]) || []).map(CONTENT_TRANSFORMATIONS.PROCEDURE),
-        ...((sdsResult.data as SDSRow[]) || []).map(CONTENT_TRANSFORMATIONS.SDS),
+        ...((coursesResult.data as CourseRow[]) || []).map(
+          CONTENT_TRANSFORMATIONS.COURSE
+        ),
+        ...((policiesResult.data as PolicyRow[]) || []).map(
+          CONTENT_TRANSFORMATIONS.POLICY
+        ),
+        ...((proceduresResult.data as ProcedureRow[]) || []).map(
+          CONTENT_TRANSFORMATIONS.PROCEDURE
+        ),
+        ...((sdsResult.data as SDSRow[]) || []).map(
+          CONTENT_TRANSFORMATIONS.SDS
+        ),
       ];
 
       setAvailableContent(allContent);
@@ -112,7 +122,8 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
           item.data.description) ||
         ''.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesType =
-        contentTypeFilter === CONTENT_TYPES.ALL || item.type === contentTypeFilter;
+        contentTypeFilter === CONTENT_TYPES.ALL ||
+        item.type === contentTypeFilter;
       return matchesSearch && matchesType;
     });
   };
@@ -223,10 +234,12 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
 
     // Simulate AI organization
     setTimeout(() => {
-      const organizedSections: PathwaySection[] = SMART_ORGANIZE_SECTIONS.map(section => ({
-        ...section,
-        items: [...section.items],
-      }));
+      const organizedSections: PathwaySection[] = SMART_ORGANIZE_SECTIONS.map(
+        (section) => ({
+          ...section,
+          items: [...section.items],
+        })
+      );
 
       // Distribute items across sections
       const newItems = selectedPathwayItems.map((item, index) => {
@@ -261,16 +274,16 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Icon path={mdiBookOpen} size={1.2} className="text-blue-600" />
-        <h3 className="text-sm font-medium text-gray-900">
-          {UI_TEXT.TITLE}
-        </h3>
+        <h3 className="text-sm font-medium text-gray-900">{UI_TEXT.TITLE}</h3>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Panel - Content Selection */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
           <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-            <h4 className="font-medium text-gray-900">{UI_TEXT.AVAILABLE_CONTENT_TITLE}</h4>
+            <h4 className="font-medium text-gray-900">
+              {UI_TEXT.AVAILABLE_CONTENT_TITLE}
+            </h4>
             <p className="text-sm text-gray-600">
               {UI_TEXT.AVAILABLE_CONTENT_DESCRIPTION}
             </p>
@@ -291,11 +304,21 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
                 onChange={(e) => setContentTypeFilter(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value={CONTENT_TYPES.ALL}>{CONTENT_TYPE_LABELS[CONTENT_TYPES.ALL]}</option>
-                <option value={CONTENT_TYPES.COURSE}>{CONTENT_TYPE_LABELS[CONTENT_TYPES.COURSE]}</option>
-                <option value={CONTENT_TYPES.POLICY}>{CONTENT_TYPE_LABELS[CONTENT_TYPES.POLICY]}</option>
-                <option value={CONTENT_TYPES.PROCEDURE}>{CONTENT_TYPE_LABELS[CONTENT_TYPES.PROCEDURE]}</option>
-                <option value={CONTENT_TYPES.SDS}>{CONTENT_TYPE_LABELS[CONTENT_TYPES.SDS]}</option>
+                <option value={CONTENT_TYPES.ALL}>
+                  {CONTENT_TYPE_LABELS[CONTENT_TYPES.ALL]}
+                </option>
+                <option value={CONTENT_TYPES.COURSE}>
+                  {CONTENT_TYPE_LABELS[CONTENT_TYPES.COURSE]}
+                </option>
+                <option value={CONTENT_TYPES.POLICY}>
+                  {CONTENT_TYPE_LABELS[CONTENT_TYPES.POLICY]}
+                </option>
+                <option value={CONTENT_TYPES.PROCEDURE}>
+                  {CONTENT_TYPE_LABELS[CONTENT_TYPES.PROCEDURE]}
+                </option>
+                <option value={CONTENT_TYPES.SDS}>
+                  {CONTENT_TYPE_LABELS[CONTENT_TYPES.SDS]}
+                </option>
               </select>
             </div>
 
@@ -326,14 +349,18 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
                           <div className="flex items-center space-x-2 mb-1">
                             <span
                               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                CONTENT_TYPE_STYLES[item.type as keyof typeof CONTENT_TYPE_STYLES] || CONTENT_TYPE_STYLES[CONTENT_TYPES.SDS]
+                                CONTENT_TYPE_STYLES[
+                                  item.type as keyof typeof CONTENT_TYPE_STYLES
+                                ] || CONTENT_TYPE_STYLES[CONTENT_TYPES.SDS]
                               }`}
                             >
                               {item.type.charAt(0).toUpperCase() +
                                 item.type.slice(1)}
                             </span>
                             {item.difficulty && (
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${ICONS.DIFFICULTY_BADGE}`}>
+                              <span
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${ICONS.DIFFICULTY_BADGE}`}
+                              >
                                 {item.difficulty}
                               </span>
                             )}

@@ -39,10 +39,14 @@ export class AssessmentValidator {
     assessment.questions.forEach((question, index) => {
       const questionValidation = this.validateQuestion(question);
       if (!questionValidation.isValid) {
-        errors.push(`Question ${index + 1}: ${questionValidation.errors.join(', ')}`);
+        errors.push(
+          `Question ${index + 1}: ${questionValidation.errors.join(', ')}`
+        );
       }
       if (questionValidation.warnings.length > 0) {
-        warnings.push(`Question ${index + 1}: ${questionValidation.warnings.join(', ')}`);
+        warnings.push(
+          `Question ${index + 1}: ${questionValidation.warnings.join(', ')}`
+        );
       }
     });
 
@@ -83,9 +87,13 @@ export class AssessmentValidator {
         if (!question.options || question.options.length < 2) {
           errors.push('Multiple choice questions must have at least 2 options');
         } else {
-          const validOptions = question.options.filter(option => option.trim());
+          const validOptions = question.options.filter((option) =>
+            option.trim()
+          );
           if (validOptions.length < 2) {
-            errors.push('Multiple choice questions must have at least 2 valid options');
+            errors.push(
+              'Multiple choice questions must have at least 2 valid options'
+            );
           }
           if (validOptions.length < 4) {
             warnings.push('Consider adding more options for better variety');
@@ -105,7 +113,9 @@ export class AssessmentValidator {
       case 'short-answer':
       case 'essay':
         if (!question.correctAnswer) {
-          warnings.push('Consider providing a sample answer for grading reference');
+          warnings.push(
+            'Consider providing a sample answer for grading reference'
+          );
         }
         break;
     }

@@ -2,7 +2,7 @@
  * @deprecated This service is deprecated in favor of UnifiedAIService
  * Use UnifiedAIService from '@/services/ai/UnifiedAIService' for new implementations
  * This service is maintained for backward compatibility
- * 
+ *
  * File: src/services/aiService.ts
  * ⚠️ STRICT INSTRUCTION FOR CURSOR:
  * DO NOT MODIFY ANY OTHER FILES.
@@ -30,8 +30,10 @@ export async function askCliniioAI({
   prompt,
   context = '',
 }: AskAIParams): Promise<string> {
-  console.warn('askCliniioAI() is deprecated. Use UnifiedAIService.askAI() instead.');
-  
+  console.warn(
+    'askCliniioAI() is deprecated. Use UnifiedAIService.askAI() instead.'
+  );
+
   if (!FN_URL) throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL');
   if (!ANON) throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY');
   if (!prompt?.trim()) throw new Error('Missing prompt');

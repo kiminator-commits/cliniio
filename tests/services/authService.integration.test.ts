@@ -122,7 +122,10 @@ describe('authService Integration', () => {
       const result = await validateToken('valid-token');
 
       expect(mockSupabase.auth.getUser).not.toHaveBeenCalled();
-      expect(result.user).toEqual({ id: 'mock-user', email: 'mock@example.com' });
+      expect(result.user).toEqual({
+        id: 'mock-user',
+        email: 'mock@example.com',
+      });
     });
 
     it('should integrate with Supabase auth for session refresh', async () => {

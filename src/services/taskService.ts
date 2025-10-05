@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
 import { isDevelopment } from '../lib/getEnv';
-import { FacilityService } from './facilityService';
 
 interface Task {
   id: string;
@@ -42,15 +41,22 @@ class TaskServiceImpl implements TaskService {
   private readonly USER_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
   /**
-   * Get cached user or fetch from Supabase
+   * Get cached user or fetch from Supabase session
    */
   private async getCachedUser() {
-    const { FacilityService } = await import('./facilityService');
-    const { userId, facilityId } =
-      await FacilityService.getCurrentUserAndFacility();
-    if (!userId || !facilityId) {
-      throw new Error('No authenticated user or facility for taskService');
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const facilityId = session?.user?.app_metadata?.facility_id;
+    const userId = session?.user?.id;
+
+    if (!facilityId) {
+      throw new Error('No authenticated facility ID found.');
     }
+    if (!userId) {
+      throw new Error('No authenticated user ID found.');
+    }
+
     return {
       id: userId,
       facility_id: facilityId,
@@ -75,10 +81,17 @@ class TaskServiceImpl implements TaskService {
       this.isLoading = true;
       this.error = null;
 
-      const { userId, facilityId } =
-        await FacilityService.getCurrentUserAndFacility();
-      if (!userId || !facilityId) {
-        return [];
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const facilityId = session?.user?.app_metadata?.facility_id;
+      const userId = session?.user?.id;
+
+      if (!facilityId) {
+        throw new Error('No authenticated facility ID found.');
+      }
+      if (!userId) {
+        throw new Error('No authenticated user ID found.');
       }
 
       // Fetch challenges from Supabase
@@ -161,10 +174,17 @@ class TaskServiceImpl implements TaskService {
    */
   async updateTask(task: Task): Promise<Task> {
     try {
-      const { userId, facilityId } =
-        await FacilityService.getCurrentUserAndFacility();
-      if (!userId || !facilityId) {
-        throw new Error('User not authenticated');
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const facilityId = session?.user?.app_metadata?.facility_id;
+      const userId = session?.user?.id;
+
+      if (!facilityId) {
+        throw new Error('No authenticated facility ID found.');
+      }
+      if (!userId) {
+        throw new Error('No authenticated user ID found.');
       }
 
       const { data, error } = await supabase

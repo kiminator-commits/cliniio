@@ -29,10 +29,7 @@ const PrivacyDataSecurity: React.FC<PrivacyDataSecurityProps> = ({
             type="checkbox"
             checked={settings.encrypted_data_transmission}
             onChange={(e) =>
-              onInputChange(
-                'encrypted_data_transmission',
-                e.target.checked
-              )
+              onInputChange('encrypted_data_transmission', e.target.checked)
             }
             disabled={!settings.ai_enabled}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
@@ -51,10 +48,7 @@ const PrivacyDataSecurity: React.FC<PrivacyDataSecurityProps> = ({
             type="checkbox"
             checked={settings.local_ai_processing_enabled}
             onChange={(e) =>
-              onInputChange(
-                'local_ai_processing_enabled',
-                e.target.checked
-              )
+              onInputChange('local_ai_processing_enabled', e.target.checked)
             }
             disabled={!settings.ai_enabled}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
@@ -64,10 +58,7 @@ const PrivacyDataSecurity: React.FC<PrivacyDataSecurityProps> = ({
           </span>
         </label>
 
-        <label
-          htmlFor="dataSharingEnabled"
-          className="flex items-center gap-3"
-        >
+        <label htmlFor="dataSharingEnabled" className="flex items-center gap-3">
           <input
             id="dataSharingEnabled"
             type="checkbox"
@@ -83,10 +74,7 @@ const PrivacyDataSecurity: React.FC<PrivacyDataSecurityProps> = ({
           </span>
         </label>
 
-        <label
-          htmlFor="aiModelTraining"
-          className="flex items-center gap-3"
-        >
+        <label htmlFor="aiModelTraining" className="flex items-center gap-3">
           <input
             id="aiModelTraining"
             type="checkbox"

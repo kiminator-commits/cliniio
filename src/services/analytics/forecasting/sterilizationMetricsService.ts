@@ -117,9 +117,7 @@ export class SterilizationMetricsService {
           recommendedOptimization: getOptimizationRecommendation(
             utilizationEfficiency
           ),
-          bottleneckIndicators: getBottleneckIndicators(
-            utilizationEfficiency
-          ),
+          bottleneckIndicators: getBottleneckIndicators(utilizationEfficiency),
           performanceScore: Math.round(utilizationEfficiency),
         };
       });
@@ -135,9 +133,7 @@ export class SterilizationMetricsService {
   /**
    * 🔬 Get sterilization metrics for optimization tips
    */
-  async getSterilizationMetrics(
-    filters: AnalyticsFilters = {}
-  ): Promise<{
+  async getSterilizationMetrics(filters: AnalyticsFilters = {}): Promise<{
     biPassRate: number;
     cycleEfficiency: number;
     qualityScore: number;

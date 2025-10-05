@@ -42,9 +42,7 @@ const PerformancePanel: React.FC<PerformancePanelProps> = ({
           <ToggleSwitch
             id="alertSystem"
             checked={settings.intelligence.alertSystem}
-            onChange={(checked) =>
-              updateIntelligence('alertSystem', checked)
-            }
+            onChange={(checked) => updateIntelligence('alertSystem', checked)}
             label={UI_TEXT.TOGGLE_LABELS.ALERT_SYSTEM}
             description={UI_TEXT.DESCRIPTIONS.ALERT_SYSTEM}
             disabled={!settings.aiEnabled}

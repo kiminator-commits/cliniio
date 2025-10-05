@@ -125,7 +125,7 @@ export class SecurityActionProvider {
     incident: SecurityIncident
   ): Promise<ActionResult> {
     const config = action.config as NotificationConfig;
-    
+
     if (!config || !config.recipients || config.recipients.length === 0) {
       return {
         success: false,
@@ -164,8 +164,12 @@ export class SecurityActionProvider {
     incident: SecurityIncident
   ): Promise<ActionResult> {
     const config = action.config as EscalationConfig;
-    
-    if (!config || !config.escalationChain || config.escalationChain.length === 0) {
+
+    if (
+      !config ||
+      !config.escalationChain ||
+      config.escalationChain.length === 0
+    ) {
       return {
         success: false,
         message: 'Escalation config missing escalation chain',
@@ -202,7 +206,7 @@ export class SecurityActionProvider {
     incident: SecurityIncident
   ): Promise<ActionResult> {
     const config = action.config as BlockConfig;
-    
+
     if (!config || !config.type || !config.target) {
       return {
         success: false,
@@ -253,7 +257,7 @@ export class SecurityActionProvider {
     for (const action of actions) {
       const result = await this.executeThreatAction(action, incident);
       results.push(result);
-      
+
       if (result.success) {
         successCount++;
       } else {
@@ -261,10 +265,13 @@ export class SecurityActionProvider {
       }
     }
 
-    logger.info(`Executed ${actions.length} actions for incident ${incident.id}`, {
-      successCount,
-      errorCount,
-    });
+    logger.info(
+      `Executed ${actions.length} actions for incident ${incident.id}`,
+      {
+        successCount,
+        errorCount,
+      }
+    );
 
     return {
       results,
@@ -305,7 +312,10 @@ export class SecurityActionProvider {
 
       case 'escalate': {
         const escalateConfig = action.config as EscalationConfig;
-        if (!escalateConfig.escalationChain || escalateConfig.escalationChain.length === 0) {
+        if (
+          !escalateConfig.escalationChain ||
+          escalateConfig.escalationChain.length === 0
+        ) {
           errors.push('Escalation action requires escalation chain');
         }
         break;
@@ -380,33 +390,40 @@ export class SecurityActionProvider {
    */
   createDefaultActionConfigs(): Record<string, ThreatAction[]> {
     return {
-      low: [
-        { type: 'log', config: { level: 'info' } },
-      ],
+      low: [{ type: 'log', config: { level: 'info' } }],
       medium: [
         { type: 'alert', config: { level: 'warning' } },
         { type: 'log', config: { level: 'warn' } },
       ],
       high: [
         { type: 'alert', config: { level: 'error' } },
-        { type: 'notify', config: { 
-          recipients: ['security-team@company.com'], 
-          channels: ['email'], 
-          priority: 'high' 
-        } },
+        {
+          type: 'notify',
+          config: {
+            recipients: ['security-team@company.com'],
+            channels: ['email'],
+            priority: 'high',
+          },
+        },
         { type: 'log', config: { level: 'error' } },
       ],
       critical: [
         { type: 'alert', config: { level: 'critical' } },
-        { type: 'notify', config: { 
-          recipients: ['security-team@company.com', 'management@company.com'], 
-          channels: ['email', 'sms'], 
-          priority: 'critical' 
-        } },
-        { type: 'escalate', config: { 
-          level: 'director', 
-          escalationChain: ['security-team', 'management', 'director'] 
-        } },
+        {
+          type: 'notify',
+          config: {
+            recipients: ['security-team@company.com', 'management@company.com'],
+            channels: ['email', 'sms'],
+            priority: 'critical',
+          },
+        },
+        {
+          type: 'escalate',
+          config: {
+            level: 'director',
+            escalationChain: ['security-team', 'management', 'director'],
+          },
+        },
         { type: 'log', config: { level: 'critical' } },
       ],
     };

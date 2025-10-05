@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useLoginStore } from '@/stores/useLoginStore';
+import { facilityConfigService } from '@/services/facilityConfigService';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,17 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // Validate OAuth state parameter for CSRF protection
+        const urlParams = new URLSearchParams(window.location.search);
+        const stateParam = urlParams.get('state');
+        const storedState = sessionStorage.getItem('oauth_state');
+
+        if (stateParam && storedState && stateParam !== storedState) {
+          console.error('OAuth state mismatch - possible CSRF attack');
+          navigate('/login?error=invalid_state');
+          return;
+        }
+
         // Get the session from the URL hash/fragment
         const { data, error } = await supabase.auth.getSession();
 
@@ -30,7 +42,8 @@ const AuthCallback: React.FC = () => {
             data.session.access_token,
             data.session.expires_at
               ? new Date(data.session.expires_at * 1000).toISOString()
-              : ''
+              : '',
+            true // OAuth logins should be remembered by default
           );
           setSessionExpiry(
             data.session.expires_at
@@ -38,13 +51,17 @@ const AuthCallback: React.FC = () => {
               : ''
           );
 
-          // Store in localStorage for persistence
+          // Store in localStorage for persistence (OAuth logins are remembered by default)
           localStorage.setItem('authToken', data.session.access_token);
           localStorage.setItem(
             'sessionExpiry',
             data.session.expires_at
               ? new Date(data.session.expires_at * 1000).toISOString()
               : ''
+          );
+          localStorage.setItem(
+            'currentUser',
+            JSON.stringify(data.session.user)
           );
 
           // Get or create user profile
@@ -85,7 +102,7 @@ const AuthCallback: React.FC = () => {
                   first_name: firstName,
                   last_name: lastName,
                   role: 'user',
-                  facility_id: 'default-facility', // Required field
+                  facility_id: facilityConfigService.getDefaultFacilityId(), // Use configured default facility
                   avatar_url:
                     data.session.user.user_metadata?.avatar_url ||
                     data.session.user.user_metadata?.picture ||
@@ -147,16 +164,29 @@ const AuthCallback: React.FC = () => {
             }
           }
 
+          // Clean up OAuth session storage
+          sessionStorage.removeItem('oauth_state');
+          sessionStorage.removeItem('oauth_code_verifier');
+          sessionStorage.removeItem('oauth_provider');
+
           // Redirect to home page
           console.log('OAuth user session established, redirecting to home');
           navigate('/home');
         } else {
           // No session found, redirect to login
           console.log('No session found, redirecting to login');
+          // Clean up OAuth session storage
+          sessionStorage.removeItem('oauth_state');
+          sessionStorage.removeItem('oauth_code_verifier');
+          sessionStorage.removeItem('oauth_provider');
           navigate('/login');
         }
       } catch (error) {
         console.error('Unexpected error in auth callback:', error);
+        // Clean up OAuth session storage on error
+        sessionStorage.removeItem('oauth_state');
+        sessionStorage.removeItem('oauth_code_verifier');
+        sessionStorage.removeItem('oauth_provider');
         navigate('/login?error=unexpected');
       }
     };

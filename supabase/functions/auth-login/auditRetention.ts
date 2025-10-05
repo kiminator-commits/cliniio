@@ -52,7 +52,8 @@ class AuditRetentionManager {
       maxConcurrentJobs: config.maxConcurrentJobs || 3,
       batchSize: config.batchSize || 1000,
       compressionLevel: config.compressionLevel || 6,
-      encryptionKey: config.encryptionKey || Deno.env.get('ARCHIVAL_ENCRYPTION_KEY'),
+      encryptionKey:
+        config.encryptionKey || Deno.env.get('ARCHIVAL_ENCRYPTION_KEY'),
       storageProvider: config.storageProvider || 'local',
       storageConfig: config.storageConfig || {},
       cleanupAfterArchival: config.cleanupAfterArchival || true,
@@ -60,7 +61,7 @@ class AuditRetentionManager {
     };
 
     this.initializeDefaultPolicies();
-    
+
     if (this.config.enabled) {
       this.startRetentionScheduler();
     }
@@ -87,7 +88,11 @@ class AuditRetentionManager {
         name: 'High Severity Events',
         description: 'Retain high severity events for extended period',
         enabled: true,
-        eventTypes: ['login_failure', 'suspicious_activity', 'rate_limit_exceeded'],
+        eventTypes: [
+          'login_failure',
+          'suspicious_activity',
+          'rate_limit_exceeded',
+        ],
         severityLevels: ['high'],
         retentionDays: 1095, // 3 years
         archivalDays: 180, // Archive after 6 months
@@ -140,16 +145,19 @@ class AuditRetentionManager {
       },
     ];
 
-    defaultPolicies.forEach(policy => {
+    defaultPolicies.forEach((policy) => {
       this.policies.set(policy.id, policy);
     });
   }
 
   private startRetentionScheduler(): void {
     // Run retention checks every hour
-    this.executionInterval = setInterval(() => {
-      this.executeRetentionPolicies();
-    }, 60 * 60 * 1000);
+    this.executionInterval = setInterval(
+      () => {
+        this.executeRetentionPolicies();
+      },
+      60 * 60 * 1000
+    );
 
     console.log('Audit retention scheduler started');
   }
@@ -192,7 +200,8 @@ class AuditRetentionManager {
 
     try {
       // Check if archival is needed
-      const archivalCutoff = Date.now() - (policy.archivalDays * 24 * 60 * 60 * 1000);
+      const archivalCutoff =
+        Date.now() - policy.archivalDays * 24 * 60 * 60 * 1000;
       const archivalNeeded = await this.needsArchival(policy, archivalCutoff);
 
       if (archivalNeeded) {
@@ -200,23 +209,29 @@ class AuditRetentionManager {
       }
 
       // Check if cleanup is needed
-      const cleanupCutoff = Date.now() - (policy.retentionDays * 24 * 60 * 60 * 1000);
+      const cleanupCutoff =
+        Date.now() - policy.retentionDays * 24 * 60 * 60 * 1000;
       await this.cleanupExpiredRecords(policy, cleanupCutoff);
-
     } catch (error) {
       console.error(`Error executing policy ${policy.id}:`, error);
     }
   }
 
-  private async needsArchival(policy: RetentionPolicy, cutoffTime: number): Promise<boolean> {
+  private async needsArchival(
+    policy: RetentionPolicy,
+    cutoffTime: number
+  ): Promise<boolean> {
     // In production, this would query the database
     // For now, we'll simulate the check
     return Math.random() > 0.7; // 30% chance of needing archival
   }
 
-  private async createArchivalJob(policy: RetentionPolicy, cutoffTime: number): Promise<string> {
+  private async createArchivalJob(
+    policy: RetentionPolicy,
+    cutoffTime: number
+  ): Promise<string> {
     const jobId = `job_${Date.now()}_${policy.id}`;
-    
+
     const job: ArchivalJob = {
       id: jobId,
       policyId: policy.id,
@@ -235,7 +250,7 @@ class AuditRetentionManager {
     this.jobs.set(jobId, job);
 
     // Execute the job asynchronously
-    this.executeArchivalJob(job).catch(error => {
+    this.executeArchivalJob(job).catch((error) => {
       console.error(`Archival job ${jobId} failed:`, error);
       job.status = 'failed';
       job.errors.push(error.message);
@@ -256,7 +271,10 @@ class AuditRetentionManager {
       }
 
       // Simulate archival process
-      const records = await this.getRecordsForArchival(policy, job.metadata.cutoffTime);
+      const records = await this.getRecordsForArchival(
+        policy,
+        job.metadata.cutoffTime
+      );
       job.recordsProcessed = records.length;
 
       if (records.length === 0) {
@@ -268,7 +286,7 @@ class AuditRetentionManager {
 
       // Process records in batches
       const batches = this.createBatches(records, this.config.batchSize);
-      
+
       for (const batch of batches) {
         await this.archiveBatch(batch, policy, job);
       }
@@ -284,7 +302,6 @@ class AuditRetentionManager {
 
       console.log(`Archival job ${job.id} completed successfully`);
       console.log(`Archived ${job.recordsArchived} records`);
-
     } catch (error) {
       job.status = 'failed';
       job.endTime = Date.now();
@@ -293,7 +310,10 @@ class AuditRetentionManager {
     }
   }
 
-  private async getRecordsForArchival(policy: RetentionPolicy, cutoffTime: number): Promise<any[]> {
+  private async getRecordsForArchival(
+    policy: RetentionPolicy,
+    cutoffTime: number
+  ): Promise<any[]> {
     // In production, this would query the database
     // For now, we'll simulate returning records
     const recordCount = Math.floor(Math.random() * 1000) + 100;
@@ -303,9 +323,17 @@ class AuditRetentionManager {
       records.push({
         id: `record_${Date.now()}_${i}`,
         timestamp: cutoffTime - Math.random() * (24 * 60 * 60 * 1000),
-        eventType: policy.eventTypes[Math.floor(Math.random() * policy.eventTypes.length)],
-        severity: policy.severityLevels[Math.floor(Math.random() * policy.severityLevels.length)],
-        data: { /* record data */ },
+        eventType:
+          policy.eventTypes[
+            Math.floor(Math.random() * policy.eventTypes.length)
+          ],
+        severity:
+          policy.severityLevels[
+            Math.floor(Math.random() * policy.severityLevels.length)
+          ],
+        data: {
+          /* record data */
+        },
       });
     }
 
@@ -320,7 +348,11 @@ class AuditRetentionManager {
     return batches;
   }
 
-  private async archiveBatch(batch: any[], policy: RetentionPolicy, job: ArchivalJob): Promise<void> {
+  private async archiveBatch(
+    batch: any[],
+    policy: RetentionPolicy,
+    job: ArchivalJob
+  ): Promise<void> {
     try {
       // Compress data if enabled
       let data = batch;
@@ -336,8 +368,9 @@ class AuditRetentionManager {
       // Store in archival location
       await this.storeArchivedData(data, policy.archivalLocation, job.id);
 
-      console.log(`Archived batch of ${batch.length} records for job ${job.id}`);
-
+      console.log(
+        `Archived batch of ${batch.length} records for job ${job.id}`
+      );
     } catch (error) {
       job.errors.push(`Batch archival failed: ${error.message}`);
       throw error;
@@ -356,7 +389,11 @@ class AuditRetentionManager {
     return { encrypted: true, data };
   }
 
-  private async storeArchivedData(data: any, location: string, jobId: string): Promise<void> {
+  private async storeArchivedData(
+    data: any,
+    location: string,
+    jobId: string
+  ): Promise<void> {
     // In production, store in actual storage provider
     console.log(`Storing archived data at ${location} for job ${jobId}`);
   }
@@ -366,9 +403,12 @@ class AuditRetentionManager {
     console.log(`Cleaning up ${records.length} archived records`);
   }
 
-  private async cleanupExpiredRecords(policy: RetentionPolicy, cutoffTime: number): Promise<void> {
+  private async cleanupExpiredRecords(
+    policy: RetentionPolicy,
+    cutoffTime: number
+  ): Promise<void> {
     console.log(`Cleaning up expired records for policy: ${policy.name}`);
-    
+
     // In production, delete records older than cutoff time
     const deletedCount = Math.floor(Math.random() * 100);
     console.log(`Deleted ${deletedCount} expired records`);
@@ -379,7 +419,10 @@ class AuditRetentionManager {
     console.log(`Added retention policy: ${policy.name}`);
   }
 
-  updateRetentionPolicy(policyId: string, updates: Partial<RetentionPolicy>): boolean {
+  updateRetentionPolicy(
+    policyId: string,
+    updates: Partial<RetentionPolicy>
+  ): boolean {
     const policy = this.policies.get(policyId);
     if (policy) {
       Object.assign(policy, updates);
@@ -398,7 +441,7 @@ class AuditRetentionManager {
 
   getArchivalJobs(status?: string): ArchivalJob[] {
     const jobs = Array.from(this.jobs.values());
-    return status ? jobs.filter(job => job.status === status) : jobs;
+    return status ? jobs.filter((job) => job.status === status) : jobs;
   }
 
   getJobById(jobId: string): ArchivalJob | null {
@@ -417,7 +460,9 @@ class AuditRetentionManager {
   } {
     const stats = {
       totalPolicies: this.policies.size,
-      activePolicies: Array.from(this.policies.values()).filter(p => p.enabled).length,
+      activePolicies: Array.from(this.policies.values()).filter(
+        (p) => p.enabled
+      ).length,
       totalJobs: this.jobs.size,
       completedJobs: 0,
       failedJobs: 0,
@@ -451,11 +496,11 @@ class AuditRetentionManager {
 
   private formatBytes(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
@@ -467,7 +512,7 @@ class AuditRetentionManager {
     const report = {
       generatedAt: new Date().toISOString(),
       statistics: stats,
-      policies: policies.map(policy => ({
+      policies: policies.map((policy) => ({
         id: policy.id,
         name: policy.name,
         enabled: policy.enabled,
@@ -475,7 +520,7 @@ class AuditRetentionManager {
         archivalDays: policy.archivalDays,
         lastExecuted: policy.lastExecuted,
       })),
-      recentJobs: jobs.slice(-10).map(job => ({
+      recentJobs: jobs.slice(-10).map((job) => ({
         id: job.id,
         policyId: job.policyId,
         status: job.status,
@@ -504,11 +549,16 @@ export function getAuditRetentionManager(): AuditRetentionManager {
   if (!auditRetentionManager) {
     auditRetentionManager = new AuditRetentionManager({
       enabled: Deno.env.get('ENABLE_AUDIT_RETENTION') === 'true',
-      maxConcurrentJobs: parseInt(Deno.env.get('MAX_CONCURRENT_ARCHIVAL_JOBS') || '3'),
+      maxConcurrentJobs: parseInt(
+        Deno.env.get('MAX_CONCURRENT_ARCHIVAL_JOBS') || '3'
+      ),
       batchSize: parseInt(Deno.env.get('ARCHIVAL_BATCH_SIZE') || '1000'),
-      compressionLevel: parseInt(Deno.env.get('ARCHIVAL_COMPRESSION_LEVEL') || '6'),
+      compressionLevel: parseInt(
+        Deno.env.get('ARCHIVAL_COMPRESSION_LEVEL') || '6'
+      ),
       encryptionKey: Deno.env.get('ARCHIVAL_ENCRYPTION_KEY'),
-      storageProvider: (Deno.env.get('ARCHIVAL_STORAGE_PROVIDER') as any) || 'local',
+      storageProvider:
+        (Deno.env.get('ARCHIVAL_STORAGE_PROVIDER') as any) || 'local',
       cleanupAfterArchival: Deno.env.get('CLEANUP_AFTER_ARCHIVAL') === 'true',
       verifyIntegrity: Deno.env.get('VERIFY_ARCHIVAL_INTEGRITY') === 'true',
     });
@@ -517,4 +567,9 @@ export function getAuditRetentionManager(): AuditRetentionManager {
   return auditRetentionManager;
 }
 
-export { AuditRetentionManager, type RetentionPolicy, type ArchivalJob, type ArchivalConfig };
+export {
+  AuditRetentionManager,
+  type RetentionPolicy,
+  type ArchivalJob,
+  type ArchivalConfig,
+};

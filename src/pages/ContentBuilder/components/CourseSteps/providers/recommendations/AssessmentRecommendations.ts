@@ -1,8 +1,4 @@
-import {
-  Assessment,
-  Question,
-  Recommendation,
-} from '../types/assessmentTypes';
+import { Assessment, Question, Recommendation } from '../types/assessmentTypes';
 import { AssessmentValidator } from '../validators/AssessmentValidator';
 import { AssessmentStatistics } from '../statistics/AssessmentStatistics';
 
@@ -56,7 +52,7 @@ export class AssessmentRecommendations {
     }
 
     // Check question variety
-    const questionTypes = new Set(assessment.questions.map(q => q.type));
+    const questionTypes = new Set(assessment.questions.map((q) => q.type));
     if (questionTypes.size === 1 && assessment.questions.length > 1) {
       recommendations.push({
         type: 'suggestion',
@@ -104,7 +100,7 @@ export class AssessmentRecommendations {
 
     // Add content suggestions
     const stats = this.statistics.getQuestionStatistics(question);
-    
+
     if (stats.wordCount < 10) {
       recommendations.push({
         type: 'suggestion',
@@ -114,7 +110,7 @@ export class AssessmentRecommendations {
     }
 
     if (question.type === 'multiple-choice' && question.options) {
-      const validOptions = question.options.filter(option => option.trim());
+      const validOptions = question.options.filter((option) => option.trim());
       if (validOptions.length < 4) {
         recommendations.push({
           type: 'suggestion',

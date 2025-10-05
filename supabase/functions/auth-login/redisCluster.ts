@@ -42,7 +42,7 @@ class RedisClusterManager {
   async connect(): Promise<void> {
     try {
       const { createClient } = await import('https://esm.sh/redis@4.6.12');
-      
+
       // Create multiple Redis clients for redundancy
       for (const node of this.config.nodes) {
         const client = createClient({
@@ -51,7 +51,9 @@ class RedisClusterManager {
             port: node.port,
             reconnectStrategy: (retries) => {
               if (retries > 10) {
-                console.error(`Redis connection failed after 10 retries for ${node.host}:${node.port}`);
+                console.error(
+                  `Redis connection failed after 10 retries for ${node.host}:${node.port}`
+                );
                 return new Error('Redis connection failed');
               }
               return Math.min(retries * 100, 3000);
@@ -66,7 +68,10 @@ class RedisClusterManager {
         });
 
         client.on('error', (err: Error) => {
-          console.error(`Redis client error for ${node.host}:${node.port}:`, err);
+          console.error(
+            `Redis client error for ${node.host}:${node.port}:`,
+            err
+          );
         });
 
         client.on('connect', () => {
@@ -74,7 +79,9 @@ class RedisClusterManager {
         });
 
         client.on('disconnect', () => {
-          console.warn(`Redis client disconnected from ${node.host}:${node.port}`);
+          console.warn(
+            `Redis client disconnected from ${node.host}:${node.port}`
+          );
         });
 
         await client.connect();
@@ -83,9 +90,11 @@ class RedisClusterManager {
 
       this.isConnected = this.clients.length > 0;
       console.log(`Redis cluster connected with ${this.clients.length} nodes`);
-      
     } catch (error) {
-      console.warn('Redis cluster connection failed, using in-memory fallback:', error);
+      console.warn(
+        'Redis cluster connection failed, using in-memory fallback:',
+        error
+      );
       this.isConnected = false;
     }
   }
@@ -97,7 +106,8 @@ class RedisClusterManager {
 
     // Round-robin client selection
     const client = this.clients[this.currentClientIndex];
-    this.currentClientIndex = (this.currentClientIndex + 1) % this.clients.length;
+    this.currentClientIndex =
+      (this.currentClientIndex + 1) % this.clients.length;
     return client;
   }
 
@@ -181,14 +191,14 @@ class RedisClusterManager {
   async mget(keys: string[]): Promise<(string | null)[]> {
     const client = this.getClient();
     if (!client) {
-      return keys.map(key => this.getFallback(key));
+      return keys.map((key) => this.getFallback(key));
     }
 
     try {
       return await client.mGet(keys);
     } catch (error) {
       console.error('Redis MGET failed:', error);
-      return keys.map(key => this.getFallback(key));
+      return keys.map((key) => this.getFallback(key));
     }
   }
 
@@ -208,7 +218,11 @@ class RedisClusterManager {
   }
 
   // Fallback methods for in-memory storage
-  private setFallback(key: string, value: string, ttlSeconds?: number): boolean {
+  private setFallback(
+    key: string,
+    value: string,
+    ttlSeconds?: number
+  ): boolean {
     const window: RateLimitWindow = {
       count: parseInt(value) || 0,
       windowStart: Date.now(),
@@ -216,7 +230,7 @@ class RedisClusterManager {
     };
 
     if (ttlSeconds) {
-      window.windowStart = Date.now() + (ttlSeconds * 1000);
+      window.windowStart = Date.now() + ttlSeconds * 1000;
     }
 
     this.fallbackStore.set(key, window);
@@ -228,7 +242,8 @@ class RedisClusterManager {
     if (!window) return null;
 
     // Check if window has expired
-    if (Date.now() > window.windowStart + (15 * 60 * 1000)) { // 15 minutes default
+    if (Date.now() > window.windowStart + 15 * 60 * 1000) {
+      // 15 minutes default
       this.fallbackStore.delete(key);
       return null;
     }
@@ -257,7 +272,7 @@ class RedisClusterManager {
     const window = this.fallbackStore.get(key);
     if (!window) return false;
 
-    window.windowStart = Date.now() + (seconds * 1000);
+    window.windowStart = Date.now() + seconds * 1000;
     this.fallbackStore.set(key, window);
     return true;
   }
@@ -311,7 +326,7 @@ export class DistributedRateLimiter {
 
   constructor(config: any) {
     this.config = config;
-    
+
     // Initialize Redis cluster
     const clusterConfig: RedisClusterConfig = {
       nodes: [
@@ -363,9 +378,13 @@ export class DistributedRateLimiter {
 
     try {
       // Check lockout status first
-      const lockoutKeys = [`${emailKey}:lockout`, `${ipKey}:lockout`, `${clientKey}:lockout`];
+      const lockoutKeys = [
+        `${emailKey}:lockout`,
+        `${ipKey}:lockout`,
+        `${clientKey}:lockout`,
+      ];
       const lockoutValues = await this.cluster.mget(lockoutKeys);
-      
+
       for (let i = 0; i < lockoutValues.length; i++) {
         const lockoutUntil = lockoutValues[i];
         if (lockoutUntil && parseInt(lockoutUntil) > now) {
@@ -374,7 +393,8 @@ export class DistributedRateLimiter {
             remainingAttempts: 0,
             resetTime: parseInt(lockoutUntil),
             retryAfter: Math.ceil((parseInt(lockoutUntil) - now) / 1000),
-            message: 'Account temporarily locked due to too many failed attempts',
+            message:
+              'Account temporarily locked due to too many failed attempts',
             distributed: true,
           };
         }
@@ -388,7 +408,7 @@ export class DistributedRateLimiter {
         await this.cluster.del(`${emailKey}:lockout`);
         await this.cluster.del(`${ipKey}:lockout`);
         await this.cluster.del(`${clientKey}:lockout`);
-        
+
         return {
           allowed: true,
           remainingAttempts: this.config.maxAttemptsPerEmail,
@@ -400,7 +420,7 @@ export class DistributedRateLimiter {
       // Get current counts
       const countKeys = [emailKey, ipKey, clientKey];
       const counts = await this.cluster.mget(countKeys);
-      
+
       const emailCount = parseInt(counts[0] || '0');
       const ipCount = parseInt(counts[1] || '0');
       const clientCount = parseInt(counts[2] || '0');
@@ -414,11 +434,18 @@ export class DistributedRateLimiter {
         // Set expiration for counters
         await this.cluster.expire(emailKey, this.config.windowSizeMinutes * 60);
         await this.cluster.expire(ipKey, this.config.windowSizeMinutes * 60);
-        await this.cluster.expire(clientKey, this.config.windowSizeMinutes * 60);
+        await this.cluster.expire(
+          clientKey,
+          this.config.windowSizeMinutes * 60
+        );
 
         // Check if any limit exceeded
         if (newEmailCount >= this.config.maxAttemptsPerEmail) {
-          await this.cluster.set(`${emailKey}:lockout`, (now + lockoutMs).toString(), this.config.lockoutDurationMinutes * 60);
+          await this.cluster.set(
+            `${emailKey}:lockout`,
+            (now + lockoutMs).toString(),
+            this.config.lockoutDurationMinutes * 60
+          );
           return {
             allowed: false,
             remainingAttempts: 0,
@@ -430,7 +457,11 @@ export class DistributedRateLimiter {
         }
 
         if (newIpCount >= this.config.maxAttemptsPerIP) {
-          await this.cluster.set(`${ipKey}:lockout`, (now + lockoutMs).toString(), this.config.lockoutDurationMinutes * 60);
+          await this.cluster.set(
+            `${ipKey}:lockout`,
+            (now + lockoutMs).toString(),
+            this.config.lockoutDurationMinutes * 60
+          );
           return {
             allowed: false,
             remainingAttempts: 0,
@@ -453,8 +484,10 @@ export class DistributedRateLimiter {
       }
 
       // Check current limits
-      if (emailCount >= this.config.maxAttemptsPerEmail || 
-          ipCount >= this.config.maxAttemptsPerIP) {
+      if (
+        emailCount >= this.config.maxAttemptsPerEmail ||
+        ipCount >= this.config.maxAttemptsPerIP
+      ) {
         return {
           allowed: false,
           remainingAttempts: 0,
@@ -474,10 +507,9 @@ export class DistributedRateLimiter {
         resetTime: now + windowMs,
         distributed: true,
       };
-
     } catch (error) {
       console.error('Distributed rate limiting failed:', error);
-      
+
       // Fallback to basic rate limiting
       return {
         allowed: true,
@@ -512,11 +544,17 @@ let distributedRateLimiter: DistributedRateLimiter | null = null;
 export async function getDistributedRateLimiter(): Promise<DistributedRateLimiter> {
   if (!distributedRateLimiter) {
     const config = {
-      maxAttemptsPerEmail: parseInt(Deno.env.get('RATE_LIMIT_MAX_EMAIL') || '5'),
+      maxAttemptsPerEmail: parseInt(
+        Deno.env.get('RATE_LIMIT_MAX_EMAIL') || '5'
+      ),
       maxAttemptsPerIP: parseInt(Deno.env.get('RATE_LIMIT_MAX_IP') || '10'),
       windowSizeMinutes: parseInt(Deno.env.get('RATE_LIMIT_WINDOW') || '15'),
-      lockoutDurationMinutes: parseInt(Deno.env.get('RATE_LIMIT_LOCKOUT') || '30'),
-      progressiveDelaySeconds: parseInt(Deno.env.get('RATE_LIMIT_DELAY') || '60'),
+      lockoutDurationMinutes: parseInt(
+        Deno.env.get('RATE_LIMIT_LOCKOUT') || '30'
+      ),
+      progressiveDelaySeconds: parseInt(
+        Deno.env.get('RATE_LIMIT_DELAY') || '60'
+      ),
     };
 
     distributedRateLimiter = new DistributedRateLimiter(config);

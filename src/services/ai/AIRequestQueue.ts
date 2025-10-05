@@ -143,11 +143,19 @@ export class AIRequestQueue {
       logger.debug(`Processing request: ${request.id}`);
 
       // Execute with rate limiting
-      const result = await aiRateLimiter.executeWithRateLimit(
-        request.service,
-        request.identifier,
-        request.operation
+      const rateLimitResult = await aiRateLimiter.checkRateLimit(
+        request.identifier
       );
+      if (!rateLimitResult.allowed) {
+        throw new Error(
+          `Rate limit exceeded. Retry after ${rateLimitResult.retryAfter}ms`
+        );
+      }
+
+      const result = await request.operation();
+
+      // Record the request after successful execution
+      await aiRateLimiter.recordRequest(request.identifier);
 
       // Store result for waiting clients
       this.storeResult(request.id, { success: true, data: result });

@@ -11,7 +11,10 @@ import {
 } from '@mdi/js';
 import { useContentBuilder } from '../../context';
 import { useContentBuilderActions } from '../../hooks';
-import { ContentBuilderProgressProvider, CourseData } from './providers/ContentBuilderProgressProvider';
+import {
+  ContentBuilderProgressProvider,
+  CourseData,
+} from './providers/ContentBuilderProgressProvider';
 import { ContentBuilderUIProvider } from './providers/ContentBuilderUIProvider';
 import { ContentBuilderModuleProvider } from './providers/ContentBuilderModuleProvider';
 import { ContentBuilderAssessmentProvider } from './providers/ContentBuilderAssessmentProvider';
@@ -69,7 +72,9 @@ const UnifiedContentBuilder: React.FC = () => {
   };
 
   // Get progress metrics using provider
-  const progressMetrics = progressProvider.getProgressMetrics(courseData as CourseData);
+  const progressMetrics = progressProvider.getProgressMetrics(
+    courseData as CourseData
+  );
   const completionStatus = progressMetrics.completionStatus;
   const overallProgress = progressMetrics.overallProgress;
 
@@ -202,7 +207,8 @@ const UnifiedContentBuilder: React.FC = () => {
           <div className="space-y-4">
             {courseData.modules.map((module) => {
               const isExpanded = expandedModules.has(module.id);
-              const moduleProgress = progressMetrics.moduleProgress[module.id] || 0;
+              const moduleProgress =
+                progressMetrics.moduleProgress[module.id] || 0;
 
               return (
                 <div
@@ -407,7 +413,8 @@ const UnifiedContentBuilder: React.FC = () => {
           <div className="space-y-4">
             {courseData.assessments.map((assessment) => {
               const isExpanded = expandedAssessments.has(assessment.id);
-              const assessmentProgress = progressMetrics.assessmentProgress[assessment.id] || 0;
+              const assessmentProgress =
+                progressMetrics.assessmentProgress[assessment.id] || 0;
 
               return (
                 <div

@@ -6,16 +6,9 @@ interface SDSModalProps {
   onClose: () => void;
 }
 
-export const SDSModal: React.FC<SDSModalProps> = ({
-  selectedSDS,
-  onClose,
-}) => {
+export const SDSModal: React.FC<SDSModalProps> = ({ selectedSDS, onClose }) => {
   return (
-    <BaseModal
-      show={!!selectedSDS}
-      onClose={onClose}
-      title="Safety Data Sheet"
-    >
+    <BaseModal show={!!selectedSDS} onClose={onClose} title="Safety Data Sheet">
       {selectedSDS && (
         <div className="space-y-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4">

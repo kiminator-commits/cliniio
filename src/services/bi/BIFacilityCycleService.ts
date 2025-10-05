@@ -29,6 +29,11 @@ type AuditLogRow = Database['public']['Tables']['audit_logs']['Row'];
  * BI Facility and Cycle Service - Handles facilities, operators, cycles, and equipment
  */
 export class BIFacilityCycleService {
+  private static cache: Map<
+    string,
+    { data: SterilizationCycle[]; timestamp: number }
+  > = new Map();
+  private static CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   /**
    * Get all facilities
    */
@@ -116,9 +121,20 @@ export class BIFacilityCycleService {
     facilityId: string,
     limit: number = 50
   ): Promise<SterilizationCycle[]> {
+    const cacheKey = `${facilityId}-${limit}`;
+    const cached = this.cache.get(cacheKey);
+
+    // Return cached data if still valid
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      return cached.data;
+    }
+
+    // Optimize query - only select fields needed for analytics
     const { data, error } = await supabase
       .from('sterilization_cycles')
-      .select('*')
+      .select(
+        'id, cycle_number, start_time, end_time, status, parameters, tools'
+      )
       .eq('facility_id', facilityId)
       .order('start_time', { ascending: false })
       .limit(limit);
@@ -127,7 +143,7 @@ export class BIFacilityCycleService {
       throw new Error(`Failed to fetch sterilization cycles: ${error.message}`);
     }
 
-    return ((data as SterilizationCycleRow[]) || []).map(
+    const cycles = ((data as SterilizationCycleRow[]) || []).map(
       (item: SterilizationCycleRow) => ({
         id: item.id,
         facility_id: item.facility_id || '',
@@ -144,7 +160,7 @@ export class BIFacilityCycleService {
             | 'cancelled') || 'pending',
         start_time: item.start_time || '',
         end_time: item.end_time || undefined,
-        phases: (item.tools as SterilizationPhase[]) || [],
+        phases: (item.parameters as SterilizationPhase[]) || [],
         tools: (item.tools as Tool[]) || [],
         cycle_parameters: (item.parameters as CycleParameters) || {},
         environmental_factors: (item.results as EnvironmentalFactors) || {},
@@ -153,6 +169,11 @@ export class BIFacilityCycleService {
         updated_at: item.updated_at || '',
       })
     ) as SterilizationCycle[];
+
+    // Cache the result
+    this.cache.set(cacheKey, { data: cycles, timestamp: Date.now() });
+
+    return cycles;
   }
 
   /**

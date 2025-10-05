@@ -1,16 +1,26 @@
-import { DailyOperationsTaskRow, AITaskPerformance, UserGamificationStatsRow } from '@/types/aiTaskPerformanceTypes';
+import {
+  DailyOperationsTaskRow,
+  AITaskPerformance,
+  UserGamificationStatsRow,
+} from '@/types/aiTaskPerformanceTypes';
 
 /**
  * Calculate time saved between estimated and actual duration
  */
-export function calculateTimeSaved(estimatedDuration: number, actualDuration: number): number {
+export function calculateTimeSaved(
+  estimatedDuration: number,
+  actualDuration: number
+): number {
   return Math.max(0, estimatedDuration - actualDuration);
 }
 
 /**
  * Calculate efficiency score as percentage
  */
-export function calculateEfficiencyScore(actualDuration: number, estimatedDuration: number): number {
+export function calculateEfficiencyScore(
+  actualDuration: number,
+  estimatedDuration: number
+): number {
   return Math.min(100, (actualDuration / estimatedDuration) * 100);
 }
 
@@ -31,7 +41,10 @@ export function minutesToHours(minutes: number): number {
 /**
  * Calculate cost saved based on time saved and hourly rate
  */
-export function calculateCostSaved(timeSavedMinutes: number, hourlyRate: number): number {
+export function calculateCostSaved(
+  timeSavedMinutes: number,
+  hourlyRate: number
+): number {
   const hoursSaved = minutesToHours(timeSavedMinutes);
   return hoursSaved * hourlyRate;
 }
@@ -47,7 +60,10 @@ export function calculateProactiveScore(completedAt: string): number {
 /**
  * Calculate category score based on task category
  */
-export function calculateCategoryScore(category: string, efficiencyScore: number): number {
+export function calculateCategoryScore(
+  category: string,
+  efficiencyScore: number
+): number {
   switch (category) {
     case 'inventory':
     case 'sterilization':
@@ -96,7 +112,10 @@ export function generateTimeSavingsCacheKey(facilityId: string): string {
 /**
  * Generate cache key for cost savings
  */
-export function generateCostSavingsCacheKey(facilityId: string, hourlyRate: number): string {
+export function generateCostSavingsCacheKey(
+  facilityId: string,
+  hourlyRate: number
+): string {
   return `cost-savings-${facilityId}-${hourlyRate}`;
 }
 
@@ -125,7 +144,10 @@ export function calculateAverage(numbers: number[]): number {
 /**
  * Calculate percentage from ratio
  */
-export function calculatePercentage(numerator: number, denominator: number): number {
+export function calculatePercentage(
+  numerator: number,
+  denominator: number
+): number {
   if (denominator === 0) return 0;
   return Math.round((numerator / denominator) * 100);
 }
@@ -147,7 +169,10 @@ export function getMaxValue(numbers: number[]): number {
 /**
  * Filter array by condition and return count
  */
-export function countByCondition<T>(array: T[], condition: (item: T) => boolean): number {
+export function countByCondition<T>(
+  array: T[],
+  condition: (item: T) => boolean
+): number {
   return array.filter(condition).length;
 }
 
@@ -162,7 +187,10 @@ export function transformTaskToPerformance(
   const estimatedDuration = taskData.estimated_duration || 30;
   const actualDuration = taskData.actual_duration || 0;
   const timeSaved = calculateTimeSaved(estimatedDuration, actualDuration);
-  const efficiencyScore = calculateEfficiencyScore(actualDuration, estimatedDuration);
+  const efficiencyScore = calculateEfficiencyScore(
+    actualDuration,
+    estimatedDuration
+  );
 
   return {
     taskId,
@@ -182,16 +210,22 @@ export function transformTaskToPerformance(
 /**
  * Calculate gamification stats aggregates
  */
-export function calculateGamificationStats(gamificationStats: UserGamificationStatsRow[]) {
+export function calculateGamificationStats(
+  gamificationStats: UserGamificationStatsRow[]
+) {
   return {
-    totalTasks: sumArray(gamificationStats.map(stat => stat.total_tasks)),
-    completedTasks: sumArray(gamificationStats.map(stat => stat.completed_tasks)),
+    totalTasks: sumArray(gamificationStats.map((stat) => stat.total_tasks)),
+    completedTasks: sumArray(
+      gamificationStats.map((stat) => stat.completed_tasks)
+    ),
     perfectDays: countByCondition(
       gamificationStats,
-      stat => stat.completed_tasks === stat.total_tasks
+      (stat) => stat.completed_tasks === stat.total_tasks
     ),
-    currentStreak: getMaxValue(gamificationStats.map(stat => stat.current_streak)),
-    bestStreak: getMaxValue(gamificationStats.map(stat => stat.best_streak)),
+    currentStreak: getMaxValue(
+      gamificationStats.map((stat) => stat.current_streak)
+    ),
+    bestStreak: getMaxValue(gamificationStats.map((stat) => stat.best_streak)),
   };
 }
 
@@ -203,20 +237,30 @@ export function calculateTeamPerformanceAggregates(
   inventoryData: { accuracy: number | null }[],
   sterilizationData: { status: string | null }[]
 ) {
-  const skills = learningData.length > 0 
-    ? Math.round(calculateAverage(learningData.map(item => item.progress ?? 0)))
-    : 0;
+  const skills =
+    learningData.length > 0
+      ? Math.round(
+          calculateAverage(learningData.map((item) => item.progress ?? 0))
+        )
+      : 0;
 
-  const inventory = inventoryData.length > 0
-    ? Math.round(calculateAverage(inventoryData.map(item => item.accuracy ?? 0)))
-    : 0;
+  const inventory =
+    inventoryData.length > 0
+      ? Math.round(
+          calculateAverage(inventoryData.map((item) => item.accuracy ?? 0))
+        )
+      : 0;
 
-  const sterilization = sterilizationData.length > 0
-    ? calculatePercentage(
-        countByCondition(sterilizationData, cycle => cycle.status === 'completed'),
-        sterilizationData.length
-      )
-    : 0;
+  const sterilization =
+    sterilizationData.length > 0
+      ? calculatePercentage(
+          countByCondition(
+            sterilizationData,
+            (cycle) => cycle.status === 'completed'
+          ),
+          sterilizationData.length
+        )
+      : 0;
 
   return { skills, inventory, sterilization };
 }

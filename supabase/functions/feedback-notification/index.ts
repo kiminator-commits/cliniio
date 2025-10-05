@@ -1,10 +1,18 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCorsHeaders, isValidOrigin } from './cors.ts';
-import { checkRateLimit, getClientId, getRateLimitConfig } from './rateLimiting.ts';
+import {
+  checkRateLimit,
+  getClientId,
+  getRateLimitConfig,
+} from './rateLimiting.ts';
 import { logSecurityEvent, detectSuspiciousActivity } from './security.ts';
 import { validateFeedbackInput } from './validation.ts';
-import { sendEmail, DEV_TEAM_EMAILS, EmailServiceConfig } from './emailService.ts';
+import {
+  sendEmail,
+  DEV_TEAM_EMAILS,
+  EmailServiceConfig,
+} from './emailService.ts';
 
 serve(async (req) => {
   // Get the origin from the request

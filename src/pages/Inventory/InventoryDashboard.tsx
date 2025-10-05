@@ -4,8 +4,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 // Component imports
 import InventoryHeader from '../../components/Inventory/ui/InventoryHeader';
-import InventoryInsightsCard from '../../components/Inventory/analytics/InventoryInsightsCard';
-import CategoriesCard from '../../components/Inventory/analytics/CategoriesCard';
+// import InventoryInsightsCard as _InventoryInsightsCard from '../../components/Inventory/analytics/InventoryInsightsCard';
+// import CategoriesCard as _CategoriesCard from '../../components/Inventory/analytics/CategoriesCard';
 import { InventoryErrorFallback } from '@/components/Error/InventoryErrorFallback';
 import { CardSkeleton, TableSkeleton } from '@/components/ui/Skeleton';
 
@@ -42,6 +42,14 @@ const InventoryTableSection = lazy(
   () => import('@/components/Inventory/InventoryTableSection')
 );
 
+// Lazy load heavy analytics components
+const InventoryInsightsCardLazy = lazy(
+  () => import('../../components/Inventory/analytics/InventoryInsightsCard')
+);
+const CategoriesCardLazy = lazy(
+  () => import('../../components/Inventory/analytics/CategoriesCard')
+);
+
 const InventoryDashboard: React.FC = () => {
   // Get data from focused hooks
   const { refreshData } = useInventoryDataAccess();
@@ -73,7 +81,7 @@ const InventoryDashboard: React.FC = () => {
   const { getProgressInfo } = useScanModalManagement();
 
   // Get form data directly from inventory store
-  const { formData: storeFormData } = useInventoryStore();
+  const { formData: storeFormData, activeTab } = useInventoryStore();
 
   // Transform form data for modal - make it reactive to store changes
   const transformedFormData = useMemo(
@@ -94,6 +102,28 @@ const InventoryDashboard: React.FC = () => {
 
   // Get setActiveTab from the store before using it in context
   const { setActiveTab } = useInventoryStore();
+
+  // Get current items based on active tab
+  const getCurrentItems = useMemo(() => {
+    switch (activeTab) {
+      case 'tools':
+        return inventoryData || [];
+      case 'supplies':
+        return suppliesData || [];
+      case 'equipment':
+        return equipmentData || [];
+      case 'officeHardware':
+        return officeHardwareData || [];
+      default:
+        return inventoryData || [];
+    }
+  }, [
+    activeTab,
+    inventoryData,
+    suppliesData,
+    equipmentData,
+    officeHardwareData,
+  ]);
 
   const contextValue: InventoryDashboardContextType = {
     showTrackedOnly: false, // Default value
@@ -176,10 +206,10 @@ const InventoryDashboard: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex flex-col gap-4 lg:w-1/4 pl-4">
               <Suspense fallback={<CardSkeleton />}>
-                <InventoryInsightsCard data={insightsData} />
+                <InventoryInsightsCardLazy data={insightsData} />
               </Suspense>
               <Suspense fallback={<CardSkeleton />}>
-                <CategoriesCard
+                <CategoriesCardLazy
                   onCategoryChange={(tab) => setActiveTab(tab)}
                   counts={{
                     tools: inventoryData?.length || 0,
@@ -199,8 +229,9 @@ const InventoryDashboard: React.FC = () => {
                   aria-label="inventory table and controls"
                 >
                   <InventoryTableSection
-                    handleEditClick={handleEditItem}
-                    handleDeleteItem={handleDeleteItem}
+                    onEdit={handleEditItem}
+                    onDelete={handleDeleteItem}
+                    items={getCurrentItems}
                   />
                 </div>
               </Suspense>
