@@ -1,20 +1,22 @@
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '../types/database.types';
-import { getEnvVar } from './getEnv';
+import { createClient } from "@supabase/supabase-js";
 
-// Get environment variables with proper fallbacks
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', 'https://mock.supabase.co');
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY', 'mock-anon-key');
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-// For CI/testing environments, use service role key if available to bypass RLS
-const isTestEnvironment =
-  (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test') ||
-  (typeof process !== 'undefined' && process?.env?.CI === 'true');
-const serviceRoleKey = getEnvVar('SUPABASE_SERVICE_ROLE_KEY', '');
+// Development-only diagnostics
+if (import.meta.env.DEV) {
+  console.info("🧩 Supabase client initialized (dev mode)");
+  console.info("URL:", SUPABASE_URL);
+} else {
+  // Silence all Supabase env logs in production
+  console.debug = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+}
 
-// Use service role key in test/CI environments to bypass RLS, otherwise use anon key
-const supabaseKey =
-  isTestEnvironment && serviceRoleKey ? serviceRoleKey : supabaseAnonKey;
-
-// Create Supabase client with appropriate key
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: true,
+  },
+});

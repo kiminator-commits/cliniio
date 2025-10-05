@@ -10,8 +10,9 @@ import {
   mdiDownload,
   mdiPrinter,
 } from '@mdi/js';
-import { BIFailureService } from '../../services/biFailureService';
+import { biFailureService } from '../../services/bi/failure/index';
 import { useSterilizationStore } from '@/store/sterilizationStore';
+import { exportService } from '@/services/bi/failure/exportService';
 
 /**
  * Get current incident ID from sterilization store or fallback
@@ -55,169 +56,13 @@ const getCurrentIncidentId = async (): Promise<string | null> => {
 /**
  * Handle printing the exposure report
  */
-const handlePrintReport = (report: ExposureReport) => {
-  try {
-    // Create a print-friendly version of the report
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Please allow pop-ups to print the report.');
-      return;
-    }
-
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Patient Exposure Report - ${report.incidentNumber}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-            .summary { margin-bottom: 30px; }
-            .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
-            .summary-item { border: 1px solid #ddd; padding: 15px; text-align: center; }
-            .summary-item h3 { margin: 0 0 10px 0; color: #333; }
-            .summary-item .number { font-size: 24px; font-weight: bold; color: #2563eb; }
-            .risk-breakdown { margin-bottom: 30px; }
-            .risk-item { display: flex; justify-content: space-between; padding: 5px 0; }
-            .high { color: #dc2626; }
-            .medium { color: #ea580c; }
-            .low { color: #16a34a; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f9fafb; font-weight: bold; }
-            .risk-badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-            .risk-badge.high { background-color: #fef2f2; color: #dc2626; }
-            .risk-badge.medium { background-color: #fff7ed; color: #ea580c; }
-            .risk-badge.low { background-color: #f0fdf4; color: #16a34a; }
-            @media print {
-              body { margin: 0; }
-              .no-print { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Exposure Report</h1>
-            <p><strong>Incident Number:</strong> ${report.incidentNumber}</p>
-            <p><strong>Generated:</strong> ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-          </div>
-
-          <div class="summary">
-            <h2>Exposure Summary</h2>
-            <div class="summary-grid">
-              <div class="summary-item">
-                <h3>Total Rooms Affected</h3>
-                <div class="number">${report.totalRoomsAffected}</div>
-              </div>
-            </div>
-          </div>
-
-          ${
-            report.roomDetails && report.roomDetails.length > 0
-              ? `
-            <h2>Affected Rooms</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Room ID</th>
-                  <th>Room Name</th>
-                  <th>Contamination Date</th>
-                  <th>Room Used Date</th>
-                  <th>Users Involved</th>
-                  <th>Contaminated Tools</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${report.roomDetails
-                  .map(
-                    (room) => `
-                  <tr>
-                    <td>${room.roomId}</td>
-                    <td>${room.roomName}</td>
-                    <td>${new Date(room.contaminationDate).toLocaleDateString()}</td>
-                    <td>${new Date(room.roomUsedDate).toLocaleDateString()}</td>
-                    <td>${room.usersInvolved.join(', ')}</td>
-                    <td>${room.contaminatedTools.length} tools</td>
-                  </tr>
-                `
-                  )
-                  .join('')}
-              </tbody>
-            </table>
-          `
-              : '<p><em>No room details available</em></p>'
-          }
-
-          <div class="no-print" style="margin-top: 30px; text-align: center;">
-            <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">
-              Print Report
-            </button>
-            <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-              Close
-            </button>
-          </div>
-        </body>
-      </html>
-    `;
-
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-
-    // Auto-print when content is loaded
-    printWindow.onload = () => {
-      printWindow.print();
-    };
-  } catch (error) {
-    console.error('Failed to print exposure report:', error);
-    alert('Failed to print report. Please try again.');
-  }
+const handlePrintReport = () => {
+  exportService.exportExposureReport("pdf");
 };
 
 // Export function for exposure report
-const exportExposureReport = (report: ExposureReport) => {
-  try {
-    // Create CSV content
-    const headers = [
-      'Incident Number',
-      'Room ID',
-      'Room Name',
-      'Contamination Date',
-      'Room Used Date',
-      'Users Involved',
-      'Contaminated Tools Count',
-      'Contaminated Tools List',
-    ];
-
-    const csvContent = [
-      headers.join(','),
-      ...(report.roomDetails?.map((room) =>
-        [
-          report.incidentNumber,
-          room.roomId,
-          room.roomName,
-          new Date(room.contaminationDate).toLocaleDateString(),
-          new Date(room.roomUsedDate).toLocaleDateString(),
-          room.usersInvolved.join(';'),
-          room.contaminatedTools.length.toString(),
-          room.contaminatedTools.join(';'),
-        ].join(',')
-      ) || []),
-    ].join('\n');
-
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `exposure_report_${report.incidentNumber}_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Failed to export exposure report:', error);
-    alert('Failed to export report. Please try again.');
-  }
+const exportExposureReport = () => {
+  exportService.exportExposureReport("csv");
 };
 
 interface ExposureReportProps {
@@ -260,7 +105,7 @@ export const ExposureReport: React.FC<ExposureReportProps> = ({
       }
 
       const exposureReport =
-        await BIFailureService.generateExposureReport(currentIncidentId);
+        await biFailureService.generateExposureReport(currentIncidentId);
       setReport(exposureReport);
     } catch (err) {
       setError(
@@ -529,11 +374,9 @@ export const ExposureReport: React.FC<ExposureReportProps> = ({
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="flex space-x-3">
                   <button
-                    onClick={() => {
-                      exportExposureReport(report);
-                    }}
+                    onClick={exportExposureReport}
                     onKeyDown={(e) =>
-                      e.key === 'Enter' && exportExposureReport(report)
+                      e.key === 'Enter' && exportExposureReport()
                     }
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     aria-label="Export exposure report"
@@ -542,11 +385,9 @@ export const ExposureReport: React.FC<ExposureReportProps> = ({
                     <span>Export Report</span>
                   </button>
                   <button
-                    onClick={() => {
-                      handlePrintReport(report);
-                    }}
+                    onClick={handlePrintReport}
                     onKeyDown={(e) =>
-                      e.key === 'Enter' && handlePrintReport(report)
+                      e.key === 'Enter' && handlePrintReport()
                     }
                     className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                     aria-label="Print exposure report"

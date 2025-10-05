@@ -61,6 +61,11 @@ class PerformanceMetricsCache {
         ),
       ]);
 
+      console.log('🔍 PerformanceMetricsCache: AI Metrics result:', aiMetrics);
+      console.log('🔍 PerformanceMetricsCache: Sterilization result:', sterilizationMetrics);
+      console.log('🔍 PerformanceMetricsCache: Integration result:', integrationMetrics);
+      console.log('🔍 PerformanceMetricsCache: AI Impact result:', aiImpactMetrics);
+
       const cachedMetrics: CachedPerformanceMetrics = {
         aiMetrics: aiMetrics.status === 'fulfilled' ? aiMetrics.value : null,
         sterilizationMetrics:
