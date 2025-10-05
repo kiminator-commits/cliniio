@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
 
 interface ExposureReportPrintProps {
-  exposures: any[]
-  facilityName: string
-  reportDate: string
+  exposures: Record<string, unknown>[];
+  facilityName: string;
+  reportDate: string;
 }
 
 export default function ExposureReportPrint({
@@ -13,8 +13,8 @@ export default function ExposureReportPrint({
 }: ExposureReportPrintProps) {
   useEffect(() => {
     // Automatically trigger print dialog once
-    window.print()
-  }, [])
+    window.print();
+  }, []);
 
   return (
     <div
@@ -28,7 +28,13 @@ export default function ExposureReportPrint({
       <h1 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
         Patient Exposure Report
       </h1>
-      <p style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+      <p
+        style={{
+          textAlign: 'center',
+          marginBottom: '1.5rem',
+          fontSize: '0.9rem',
+        }}
+      >
         {facilityName} — {reportDate}
       </p>
 
@@ -87,5 +93,5 @@ export default function ExposureReportPrint({
         Generated on {new Date().toLocaleString()}
       </p>
     </div>
-  )
+  );
 }

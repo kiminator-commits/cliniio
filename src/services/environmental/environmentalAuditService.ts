@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient';
 
 export async function logEnvironmentalAudit({
   facilityId,
@@ -9,13 +9,13 @@ export async function logEnvironmentalAudit({
   notes = null,
   timestamp = new Date().toISOString(),
 }: {
-  facilityId: string
-  area: string
-  task: string
-  userId: string
-  status: string
-  notes?: string | null
-  timestamp?: string
+  facilityId: string;
+  area: string;
+  task: string;
+  userId: string;
+  status: string;
+  notes?: string | null;
+  timestamp?: string;
 }) {
   try {
     const { error } = await supabase.from('environmental_clean_audits').insert([
@@ -28,17 +28,20 @@ export async function logEnvironmentalAudit({
         notes,
         logged_at: timestamp,
       },
-    ])
+    ]);
 
-    if (error) throw error
+    if (error) throw error;
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug(`🧾 Logged environmental audit for ${area} (${task})`)
+      console.debug(`🧾 Logged environmental audit for ${area} (${task})`);
     }
 
-    return true
-  } catch (err: any) {
-    console.error('logEnvironmentalAudit failed:', err.message)
-    return false
+    return true;
+  } catch (err: unknown) {
+    console.error(
+      'logEnvironmentalAudit failed:',
+      err instanceof Error ? err.message : String(err)
+    );
+    return false;
   }
 }

@@ -26,8 +26,11 @@ export async function loadBIComplianceSettings(facilityId: string) {
     }
 
     return settings;
-  } catch (err: any) {
-    console.error('loadBIComplianceSettings failed:', err.message);
+  } catch (err: unknown) {
+    console.error(
+      'loadBIComplianceSettings failed:',
+      err instanceof Error ? err.message : String(err)
+    );
     return {
       auto_close_failures: false,
       alert_threshold_minutes: 60,
@@ -43,7 +46,7 @@ export async function loadBIComplianceSettings(facilityId: string) {
  */
 export async function syncWithSupabase(
   facilityId: string,
-  pendingChanges: any[]
+  pendingChanges: Record<string, unknown>[]
 ) {
   if (!Array.isArray(pendingChanges) || pendingChanges.length === 0) return 0;
   let successCount = 0;
@@ -98,8 +101,11 @@ export async function syncWithSupabase(
             console.debug(`Skipping unknown BI change type: ${change.type}`);
           }
       }
-    } catch (err: any) {
-      console.error(`syncWithSupabase failed for ${change.type}:`, err.message);
+    } catch (err: unknown) {
+      console.error(
+        `syncWithSupabase failed for ${change.type}:`,
+        err instanceof Error ? err.message : String(err)
+      );
     }
   }
 
@@ -114,35 +120,43 @@ export async function syncWithSupabase(
 
 export function subscribeToBIFailureUpdates(
   facilityId: string,
-  onUpdate: (payload: any) => void
+  onUpdate: (payload: Record<string, unknown>) => void
 ) {
-  if (!facilityId) return () => {}
+  if (!facilityId) return () => {};
 
   try {
     const channel = supabase
       .channel(`bi_failures_${facilityId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'bi_failures', filter: `facility_id=eq.${facilityId}` },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bi_failures',
+          filter: `facility_id=eq.${facilityId}`,
+        },
         (payload) => {
-          if (typeof onUpdate === 'function') onUpdate(payload)
+          if (typeof onUpdate === 'function') onUpdate(payload);
         }
       )
       .subscribe((status) => {
         if (process.env.NODE_ENV === 'development') {
-          console.debug(`📡 BI realtime subscription: ${status}`)
+          console.debug(`📡 BI realtime subscription: ${status}`);
         }
-      })
+      });
 
     // ✅ Provide a cleanup handle for safe unsubscription
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(channel);
       if (process.env.NODE_ENV === 'development') {
-        console.debug('🧹 BI realtime listener unsubscribed.')
+        console.debug('🧹 BI realtime listener unsubscribed.');
       }
-    }
-  } catch (err: any) {
-    console.error('subscribeToBIFailureUpdates failed:', err.message)
-    return () => {}
+    };
+  } catch (err: unknown) {
+    console.error(
+      'subscribeToBIFailureUpdates failed:',
+      err instanceof Error ? err.message : String(err)
+    );
+    return () => {};
   }
 }

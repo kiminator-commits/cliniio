@@ -1,6 +1,12 @@
 import { supabase } from '@/lib/supabaseClient';
 
-export async function runWorkflowAutomation({ scanData, facilityId }: any) {
+export async function runWorkflowAutomation({
+  scanData,
+  facilityId,
+}: {
+  scanData: Record<string, unknown>;
+  facilityId: string;
+}) {
   if (!scanData || !facilityId) return;
 
   try {
@@ -28,7 +34,10 @@ export async function runWorkflowAutomation({ scanData, facilityId }: any) {
           console.debug(`Unknown workflow scan type: ${scanData.type}`);
         }
     }
-  } catch (err: any) {
-    console.error('runWorkflowAutomation failed:', err.message);
+  } catch (err: unknown) {
+    console.error(
+      'runWorkflowAutomation failed:',
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }

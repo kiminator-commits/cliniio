@@ -42,10 +42,25 @@ const safeRecordArray = (value: unknown): Record<string, unknown>[] => {
 
 // Fetch all content items from Supabase
 export async function getAllContentItems(): Promise<ContentItem[]> {
-  const { data, error } = await supabase
-    .from('knowledge_hub_courses')
-    .select('*')
-    .order('created_at', { ascending: false });
+  // Get current user for facility scoping
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  let facilityId: string | null = null;
+  if (!authError && user) {
+    facilityId = user.user_metadata?.facility_id || null;
+  }
+
+  const query = supabase.from('knowledge_hub_courses').select('*');
+
+  // Only add facility scoping if facility_id is available
+  if (facilityId) {
+    query.eq('facility_id', facilityId); // Enforces tenant isolation
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching content items:', error);

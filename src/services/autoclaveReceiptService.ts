@@ -100,10 +100,13 @@ export class AutoclaveReceiptService {
         throw new Error(`Failed to upload file: ${uploadError.message}`);
       }
 
-      // Get the public URL
-      const { data: _urlData } = supabase.storage
-        .from('autoclave-receipts')
-        .getPublicUrl(filename);
+      // Generate signed URL for secure access
+      const { data: signedUrlData, error: signedUrlError } =
+        await supabase.storage
+          .from('autoclave-receipts')
+          .createSignedUrl(filename, 3600); // 1-hour expiry
+
+      if (signedUrlError) throw signedUrlError;
 
       // Calculate retention date (default 24 months)
       const retentionMonths = 24; // Default retention period
@@ -116,6 +119,7 @@ export class AutoclaveReceiptService {
         .insert({
           autoclave_id: null, // Will be linked when autoclave is identified
           receipt_number: upload.batchCode, // Using batch code as receipt number
+          facility_id: userProfile.facility_id, // Enforces tenant isolation
         })
         .select()
         .single();
@@ -142,11 +146,30 @@ export class AutoclaveReceiptService {
     batchCode: string
   ): Promise<AutoclaveReceipt[]> {
     try {
-      const { data, error } = await supabase
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase
         .from('autoclave_receipts')
         .select('*')
-        .eq('receipt_number', batchCode)
-        .order('created_at', { ascending: false });
+        .eq('receipt_number', batchCode);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { data, error } = await query.order('created_at', {
+        ascending: false,
+      });
 
       if (error) {
         throw new Error(`Failed to fetch receipts: ${error.message}`);
@@ -167,9 +190,25 @@ export class AutoclaveReceiptService {
     offset = 0
   ): Promise<AutoclaveReceipt[]> {
     try {
-      const { data, error } = await supabase
-        .from('autoclave_receipts')
-        .select('*')
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase.from('autoclave_receipts').select('*');
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { data, error } = await query
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
@@ -189,22 +228,46 @@ export class AutoclaveReceiptService {
    */
   static async deleteReceipt(receiptId: string): Promise<void> {
     try {
-      // Get receipt info first
-      const { data: _receipt, error: fetchError } = await supabase
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      // Get receipt info first with facility scoping
+      const query = supabase
         .from('autoclave_receipts')
         .select('id')
-        .eq('id', receiptId)
-        .single();
+        .eq('id', receiptId);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { data: _receipt, error: fetchError } = await query.single();
 
       if (fetchError) {
         throw new Error(`Failed to fetch receipt: ${fetchError.message}`);
       }
 
-      // Delete from database
-      const { error: deleteError } = await supabase
+      // Delete from database with facility scoping
+      const deleteQuery = supabase
         .from('autoclave_receipts')
         .delete()
         .eq('id', receiptId);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        deleteQuery.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { error: deleteError } = await deleteQuery;
 
       if (deleteError) {
         throw new Error(`Failed to delete receipt: ${deleteError.message}`);
@@ -254,11 +317,26 @@ export class AutoclaveReceiptService {
    */
   static async cleanupExpiredReceipts(): Promise<number> {
     try {
-      // Get expired receipts (using a simple approach since is_expired doesn't exist)
-      const { data: expiredReceipts, error: fetchError } = await supabase
-        .from('autoclave_receipts')
-        .select('id')
-        .limit(0); // Return no results since we don't have expiration tracking
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      // Get expired receipts with facility scoping
+      const query = supabase.from('autoclave_receipts').select('id').limit(0); // Return no results since we don't have expiration tracking
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { data: expiredReceipts, error: fetchError } = await query;
 
       if (fetchError) {
         throw new Error(
@@ -270,14 +348,22 @@ export class AutoclaveReceiptService {
         return 0;
       }
 
-      // Delete from database
+      // Delete from database with facility scoping
       const receiptIds = (expiredReceipts as Record<string, unknown>[]).map(
         (r: Record<string, unknown>) => r.id as string
       );
-      const { error: deleteError } = await supabase
+
+      const deleteQuery = supabase
         .from('autoclave_receipts')
         .delete()
         .in('id', receiptIds);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        deleteQuery.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { error: deleteError } = await deleteQuery;
 
       if (deleteError) {
         throw new Error(

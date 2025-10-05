@@ -35,12 +35,28 @@ export class TypedSupabaseAdapter {
     options?: InventoryQueryOptions
   ): Promise<InventoryBatchTransformationResult> {
     try {
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
       const query = supabase
         .from(this.tableName)
         .select(options?.select || '*')
         .order(options?.orderBy?.column || 'created_at', {
           ascending: options?.orderBy?.ascending ?? false,
         });
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
 
       if (options?.limit) {
         query.limit(options.limit);
@@ -117,11 +133,25 @@ export class TypedSupabaseAdapter {
    */
   async getItemById(id: string): Promise<InventoryTransformationResult> {
     try {
-      const response = await supabase
-        .from(this.tableName)
-        .select('*')
-        .eq('id', id)
-        .single();
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase.from(this.tableName).select('*').eq('id', id);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const response = await query.single();
 
       if (!isSupabaseResponse<SupabaseInventoryRow>(response)) {
         return {
@@ -162,9 +192,26 @@ export class TypedSupabaseAdapter {
     itemData: CreateInventoryItemData
   ): Promise<InventoryTransformationResult> {
     try {
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      // Ensure facility_id is included in the insert data
+      const insertData = {
+        ...itemData,
+        facility_id: facilityId || itemData.facility_id, // Use provided or derived facility_id
+      };
+
       const response = await supabase
         .from(this.tableName)
-        .insert([itemData])
+        .insert([insertData])
         .select()
         .single();
 
@@ -208,12 +255,25 @@ export class TypedSupabaseAdapter {
     updates: UpdateInventoryItemData
   ): Promise<InventoryTransformationResult> {
     try {
-      const response = await supabase
-        .from(this.tableName)
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase.from(this.tableName).update(updates).eq('id', id);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const response = await query.select().single();
 
       if (!isSupabaseResponse<SupabaseInventoryRow>(response)) {
         return {
@@ -252,10 +312,25 @@ export class TypedSupabaseAdapter {
    */
   async deleteItem(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await supabase
-        .from(this.tableName)
-        .delete()
-        .eq('id', id);
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase.from(this.tableName).delete().eq('id', id);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const response = await query;
 
       if (!isSupabaseResponse<SupabaseInventoryRow>(response)) {
         return {

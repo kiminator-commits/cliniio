@@ -41,9 +41,12 @@ export function useInventoryUpload(facilityId: string) {
       }
 
       return uploadData;
-    } catch (err: any) {
-      console.error('handleInventoryUpload failed:', err.message);
-      setError(err.message);
+    } catch (err: unknown) {
+      console.error(
+        'handleInventoryUpload failed:',
+        err instanceof Error ? err.message : String(err)
+      );
+      setError(err instanceof Error ? err.message : String(err));
       return null;
     } finally {
       setUploading(false);

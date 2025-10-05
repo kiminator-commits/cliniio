@@ -29,10 +29,19 @@ interface EnvironmentalCleanRow {
 export class RoomService {
   static async fetchRooms(): Promise<Room[]> {
     try {
-      const { data, error } = await supabase
-        .from('environmental_cleans_enhanced')
-        .select(
-          `
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase.from('environmental_cleans_enhanced').select(
+        `
           id,
           room_id,
           room_name,
@@ -45,8 +54,16 @@ export class RoomService {
           created_at,
           updated_at
         `
-        )
-        .order('scheduled_time', { ascending: false });
+      );
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { data, error } = await query.order('scheduled_time', {
+        ascending: false,
+      });
 
       if (error) throw error;
 
@@ -138,13 +155,31 @@ export class RoomService {
     status: RoomStatusType
   ): Promise<void> {
     try {
-      const { error } = await supabase
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase
         .from('environmental_cleans_enhanced')
         .update({
           status: mapRoomStatusToDatabaseStatus(status),
           updated_at: new Date().toISOString(),
         } as Database['public']['Tables']['environmental_cleans_enhanced']['Update'])
         .eq('room_id', roomId);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -164,9 +199,19 @@ export class RoomService {
     roomData: Partial<Room>
   ): Promise<Room> {
     try {
-      const { data, error } = await supabase
-        .from('environmental_cleans_enhanced')
-        .insert({
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const insertData: Database['public']['Tables']['environmental_cleans_enhanced']['Insert'] =
+        {
           room_id: roomData.id ?? '',
           room_name: roomData.name ?? '',
           status: 'pending',
@@ -175,7 +220,18 @@ export class RoomService {
           checklist_items: [],
           completed_items: [],
           failed_items: [],
-        } as Database['public']['Tables']['environmental_cleans_enhanced']['Insert'])
+        };
+
+      // Only add facility_id if available
+      if (facilityId) {
+        insertData.facility_id = facilityId; // Enforces tenant isolation
+      }
+
+      const { data, error } = await supabase
+        .from('environmental_cleans_enhanced')
+        .insert(
+          insertData as Database['public']['Tables']['environmental_cleans_enhanced']['Insert']
+        )
         .select()
         .single();
 
@@ -220,6 +276,17 @@ export class RoomService {
     roomData: Partial<Room>
   ): Promise<Room> {
     try {
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
       const updateData: Partial<EnvironmentalCleanRow> = {
         updated_at: new Date().toISOString(),
       };
@@ -231,14 +298,19 @@ export class RoomService {
         updateData.status = mapRoomStatusToDatabaseStatus(roomData.status);
       }
 
-      const { data, error } = await supabase
+      const query = supabase
         .from('environmental_cleans_enhanced')
         .update(
           updateData as Database['public']['Tables']['environmental_cleans_enhanced']['Update']
         )
-        .eq('room_id', id)
-        .select()
-        .single();
+        .eq('room_id', id);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { data, error } = await query.select().single();
 
       if (error || !data) throw error ?? new Error('Update failed');
 
@@ -283,10 +355,28 @@ export class RoomService {
 
   static async deleteEnvironmentalClean(id: string): Promise<void> {
     try {
-      const { error } = await supabase
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase
         .from('environmental_cleans_enhanced')
         .delete()
         .eq('room_id', id);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -305,7 +395,18 @@ export class RoomService {
     try {
       if (!roomId) throw new Error('Room ID is required');
 
-      const { error } = await supabase
+      // Get current user for facility scoping
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      let facilityId: string | null = null;
+      if (!authError && user) {
+        facilityId = user.user_metadata?.facility_id || null;
+      }
+
+      const query = supabase
         .from('environmental_cleans_enhanced')
         .update({
           status: 'completed',
@@ -313,6 +414,13 @@ export class RoomService {
           updated_at: new Date().toISOString(),
         } as Database['public']['Tables']['environmental_cleans_enhanced']['Update'])
         .eq('room_id', roomId);
+
+      // Only add facility scoping if facility_id is available
+      if (facilityId) {
+        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      }
+
+      const { error } = await query;
 
       if (error) throw error;
 
