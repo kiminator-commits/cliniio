@@ -1,81 +1,56 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 
-export function useInventoryUpload() {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<
-    'idle' | 'uploading' | 'success' | 'error'
-  >('idle');
+export function useInventoryUpload(facilityId: string) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleShowUploadModal = useCallback(() => {
-    setIsUploadModalOpen(true);
-    setUploadStatus('idle');
-    setUploadProgress(0);
-  }, []);
+  async function handleInventoryUpload(file: File) {
+    if (!file || !facilityId) return
 
-  const handleCloseUploadModal = useCallback(() => {
-    setIsUploadModalOpen(false);
-    setUploadStatus('idle');
-    setUploadProgress(0);
-  }, []);
+    try {
+      setUploading(true)
+      setError(null)
 
-  const handleFileUpload = useCallback(
-    async (file: File) => {
-      try {
-        setUploadStatus('uploading');
-        setUploadProgress(0);
+      // Upload file to Supabase Storage bucket "inventory_uploads"
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('inventory_uploads')
+        .upload(`${facilityId}/${Date.now()}_${file.name}`, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
 
-        // Simulate upload progress
-        const progressInterval = setInterval(() => {
-          setUploadProgress((prev) => {
-            if (prev >= 90) {
-              clearInterval(progressInterval);
-              return 90;
-            }
-            return prev + 10;
-          });
-        }, 200);
+      if (uploadError) throw uploadError
 
-        // Import the file using the existing import service
-        const { InventoryImportService } = await import(
-          '../pages/Inventory/services/inventoryImportService'
-        );
-        const result = await InventoryImportService.importItems(file, {
-          format: 'csv',
-          hasHeaders: true,
-          duplicateHandling: 'skip',
-        });
+      // Record metadata for audit tracking
+      const { error: insertError } = await supabase.from('inventory_files').insert([
+        {
+          facility_id: facilityId,
+          file_name: file.name,
+          storage_path: uploadData?.path || '',
+          uploaded_at: new Date().toISOString(),
+        },
+      ])
 
-        clearInterval(progressInterval);
-        setUploadProgress(100);
+      if (insertError) throw insertError
 
-        if (result.success) {
-          setUploadStatus('success');
-          console.log('Upload successful:', result);
-        } else {
-          setUploadStatus('error');
-          console.error('Upload failed:', result.errors);
-        }
-
-        // Auto-close modal after 2 seconds
-        setTimeout(() => {
-          handleCloseUploadModal();
-        }, 2000);
-      } catch (error) {
-        setUploadStatus('error');
-        setUploadProgress(0);
-        console.error('Upload error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug(`📦 Uploaded inventory file: ${file.name}`)
       }
-    },
-    [handleCloseUploadModal]
-  );
+
+      return uploadData
+    } catch (err: any) {
+      console.error('handleInventoryUpload failed:', err.message)
+      setError(err.message)
+      return null
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return {
-    isUploadModalOpen,
-    uploadProgress,
-    uploadStatus,
-    handleShowUploadModal,
-    handleCloseUploadModal,
-    handleFileUpload,
-  };
+    uploading,
+    error,
+    handleInventoryUpload,
+  }
 }
