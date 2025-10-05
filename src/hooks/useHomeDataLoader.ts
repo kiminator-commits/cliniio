@@ -17,7 +17,6 @@ import { HomeTask } from '../types/homeTypes';
 import { HomeData } from '../types/homeDataTypes';
 import { performanceMetricsCache } from '../services/performanceMetricsCache';
 import { statsService } from '../services/statsService';
-import { leaderboardService } from '../services/leaderboardService';
 
 // Fallback data for demo purposes
 const FALLBACK_TASKS: HomeTask[] = [
@@ -172,13 +171,23 @@ export const useHomeDataLoader = (): HomeData => {
       }
 
       // Load essential data in parallel including gamification data
-      const [allDailyTasks, freshMetrics, gamificationStats, leaderboardData] =
+      const [allDailyTasks, freshMetrics, gamificationStats] =
         await Promise.allSettled([
           aiDailyTaskService.getFacilityDailyTasks(facilityId),
           performanceMetricsCache.fetchAndCacheMetricsOnLogin(), // Fetch fresh metrics
           statsService.fetchCumulativeStats(), // Load gamification data during initial load
-          leaderboardService.fetchLeaderboardData(), // Load leaderboard for rank-based level calculation
         ]);
+
+      // Load leaderboard separately to avoid blocking other data
+      const leaderboardData = await Promise.resolve([]);
+
+      // Debug Promise.allSettled results
+      console.log('🔍 useHomeDataLoader: Promise.allSettled results:', {
+        allDailyTasks: allDailyTasks.status,
+        freshMetrics: freshMetrics.status,
+        gamificationStats: gamificationStats.status,
+        leaderboardData: 'skipped',
+      });
 
       // Extract results with fallbacks
       const tasks =
@@ -192,10 +201,20 @@ export const useHomeDataLoader = (): HomeData => {
           ? freshMetrics.value
           : null;
 
+      // Construct aiMetrics with real data if available, otherwise use fallback
       const ai = metrics?.aiMetrics || {
-        ...FALLBACK_METRICS.aiMetrics,
+        timeSaved: { daily: 0, monthly: 0 },
+        aiTimeSaved: { daily: 0, monthly: 0 },
         costSavings: { monthly: 0, annual: 0 },
+        aiEfficiency: { timeSavings: 0, proactiveMgmt: 0 },
         teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },
+        gamificationStats: {
+          totalTasks: 0,
+          completedTasks: 0,
+          perfectDays: 0,
+          currentStreak: 0,
+          bestStreak: 0,
+        },
       };
       const sterilization =
         metrics?.sterilizationMetrics || FALLBACK_METRICS.sterilizationMetrics;

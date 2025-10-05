@@ -121,7 +121,7 @@ class AITimeSavingsService {
    * Shows how AI accelerates task completion
    */
   private async calculateAITaskPerformanceSavings(
-    _facilityId: string
+    facilityId: string
   ): Promise<{ daily: number; monthly: number }> {
     try {
       const today = new Date().toISOString().split('T')[0];

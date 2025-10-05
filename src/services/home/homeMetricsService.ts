@@ -145,7 +145,7 @@ class HomeMetricsService {
         teamPerformanceData,
         dailyMetrics,
         gamificationStats,
-      ] = await Promise.all([
+      ] = await Promise.allSettled([
         operationalTimeSavingsService.getOperationalTimeSavings(),
         aiTimeSavingsService.getAITimeSavings(),
         getCostSavingsAggregates(),
@@ -154,42 +154,79 @@ class HomeMetricsService {
         this.getGamificationStats(today, facilityId),
       ]);
 
+      // Extract values with fallbacks
+      const operationalTimeSavingsData =
+        operationalTimeSavings.status === 'fulfilled'
+          ? operationalTimeSavings.value
+          : { daily_time_saved: 0, monthly_time_saved: 0 };
+      const aiTimeSavingsData =
+        aiTimeSavings.status === 'fulfilled'
+          ? aiTimeSavings.value
+          : { daily_time_saved: 0, monthly_time_saved: 0 };
+      const costSavingsDataResult =
+        costSavingsData.status === 'fulfilled'
+          ? costSavingsData.value
+          : { monthly_cost_savings: 0, annual_cost_savings: 0 };
+      const teamPerformanceDataResult =
+        teamPerformanceData.status === 'fulfilled'
+          ? teamPerformanceData.value
+          : { skills_score: 0, inventory_score: 0, sterilization_score: 0 };
+      const dailyMetricsResult =
+        dailyMetrics.status === 'fulfilled' ? dailyMetrics.value : [];
+      const gamificationStatsResult =
+        gamificationStats.status === 'fulfilled' ? gamificationStats.value : [];
+
       console.log(
         '📊 HomeMetricsService: Received operational time savings:',
-        operationalTimeSavings
+        operationalTimeSavingsData
+      );
+      console.log(
+        '📊 HomeMetricsService: Received AI time savings:',
+        aiTimeSavingsData
+      );
+      console.log(
+        '📊 HomeMetricsService: Received cost savings:',
+        costSavingsDataResult
+      );
+      console.log(
+        '📊 HomeMetricsService: Received team performance:',
+        teamPerformanceDataResult
       );
 
       const result = {
         timeSaved: {
-          daily: operationalTimeSavings.daily_time_saved,
-          monthly: operationalTimeSavings.monthly_time_saved,
+          daily: operationalTimeSavingsData.daily_time_saved,
+          monthly: operationalTimeSavingsData.monthly_time_saved,
         },
         aiTimeSaved: {
-          daily: aiTimeSavings.daily_time_saved,
-          monthly: aiTimeSavings.monthly_time_saved,
+          daily: aiTimeSavingsData.daily_time_saved,
+          monthly: aiTimeSavingsData.monthly_time_saved,
         },
         costSavings: {
-          monthly: costSavingsData.monthly_cost_savings,
-          annual: costSavingsData.annual_cost_savings,
+          monthly: costSavingsDataResult.monthly_cost_savings,
+          annual: costSavingsDataResult.annual_cost_savings,
         },
         aiEfficiency: {
-          timeSavings: this.extractAIEfficiency(dailyMetrics, 'time_savings'),
+          timeSavings: this.extractAIEfficiency(
+            dailyMetricsResult,
+            'time_savings'
+          ),
           proactiveMgmt: this.extractAIEfficiency(
-            dailyMetrics,
+            dailyMetricsResult,
             'proactive_mgmt'
           ),
         },
         teamPerformance: {
-          skills: teamPerformanceData.skills_score,
-          inventory: teamPerformanceData.inventory_score,
-          sterilization: teamPerformanceData.sterilization_score,
+          skills: teamPerformanceDataResult.skills_score,
+          inventory: teamPerformanceDataResult.inventory_score,
+          sterilization: teamPerformanceDataResult.sterilization_score,
         },
         gamificationStats: {
-          totalTasks: this.calculateTotalTasks(gamificationStats),
-          completedTasks: this.calculateCompletedTasks(gamificationStats),
-          perfectDays: this.calculatePerfectDays(gamificationStats),
-          currentStreak: this.calculateCurrentStreak(gamificationStats),
-          bestStreak: this.calculateBestStreak(gamificationStats),
+          totalTasks: this.calculateTotalTasks(gamificationStatsResult),
+          completedTasks: this.calculateCompletedTasks(gamificationStatsResult),
+          perfectDays: this.calculatePerfectDays(gamificationStatsResult),
+          currentStreak: this.calculateCurrentStreak(gamificationStatsResult),
+          bestStreak: this.calculateBestStreak(gamificationStatsResult),
         },
       };
 

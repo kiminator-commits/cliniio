@@ -6,6 +6,10 @@ import { useDashboardLogic } from '../hooks/useDashboardLogic';
 import { useDashboardState } from './hooks/useDashboardState';
 import { BITestResult } from '../../../types/toolTypes';
 import { DashboardHeader } from './DashboardHeader';
+import {
+  initializeBIFailureState,
+  useBIStore,
+} from '../../../services/bi/failure/index';
 
 import { DashboardTabs } from './DashboardTabs';
 import { NewCycleModal } from './NewCycleModal';
@@ -37,6 +41,8 @@ const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
       setShowBatchCodeModal,
     } = useSterilizationStore();
 
+    const { initError, subscribe, unsubscribe } = useBIStore();
+
     // Business logic separated into hook
     const {
       tabs,
@@ -55,6 +61,20 @@ const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
       handleCloseNewCycleModal,
       resetOperatorName,
     } = useDashboardState();
+
+    // Initialize BI data on mount
+    useEffect(() => {
+      // Initialize BI data on mount
+      initializeBIFailureState();
+
+      // Enable realtime updates
+      subscribe();
+
+      // Cleanup on unmount
+      return () => {
+        unsubscribe();
+      };
+    }, [subscribe, unsubscribe]);
 
     // Check for BI test due every 5 minutes instead of every minute for better performance
     useEffect(() => {
@@ -157,6 +177,13 @@ const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
           onComplete={handleBITestComplete}
           onOptOut={handleBITestOptOut}
         />
+
+        {/* BI Initialization Error Banner */}
+        {initError && (
+          <div className="bg-red-100 text-red-700 text-sm p-2 rounded-md">
+            BI Initialization Failed: {initError.message}
+          </div>
+        )}
 
         <DashboardHeader />
 

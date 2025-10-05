@@ -347,10 +347,23 @@ export class AISuggestionsService {
       };
       if (!user) return false;
 
+      // Get facility_id from user profile
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !userProfile?.facility_id) {
+        console.error('Missing facility_id in user profile');
+        return false;
+      }
+
       const userData = user;
       const { error } = (await supabase.from('ai_learning_analytics').insert({
         user_id: userData.id,
-        session_start: sessionData.session_start,
+        facility_id: userProfile.facility_id,
+        session_start: new Date(sessionData.session_start).toISOString(),
         content_items_accessed: sessionData.content_items_accessed,
         learning_path_progress: sessionData.learning_path_progress
           ? JSON.stringify(sessionData.learning_path_progress)

@@ -1,293 +1,202 @@
-import { supabase } from '@/lib/supabase';
-import {
-  Challenge,
-  ChallengeCategory,
-  ChallengeDifficulty,
-} from '@/components/ChallengeModal';
-import { logger } from '../utils/_core/logger';
+import { supabase } from '@/lib/supabaseClient';
+import { facilityCacheService } from '@/services/cache/facilityCacheService';
 
-interface UserRow {
-  id: string;
-  facility_id: string;
-}
-
-export interface ChallengeCompletion {
-  id: string;
-  challenge_id: string;
-  user_id: string;
-  facility_id: string;
-  completed_at: string;
-  points_earned: number;
-}
-
-export interface CreateChallengeCompletionData {
-  challenge_id: string;
-  points_earned: number;
-}
-
-class ChallengeService {
-  private lastLogTime: number = 0; // Prevent duplicate logs in StrictMode
-  private lastRawLogTime: number = 0; // Separate throttling for raw data logs
-
-  private async getCachedUser() {
-    const { FacilityService } = await import('@/services/facilityService');
-    const { userId, facilityId } =
-      await FacilityService.getCurrentUserAndFacility();
-    if (!userId || !facilityId) {
-      throw new Error('No authenticated user or facility for challengeService');
-    }
-    return {
-      id: userId,
-      facility_id: facilityId,
-    };
-  }
-
-  private async getCachedUserOld() {
-    // In production, get from auth context
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return null;
-    }
-
-    // CRITICAL: Wait for authentication to be fully established before database calls
-    const session = await supabase.auth.getSession();
-    if (!session.data.session) {
-      return null;
-    }
-
-    // Fetch user profile from database to get facility_id
-    const { data: userProfile, error } = await supabase
-      .from('users')
-      .select('id, facility_id')
-      .eq('id', user.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching user profile:', error);
-
-      // If user doesn't exist in users table, create them with a default facility
-      console.log('Creating user profile for:', user.id);
-
-      // Get current facility ID
-      const { FacilityService } = await import('@/services/facilityService');
-      const facilityId = await FacilityService.getCurrentFacilityId();
-
-      const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .insert({
-          id: user.id,
-          email: user.email,
-          facility_id: facilityId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select('id, facility_id')
-        .single();
-
-      if (createError) {
-        console.error('Error creating user profile:', createError);
-        return null;
-      }
-
-      return newUser;
-    }
-
-    return userProfile;
-  }
-
-  async fetchChallenges(): Promise<Challenge[]> {
+export const challengeService = {
+  async createChallenge(payload: {
+    title: string;
+    description?: string;
+    points?: number;
+  }) {
     try {
-      const user = await this.getCachedUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-      if (!user) {
-        logger.debug(
-          'challengeService: No authenticated user found, returning empty array'
+      if (userError || !user)
+        throw new Error('Unauthorized: no authenticated user.');
+
+      const facilityId = user.user_metadata?.facility_id;
+      if (!facilityId) throw new Error('Missing facility context.');
+
+      const userRole = user.user_metadata?.role || 'staff';
+      const allowedRoles = ['admin', 'manager'];
+
+      if (!allowedRoles.includes(userRole)) {
+        throw new Error(
+          'Forbidden: insufficient permissions to create challenges.'
         );
-        return [];
       }
 
-      logger.debug(
-        'challengeService: Fetching challenges for facility:',
-        (user as UserRow).facility_id
-      );
+      const challengeData = {
+        title: payload.title,
+        description: payload.description || '',
+        points: payload.points || 0,
+        facility_id: facilityId,
+        created_by: user.id,
+        created_at: new Date().toISOString(),
+      };
 
-      // Single optimized query instead of duplicate queries
       const { data, error } = await supabase
         .from('home_challenges')
-        .select('*')
-        .eq('facility_id', (user as UserRow).facility_id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching challenges:', error);
-        return [];
-      }
-
-      // Only log once per calculation to avoid StrictMode duplicate logs
-      const now = Date.now();
-      if (now - this.lastRawLogTime > 1000) {
-        // Only log once per second
-        logger.debug('challengeService: Raw challenges data:', data);
-        this.lastRawLogTime = now;
-      }
-
-      // Transform the data to match the Challenge interface
-      const challenges: Challenge[] = (data as Record<string, unknown>[]).map(
-        (challenge: Record<string, unknown>) => ({
-          id: challenge.id as string,
-          title: challenge.title as string,
-          description: challenge.description as string,
-          category: challenge.category as ChallengeCategory,
-          difficulty: challenge.difficulty as ChallengeDifficulty,
-          points: challenge.points as number,
-          timeEstimate: challenge.time_estimate as string,
-          completed: false, // We'll check completions separately
-        })
-      );
-
-      // Get user's completed challenges to mark them as completed
-      const completedChallenges = await this.getUserCompletedChallenges();
-      const completedIds = new Set(
-        completedChallenges.map((c) => c.challenge_id)
-      );
-
-      challenges.forEach((challenge) => {
-        challenge.completed = completedIds.has(challenge.id);
-      });
-
-      // Only log once per calculation to avoid StrictMode duplicate logs
-      if (now - this.lastLogTime > 1000) {
-        // Only log once per second
-        logger.debug('challengeService: Transformed challenges:', challenges);
-        this.lastLogTime = now;
-      }
-      return challenges;
-    } catch (error) {
-      console.error('Error in fetchChallenges:', error);
-      return [];
-    }
-  }
-
-  async getUserCompletedChallenges(): Promise<ChallengeCompletion[]> {
-    try {
-      const user = await this.getCachedUser();
-
-      if (!user) {
-        logger.debug(
-          'challengeService: No authenticated user found for completed challenges'
-        );
-        return [];
-      }
-
-      const { data, error } = await supabase
-        .from('home_challenge_completions')
-        .select('*')
-        .eq('user_id', (user as UserRow).id)
-        .eq('facility_id', (user as UserRow).facility_id)
-        .order('completed_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching completed challenges:', error);
-        return [];
-      }
-
-      return (data as unknown as ChallengeCompletion[]) || [];
-    } catch (error) {
-      console.error('Error in getUserCompletedChallenges:', error);
-      return [];
-    }
-  }
-
-  async completeChallenge(
-    completionData: CreateChallengeCompletionData
-  ): Promise<boolean> {
-    try {
-      const user = await this.getCachedUser();
-
-      if (!user) {
-        console.error(
-          'challengeService: No authenticated user found for challenge completion'
-        );
-        return false;
-      }
-
-      const { data, error } = await supabase
-        .from('home_challenge_completions')
-        .insert({
-          challenge_id: completionData.challenge_id,
-          user_id: (user as UserRow).id,
-          facility_id: (user as UserRow).facility_id,
-          points_earned: completionData.points_earned,
-        })
+        .insert([challengeData])
         .select()
         .single();
 
-      if (error) {
-        console.error('Error completing challenge:', error);
-        return false;
+      if (error) throw new Error(error.message);
+
+      console.info(`✅ Challenge created by ${userRole}:`, data.title);
+      return { success: true, data };
+    } catch (err: unknown) {
+      console.error(
+        '❌ Challenge creation failed:',
+        err instanceof Error ? err.message : String(err)
+      );
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  },
+
+  async fetchUserChallenges() {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) throw new Error('Unauthorized user');
+
+      const facilityId = user.user_metadata?.facility_id;
+      if (!facilityId) throw new Error('Missing facility context');
+
+      const cacheKey = `challenges_and_completions:${facilityId}`;
+      const cached =
+        facilityCacheService.get<Record<string, unknown>[]>(cacheKey);
+      if (cached) {
+        console.info('🧠 Loaded challenges from cache:', cached.length);
+        return cached;
       }
 
-      logger.debug('challengeService: Challenge completed successfully:', data);
+      // Run challenge + completion queries in parallel
+      const [challengesRes, completionsRes] = await Promise.all([
+        supabase
+          .from('home_challenges')
+          .select('*')
+          .eq('facility_id', facilityId)
+          .order('created_at', { ascending: false }),
+
+        supabase
+          .from('challenge_completions')
+          .select('challenge_id, user_id, completed_at')
+          .eq('facility_id', facilityId)
+          .eq('user_id', user.id),
+      ]);
+
+      if (challengesRes.error) throw new Error(challengesRes.error.message);
+      if (completionsRes.error) throw new Error(completionsRes.error.message);
+
+      const challenges = challengesRes.data || [];
+      const completions = completionsRes.data || [];
+
+      // Merge completion state into challenges
+      const merged = challenges.map((ch) => ({
+        ...ch,
+        isCompleted: completions.some((c) => c.challenge_id === ch.id),
+        completedAt:
+          completions.find((c) => c.challenge_id === ch.id)?.completed_at ||
+          null,
+      }));
+
+      facilityCacheService.set(cacheKey, merged);
+      console.info(
+        `✅ Cached ${merged.length} merged challenges for ${facilityId}`
+      );
+      return merged;
+    } catch (err: unknown) {
+      console.error(
+        '❌ Failed to fetch challenges:',
+        err instanceof Error ? err.message : String(err)
+      );
+      return [];
+    }
+  },
+
+  async completeChallenge(payload: {
+    challenge_id: string;
+    points_earned: number;
+  }) {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user)
+        throw new Error('Unauthorized: no authenticated user.');
+
+      // Try multiple approaches to get facility_id
+      let facilityId =
+        user.user_metadata?.facility_id || user.app_metadata?.facility_id;
+
+      // If not found in metadata, query the users table
+      if (!facilityId) {
+        const { data: userData, error: profileError } = await supabase
+          .from('users')
+          .select('facility_id')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError || !userData?.facility_id) {
+          throw new Error('Missing facility context.');
+        }
+        facilityId = userData.facility_id;
+      }
+
+      // Check if challenge already completed
+      const { data: existingCompletion, error: checkError } = await supabase
+        .from('challenge_completions')
+        .select('id')
+        .eq('challenge_id', payload.challenge_id)
+        .eq('user_id', user.id)
+        .eq('facility_id', facilityId)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw new Error(checkError.message);
+      }
+
+      if (existingCompletion) {
+        console.warn('Challenge already completed by user');
+        return true; // Already completed
+      }
+
+      // Record challenge completion
+      const { error: insertError } = await supabase
+        .from('challenge_completions')
+        .insert([
+          {
+            challenge_id: payload.challenge_id,
+            user_id: user.id,
+            facility_id: facilityId,
+            points_earned: payload.points_earned,
+            completed_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (insertError) throw new Error(insertError.message);
+
+      console.info(
+        `✅ Challenge ${payload.challenge_id} completed by user ${user.id}`
+      );
       return true;
-    } catch (error) {
-      console.error('Error in completeChallenge:', error);
+    } catch (err: unknown) {
+      console.error(
+        '❌ Challenge completion failed:',
+        err instanceof Error ? err.message : String(err)
+      );
       return false;
     }
-  }
-
-  async createChallenge(
-    challengeData: Omit<Challenge, 'id' | 'completed'>
-  ): Promise<Challenge | null> {
-    try {
-      const user = await this.getCachedUser();
-
-      if (!user) {
-        console.error(
-          'challengeService: No authenticated user found for creating challenge'
-        );
-        return null;
-      }
-
-      const { data, error } = await supabase
-        .from('home_challenges')
-        .insert({
-          title: challengeData.title,
-          description: challengeData.description,
-          category: challengeData.category,
-          difficulty: challengeData.difficulty,
-          points: challengeData.points,
-          time_estimate: challengeData.timeEstimate,
-          facility_id: (user as UserRow).facility_id,
-          created_by: (user as UserRow).id,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating challenge:', error);
-        return null;
-      }
-
-      return {
-        id: (data as Record<string, unknown>).id as string,
-        title: (data as Record<string, unknown>).title as string,
-        description: (data as Record<string, unknown>).description as string,
-        category: (data as Record<string, unknown>)
-          .category as ChallengeCategory,
-        difficulty: (data as Record<string, unknown>)
-          .difficulty as ChallengeDifficulty,
-        points: (data as Record<string, unknown>).points as number,
-        timeEstimate: (data as Record<string, unknown>).time_estimate as string,
-        completed: false,
-      };
-    } catch (error) {
-      console.error('Error in createChallenge:', error);
-      return null;
-    }
-  }
-}
-
-export const challengeService = new ChallengeService();
+  },
+};
