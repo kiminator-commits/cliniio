@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from '@/lib/supabaseClient';
 
 export interface ComplianceSettings {
   id: string;
@@ -19,31 +19,38 @@ export const complianceService = {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        console.error("Unauthorized: cannot load compliance settings without a valid user.");
+        console.error(
+          'Unauthorized: cannot load compliance settings without a valid user.'
+        );
         return null;
       }
 
       const facilityId = user.user_metadata?.facility_id;
       if (!facilityId) {
-        console.error("Missing facility_id — cannot fetch compliance settings.");
+        console.error(
+          'Missing facility_id — cannot fetch compliance settings.'
+        );
         return null;
       }
 
       const { data, error } = await supabase
-        .from("compliance_settings")
-        .select("*")
-        .eq("facility_id", facilityId)
+        .from('compliance_settings')
+        .select('*')
+        .eq('facility_id', facilityId)
         .single();
 
       if (error) {
-        console.error("Error loading compliance settings:", error.message);
+        console.error('Error loading compliance settings:', error.message);
         return null;
       }
 
-      console.info("✅ Compliance settings loaded successfully for facility:", facilityId);
+      console.info(
+        '✅ Compliance settings loaded successfully for facility:',
+        facilityId
+      );
       return data as ComplianceSettings;
     } catch (err) {
-      console.error("Unexpected error loading compliance settings:", err);
+      console.error('Unexpected error loading compliance settings:', err);
       return null;
     }
   },

@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from '@/lib/supabaseClient';
 
 export const aiSuggestionService = {
   timers: new Map<string, number>(),
@@ -26,17 +26,19 @@ export const aiSuggestionService = {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        console.error("Unauthorized: cannot persist AI suggestion tracking data.");
+        console.error(
+          'Unauthorized: cannot persist AI suggestion tracking data.'
+        );
         return;
       }
 
       const facilityId = user.user_metadata?.facility_id;
       if (!facilityId) {
-        console.error("Missing facility_id — skipping AI suggestion time log.");
+        console.error('Missing facility_id — skipping AI suggestion time log.');
         return;
       }
 
-      const { error } = await supabase.from("ai_suggestion_metrics").insert([
+      const { error } = await supabase.from('ai_suggestion_metrics').insert([
         {
           suggestion_id: suggestionId,
           user_id: user.id,
@@ -48,9 +50,14 @@ export const aiSuggestionService = {
 
       if (error) throw new Error(error.message);
 
-      console.info(`✅ Recorded ${elapsedMinutes} min on AI suggestion ${suggestionId}`);
+      console.info(
+        `✅ Recorded ${elapsedMinutes} min on AI suggestion ${suggestionId}`
+      );
     } catch (err: unknown) {
-      console.error("❌ Failed to persist AI suggestion time:", err instanceof Error ? err.message : String(err));
+      console.error(
+        '❌ Failed to persist AI suggestion time:',
+        err instanceof Error ? err.message : String(err)
+      );
     }
   },
 };

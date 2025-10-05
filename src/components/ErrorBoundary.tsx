@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React from "react";
-import { observabilityService } from "@/services/observability/observabilityService";
+import React from 'react';
+import { observabilityService } from '@/services/observability/observabilityService';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -22,9 +22,9 @@ export class ErrorBoundary extends React.Component<
   }
 
   async componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("💥 Global Error Boundary caught:", error, errorInfo);
+    console.error('💥 Global Error Boundary caught:', error, errorInfo);
 
-    await observabilityService.logCritical("Global React component crash", {
+    await observabilityService.logCritical('Global React component crash', {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

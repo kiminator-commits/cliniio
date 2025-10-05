@@ -1,12 +1,12 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 // Development-only diagnostics
 if (import.meta.env.DEV) {
-  console.info("🧩 Supabase client initialized (dev mode)");
-  console.info("URL:", SUPABASE_URL);
+  console.info('🧩 Supabase client initialized (dev mode)');
+  console.info('URL:', SUPABASE_URL);
 } else {
   // Silence all Supabase env logs in production
   console.debug = () => {};

@@ -1,5 +1,5 @@
-import { supabase } from "@/lib/supabaseClient";
-import { facilityCacheService } from "@/services/cache/facilityCacheService";
+import { supabase } from '@/lib/supabaseClient';
+import { facilityCacheService } from '@/services/cache/facilityCacheService';
 
 export const statsService = {
   async fetchDashboardStats() {
@@ -9,36 +9,41 @@ export const statsService = {
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError || !user) throw new Error("Unauthorized user");
+      if (userError || !user) throw new Error('Unauthorized user');
 
       const facilityId = user.user_metadata?.facility_id;
-      if (!facilityId) throw new Error("Missing facility context");
+      if (!facilityId) throw new Error('Missing facility context');
 
       const cacheKey = `bi_stats:${facilityId}`;
-      const cached = facilityCacheService.get<Record<string, unknown>>(cacheKey);
+      const cached =
+        facilityCacheService.get<Record<string, unknown>>(cacheKey);
       if (cached) {
-        console.info("🧠 Loaded BI stats from cache");
+        console.info('🧠 Loaded BI stats from cache');
         return cached;
       }
 
       // Combined query: incidents, resolved counts, and open failures
-      const { data, error } = await supabase.rpc("get_bi_dashboard_stats", {
+      const { data, error } = await supabase.rpc('get_bi_dashboard_stats', {
         input_facility_id: facilityId,
       });
 
       // Fallback if RPC not yet deployed
       if (error || !data) {
-        console.warn("⚠️ RPC not found or failed — falling back to manual join.");
+        console.warn(
+          '⚠️ RPC not found or failed — falling back to manual join.'
+        );
 
         const { data: incidents, error: incidentError } = await supabase
-          .from("bi_incidents")
-          .select("id, status, severity, created_at, resolved_at")
-          .eq("facility_id", facilityId);
+          .from('bi_incidents')
+          .select('id, status, severity, created_at, resolved_at')
+          .eq('facility_id', facilityId);
 
         if (incidentError) throw new Error(incidentError.message);
 
-        const open = incidents.filter((i) => i.status !== "resolved").length;
-        const resolved = incidents.filter((i) => i.status === "resolved").length;
+        const open = incidents.filter((i) => i.status !== 'resolved').length;
+        const resolved = incidents.filter(
+          (i) => i.status === 'resolved'
+        ).length;
 
         const stats = {
           totalIncidents: incidents.length,
@@ -55,10 +60,13 @@ export const statsService = {
 
       // RPC returned successful data
       facilityCacheService.set(cacheKey, data);
-      console.info("✅ Cached BI stats successfully");
+      console.info('✅ Cached BI stats successfully');
       return data;
     } catch (err: unknown) {
-      console.error("❌ Failed to fetch BI stats:", err instanceof Error ? err.message : String(err));
+      console.error(
+        '❌ Failed to fetch BI stats:',
+        err instanceof Error ? err.message : String(err)
+      );
       return {
         totalIncidents: 0,
         openIncidents: 0,

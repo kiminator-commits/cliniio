@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from '@/lib/supabaseClient';
 
 export const leaderboardService = {
   async fetchLeaderboard() {
@@ -8,18 +8,18 @@ export const leaderboardService = {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      console.error("Leaderboard fetch blocked — no authenticated user");
+      console.error('Leaderboard fetch blocked — no authenticated user');
       return [];
     }
 
     const { data, error } = await supabase
-      .from("leaderboard")
-      .select("*")
-      .eq("facility_id", user.user_metadata?.facility_id || "")
-      .order("points", { ascending: false });
+      .from('leaderboard')
+      .select('*')
+      .eq('facility_id', user.user_metadata?.facility_id || '')
+      .order('points', { ascending: false });
 
     if (error) {
-      console.error("Error fetching leaderboard:", error);
+      console.error('Error fetching leaderboard:', error);
       // Return empty array instead of throwing error
       return [];
     }

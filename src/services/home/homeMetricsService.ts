@@ -155,12 +155,26 @@ class HomeMetricsService {
       ]);
 
       // Extract values with fallbacks
-      const operationalTimeSavingsData = operationalTimeSavings.status === 'fulfilled' ? operationalTimeSavings.value : { daily_time_saved: 0, monthly_time_saved: 0 };
-      const aiTimeSavingsData = aiTimeSavings.status === 'fulfilled' ? aiTimeSavings.value : { daily_time_saved: 0, monthly_time_saved: 0 };
-      const costSavingsDataResult = costSavingsData.status === 'fulfilled' ? costSavingsData.value : { monthly_cost_savings: 0, annual_cost_savings: 0 };
-      const teamPerformanceDataResult = teamPerformanceData.status === 'fulfilled' ? teamPerformanceData.value : { skills_score: 0, inventory_score: 0, sterilization_score: 0 };
-      const dailyMetricsResult = dailyMetrics.status === 'fulfilled' ? dailyMetrics.value : [];
-      const gamificationStatsResult = gamificationStats.status === 'fulfilled' ? gamificationStats.value : [];
+      const operationalTimeSavingsData =
+        operationalTimeSavings.status === 'fulfilled'
+          ? operationalTimeSavings.value
+          : { daily_time_saved: 0, monthly_time_saved: 0 };
+      const aiTimeSavingsData =
+        aiTimeSavings.status === 'fulfilled'
+          ? aiTimeSavings.value
+          : { daily_time_saved: 0, monthly_time_saved: 0 };
+      const costSavingsDataResult =
+        costSavingsData.status === 'fulfilled'
+          ? costSavingsData.value
+          : { monthly_cost_savings: 0, annual_cost_savings: 0 };
+      const teamPerformanceDataResult =
+        teamPerformanceData.status === 'fulfilled'
+          ? teamPerformanceData.value
+          : { skills_score: 0, inventory_score: 0, sterilization_score: 0 };
+      const dailyMetricsResult =
+        dailyMetrics.status === 'fulfilled' ? dailyMetrics.value : [];
+      const gamificationStatsResult =
+        gamificationStats.status === 'fulfilled' ? gamificationStats.value : [];
 
       console.log(
         '📊 HomeMetricsService: Received operational time savings:',
@@ -193,7 +207,10 @@ class HomeMetricsService {
           annual: costSavingsDataResult.annual_cost_savings,
         },
         aiEfficiency: {
-          timeSavings: this.extractAIEfficiency(dailyMetricsResult, 'time_savings'),
+          timeSavings: this.extractAIEfficiency(
+            dailyMetricsResult,
+            'time_savings'
+          ),
           proactiveMgmt: this.extractAIEfficiency(
             dailyMetricsResult,
             'proactive_mgmt'

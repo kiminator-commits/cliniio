@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from '@/lib/supabaseClient';
 
 export const statsService = {
   async fetchStats() {
@@ -8,33 +8,33 @@ export const statsService = {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      console.error("Stats fetch blocked — no authenticated user");
+      console.error('Stats fetch blocked — no authenticated user');
       return null;
     }
 
     // Get facility_id from user profile instead of user_metadata
     const { data: userProfile, error: profileError } = await supabase
-      .from("users")
-      .select("facility_id")
-      .eq("id", user.id)
+      .from('users')
+      .select('facility_id')
+      .eq('id', user.id)
       .single();
 
     if (profileError || !userProfile?.facility_id) {
-      console.error("Missing facility_id in user profile");
+      console.error('Missing facility_id in user profile');
       return null;
     }
 
     const facilityId = userProfile.facility_id;
 
     const { data, error } = await supabase
-      .from("user_stats")
-      .select("*")
-      .eq("facility_id", facilityId)
-      .eq("user_id", user.id)
+      .from('user_stats')
+      .select('*')
+      .eq('facility_id', facilityId)
+      .eq('user_id', user.id)
       .single();
 
     if (error) {
-      console.error("Error fetching stats:", error);
+      console.error('Error fetching stats:', error);
       return null;
     }
 
@@ -48,7 +48,7 @@ export const statsService = {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      console.error("Cumulative stats fetch blocked — no authenticated user");
+      console.error('Cumulative stats fetch blocked — no authenticated user');
       return {
         toolsSterilized: 0,
         inventoryChecks: 0,

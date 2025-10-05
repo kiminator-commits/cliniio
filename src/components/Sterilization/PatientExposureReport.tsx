@@ -57,12 +57,12 @@ const getCurrentIncidentId = async (): Promise<string | null> => {
  * Handle printing the exposure report
  */
 const handlePrintReport = () => {
-  exportService.exportExposureReport("pdf");
+  exportService.exportExposureReport('pdf');
 };
 
 // Export function for exposure report
 const exportExposureReport = () => {
-  exportService.exportExposureReport("csv");
+  exportService.exportExposureReport('csv');
 };
 
 interface ExposureReportProps {
@@ -386,9 +386,7 @@ export const ExposureReport: React.FC<ExposureReportProps> = ({
                   </button>
                   <button
                     onClick={handlePrintReport}
-                    onKeyDown={(e) =>
-                      e.key === 'Enter' && handlePrintReport()
-                    }
+                    onKeyDown={(e) => e.key === 'Enter' && handlePrintReport()}
                     className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                     aria-label="Print exposure report"
                   >

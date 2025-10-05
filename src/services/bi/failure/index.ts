@@ -1,8 +1,8 @@
-import { supabase } from "@/lib/supabaseClient";
-import { create } from "zustand";
-import { incidentService } from "@/services/bi/failure/incidentService";
-import { observabilityService } from "@/services/observability/observabilityService";
-import { facilityCacheService } from "@/services/cache/facilityCacheService";
+import { supabase } from '@/lib/supabaseClient';
+import { create } from 'zustand';
+import { incidentService } from '@/services/bi/failure/incidentService';
+import { observabilityService } from '@/services/observability/observabilityService';
+import { facilityCacheService } from '@/services/cache/facilityCacheService';
 
 // ── Store shape extended with init error state
 interface BIState {
@@ -20,20 +20,20 @@ export const useBIStore = create<BIState>((set, get) => ({
   setIncidents: (data) => set({ incidents: data }),
   setInitError: (err) => set({ initError: err }),
   subscribe: () => {
-    console.info("📡 Subscribing to realtime BI updates…");
+    console.info('📡 Subscribing to realtime BI updates…');
 
     const channel = supabase
-      .channel("bi_incident_updates")
+      .channel('bi_incident_updates')
       .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bi_incidents" },
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bi_incidents' },
         async () => {
           const { data, error } = await supabase
-            .from("bi_incidents")
-            .select("*")
-            .order("created_at", { ascending: false });
+            .from('bi_incidents')
+            .select('*')
+            .order('created_at', { ascending: false });
           if (error) {
-            console.error("Error refreshing BI data:", error);
+            console.error('Error refreshing BI data:', error);
             return;
           }
           get().setIncidents(data);
@@ -46,7 +46,7 @@ export const useBIStore = create<BIState>((set, get) => ({
   unsubscribe: () => {
     const channel = (window as Record<string, unknown>).__bi_channel__;
     if (channel) {
-      console.info("🛑 Unsubscribing from realtime BI updates");
+      console.info('🛑 Unsubscribing from realtime BI updates');
       supabase.removeChannel(channel);
       (window as Record<string, unknown>).__bi_channel__ = null;
     }
@@ -63,16 +63,17 @@ export async function initializeBIFailureState() {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      throw new Error("Unauthorized: no authenticated user for BI init");
+      throw new Error('Unauthorized: no authenticated user for BI init');
     }
 
-    const facilityId = user.user_metadata?.facility_id || "";
+    const facilityId = user.user_metadata?.facility_id || '';
     const cacheKey = `bi_incidents:${facilityId}`;
 
     // 🔹 Attempt to load from cache first
-    const cached = facilityCacheService.get<Record<string, unknown>[]>(cacheKey);
+    const cached =
+      facilityCacheService.get<Record<string, unknown>[]>(cacheKey);
     if (cached) {
-      console.info("🧠 Loaded BI incidents from cache:", cached.length);
+      console.info('🧠 Loaded BI incidents from cache:', cached.length);
       useBIStore.getState().setIncidents(cached);
       setInitError(null);
       return;
@@ -80,10 +81,10 @@ export async function initializeBIFailureState() {
 
     // 🔹 Otherwise, fetch from Supabase and cache
     const { data, error } = await supabase
-      .from("bi_incidents")
-      .select("*")
-      .eq("facility_id", facilityId)
-      .order("created_at", { ascending: false });
+      .from('bi_incidents')
+      .select('*')
+      .eq('facility_id', facilityId)
+      .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
 
@@ -91,24 +92,33 @@ export async function initializeBIFailureState() {
     facilityCacheService.set(cacheKey, data || []);
     setInitError(null);
 
-    console.info(`✅ Cached ${data?.length || 0} BI incidents for ${facilityId}`);
+    console.info(
+      `✅ Cached ${data?.length || 0} BI incidents for ${facilityId}`
+    );
   } catch (e: unknown) {
-    const err = { message: e instanceof Error ? e.message : String(e), at: new Date().toISOString() };
+    const err = {
+      message: e instanceof Error ? e.message : String(e),
+      at: new Date().toISOString(),
+    };
     setInitError(err);
 
-    await observabilityService.logSecurityEvent("security.bi_init_failed", err.message, {
-      timestamp: err.at,
-    });
+    await observabilityService.logSecurityEvent(
+      'security.bi_init_failed',
+      err.message,
+      {
+        timestamp: err.at,
+      }
+    );
 
     try {
-      const evt = new CustomEvent("bi:init:error", { detail: err });
+      const evt = new CustomEvent('bi:init:error', { detail: err });
       window.dispatchEvent(evt);
     } catch {
       /* no-op */
     }
 
     (window as Record<string, unknown>).__BI_INIT_ERROR__ = err;
-    console.error("❌ BI initialization failed:", err.message);
+    console.error('❌ BI initialization failed:', err.message);
   }
 }
 
@@ -117,10 +127,10 @@ export const biFailureService = {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return { error: "Unauthorized" };
+    if (!user) return { error: 'Unauthorized' };
 
     const { data, error } = await supabase
-      .from("bi_incidents")
+      .from('bi_incidents')
       .insert([
         {
           ...incidentData,
@@ -139,17 +149,17 @@ export const biFailureService = {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return { error: "Unauthorized" };
+    if (!user) return { error: 'Unauthorized' };
 
     const { data, error } = await supabase
-      .from("bi_incidents")
+      .from('bi_incidents')
       .update({
-        status: "resolved",
+        status: 'resolved',
         resolution,
         resolved_by: user.id,
         resolved_at: new Date().toISOString(),
       })
-      .eq("id", incidentId)
+      .eq('id', incidentId)
       .select()
       .single();
 
@@ -165,43 +175,51 @@ export const biFailureService = {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        console.error("Unauthorized: cannot fetch BI activity logs without a valid user.");
+        console.error(
+          'Unauthorized: cannot fetch BI activity logs without a valid user.'
+        );
         return [];
       }
 
       const facilityId = user.user_metadata?.facility_id;
       if (!facilityId) {
-        console.error("Missing facility_id for BI activity logs.");
+        console.error('Missing facility_id for BI activity logs.');
         return [];
       }
 
       const { data, error } = await supabase
-        .from("bi_activity_logs")
-        .select("*")
-        .eq("facility_id", facilityId)
-        .order("created_at", { ascending: false })
+        .from('bi_activity_logs')
+        .select('*')
+        .eq('facility_id', facilityId)
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) {
-        console.error("Error fetching BI activity logs:", error.message);
+        console.error('Error fetching BI activity logs:', error.message);
         return [];
       }
 
       console.info(`✅ Loaded ${data.length} BI activity log entries`);
       return data || [];
     } catch (err) {
-      console.error("Unexpected BI log fetch error:", err);
+      console.error('Unexpected BI log fetch error:', err);
       return [];
     }
   },
 
   async identifyExposureWindowTools(windowStart: string, windowEnd: string) {
     try {
-      const tools = await incidentService.getToolsInExposureWindow(windowStart, windowEnd);
+      const tools = await incidentService.getToolsInExposureWindow(
+        windowStart,
+        windowEnd
+      );
       console.info(`✅ Identified ${tools.length} tools in exposure window.`);
       return tools;
     } catch (err: unknown) {
-      console.error("Error identifying exposure window tools:", err instanceof Error ? err.message : String(err));
+      console.error(
+        'Error identifying exposure window tools:',
+        err instanceof Error ? err.message : String(err)
+      );
       return [];
     }
   },

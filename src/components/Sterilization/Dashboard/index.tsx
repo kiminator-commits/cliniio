@@ -6,7 +6,10 @@ import { useDashboardLogic } from '../hooks/useDashboardLogic';
 import { useDashboardState } from './hooks/useDashboardState';
 import { BITestResult } from '../../../types/toolTypes';
 import { DashboardHeader } from './DashboardHeader';
-import { initializeBIFailureState, useBIStore } from '../../../services/bi/failure/index';
+import {
+  initializeBIFailureState,
+  useBIStore,
+} from '../../../services/bi/failure/index';
 
 import { DashboardTabs } from './DashboardTabs';
 import { NewCycleModal } from './NewCycleModal';

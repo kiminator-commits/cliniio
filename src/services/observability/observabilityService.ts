@@ -1,18 +1,18 @@
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from '@/lib/supabaseClient';
 
-type EventSeverity = "info" | "warning" | "error" | "critical";
+type EventSeverity = 'info' | 'warning' | 'error' | 'critical';
 type EventType =
-  | "auth.session_invalid"
-  | "auth.logout"
-  | "security.protected_route_blocked"
-  | "security.bi_init_failed"
-  | "security.tenant_mismatch"
-  | "bi.incident_created"
-  | "bi.incident_resolved"
-  | "workflow.scan_processed"
-  | "report.export_started"
-  | "report.export_failed"
-  | "app.error";
+  | 'auth.session_invalid'
+  | 'auth.logout'
+  | 'security.protected_route_blocked'
+  | 'security.bi_init_failed'
+  | 'security.tenant_mismatch'
+  | 'bi.incident_created'
+  | 'bi.incident_resolved'
+  | 'workflow.scan_processed'
+  | 'report.export_started'
+  | 'report.export_failed'
+  | 'app.error';
 
 async function getContext() {
   try {
@@ -23,11 +23,16 @@ async function getContext() {
 
     return {
       userId: user?.id ?? null,
-      facilityId: (user?.user_metadata as Record<string, unknown>)?.facility_id ?? null,
+      facilityId:
+        (user?.user_metadata as Record<string, unknown>)?.facility_id ?? null,
       authError: error?.message ?? null,
     };
   } catch {
-    return { userId: null, facilityId: null, authError: "context_fetch_failed" };
+    return {
+      userId: null,
+      facilityId: null,
+      authError: 'context_fetch_failed',
+    };
   }
 }
 
@@ -49,39 +54,53 @@ async function insertEvent(
       created_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase.from("app_events").insert([payload]);
+    const { error } = await supabase.from('app_events').insert([payload]);
 
     // If the table doesn't exist yet, fail silently in prod, log in dev.
     if (error) {
       if (import.meta.env.DEV) {
-        console.warn("🟡 observabilityService: insert failed (likely missing table)", error.message);
+        console.warn(
+          '🟡 observabilityService: insert failed (likely missing table)',
+          error.message
+        );
       }
       return { success: false, error: error.message };
     }
     return { success: true };
   } catch (err: unknown) {
     if (import.meta.env.DEV) {
-      console.warn("🟡 observabilityService: unexpected error", err instanceof Error ? err.message : String(err));
+      console.warn(
+        '🟡 observabilityService: unexpected error',
+        err instanceof Error ? err.message : String(err)
+      );
     }
     return { success: false, error: String(err) };
   }
 }
 
 export const observabilityService = {
-  async logSecurityEvent(type: Extract<EventType, `security.${string}`>, message: string, ctx?: Record<string, unknown>) {
-    return insertEvent(type, "warning", message, ctx);
+  async logSecurityEvent(
+    type: Extract<EventType, `security.${string}`>,
+    message: string,
+    ctx?: Record<string, unknown>
+  ) {
+    return insertEvent(type, 'warning', message, ctx);
   },
 
   async logCritical(message: string, ctx?: Record<string, unknown>) {
-    return insertEvent("app.error", "critical", message, ctx);
+    return insertEvent('app.error', 'critical', message, ctx);
   },
 
   async logError(message: string, ctx?: Record<string, unknown>) {
-    return insertEvent("app.error", "error", message, ctx);
+    return insertEvent('app.error', 'error', message, ctx);
   },
 
-  async logInfo(type: Exclude<EventType, `security.${string}` | "app.error">, message: string, ctx?: Record<string, unknown>) {
-    return insertEvent(type, "info", message, ctx);
+  async logInfo(
+    type: Exclude<EventType, `security.${string}` | 'app.error'>,
+    message: string,
+    ctx?: Record<string, unknown>
+  ) {
+    return insertEvent(type, 'info', message, ctx);
   },
 };
 
