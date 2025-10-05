@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
@@ -25,13 +27,14 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Set environment variables
-      run: |
-        echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> $GITHUB_ENV
-        echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
+    - name: Run Tests
+      run: npm run test:ci
       
     - name: Build
       run: npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
