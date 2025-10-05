@@ -1,8 +1,12 @@
+# GitHub Actions workflow - ignore context access warnings
 name: Deploy to GitHub Pages (SIMPLIFIED)
 
 on:
   push:
     branches: [ main, master ]
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -21,15 +25,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Set environment variables
+      run: |
+        echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> $GITHUB_ENV
+        echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
+      
     - name: Build
       run: npm run build
-      env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
-        cname: ${{ secrets.CNAME }} 
+        publish_dir: ./dist 
