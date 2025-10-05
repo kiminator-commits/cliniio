@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient';
 
 /**
  * Loads BI compliance configuration for the specified facility.
@@ -10,30 +10,30 @@ export async function loadBIComplianceSettings(facilityId: string) {
       .from('bi_compliance_settings')
       .select('*')
       .eq('facility_id', facilityId)
-      .single()
+      .single();
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error && error.code !== 'PGRST116') throw error;
 
     const settings = data || {
       auto_close_failures: false,
       alert_threshold_minutes: 60,
       email_notifications: false,
       last_synced_at: null,
-    }
+    };
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug(`⚙️ Loaded BI compliance settings for ${facilityId}`)
+      console.debug(`⚙️ Loaded BI compliance settings for ${facilityId}`);
     }
 
-    return settings
+    return settings;
   } catch (err: any) {
-    console.error('loadBIComplianceSettings failed:', err.message)
+    console.error('loadBIComplianceSettings failed:', err.message);
     return {
       auto_close_failures: false,
       alert_threshold_minutes: 60,
       email_notifications: false,
       last_synced_at: null,
-    }
+    };
   }
 }
 
@@ -41,9 +41,12 @@ export async function loadBIComplianceSettings(facilityId: string) {
  * Syncs pending BI changes with Supabase.
  * Handles incident and compliance updates atomically.
  */
-export async function syncWithSupabase(facilityId: string, pendingChanges: any[]) {
-  if (!Array.isArray(pendingChanges) || pendingChanges.length === 0) return 0
-  let successCount = 0
+export async function syncWithSupabase(
+  facilityId: string,
+  pendingChanges: any[]
+) {
+  if (!Array.isArray(pendingChanges) || pendingChanges.length === 0) return 0;
+  let successCount = 0;
 
   for (const change of pendingChanges) {
     try {
@@ -57,25 +60,25 @@ export async function syncWithSupabase(facilityId: string, pendingChanges: any[]
               resolved_by: change.payload.resolved_by,
             })
             .eq('id', change.payload.id)
-            .eq('facility_id', facilityId)
-          successCount++
-          break
+            .eq('facility_id', facilityId);
+          successCount++;
+          break;
 
         case 'CREATE_INCIDENT':
           await supabase
             .from('bi_failures')
-            .insert([{ ...change.payload, facility_id: facilityId }])
-          successCount++
-          break
+            .insert([{ ...change.payload, facility_id: facilityId }]);
+          successCount++;
+          break;
 
         case 'DELETE_INCIDENT':
           await supabase
             .from('bi_failures')
             .delete()
             .eq('id', change.payload.id)
-            .eq('facility_id', facilityId)
-          successCount++
-          break
+            .eq('facility_id', facilityId);
+          successCount++;
+          break;
 
         case 'UPDATE_COMPLIANCE':
           await supabase
@@ -86,23 +89,60 @@ export async function syncWithSupabase(facilityId: string, pendingChanges: any[]
               email_notifications: change.payload.email_notifications,
               last_synced_at: new Date().toISOString(),
             })
-            .eq('facility_id', facilityId)
-          successCount++
-          break
+            .eq('facility_id', facilityId);
+          successCount++;
+          break;
 
         default:
           if (process.env.NODE_ENV === 'development') {
-            console.debug(`Skipping unknown BI change type: ${change.type}`)
+            console.debug(`Skipping unknown BI change type: ${change.type}`);
           }
       }
     } catch (err: any) {
-      console.error(`syncWithSupabase failed for ${change.type}:`, err.message)
+      console.error(`syncWithSupabase failed for ${change.type}:`, err.message);
     }
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.debug(`✅ Synced ${successCount}/${pendingChanges.length} BI changes to Supabase.`)
+    console.debug(
+      `✅ Synced ${successCount}/${pendingChanges.length} BI changes to Supabase.`
+    );
   }
 
-  return successCount
+  return successCount;
+}
+
+export function subscribeToBIFailureUpdates(
+  facilityId: string,
+  onUpdate: (payload: any) => void
+) {
+  if (!facilityId) return () => {}
+
+  try {
+    const channel = supabase
+      .channel(`bi_failures_${facilityId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bi_failures', filter: `facility_id=eq.${facilityId}` },
+        (payload) => {
+          if (typeof onUpdate === 'function') onUpdate(payload)
+        }
+      )
+      .subscribe((status) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.debug(`📡 BI realtime subscription: ${status}`)
+        }
+      })
+
+    // ✅ Provide a cleanup handle for safe unsubscription
+    return () => {
+      supabase.removeChannel(channel)
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('🧹 BI realtime listener unsubscribed.')
+      }
+    }
+  } catch (err: any) {
+    console.error('subscribeToBIFailureUpdates failed:', err.message)
+    return () => {}
+  }
 }
