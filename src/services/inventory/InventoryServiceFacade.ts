@@ -591,17 +591,6 @@ export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
   static async fetchAllInventoryData() {
     return InventoryServiceFacadeImpl.getInstance().fetchAllInventoryData();
   }
-
-  // Add missing method for testing
-  async fetchAllInventoryData() {
-    try {
-      const result = await this.getAllItems();
-      return result.data || [];
-    } catch (error) {
-      console.error('Error fetching all inventory data:', error);
-      return [];
-    }
-  }
 }
 
 // ============================================================================

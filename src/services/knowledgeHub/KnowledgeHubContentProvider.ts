@@ -20,13 +20,17 @@ export class KnowledgeHubContentProvider {
         category: convertStringToContentCategory(article.category || 'Courses'),
         status: 'draft' as ContentStatus,
         dueDate:
-          (article as Record<string, unknown>).published_at ||
+          (article as { published_at?: string }).published_at ||
           new Date().toISOString(),
         progress: 0,
-        lastUpdated: (article as Record<string, unknown>).updated_at,
-        description: (article as Record<string, unknown>).summary,
-        tags: (article as Record<string, unknown>).tags,
-        createdAt: (article as Record<string, unknown>).created_at,
+        lastUpdated:
+          (article as { updated_at?: string }).updated_at ||
+          new Date().toISOString(),
+        description: (article as { summary?: string }).summary || '',
+        tags: (article as { tags?: string[] }).tags || [],
+        createdAt:
+          (article as { created_at?: string }).created_at ||
+          new Date().toISOString(),
       }));
     } catch (error) {
       console.error('Failed to get knowledge articles:', error);
@@ -61,13 +65,17 @@ export class KnowledgeHubContentProvider {
         category: convertStringToContentCategory(article.category || 'Courses'),
         status: 'draft' as ContentStatus,
         dueDate:
-          (article as Record<string, unknown>).published_at ||
+          (article as { published_at?: string }).published_at ||
           new Date().toISOString(),
         progress: 0,
-        lastUpdated: (article as Record<string, unknown>).updated_at,
-        description: (article as Record<string, unknown>).summary,
-        tags: (article as Record<string, unknown>).tags,
-        createdAt: (article as Record<string, unknown>).created_at,
+        lastUpdated:
+          (article as { updated_at?: string }).updated_at ||
+          new Date().toISOString(),
+        description: (article as { summary?: string }).summary || '',
+        tags: (article as { tags?: string[] }).tags || [],
+        createdAt:
+          (article as { created_at?: string }).created_at ||
+          new Date().toISOString(),
       };
     } catch (error) {
       console.error('Failed to get knowledge article by ID:', error);

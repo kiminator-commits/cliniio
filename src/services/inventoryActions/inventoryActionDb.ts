@@ -48,7 +48,9 @@ export async function getItemsByCategory(
   _category: string
 ): Promise<InventoryItem[]> {
   try {
-    const response = await InventoryCrudOperations.getItems({ category });
+    const response = await InventoryCrudOperations.getItems({
+      category: _category,
+    });
     return response.data || [];
   } catch (error) {
     console.error('Error getting items by category:', error);
@@ -63,7 +65,9 @@ export async function getItemsByLocation(
   _location: string
 ): Promise<InventoryItem[]> {
   try {
-    const response = await InventoryCrudOperations.getItems({ location });
+    const response = await InventoryCrudOperations.getItems({
+      location: _location,
+    });
     return response.data || [];
   } catch (error) {
     console.error('Error getting items by location:', error);
@@ -79,7 +83,7 @@ export async function getItemsByStatus(
 ): Promise<InventoryItem[]> {
   try {
     const response = await InventoryCrudOperations.getItems({
-      status: status as unknown,
+      status: _status as 'active' | 'inactive' | 'maintenance' | 'retired',
     });
     return response.data || [];
   } catch (error) {
