@@ -1,8 +1,8 @@
 import { vi } from 'vitest';
 import {
   BIFailureService,
-  BIFailureError,
-} from '../../src/services/biFailureService';
+} from '../../src/services/bi/failure/index';
+import { BIFailureError } from '../../src/services/bi/failure/BIFailureError';
 import { supabase } from '../../src/lib/supabaseClient';
 
 // Mock FacilityService

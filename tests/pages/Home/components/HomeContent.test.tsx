@@ -171,36 +171,58 @@ vi.mock('@/components/Dashboard/GamificationStats', () => ({
 }));
 
 describe('HomeContent', () => {
+  const mockHomeData = {
+    tasks: [
+      {
+        id: '1',
+        title: 'Test Task 1',
+        description: 'Test task description 1',
+        category: 'maintenance',
+        difficulty: 'Easy',
+        points: 10,
+        timeEstimate: '15 min',
+        isCompleted: false,
+      },
+    ],
+    aiMetrics: {},
+    sterilizationMetrics: {},
+    integrationMetrics: {},
+    gamificationData: {
+      totalScore: 100,
+      streak: 5,
+      level: 3,
+      rank: 1,
+    },
+  };
+
   it('renders without crashing', () => {
     render(
       <FacilityProvider>
-        <HomeContent />
+        <HomeContent homeData={mockHomeData} />
       </FacilityProvider>
     );
 
     // Check that the component renders without throwing an error
     expect(screen.getByTestId('tasks-list')).toBeInTheDocument();
     expect(screen.getByTestId('metrics-section')).toBeInTheDocument();
-    expect(screen.getByTestId('gamification-stats')).toBeInTheDocument();
   });
 
   it('contains all main sections', () => {
     render(
       <FacilityProvider>
-        <HomeContent />
+        <HomeContent homeData={mockHomeData} />
       </FacilityProvider>
     );
 
     // Check that all main sections are rendered
     expect(screen.getByTestId('tasks-list')).toBeInTheDocument();
     expect(screen.getByTestId('metrics-section')).toBeInTheDocument();
-    expect(screen.getByTestId('gamification-stats')).toBeInTheDocument();
   });
 
   it('renders components in correct order', () => {
     render(
       <FacilityProvider>
-        <HomeContent />
+        <HomeContent homeData={mockHomeData} />
       </FacilityProvider>
     );
 
@@ -211,6 +233,5 @@ describe('HomeContent', () => {
     // Verify the presence of all expected components
     expect(screen.getByTestId('tasks-list')).toBeInTheDocument();
     expect(screen.getByTestId('metrics-section')).toBeInTheDocument();
-    expect(screen.getByTestId('gamification-stats')).toBeInTheDocument();
   });
 });

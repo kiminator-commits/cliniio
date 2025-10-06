@@ -56,6 +56,7 @@ describe('HomeMetricsService', () => {
 
       expect(result).toEqual({
         timeSaved: { daily: 0, monthly: 0 },
+        aiTimeSaved: { daily: 0, monthly: 0 },
         costSavings: { monthly: 0, annual: 0 },
         aiEfficiency: { timeSavings: 0, proactiveMgmt: 0 },
         teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },
@@ -86,6 +87,7 @@ describe('HomeMetricsService', () => {
 
       expect(result).toEqual({
         timeSaved: { daily: 0, monthly: 0 },
+        aiTimeSaved: { daily: 0, monthly: 0 },
         costSavings: { monthly: 0, annual: 0 },
         aiEfficiency: { timeSavings: 0, proactiveMgmt: 0 },
         teamPerformance: { skills: 0, inventory: 0, sterilization: 0 },
