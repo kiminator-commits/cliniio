@@ -1,4 +1,4 @@
-export { ErrorBoundary } from '../ErrorBoundary';
+export { default as ErrorBoundary } from './index.tsx';
 export {
   withErrorBoundary,
   withComponentErrorBoundary,

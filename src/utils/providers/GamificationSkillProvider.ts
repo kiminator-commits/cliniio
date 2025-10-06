@@ -266,8 +266,7 @@ export class GamificationSkillProvider {
       if (!userLearningProgress) return 1;
       if (!userCertifications) return 1;
 
-      const learningProgressData =
-        userLearningProgress as LearningProgressRow[];
+      const learningProgressData = userLearningProgress as unknown[];
       const certificationsData = userCertifications as CertificationRow[];
 
       const completedModules = learningProgressData?.length || 0;

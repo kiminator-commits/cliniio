@@ -125,7 +125,7 @@ class OperationalTimeSavingsService {
    * Shows efficiency gains from organized sterilization workflows
    */
   private async calculateSterilizationTimeSavings(
-    facilityId: _facilityId
+    facilityId: string
   ): Promise<{ daily: number; monthly: number }> {
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -175,7 +175,7 @@ class OperationalTimeSavingsService {
    * Shows efficiency gains from organized task management
    */
   private async calculateTaskCompletionTimeSavings(
-    facilityId: _facilityId
+    facilityId: string
   ): Promise<{ daily: number; monthly: number }> {
     try {
       const today = new Date().toISOString().split('T')[0];

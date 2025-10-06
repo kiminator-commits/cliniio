@@ -7,6 +7,8 @@ export interface SterilizationCycleData {
   cycle_type: string;
   facility_id: string;
   user_id: string;
+  autoclave_id?: string;
+  tool_batch_id?: string;
   tools: Array<{
     tool_id: string;
     tool_name: string;

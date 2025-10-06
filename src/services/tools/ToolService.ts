@@ -6,7 +6,7 @@ export type ToolRow = Database['public']['Tables']['tools']['Row'];
 type ToolUpdate = Database['public']['Tables']['tools']['Update'];
 
 // Helper functions for tenant and audit stamping
-async function getCurrentUserId(): Promise<string> {
+async function _getCurrentUserId(): Promise<string> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -78,7 +78,6 @@ export const ToolService = {
     const updates: ToolUpdate = {
       status,
       facility_id: await getCurrentFacilityId(),
-      updated_by: await getCurrentUserId(),
       updated_at: new Date().toISOString(),
     };
     const { data, error } = await supabase
@@ -158,7 +157,6 @@ export const ToolService = {
     const updates: ToolUpdate = {
       status,
       facility_id: await getCurrentFacilityId(),
-      updated_by: await getCurrentUserId(),
       updated_at: new Date().toISOString(),
     };
     const { data, error } = await supabase
@@ -173,15 +171,12 @@ export const ToolService = {
   async updateToolsCyclePhase(
     toolIds: string[],
     status: ToolStatus,
-    cycleId: string,
-    phase: string
+    _cycleId: string,
+    _phase: string
   ) {
     const updates: ToolUpdate = {
       status,
-      current_cycle_id: cycleId,
-      current_phase: phase,
       facility_id: await getCurrentFacilityId(),
-      updated_by: await getCurrentUserId(),
       updated_at: new Date().toISOString(),
     };
     const { data, error } = await supabase
@@ -215,12 +210,9 @@ export const ToolService = {
 
     const updates: ToolUpdate = {
       status,
-      current_cycle_id: '00000000-0000-0000-0000-000000000000', // Use placeholder UUID instead of null
-      current_phase: null,
       facility_id: await getCurrentFacilityId(),
-      updated_by: await getCurrentUserId(),
       updated_at: new Date().toISOString(),
-    };
+    } as unknown;
     const { data, error } = await supabase
       .from('tools')
       .update(updates)
@@ -242,8 +234,6 @@ export const ToolService = {
     }
 
     const updates: ToolUpdate = {
-      last_sterilized: new Date().toISOString(),
-      updated_by: await getCurrentUserId(),
       facility_id: await getCurrentFacilityId(),
       updated_at: new Date().toISOString(),
     };
@@ -257,10 +247,8 @@ export const ToolService = {
     return data;
   },
 
-  async updateToolPhase(toolId: string, phase: string) {
+  async updateToolPhase(toolId: string, _phase: string) {
     const updates: ToolUpdate = {
-      current_phase: phase,
-      updated_by: await getCurrentUserId(),
       facility_id: await getCurrentFacilityId(),
       updated_at: new Date().toISOString(),
     };
@@ -276,7 +264,6 @@ export const ToolService = {
 
   async touchTools(toolIds: string[]) {
     const updates: ToolUpdate = {
-      updated_by: await getCurrentUserId(),
       facility_id: await getCurrentFacilityId(),
       updated_at: new Date().toISOString(),
     };

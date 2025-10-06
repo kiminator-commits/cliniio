@@ -124,7 +124,7 @@ export class SecurityActionProvider {
     action: ThreatAction,
     incident: SecurityIncident
   ): Promise<ActionResult> {
-    const config = action.config as NotificationConfig;
+    const config = action.config as unknown as NotificationConfig;
 
     if (!config || !config.recipients || config.recipients.length === 0) {
       return {
@@ -163,7 +163,7 @@ export class SecurityActionProvider {
     action: ThreatAction,
     incident: SecurityIncident
   ): Promise<ActionResult> {
-    const config = action.config as EscalationConfig;
+    const config = action.config as unknown as EscalationConfig;
 
     if (
       !config ||
@@ -205,7 +205,7 @@ export class SecurityActionProvider {
     action: ThreatAction,
     incident: SecurityIncident
   ): Promise<ActionResult> {
-    const config = action.config as BlockConfig;
+    const config = action.config as unknown as BlockConfig;
 
     if (!config || !config.type || !config.target) {
       return {
@@ -300,7 +300,7 @@ export class SecurityActionProvider {
     // Validate specific action types
     switch (action.type) {
       case 'notify': {
-        const notifyConfig = action.config as NotificationConfig;
+        const notifyConfig = action.config as unknown as NotificationConfig;
         if (!notifyConfig.recipients || notifyConfig.recipients.length === 0) {
           errors.push('Notification action requires recipients');
         }
@@ -311,7 +311,7 @@ export class SecurityActionProvider {
       }
 
       case 'escalate': {
-        const escalateConfig = action.config as EscalationConfig;
+        const escalateConfig = action.config as unknown as EscalationConfig;
         if (
           !escalateConfig.escalationChain ||
           escalateConfig.escalationChain.length === 0
@@ -322,7 +322,7 @@ export class SecurityActionProvider {
       }
 
       case 'block': {
-        const blockConfig = action.config as BlockConfig;
+        const blockConfig = action.config as unknown as BlockConfig;
         if (!blockConfig.type) {
           errors.push('Block action requires type');
         }

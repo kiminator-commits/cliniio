@@ -34,7 +34,7 @@ interface TrendAnalysisData {
 
 export function calculateConfidence(
   incidents: BIIncident[],
-  days: number = 30
+  days?: number
 ): number;
 export function calculateConfidence(
   facilityId: string,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SharedLayout } from '../../components/Layout/SharedLayout';
 import Icon from '@mdi/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
@@ -153,109 +153,55 @@ const Settings: React.FC = () => {
             style={{ gridColumn: '1 / -1' }}
           >
             {section.id === 'profile' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load Profile Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <ProfileAccountSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'system' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load System Administration Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <SystemAdministrationSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'system-config' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load Billing Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <BillingSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'content' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load Content Management Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <ContentManagementSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'learning' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load Learning & Training Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <LearningTrainingSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'cleaning' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load Environmental Cleaning Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <EnvironmentalCleaningSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'inventory' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load Inventory Management Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <InventoryManagementSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'sterilization' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load Sterilization Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <SterilizationSettings />
               </ErrorBoundary>
             )}
 
             {section.id === 'analytics' && (
-              <ErrorBoundary
-                fallback={
-                  <div className="text-red-600 p-4">
-                    Failed to load AI Analytics Settings
-                  </div>
-                }
-              >
+              <ErrorBoundary>
                 <AIAnalyticsSettings />
               </ErrorBoundary>
             )}

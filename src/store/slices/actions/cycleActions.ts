@@ -123,7 +123,7 @@ export const createCycleActions: StateCreator<
               name: phase.name,
               duration: phase.duration,
               tools: Array.isArray(phase.tools)
-                ? phase.tools.map((tool) => tool.id)
+                ? phase.tools.map((tool: unknown) => tool.id)
                 : [],
               isActive: phase.isActive,
               startTime: phase.startTime ? new Date(phase.startTime) : null,

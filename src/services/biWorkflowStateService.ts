@@ -1,6 +1,6 @@
 import { BIFailureService } from './bi/failure';
 import { BITestService } from './bi/BITestService';
-import { BIFailureIncidentService } from './bi/BIFailureIncidentService';
+import { BIFailureIncidentService } from './bi/failure/BIFailureIncidentService';
 import { supabase } from '../lib/supabaseClient';
 import { FacilityService } from './facilityService';
 

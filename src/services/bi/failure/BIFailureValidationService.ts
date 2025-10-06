@@ -15,6 +15,10 @@ export interface CreateBIFailureParams {
   failure_reason?: string;
   severity_level?: 'low' | 'medium' | 'high' | 'critical';
   lastSuccessfulBIDate?: Date;
+  incident_type?: string;
+  severity?: string;
+  description?: string;
+  notes?: string;
 }
 
 /**

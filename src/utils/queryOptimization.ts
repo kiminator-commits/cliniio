@@ -164,7 +164,7 @@ export function applyPagination(
   const safeOptions = applyQuerySafety(options, tableName);
 
   // Apply limit
-  const limitedQuery = query.limit(safeOptions.limit);
+  const limitedQuery = (query as unknown).limit(safeOptions.limit);
 
   // Apply offset using range
   const paginatedQuery = limitedQuery.range(
@@ -189,7 +189,7 @@ export function applyOrdering(
 ): unknown {
   const safeOptions = applyQuerySafety(options, tableName);
 
-  return query.order(safeOptions.orderBy, {
+  return (query as unknown).order(safeOptions.orderBy, {
     ascending: safeOptions.orderDirection === 'asc',
   });
 }

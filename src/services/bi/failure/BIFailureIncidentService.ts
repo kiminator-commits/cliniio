@@ -117,29 +117,27 @@ export class BIFailureIncidentService {
       }
 
       return {
-        ...(result as {
-          id: string;
-          incident_number: string;
-          facility_id: string;
-          bi_test_result_id: string;
-          detected_by_operator_id: string;
-          incident_type: string;
-          severity: string;
-          description: string;
-          immediate_actions: string[];
-          root_cause_analysis: string;
-          corrective_actions: string[];
-          preventive_measures: string[];
-          estimated_resolution_time: string;
-          priority: string;
-          status: string;
-          notes: string;
-          created_at: string;
-          updated_at: string;
-        }),
-        affected_batch_ids:
-          (result as { affected_batch_ids?: string[] }).affected_batch_ids ??
-          [],
+        id: (result as { id: string }).id,
+        facility_id: (result as { facility_id: string }).facility_id,
+        bi_test_result_id:
+          (result as { bi_test_result_id?: string }).bi_test_result_id || '',
+        incident_number: (result as { incident_number: string })
+          .incident_number,
+        failure_date:
+          (result as { failure_date?: string }).failure_date ||
+          new Date().toISOString(),
+        detected_by_operator_id:
+          (result as { detected_by_operator_id?: string })
+            .detected_by_operator_id || '',
+        affected_tools_count: params.affected_tools_count,
+        affected_batch_ids: params.affected_batch_ids,
+        failure_reason: params.failure_reason || '',
+        severity_level: params.severity_level || 'medium',
+        status: 'active' as const,
+        regulatory_notification_required: false,
+        regulatory_notification_sent: false,
+        created_at: (result as { created_at: string }).created_at,
+        updated_at: (result as { updated_at: string }).updated_at,
       };
     } catch (error) {
       if (error instanceof Error && error.name === 'BIFailureError')
@@ -172,32 +170,25 @@ export class BIFailureIncidentService {
         return result;
       }, 'get active BI failure incidents');
 
-      return (data ?? []).map(
-        (item: {
-          id: string;
-          incident_number: string;
-          facility_id: string;
-          bi_test_result_id: string;
-          detected_by_operator_id: string;
-          incident_type: string;
-          severity: string;
-          description: string;
-          immediate_actions: string[];
-          root_cause_analysis: string;
-          corrective_actions: string[];
-          preventive_measures: string[];
-          estimated_resolution_time: string;
-          priority: string;
-          status: string;
-          notes: string;
-          created_at: string;
-          updated_at: string;
-          affected_batch_ids?: string[];
-        }) => ({
-          ...item,
-          affected_batch_ids: item.affected_batch_ids ?? [],
-        })
-      );
+      return (data ?? []).map((item: _BIFailureIncidentRow) => ({
+        id: item.id,
+        facility_id: item.facility_id,
+        bi_test_result_id: item.bi_test_result_id || '',
+        incident_number: item.incident_number,
+        failure_date: item.failure_date || new Date().toISOString(),
+        detected_by_operator_id: item.detected_by_operator_id || '',
+        affected_tools_count: item.affected_tools_count || 0,
+        affected_batch_ids: item.affected_batch_ids || [],
+        failure_reason: item.failure_reason || '',
+        severity_level: item.severity_level || 'medium',
+        status: item.status || 'active',
+        regulatory_notification_required:
+          item.regulatory_notification_required || false,
+        regulatory_notification_sent:
+          item.regulatory_notification_sent || false,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }));
     } catch (error) {
       if (error instanceof Error && error.name === 'BIFailureError')
         throw error;
@@ -235,29 +226,23 @@ export class BIFailureIncidentService {
 
       return data
         ? {
-            ...(data as {
-              id: string;
-              incident_number: string;
-              facility_id: string;
-              bi_test_result_id: string;
-              detected_by_operator_id: string;
-              incident_type: string;
-              severity: string;
-              description: string;
-              immediate_actions: string[];
-              root_cause_analysis: string;
-              corrective_actions: string[];
-              preventive_measures: string[];
-              estimated_resolution_time: string;
-              priority: string;
-              status: string;
-              notes: string;
-              created_at: string;
-              updated_at: string;
-            }),
-            affected_batch_ids:
-              (data as { affected_batch_ids?: string[] }).affected_batch_ids ??
-              [],
+            id: data.id,
+            facility_id: data.facility_id,
+            bi_test_result_id: data.bi_test_result_id || '',
+            incident_number: data.incident_number,
+            failure_date: data.failure_date || new Date().toISOString(),
+            detected_by_operator_id: data.detected_by_operator_id || '',
+            affected_tools_count: data.affected_tools_count || 0,
+            affected_batch_ids: data.affected_batch_ids || [],
+            failure_reason: data.failure_reason || '',
+            severity_level: data.severity_level || 'medium',
+            status: data.status || 'active',
+            regulatory_notification_required:
+              data.regulatory_notification_required || false,
+            regulatory_notification_sent:
+              data.regulatory_notification_sent || false,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
           }
         : null;
     } catch (error) {
@@ -426,32 +411,25 @@ export class BIFailureIncidentService {
         return result;
       }, 'get incident history');
 
-      return (data ?? []).map(
-        (item: {
-          id: string;
-          incident_number: string;
-          facility_id: string;
-          bi_test_result_id: string;
-          detected_by_operator_id: string;
-          incident_type: string;
-          severity: string;
-          description: string;
-          immediate_actions: string[];
-          root_cause_analysis: string;
-          corrective_actions: string[];
-          preventive_measures: string[];
-          estimated_resolution_time: string;
-          priority: string;
-          status: string;
-          notes: string;
-          created_at: string;
-          updated_at: string;
-          affected_batch_ids?: string[];
-        }) => ({
-          ...item,
-          affected_batch_ids: item.affected_batch_ids ?? [],
-        })
-      );
+      return (data ?? []).map((item: _BIFailureIncidentRow) => ({
+        id: item.id,
+        facility_id: item.facility_id,
+        bi_test_result_id: item.bi_test_result_id || '',
+        incident_number: item.incident_number,
+        failure_date: item.failure_date || new Date().toISOString(),
+        detected_by_operator_id: item.detected_by_operator_id || '',
+        affected_tools_count: item.affected_tools_count || 0,
+        affected_batch_ids: item.affected_batch_ids || [],
+        failure_reason: item.failure_reason || '',
+        severity_level: item.severity_level || 'medium',
+        status: item.status || 'active',
+        regulatory_notification_required:
+          item.regulatory_notification_required || false,
+        regulatory_notification_sent:
+          item.regulatory_notification_sent || false,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }));
     } catch (error) {
       if (error instanceof Error && error.name === 'BIFailureError')
         throw error;
@@ -470,7 +448,7 @@ export class BIFailureIncidentService {
       const { data, error } = await BIFailureErrorHandler.withRetry(
         async () => {
           return await supabase.rpc<
-            number,
+            string,
             { p_incident_id: string; p_last_successful_bi_date: string }
           >('identify_exposure_window_tools', {
             p_incident_id: incidentId,
@@ -487,7 +465,7 @@ export class BIFailureIncidentService {
         );
       }
 
-      return data ?? 0;
+      return parseInt(data as string) ?? 0;
     } catch (error) {
       if (error instanceof Error && error.name === 'BIFailureError')
         throw error;

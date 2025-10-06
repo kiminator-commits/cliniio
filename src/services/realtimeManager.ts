@@ -27,7 +27,7 @@ class RealtimeManager {
       typeof subscription === 'object' &&
       'unsubscribe' in subscription
     ) {
-      supabase.removeChannel(subscription as { unsubscribe: () => void });
+      supabase.removeChannel(subscription as unknown);
     }
     this.subscriptions = this.subscriptions.filter((s) => s !== subscription);
   }
@@ -35,7 +35,7 @@ class RealtimeManager {
   static forceCleanup() {
     this.subscriptions.forEach((sub) => {
       if (sub && typeof sub === 'object' && 'unsubscribe' in sub) {
-        supabase.removeChannel(sub as { unsubscribe: () => void });
+        supabase.removeChannel(sub as unknown);
       }
     });
     this.subscriptions = [];

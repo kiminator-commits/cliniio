@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   BIFailureIncidentService,
   BIFailureIncident,
-} from '../../../services/bi/BIFailureIncidentService';
+} from '../../../services/bi/failure/BIFailureIncidentService';
 
 interface BIFailureIncidentDashboardProps {
   facilityId: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '@mdi/react';
 import { mdiLink } from '@mdi/js';
-import { UnifiedAISettings } from '../../../../services/ai/aiSettingsService';
+import { UnifiedAISettings } from '../../../../../services/ai/aiSettingsService';
 import { UI_TEXT } from '../../AIAnalyticsSettings.config';
 import FormGroup from './FormGroup';
 import ToggleSwitch from './ToggleSwitch';

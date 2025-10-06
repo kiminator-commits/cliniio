@@ -4,9 +4,9 @@ import {
   InventoryExportTemplateService,
   ExportTemplate,
   ExportSchedule,
-} from '../../services/inventoryExportTemplateService';
-import { InventoryScheduledExportService } from '../../services/inventoryScheduledExportService';
-import { InventoryExportService } from '../../services/inventoryExportService';
+} from '../../../services/inventoryExportTemplateService';
+import { InventoryScheduledExportService } from '../../../services/inventoryScheduledExportService';
+import { InventoryExportService } from '../../../services/inventoryExportService';
 
 interface ScheduleFormData {
   name: string;

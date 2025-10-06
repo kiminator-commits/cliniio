@@ -19,12 +19,14 @@ export class KnowledgeHubContentProvider {
         title: article.title,
         category: convertStringToContentCategory(article.category || 'Courses'),
         status: 'draft' as ContentStatus,
-        dueDate: article.published_at || new Date().toISOString(),
+        dueDate:
+          (article as Record<string, unknown>).published_at ||
+          new Date().toISOString(),
         progress: 0,
-        lastUpdated: article.updated_at,
-        description: article.summary,
-        tags: article.tags,
-        createdAt: article.created_at,
+        lastUpdated: (article as Record<string, unknown>).updated_at,
+        description: (article as Record<string, unknown>).summary,
+        tags: (article as Record<string, unknown>).tags,
+        createdAt: (article as Record<string, unknown>).created_at,
       }));
     } catch (error) {
       console.error('Failed to get knowledge articles:', error);
@@ -58,12 +60,14 @@ export class KnowledgeHubContentProvider {
         title: article.title,
         category: convertStringToContentCategory(article.category || 'Courses'),
         status: 'draft' as ContentStatus,
-        dueDate: article.published_at || new Date().toISOString(),
+        dueDate:
+          (article as Record<string, unknown>).published_at ||
+          new Date().toISOString(),
         progress: 0,
-        lastUpdated: article.updated_at,
-        description: article.summary,
-        tags: article.tags,
-        createdAt: article.created_at,
+        lastUpdated: (article as Record<string, unknown>).updated_at,
+        description: (article as Record<string, unknown>).summary,
+        tags: (article as Record<string, unknown>).tags,
+        createdAt: (article as Record<string, unknown>).created_at,
       };
     } catch (error) {
       console.error('Failed to get knowledge article by ID:', error);

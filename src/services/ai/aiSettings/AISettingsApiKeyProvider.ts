@@ -12,7 +12,7 @@ export class AISettingsApiKeyProvider {
     if (!settings.aiEnabled) return false;
 
     const featureValue = this.getNestedValue(
-      settings as Record<string, unknown>,
+      settings as unknown as Record<string, unknown>,
       featurePath
     );
     return featureValue === true;

@@ -7,8 +7,20 @@ export interface AdminTaskConfig {
     high: number;
     urgent: number;
   };
+  priorityWeights?: {
+    low: number;
+    medium: number;
+    high: number;
+    urgent: number;
+  };
+  rolePreferences?: Record<string, string[]>;
+  timeConstraints?: {
+    maxTaskDuration?: number;
+    minTaskDuration?: number;
+  };
   autoAssignment: boolean;
   aiSensitivity: 'low' | 'medium' | 'high';
+  aiEnabled?: boolean;
 }
 
 export const DEFAULT_ADMIN_TASK_CONFIG: AdminTaskConfig = {
@@ -20,8 +32,26 @@ export const DEFAULT_ADMIN_TASK_CONFIG: AdminTaskConfig = {
     high: 3,
     urgent: 4,
   },
+  priorityWeights: {
+    low: 1,
+    medium: 2,
+    high: 3,
+    urgent: 4,
+  },
+  rolePreferences: {
+    technician: ['equipment', 'compliance'],
+    operator: ['operational', 'compliance'],
+    cleaning_staff: ['compliance'],
+    inventory_manager: ['operational'],
+    supervisor: ['safety', 'operational'],
+  },
+  timeConstraints: {
+    maxTaskDuration: 120,
+    minTaskDuration: 5,
+  },
   autoAssignment: true,
   aiSensitivity: 'medium',
+  aiEnabled: true,
 };
 
 export const PRIORITY_ORDER = {
@@ -60,10 +90,17 @@ export function validateAdminTaskConfig(
         config.priorityThresholds?.urgent ??
         DEFAULT_ADMIN_TASK_CONFIG.priorityThresholds.urgent,
     },
+    priorityWeights:
+      config.priorityWeights ?? DEFAULT_ADMIN_TASK_CONFIG.priorityWeights,
+    rolePreferences:
+      config.rolePreferences ?? DEFAULT_ADMIN_TASK_CONFIG.rolePreferences,
+    timeConstraints:
+      config.timeConstraints ?? DEFAULT_ADMIN_TASK_CONFIG.timeConstraints,
     autoAssignment:
       config.autoAssignment ?? DEFAULT_ADMIN_TASK_CONFIG.autoAssignment,
     aiSensitivity:
       config.aiSensitivity ?? DEFAULT_ADMIN_TASK_CONFIG.aiSensitivity,
+    aiEnabled: config.aiEnabled ?? DEFAULT_ADMIN_TASK_CONFIG.aiEnabled,
   };
 }
 

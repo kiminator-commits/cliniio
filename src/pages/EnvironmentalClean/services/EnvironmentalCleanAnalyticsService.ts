@@ -40,7 +40,7 @@ export class EnvironmentalCleanAnalyticsService {
 
       if (error) throw error;
 
-      const roomData = (data || []) as EnvironmentalCleanRoom[];
+      const roomData = (data || []) as unknown as EnvironmentalCleanRoom[];
 
       const totalRooms = roomData.length;
       const cleanRooms = roomData.filter(
@@ -127,7 +127,7 @@ export class EnvironmentalCleanAnalyticsService {
 
       if (error) throw error;
 
-      const roomData = (data || []) as EnvironmentalCleanRoom[];
+      const roomData = (data || []) as unknown as EnvironmentalCleanRoom[];
 
       const counts: RoomCounts = {
         completed: roomData.filter(
@@ -167,7 +167,7 @@ export class EnvironmentalCleanAnalyticsService {
 
       if (error) throw error;
 
-      const roomData = (data || []) as EnvironmentalCleanRoom[];
+      const roomData = (data || []) as unknown as EnvironmentalCleanRoom[];
 
       const recentlyCleaned = roomData.map((item: EnvironmentalCleanRoom) => ({
         room: (item.room_name as string) || 'Unknown Room',
@@ -198,7 +198,7 @@ export class EnvironmentalCleanAnalyticsService {
 
       if (error) throw error;
 
-      const roomData = (data || []) as EnvironmentalCleanRoom[];
+      const roomData = (data || []) as unknown as EnvironmentalCleanRoom[];
 
       // Group by day and calculate efficiency
       const dailyEfficiency: Record<string, DailyEfficiency> = {};

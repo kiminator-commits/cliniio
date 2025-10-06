@@ -1,6 +1,13 @@
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
 import { PerformanceSnapshot } from './monitoring/PerformanceMonitor';
 
+// Define missing types
+interface AnalyticsData {
+  snapshots: PerformanceSnapshot[];
+  metrics: Record<string, number>;
+  trends: Record<string, string>;
+}
+
 /**
  * Performance Analytics Service
  * Provides advanced analytics and reporting for performance data
@@ -33,7 +40,7 @@ export class PerformanceAnalyticsService {
     const metrics = this.analyzeMetrics(recentSnapshots);
     const trends = this.analyzeTrends(recentSnapshots);
     const insights = this.generateInsights(metrics, trends);
-    const recommendations = this.generateRecommendations(metrics, trends);
+    const recommendations = this.generateRecommendations(metrics);
 
     return {
       period: `${Math.round(period / 60000)} minutes`,

@@ -3,18 +3,22 @@ import Icon from '@mdi/react';
 import { categories } from '../constants/cleaningData';
 import CategoryTabs from './CategoryTabs';
 import ChecklistItem from './ChecklistItem';
-import { Checklist } from '../types/cleaningChecklists';
+import { Checklist, Category, SDSSheet } from '../types/cleaningChecklists';
 
 interface ChecklistTabProps {
-  selectedCategory: unknown;
+  selectedCategory: Category | null;
   selectedChecklist: Checklist | null;
   bypassedItems: Set<string>;
   adjustedQuantities: Record<string, number>;
-  onCategoryClick: (category: unknown) => void;
+  onCategoryClick: (category: Category) => void;
   onChecklistSelect: (checklist: Checklist) => void;
   onBypassItem: (itemId: string) => void;
-  onAdjustQuantity: (itemId: string, quantity: number) => void;
-  onViewSDS: (sds: unknown) => void;
+  onAdjustQuantity: (
+    itemId: string,
+    inventoryItemId: string,
+    adjustment: number
+  ) => void;
+  onViewSDS: (sds: SDSSheet) => void;
   onMarkComplete: () => void;
   getChecklistsForCategory: (categoryId: string) => Checklist[];
 }

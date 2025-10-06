@@ -40,7 +40,7 @@ export class SecurityDataManager {
     // Clean up old events every hour
     setInterval(
       () => {
-        this.cleanupOldEvents();
+        this.cleanupOldEventsPrivate();
       },
       60 * 60 * 1000
     );
@@ -49,7 +49,7 @@ export class SecurityDataManager {
   /**
    * Clean up old events (30 days)
    */
-  private cleanupOldEvents(): void {
+  private cleanupOldEventsPrivate(): void {
     const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days
     const removedEvents = this.cleanupOldEvents(cutoff);
 

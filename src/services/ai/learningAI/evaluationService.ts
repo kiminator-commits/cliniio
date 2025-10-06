@@ -57,7 +57,7 @@ export class EvaluationService {
         confidence_score: result.confidence_score,
         performance_factors: result.risk_factors as Json,
         improvement_suggestions: result.improvement_suggestions as Json,
-        estimated_completion_time: result.predicted_completion_time,
+        predicted_completion_time: result.predicted_completion_time,
         difficulty_assessment: result.study_recommendations as Json,
         prerequisite_requirements: {} as Json, // Not available in this interface
         alternative_approaches: {} as Json, // Not available in this interface
@@ -87,7 +87,7 @@ export class EvaluationService {
         user_id: resultData.user_id ?? '',
         content_id: resultData.content_id ?? '',
         predicted_performance: resultData.predicted_performance ?? 0,
-        predicted_completion_time: resultData.estimated_completion_time ?? 0,
+        predicted_completion_time: resultData.predicted_completion_time ?? 0,
         success_probability: 0, // Not available in database
         risk_factors: [], // Not available in database
         improvement_suggestions:

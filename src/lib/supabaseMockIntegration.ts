@@ -6,10 +6,10 @@ import { vi } from 'vitest';
 
 // Mock implementations since the actual modules don't exist
 interface TypeSafeMockSupabaseClient {
-  from: (table: string) => unknown;
-  auth: unknown;
-  storage: unknown;
-  functions: unknown;
+  from: (table: string) => MockTableBuilder;
+  auth: MockAuthClient;
+  storage: MockStorageClient;
+  functions: MockFunctionsClient;
   channel: (name: string) => unknown;
   removeChannel: (subscription: unknown) => void;
   realtime: {
@@ -18,6 +18,69 @@ interface TypeSafeMockSupabaseClient {
     channel: (name: string) => unknown;
     getChannels: () => unknown[];
   };
+}
+
+interface MockAuthClient {
+  signIn: (credentials: {
+    email: string;
+    password: string;
+  }) => Promise<{ data: unknown; error: unknown }>;
+  signUp: (credentials: {
+    email: string;
+    password: string;
+  }) => Promise<{ data: unknown; error: unknown }>;
+  signOut: () => Promise<{ error: unknown }>;
+  getUser: () => Promise<{ data: { user: unknown } | null; error: unknown }>;
+  getSession: () => Promise<{
+    data: { session: unknown } | null;
+    error: unknown;
+  }>;
+  onAuthStateChange: (callback: (event: string, session: unknown) => void) => {
+    data: { subscription: unknown };
+  };
+  updateUser: (
+    attributes: unknown
+  ) => Promise<{ data: unknown; error: unknown }>;
+  resetPasswordForEmail: (
+    email: string
+  ) => Promise<{ data: unknown; error: unknown }>;
+}
+
+interface MockStorageClient {
+  from: (bucket: string) => unknown;
+  upload: (
+    path: string,
+    file: File
+  ) => Promise<{ data: unknown; error: unknown }>;
+  download: (path: string) => Promise<{ data: unknown; error: unknown }>;
+  list: (path: string) => Promise<{ data: unknown[]; error: unknown }>;
+  remove: (paths: string[]) => Promise<{ data: unknown; error: unknown }>;
+  createSignedUrl: (
+    path: string,
+    expiresIn: number
+  ) => Promise<{ data: unknown; error: unknown }>;
+  getPublicUrl: (path: string) => { data: { publicUrl: string } };
+}
+
+interface MockFunctionsClient {
+  invoke: (
+    functionName: string,
+    payload?: unknown
+  ) => Promise<{ data: unknown; error: unknown }>;
+}
+
+interface MockTableBuilder {
+  select: (columns?: string) => MockQueryBuilder;
+  insert: (data: unknown) => MockQueryBuilder;
+  update: (data: unknown) => MockQueryBuilder;
+  delete: () => MockQueryBuilder;
+}
+
+interface MockQueryBuilder {
+  then: (
+    callback: (result: { data: unknown[] | null; error: unknown }) => void
+  ) => Promise<{ data: unknown[] | null; error: unknown }>;
+  single: () => Promise<{ data: unknown | null; error: unknown }>;
 }
 
 interface EnhancedMockConfig {
@@ -31,34 +94,54 @@ interface EnhancedMockConfig {
 export function createTypeSafeMockSupabaseClient(
   _config: EnhancedMockConfig = {}
 ): TypeSafeMockSupabaseClient {
+  const mockQueryBuilder: MockQueryBuilder = {
+    then: vi.fn().mockResolvedValue({ data: [], error: null }),
+    single: vi.fn().mockResolvedValue({ data: null, error: null }),
+  };
+
+  const mockTableBuilder: MockTableBuilder = {
+    select: vi.fn().mockReturnValue(mockQueryBuilder),
+    insert: vi.fn().mockReturnValue(mockQueryBuilder),
+    update: vi.fn().mockReturnValue(mockQueryBuilder),
+    delete: vi.fn().mockReturnValue(mockQueryBuilder),
+  };
+
   return {
-    from: vi.fn(),
+    from: vi.fn().mockReturnValue(mockTableBuilder),
     auth: {
-      signIn: vi.fn(),
-      signUp: vi.fn(),
-      signOut: vi.fn(),
-      getUser: vi.fn(),
-      getSession: vi.fn(),
-      onAuthStateChange: vi.fn(),
+      signIn: vi.fn().mockResolvedValue({ data: null, error: null }),
+      signUp: vi.fn().mockResolvedValue({ data: null, error: null }),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
+      getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      getSession: vi
+        .fn()
+        .mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: vi
+        .fn()
+        .mockReturnValue({ data: { subscription: null } }),
+      updateUser: vi.fn().mockResolvedValue({ data: null, error: null }),
+      resetPasswordForEmail: vi
+        .fn()
+        .mockResolvedValue({ data: null, error: null }),
     },
     storage: {
-      from: vi.fn(),
-      upload: vi.fn(),
-      download: vi.fn(),
-      list: vi.fn(),
-      remove: vi.fn(),
-      createSignedUrl: vi.fn(),
-      getPublicUrl: vi.fn(),
+      from: vi.fn().mockReturnValue({}),
+      upload: vi.fn().mockResolvedValue({ data: null, error: null }),
+      download: vi.fn().mockResolvedValue({ data: null, error: null }),
+      list: vi.fn().mockResolvedValue({ data: [], error: null }),
+      remove: vi.fn().mockResolvedValue({ data: null, error: null }),
+      createSignedUrl: vi.fn().mockResolvedValue({ data: null, error: null }),
+      getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: '' } }),
     },
     functions: {
-      invoke: vi.fn(),
+      invoke: vi.fn().mockResolvedValue({ data: null, error: null }),
     },
-    channel: vi.fn(),
+    channel: vi.fn().mockReturnValue({}),
     removeChannel: vi.fn(),
     realtime: {
       removeAllChannels: vi.fn(),
       removeChannel: vi.fn(),
-      channel: vi.fn(),
+      channel: vi.fn().mockReturnValue({}),
       getChannels: vi.fn(() => []),
     },
   };
@@ -79,7 +162,7 @@ export function createErrorTestingMockClient(
 function createPerformanceTestingMockClient(): TypeSafeMockSupabaseClient {
   return createTypeSafeMockSupabaseClient({});
 }
-import { Database } from '@/types/database.types';
+import { Database } from '../types/database.types';
 
 // ============================================================================
 // BACKWARD COMPATIBILITY LAYER
@@ -101,8 +184,7 @@ export function createJestCompatibleMockClient(): TypeSafeMockSupabaseClient {
   });
 
   // Wrap methods to be Vitest-compatible
-  const wrappedClient = {
-    ...mockClient,
+  const wrappedClient: TypeSafeMockSupabaseClient = {
     from: vi
       .fn()
       .mockImplementation(
@@ -110,8 +192,7 @@ export function createJestCompatibleMockClient(): TypeSafeMockSupabaseClient {
           mockClient.from(table as string)
       ),
     auth: {
-      ...mockClient.auth,
-      signInWithPassword: vi
+      signIn: vi
         .fn()
         .mockImplementation((credentials) =>
           mockClient.auth.signIn(credentials)
@@ -142,21 +223,20 @@ export function createJestCompatibleMockClient(): TypeSafeMockSupabaseClient {
           mockClient.auth.resetPasswordForEmail(email)
         ),
     },
+    storage: mockClient.storage,
+    functions: mockClient.functions,
     channel: vi
       .fn()
       .mockImplementation((name: string) => mockClient.channel(name)),
-    removeAllChannels: vi
-      .fn()
-      .mockImplementation(() => mockClient.realtime.removeAllChannels()),
-    // Add missing properties (using public accessor methods if available)
     removeChannel: vi
       .fn()
       .mockImplementation((subscription) =>
         mockClient.realtime.removeChannel(subscription)
       ),
+    realtime: mockClient.realtime,
   };
 
-  return wrappedClient as unknown as TypeSafeMockSupabaseClient;
+  return wrappedClient;
 }
 
 /**
@@ -197,52 +277,38 @@ export function createMockClientWithResponses(responses: {
   // Override auth responses if provided
   if (responses.auth) {
     if (responses.auth.getUser) {
-      (
-        mockClient.auth.getUser as {
-          mockResolvedValue: (value: unknown) => void;
-        }
-      ).mockResolvedValue(responses.auth.getUser);
+      (mockClient.auth.getUser as jest.Mock).mockResolvedValue(
+        responses.auth.getUser
+      );
     }
     if (responses.auth.getSession) {
-      (
-        mockClient.auth.getSession as {
-          mockResolvedValue: (value: unknown) => void;
-        }
-      ).mockResolvedValue(responses.auth.getSession);
+      (mockClient.auth.getSession as jest.Mock).mockResolvedValue(
+        responses.auth.getSession
+      );
     }
     if (responses.auth.signIn) {
-      (
-        mockClient.auth.signIn as {
-          mockResolvedValue: (value: unknown) => void;
-        }
-      ).mockResolvedValue(responses.auth.signIn);
+      (mockClient.auth.signIn as jest.Mock).mockResolvedValue(
+        responses.auth.signIn
+      );
     }
     if (responses.auth.signUp) {
-      (
-        mockClient.auth.signUp as {
-          mockResolvedValue: (value: unknown) => void;
-        }
-      ).mockResolvedValue(responses.auth.signUp);
+      (mockClient.auth.signUp as jest.Mock).mockResolvedValue(
+        responses.auth.signUp
+      );
     }
     if (responses.auth.signOut) {
-      (
-        mockClient.auth.signOut as {
-          mockResolvedValue: (value: unknown) => void;
-        }
-      ).mockResolvedValue(responses.auth.signOut);
+      (mockClient.auth.signOut as jest.Mock).mockResolvedValue(
+        responses.auth.signOut
+      );
     }
   }
 
   // Override database responses if provided
   if (responses.database) {
     const originalFrom = mockClient.from;
-    (
-      mockClient.from as {
-        mockImplementation: (fn: (table: string) => unknown) => void;
-      }
-    ).mockImplementation(
+    (mockClient.from as jest.Mock).mockImplementation(
       <T extends keyof Database['public']['Tables']>(table: T) => {
-        const tableBuilder = originalFrom(table as string);
+        const tableBuilder = originalFrom(table as string) as MockTableBuilder;
 
         if (responses.database?.select) {
           const originalSelect = tableBuilder.select;
@@ -250,10 +316,10 @@ export function createMockClientWithResponses(responses: {
             .fn()
             .mockImplementation((columns?: string) => {
               const selectBuilder = originalSelect(columns);
-              selectBuilder.then = vi
+              (selectBuilder as jest.Mock).then = vi
                 .fn()
                 .mockResolvedValue(responses.database!.select);
-              selectBuilder.single = vi
+              (selectBuilder as jest.Mock).single = vi
                 .fn()
                 .mockResolvedValue(responses.database!.select);
               return selectBuilder;
@@ -264,10 +330,10 @@ export function createMockClientWithResponses(responses: {
           const originalInsert = tableBuilder.insert;
           tableBuilder.insert = vi.fn().mockImplementation((data: unknown) => {
             const insertBuilder = originalInsert(data);
-            insertBuilder.then = vi
+            (insertBuilder as jest.Mock).then = vi
               .fn()
               .mockResolvedValue(responses.database!.insert);
-            insertBuilder.single = vi
+            (insertBuilder as jest.Mock).single = vi
               .fn()
               .mockResolvedValue(responses.database!.insert);
             return insertBuilder;
@@ -277,11 +343,11 @@ export function createMockClientWithResponses(responses: {
         if (responses.database?.update) {
           const originalUpdate = tableBuilder.update;
           tableBuilder.update = vi.fn().mockImplementation((data: unknown) => {
-            const updateBuilder = originalUpdate(data as Partial<unknown>);
-            updateBuilder.then = vi
+            const updateBuilder = originalUpdate(data);
+            (updateBuilder as jest.Mock).then = vi
               .fn()
               .mockResolvedValue(responses.database!.update);
-            updateBuilder.single = vi
+            (updateBuilder as jest.Mock).single = vi
               .fn()
               .mockResolvedValue(responses.database!.update);
             return updateBuilder;
@@ -292,7 +358,7 @@ export function createMockClientWithResponses(responses: {
           const originalDelete = tableBuilder.delete;
           tableBuilder.delete = vi.fn().mockImplementation(() => {
             const deleteBuilder = originalDelete();
-            deleteBuilder.then = vi
+            (deleteBuilder as jest.Mock).then = vi
               .fn()
               .mockResolvedValue(responses.database!.delete);
             return deleteBuilder;

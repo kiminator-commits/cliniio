@@ -1,5 +1,5 @@
 import React from 'react';
-import { UnifiedAISettings } from '../../../../services/ai/aiSettingsService';
+import { UnifiedAISettings } from '../../../../../services/ai/aiSettingsService';
 import { UI_TEXT } from '../../AIAnalyticsSettings.config';
 import FormGroup from './FormGroup';
 import ToggleSwitch from './ToggleSwitch';

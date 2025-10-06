@@ -248,6 +248,17 @@ export class AISettingsPersistenceProvider {
   } {
     const errors: string[] = [];
 
+    // Type guard to check if settings is an object
+    if (typeof settings !== 'object' || settings === null) {
+      errors.push('Settings must be an object');
+      return {
+        isValid: false,
+        errors,
+      };
+    }
+
+    const settingsObj = settings as Record<string, unknown>;
+
     // Check required top-level properties
     const requiredProperties = [
       'aiEnabled',
@@ -272,36 +283,37 @@ export class AISettingsPersistenceProvider {
     ];
 
     requiredProperties.forEach((prop) => {
-      if (!(prop in settings)) {
+      if (!(prop in settingsObj)) {
         errors.push(`Missing required property: ${prop}`);
       }
     });
 
     // Check nested object structures
     if (
-      settings.computerVision &&
-      typeof settings.computerVision !== 'object'
+      settingsObj.computerVision &&
+      typeof settingsObj.computerVision !== 'object'
     ) {
       errors.push('computerVision must be an object');
     }
 
     if (
-      settings.predictiveAnalytics &&
-      typeof settings.predictiveAnalytics !== 'object'
+      settingsObj.predictiveAnalytics &&
+      typeof settingsObj.predictiveAnalytics !== 'object'
     ) {
       errors.push('predictiveAnalytics must be an object');
     }
 
-    if (settings.aiConfig && typeof settings.aiConfig !== 'object') {
+    if (settingsObj.aiConfig && typeof settingsObj.aiConfig !== 'object') {
       errors.push('aiConfig must be an object');
     }
 
     // Check AI config properties
-    if (settings.aiConfig) {
-      if (typeof settings.aiConfig.aiConfidenceThreshold !== 'number') {
+    if (settingsObj.aiConfig && typeof settingsObj.aiConfig === 'object') {
+      const aiConfig = settingsObj.aiConfig as Record<string, unknown>;
+      if (typeof aiConfig.aiConfidenceThreshold !== 'number') {
         errors.push('aiConfig.aiConfidenceThreshold must be a number');
       }
-      if (typeof settings.aiConfig.aiDataRetentionDays !== 'number') {
+      if (typeof aiConfig.aiDataRetentionDays !== 'number') {
         errors.push('aiConfig.aiDataRetentionDays must be a number');
       }
     }

@@ -1,9 +1,6 @@
 // Core services
 export { createTaskService } from './taskService';
-export {
-  gamificationService,
-  createGamificationService,
-} from './gamificationService';
+export { gamificationService } from './gamificationService';
 export { feedbackService } from './feedbackService';
 
 // Service types

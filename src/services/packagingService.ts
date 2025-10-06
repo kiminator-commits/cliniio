@@ -27,6 +27,42 @@ const safeDate = (value: unknown): Date | undefined => {
   return undefined;
 };
 
+const _mapToToolStatus = (phase: string): ToolStatus => {
+  switch (phase) {
+    case 'active':
+      return 'active';
+    case 'dirty':
+      return 'dirty';
+    case 'clean':
+      return 'clean';
+    case 'problem':
+      return 'problem';
+    case 'new_barcode':
+      return 'new_barcode';
+    default:
+      return 'active';
+  }
+};
+
+const mapDatabaseStatusToToolStatus = (
+  dbStatus: string
+): 'available' | 'in_cycle' | 'maintenance' | 'retired' | 'problem' => {
+  switch (dbStatus) {
+    case 'active':
+      return 'available';
+    case 'dirty':
+      return 'maintenance';
+    case 'clean':
+      return 'available';
+    case 'problem':
+      return 'problem';
+    case 'new_barcode':
+      return 'available';
+    default:
+      return 'available';
+  }
+};
+
 /**
  * Generate unique package ID
  */
@@ -46,20 +82,35 @@ export interface Tool {
   id: string;
   name: string;
   barcode: string;
-  type: string;
   category: string;
-  currentPhase: string;
-  status: 'available' | 'maintenance' | 'retired' | 'in_cycle' | 'problem';
+  status: 'available' | 'in_cycle' | 'maintenance' | 'retired' | 'problem';
   lastSterilized?: string;
-  sterilizationCount: number;
   cycleCount: number;
-  location: string;
-  manufacturer: string;
-  model: string;
-  serialNumber: string;
-  maintenanceDueDate: Date | null;
-  notes: string;
-  metadata: Record<string, unknown>;
+  maxCycles?: number;
+  location?: string;
+  notes?: string;
+  type?: string;
+  currentPhase?:
+    | 'bath1'
+    | 'bath2'
+    | 'airDry'
+    | 'autoclave'
+    | 'complete'
+    | 'failed'
+    | string;
+  startTime?: Date | null;
+  endTime?: Date | null;
+  phaseStartTime?: Date | null;
+  phaseEndTime?: Date | null;
+  biStatus?: 'pending' | 'pass' | 'fail' | 'in-progress';
+  operator?: string;
+  cycleId?: string;
+  label?: string;
+  problemType?: 'damaged' | 'improperly_cleaned' | 'worn_out' | 'other';
+  problemNotes?: string;
+  problemReportedBy?: string;
+  problemReportedAt?: Date;
+  isP2Status?: boolean;
 }
 
 export interface SterilizationBatch {
@@ -148,18 +199,14 @@ export class PackagingService {
             type: safeString(typedTool.tool_type),
             category: safeString(typedTool.category) || 'general',
             currentPhase: safeString(typedTool.current_phase),
-            status:
-              (safeString(typedTool.current_phase) as ToolStatus) || 'active',
+            status: mapDatabaseStatusToToolStatus(
+              safeString(typedTool.current_phase)
+            ),
             lastSterilized: safeString(typedTool.last_sterilized) || undefined,
-            sterilizationCount: safeNumber(typedTool.sterilization_count),
             cycleCount: safeNumber(typedTool.cycle_count),
-            location: '',
-            manufacturer: '',
-            model: '',
-            serialNumber: '',
-            maintenanceDueDate: null,
-            notes: '',
-            metadata: {},
+            maxCycles: safeNumber(typedTool.max_cycles) || undefined,
+            location: safeString(typedTool.location) || undefined,
+            notes: safeString(typedTool.notes) || undefined,
           };
         });
       } catch (error) {
@@ -288,12 +335,12 @@ export class PackagingService {
       const authService = new SecureAuthService();
       const currentUser = await authService.getCurrentUser();
       const currentFacility = currentUser
-        ? { id: currentUser.facility_id }
+        ? { id: (currentUser as unknown).facility_id }
         : null;
 
       // Create audit log entry
       await supabase.from('audit_logs').insert({
-        created_by: currentUser?.id || 'unknown',
+        created_by: (currentUser as unknown)?.id || 'unknown',
         facility_id: currentFacility?.id || 'unknown',
         module: 'sterilization',
         action: 'package_created',
@@ -305,13 +352,13 @@ export class PackagingService {
           package_type: packageInfo.packageType,
           total_items: toolIds.length,
           status: 'packaged',
-        } as Json,
+        } as Record<string, unknown>,
         metadata: {
           package_id: packageId,
           tool_count: toolIds.length,
           operator_name: operatorName,
           package_info: packageInfo,
-        } as Json,
+        } as Record<string, unknown>,
       });
 
       const sterilizationBatch: SterilizationBatch = {
@@ -451,25 +498,11 @@ export class PackagingService {
           type: tool.tool_type as string,
           category: (tool.category as string) || 'general',
           currentPhase: tool.status as string,
-          status:
-            (tool.status as
-              | 'available'
-              | 'maintenance'
-              | 'retired'
-              | 'in_cycle'
-              | 'problem') || 'available',
+          status: mapDatabaseStatusToToolStatus(tool.status as string),
           location: tool.location as string,
-          manufacturer: tool.manufacturer as string,
-          model: tool.model as string,
-          serialNumber: tool.serial_number as string,
-          sterilizationCount: (tool.sterilization_count as number) || 0,
+          notes: (tool.notes as string) || undefined,
           cycleCount: (tool.cycle_count as number) || 0,
           lastSterilized: tool.last_sterilized as string | undefined,
-          maintenanceDueDate: tool.maintenance_due_date
-            ? new Date(tool.maintenance_due_date as string)
-            : null,
-          notes: (tool.notes as string) || '',
-          metadata: (tool.metadata as Record<string, unknown>) || {},
         };
       });
     } catch (error) {

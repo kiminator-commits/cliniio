@@ -1,6 +1,6 @@
 import { supabase } from '../../../../lib/supabase';
-import { ContentItem } from '../../KnowledgeHub/types';
-import { ApiError, ErrorType, ErrorSeverity } from '../../../types/errors';
+import { ContentItem } from '../../types';
+import { ApiError, ErrorType, ErrorSeverity } from '../../types/errors';
 import { KHDataTransformationProvider } from './KHDataTransformationProvider';
 
 export interface SearchFilters {

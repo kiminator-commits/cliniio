@@ -31,8 +31,8 @@ export class InventoryTableService {
     sortOrder: 'asc' | 'desc'
   ) {
     return [...data].sort((a, b) => {
-      const aValue = (a as Record<string, unknown>)[sortBy];
-      const bValue = (b as Record<string, unknown>)[sortBy];
+      const aValue = (a as unknown as Record<string, unknown>)[sortBy];
+      const bValue = (b as unknown as Record<string, unknown>)[sortBy];
 
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         const comparison = aValue.localeCompare(bValue);
@@ -58,7 +58,7 @@ export class InventoryTableService {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
 
-        const itemValue = (item as Record<string, unknown>)[key];
+        const itemValue = (item as unknown as Record<string, unknown>)[key];
         if (typeof value === 'string') {
           return itemValue
             ?.toString()
@@ -116,7 +116,7 @@ export class InventoryTableService {
       headers.join(','),
       ...data.map((row) =>
         headers
-          .map((header) => (row as Record<string, unknown>)[header])
+          .map((header) => (row as unknown as Record<string, unknown>)[header])
           .join(',')
       ),
     ].join('\n');

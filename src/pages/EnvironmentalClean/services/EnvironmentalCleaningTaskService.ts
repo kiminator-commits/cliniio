@@ -14,9 +14,9 @@ interface TaskCategoryData {
 interface TaskData {
   task_id: string;
   task_name: string;
-  task_description: string;
+  description: string;
   task_order: number;
-  estimated_duration_minutes: number;
+  estimated_duration: number;
   required_supplies: string[];
   required_equipment: string[];
   safety_notes: string;
@@ -107,10 +107,10 @@ export class EnvironmentalCleaningTaskService {
         id: task.task_id as string,
         categoryId: '', // Will be filled by the calling function
         taskName: task.task_name as string,
-        taskDescription: task.task_description as string,
+        taskDescription: task.description as string,
         taskOrder: task.task_order as number,
         isRequired: true,
-        estimatedDurationMinutes: task.estimated_duration_minutes as number,
+        estimatedDurationMinutes: task.estimated_duration as number,
         requiredSupplies: (task.required_supplies as string[]) || [],
         requiredEquipment: (task.required_equipment as string[]) || [],
         safetyNotes: task.safety_notes as string,
@@ -152,12 +152,24 @@ export class EnvironmentalCleaningTaskService {
       const taskData = (data || []) as Array<{
         id: string;
         category_id: string;
-        environmental_cleaning_task_categories: { name: string };
+        environmental_cleaning_task_categories: {
+          name: string;
+          color: string;
+          icon: string;
+        };
         name: string;
+        task_name: string;
         description: string;
+        task_order: number;
         estimated_duration: number;
         priority: string;
         is_active: boolean;
+        is_required: boolean;
+        required_supplies: string[];
+        required_equipment: string[];
+        safety_notes: string;
+        compliance_requirements: string[];
+        quality_checkpoints: string[];
         created_at: string;
         updated_at: string;
       }>;
@@ -189,10 +201,10 @@ export class EnvironmentalCleaningTaskService {
             }
           )?.icon || 'mdi-help',
         taskName: task.task_name as string,
-        taskDescription: task.task_description as string,
+        taskDescription: task.description as string,
         taskOrder: task.task_order as number,
         isRequired: task.is_required as boolean,
-        estimatedDurationMinutes: task.estimated_duration_minutes as number,
+        estimatedDurationMinutes: task.estimated_duration as number,
         requiredSupplies: (task.required_supplies as string[]) || [],
         requiredEquipment: (task.required_equipment as string[]) || [],
         safetyNotes: task.safety_notes as string,
@@ -239,7 +251,7 @@ export class EnvironmentalCleaningTaskService {
         .insert({
           facility_id: (await supabase.auth.getUser()).data.user?.id, // This should be facility_id
           name: taskData.task_name as string,
-          description: taskData.task_description as string,
+          description: taskData.description as string,
           location: roomName,
           room: roomName,
           task_type: 'routine',
@@ -248,8 +260,7 @@ export class EnvironmentalCleaningTaskService {
           assigned_to: assignedTo,
           assigned_at: new Date().toISOString(),
           due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Due in 24 hours
-          estimated_duration_minutes:
-            taskData.estimated_duration_minutes as number,
+          estimated_duration: taskData.estimated_duration as number,
           checklist_items: taskData.quality_checkpoints as string[],
           task_category_id: taskData.category_id as string,
         })

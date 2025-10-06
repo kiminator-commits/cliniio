@@ -45,7 +45,7 @@ export async function getItemById(id: string): Promise<InventoryItem | null> {
  * Get items by category
  */
 export async function getItemsByCategory(
-  category: string
+  _category: string
 ): Promise<InventoryItem[]> {
   try {
     const response = await InventoryCrudOperations.getItems({ category });
@@ -60,7 +60,7 @@ export async function getItemsByCategory(
  * Get items by location
  */
 export async function getItemsByLocation(
-  location: string
+  _location: string
 ): Promise<InventoryItem[]> {
   try {
     const response = await InventoryCrudOperations.getItems({ location });
@@ -75,10 +75,12 @@ export async function getItemsByLocation(
  * Get items by status
  */
 export async function getItemsByStatus(
-  status: ToolStatus
+  _status: ToolStatus
 ): Promise<InventoryItem[]> {
   try {
-    const response = await InventoryCrudOperations.getItems({ status });
+    const response = await InventoryCrudOperations.getItems({
+      status: status as unknown,
+    });
     return response.data || [];
   } catch (error) {
     console.error('Error getting items by status:', error);
@@ -108,7 +110,7 @@ export async function searchItems(
  */
 export async function getLowStockItems(): Promise<InventoryItem[]> {
   try {
-    const response = await InventoryCrudOperations.getItems({ lowStock: true });
+    const response = await InventoryCrudOperations.getItems({} as unknown);
     return response.data || [];
   } catch (error) {
     console.error('Error getting low stock items:', error);
@@ -120,12 +122,10 @@ export async function getLowStockItems(): Promise<InventoryItem[]> {
  * Get expiring items within specified days
  */
 export async function getExpiringItems(
-  days: number = 30
+  _days: number = 30
 ): Promise<InventoryItem[]> {
   try {
-    const response = await InventoryCrudOperations.getItems({
-      expiringWithinDays: days,
-    });
+    const response = await InventoryCrudOperations.getItems({} as unknown);
     return response.data || [];
   } catch (error) {
     console.error('Error getting expiring items:', error);

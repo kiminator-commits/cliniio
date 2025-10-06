@@ -75,23 +75,23 @@ export class UnifiedAIService {
    */
   static async getLearningRecommendations(facilityId: string, userId: string) {
     const learningAI = this.getLearningAI(facilityId);
-    return learningAI.getPersonalizedRecommendations(userId);
+    return learningAI.generatePersonalizedRecommendations(userId);
   }
 
   /**
-   * Analyze knowledge gaps
+   * Analyze skill gaps
    */
-  static async analyzeKnowledgeGaps(facilityId: string, userId: string) {
+  static async analyzeSkillGaps(facilityId: string, userId: string) {
     const learningAI = this.getLearningAI(facilityId);
-    return learningAI.analyzeKnowledgeGaps(userId);
+    return learningAI.analyzeSkillGaps(userId);
   }
 
   /**
    * Optimize learning pathways
    */
-  static async optimizeLearningPathways(facilityId: string, userId: string) {
+  static async optimizeLearningPath(facilityId: string, userId: string) {
     const learningAI = this.getLearningAI(facilityId);
-    return learningAI.optimizeLearningPathways(userId);
+    return learningAI.optimizeLearningPath(userId);
   }
 
   // ============================================================================
@@ -111,7 +111,7 @@ export class UnifiedAIService {
   /**
    * Analyze barcode data
    */
-  static async analyzeBarcode(facilityId: string, barcodeData: string) {
+  static async analyzeBarcode(facilityId: string, barcodeData: File) {
     const inventoryAI = this.getInventoryAI(facilityId);
     return inventoryAI.analyzeBarcode(barcodeData);
   }
@@ -119,28 +119,32 @@ export class UnifiedAIService {
   /**
    * Perform image recognition
    */
-  static async performImageRecognition(facilityId: string, imageData: string) {
+  static async performImageRecognition(facilityId: string, imageFile: File) {
     const inventoryAI = this.getInventoryAI(facilityId);
-    return inventoryAI.performImageRecognition(imageData);
+    return inventoryAI.analyzeImage(imageFile);
   }
 
   /**
    * Generate demand forecasting
    */
-  static async generateDemandForecasting(
+  static async generateDemandForecast(
     facilityId: string,
-    timeframe: string
+    timeframe: string,
+    period: 'week' | 'month' | 'quarter' | 'year'
   ) {
     const inventoryAI = this.getInventoryAI(facilityId);
-    return inventoryAI.generateDemandForecasting(timeframe);
+    return inventoryAI.generateDemandForecast(timeframe, period);
   }
 
   /**
-   * Optimize inventory costs
+   * Generate cost optimization
    */
-  static async optimizeInventoryCosts(facilityId: string) {
+  static async generateCostOptimization(
+    facilityId: string,
+    optimizationType: 'purchasing' | 'storage' | 'transportation' | 'overall'
+  ) {
     const inventoryAI = this.getInventoryAI(facilityId);
-    return inventoryAI.optimizeInventoryCosts();
+    return inventoryAI.generateCostOptimization(optimizationType);
   }
 
   // ============================================================================
@@ -150,9 +154,11 @@ export class UnifiedAIService {
   /**
    * Get Sterilization AI service instance
    */
-  private static getSterilizationAI(): SterilizationAIService {
+  private static getSterilizationAI(
+    facilityId: string
+  ): SterilizationAIService {
     if (!this.sterilizationAIInstance) {
-      this.sterilizationAIInstance = new SterilizationAIService();
+      this.sterilizationAIInstance = new SterilizationAIService(facilityId);
     }
     return this.sterilizationAIInstance;
   }
@@ -160,33 +166,36 @@ export class UnifiedAIService {
   /**
    * Get sterilization insights
    */
-  static async getSterilizationInsights() {
-    const sterilizationAI = this.getSterilizationAI();
-    return sterilizationAI.getInsights();
+  static async getSterilizationInsights(facilityId: string) {
+    const sterilizationAI = this.getSterilizationAI(facilityId);
+    return sterilizationAI.getRealTimeInsights();
   }
 
   /**
    * Get predictive analytics
    */
-  static async getSterilizationPredictiveAnalytics() {
-    const sterilizationAI = this.getSterilizationAI();
+  static async getSterilizationPredictiveAnalytics(facilityId: string) {
+    const sterilizationAI = this.getSterilizationAI(facilityId);
     return sterilizationAI.getPredictiveAnalytics();
   }
 
   /**
    * Get real-time insights
    */
-  static async getSterilizationRealTimeInsights() {
-    const sterilizationAI = this.getSterilizationAI();
+  static async getSterilizationRealTimeInsights(facilityId: string) {
+    const sterilizationAI = this.getSterilizationAI(facilityId);
     return sterilizationAI.getRealTimeInsights();
   }
 
   /**
    * Get historical trends
    */
-  static async getSterilizationHistoricalTrends() {
-    const sterilizationAI = this.getSterilizationAI();
-    return sterilizationAI.getHistoricalTrends();
+  static async getSterilizationHistoricalTrends(
+    facilityId: string,
+    timeframe: 'week' | 'month' | 'quarter' | 'year'
+  ) {
+    const sterilizationAI = this.getSterilizationAI(facilityId);
+    return sterilizationAI.getHistoricalTrends(timeframe);
   }
 
   // ============================================================================
@@ -208,12 +217,9 @@ export class UnifiedAIService {
   /**
    * Analyze environmental data
    */
-  static async analyzeEnvironmentalData(
-    facilityId: string,
-    data: Record<string, unknown>
-  ) {
+  static async analyzeEnvironmentalData(facilityId: string, roomId: string) {
     const environmentalAI = this.getEnvironmentalAI(facilityId);
-    return environmentalAI.analyzeEnvironmentalData(data);
+    return environmentalAI.generatePredictiveCleaning(roomId);
   }
 
   /**
@@ -221,7 +227,7 @@ export class UnifiedAIService {
    */
   static async generateEnvironmentalInsights(facilityId: string) {
     const environmentalAI = this.getEnvironmentalAI(facilityId);
-    return environmentalAI.generateInsights();
+    return environmentalAI.getEnvironmentalInsights();
   }
 
   // ============================================================================
@@ -239,7 +245,7 @@ export class UnifiedAIService {
 
       // Initialize Inventory AI
       const inventoryAI = this.getInventoryAI(facilityId);
-      await inventoryAI.initialize();
+      await inventoryAI.initializeSettings();
 
       // Initialize Environmental AI
       const environmentalAI = this.getEnvironmentalAI(facilityId);

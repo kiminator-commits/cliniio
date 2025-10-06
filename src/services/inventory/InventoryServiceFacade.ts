@@ -51,7 +51,6 @@ export {
 // ============================================================================
 // MAIN FACADE IMPLEMENTATION
 // ============================================================================
-
 export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
   // Use the new facade modules
   private readonly cacheManager = new InventoryCacheManager();
@@ -59,6 +58,13 @@ export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
   private readonly adapterManager = new InventoryAdapterManager();
   private isInitialized = false;
   private initializationPromise: Promise<void> | null = null;
+
+  transformDataForModal(items: InventoryItem[]): Record<string, unknown>[] {
+    return items.map((item) => ({
+      ...item,
+      // Add any additional transformations needed for modal display
+    }));
+  }
 
   // Static instance for true singleton behavior
   private static instance: InventoryServiceFacadeImpl | null = null;
@@ -580,6 +586,21 @@ export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
 
   static async getAllItems(): Promise<InventoryResponse> {
     return InventoryServiceFacadeImpl.getInstance().getAllItems();
+  }
+
+  static async fetchAllInventoryData() {
+    return InventoryServiceFacadeImpl.getInstance().fetchAllInventoryData();
+  }
+
+  // Add missing method for testing
+  async fetchAllInventoryData() {
+    try {
+      const result = await this.getAllItems();
+      return result.data || [];
+    } catch (error) {
+      console.error('Error fetching all inventory data:', error);
+      return [];
+    }
   }
 }
 

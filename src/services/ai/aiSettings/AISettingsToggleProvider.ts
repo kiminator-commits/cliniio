@@ -90,7 +90,7 @@ export class AISettingsToggleProvider {
   // Get feature status
   getFeatureStatus(settings: UnifiedAISettings, featurePath: string): boolean {
     const featureValue = this.getNestedValue(
-      settings as Record<string, unknown>,
+      settings as unknown as Record<string, unknown>,
       featurePath
     );
     return featureValue === true;

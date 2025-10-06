@@ -1,6 +1,6 @@
 import { isSupabaseConfigured as _isSupabaseConfigured } from '@/lib/supabase';
 import {
-  _InventoryResponse,
+  // InventoryResponse,
   InventoryFilters,
 } from '../types/inventoryServiceTypes';
 import { InventoryItem } from '@/types/inventoryTypes';

@@ -350,13 +350,13 @@ interface AlertRule {
   enabled: boolean;
 }
 
-interface NotificationChannel {
+export interface NotificationChannel {
   id: string;
   name: string;
   send: (notification: Notification) => Promise<void>;
 }
 
-interface Notification {
+export interface Notification {
   id: string;
   title: string;
   message: string;

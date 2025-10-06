@@ -41,9 +41,13 @@ export class EnvironmentalCleanChecklistProvider {
           description: (item.data as { description?: string })
             ?.description as string,
           items: [], // Task items will be fetched separately if needed
-          isActive: item.is_active as boolean,
-          createdAt: item.created_at as string,
-          updatedAt: item.updated_at as string,
+          isActive: (item as Record<string, unknown>).is_active ?? true,
+          createdAt:
+            (item as Record<string, unknown>).created_at ??
+            new Date().toISOString(),
+          updatedAt:
+            (item as Record<string, unknown>).updated_at ??
+            new Date().toISOString(),
         })
       );
     } catch (error) {

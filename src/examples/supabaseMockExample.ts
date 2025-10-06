@@ -162,7 +162,7 @@ export async function realtimeExample() {
   const subscription = mockClient
     .channel('public:inventory_items')
     .on(
-      'postgres_changes' as const,
+      'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'inventory_items' },
       (payload) => {
         console.log('Realtime event:', payload);

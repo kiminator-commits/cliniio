@@ -209,14 +209,14 @@ export class InventorySyncServiceImpl implements InventorySyncService {
     switch (operation.type) {
       case 'create':
         if (operation.entity === 'item') {
-          await this.syncInventoryItem(operation.data);
+          await this.syncInventoryItem(operation._data);
         } else if (operation.entity === 'category') {
-          await this.syncCategory(operation.data as string);
+          await this.syncCategory(operation._data as string);
         }
         break;
       case 'update':
         if (operation.entity === 'item') {
-          await this.syncInventoryItem(operation.data);
+          await this.syncInventoryItem(operation._data);
         }
         break;
       case 'delete':

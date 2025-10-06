@@ -54,7 +54,7 @@ export class SupabaseAuthService {
 
         return {
           user: userProfile as User | null,
-          session: data.session as Record<string, unknown>,
+          session: data.session as unknown as Record<string, unknown>,
           error: null,
         };
       }
@@ -127,7 +127,7 @@ export class SupabaseAuthService {
 
         return {
           user: userProfile as User,
-          session: data.session as Record<string, unknown>,
+          session: data.session as unknown as Record<string, unknown>,
           error: null,
         };
       }
@@ -247,7 +247,7 @@ export class SupabaseAuthService {
       }
 
       return {
-        session: session as Record<string, unknown>,
+        session: session as unknown as Record<string, unknown>,
         error: null,
       };
     } catch (error) {
@@ -348,7 +348,7 @@ export class SupabaseAuthService {
     callback: (event: string, session: Record<string, unknown>) => void
   ) {
     return supabase.auth.onAuthStateChange((event, session) => {
-      callback(event, session as Record<string, unknown>);
+      callback(event, session as unknown as Record<string, unknown>);
     });
   }
 }

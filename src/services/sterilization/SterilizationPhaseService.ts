@@ -133,13 +133,12 @@ export class SterilizationPhaseService {
           end_time: now,
           duration_minutes: Math.round(
             (new Date(now).getTime() -
-              new Date(typedCurrentPhase.start_time as string).getTime()) /
+              new Date(typedCycle.start_time as string).getTime()) /
               60000
           ),
           phase_status: 'completed',
           phase_data: {
-            ...((typedCurrentPhase.phase_data as Record<string, unknown>) ??
-              {}),
+            ...((typedCycle.parameters as Record<string, unknown>) ?? {}),
             ...(phaseData ?? {}),
             completed_by: userId,
             completion_time: now,

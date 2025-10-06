@@ -18,7 +18,6 @@ export type {
   ToolBatchInfo,
 } from './sterilization/SterilizationBatchProvider';
 export type {
-  SterilizationCycle,
   CreateCycleResult,
   SterilizationPhase,
 } from './sterilization/SterilizationCycleProvider';

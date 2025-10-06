@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Icon } from '@mdi/react';
 import {
   mdiLink,
@@ -10,8 +10,28 @@ import {
 } from '@mdi/js';
 import { IntegrationMetrics } from './utils/intelligenceTypes';
 
+interface Integration {
+  name: string;
+  type: string;
+  status: 'healthy' | 'warning' | 'error';
+  lastSyncTime?: string;
+  lastSync?: string;
+  responseTime?: number;
+  errorMessage?: string;
+  error?: string;
+}
+
+interface ExtendedIntegrationMetrics extends IntegrationMetrics {
+  overallHealthScore?: number;
+  activeIntegrations?: number;
+  failedIntegrations?: number;
+  lastSyncHours?: number;
+  integrations?: Integration[];
+  lastSystemCheck?: string;
+}
+
 interface IntelligenceIntegrationsTabProps {
-  integrationMetrics: IntegrationMetrics;
+  integrationMetrics: ExtendedIntegrationMetrics;
 }
 
 export const IntelligenceIntegrationsTab: React.FC<
@@ -31,34 +51,28 @@ export const IntelligenceIntegrationsTab: React.FC<
         <div className="grid gap-4 md:grid-cols-4">
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">
-              {(integrationMetrics as { overallHealthScore?: number })
-                .overallHealthScore || 0}
-              %
+              {integrationMetrics.overallHealthScore || 0}%
             </div>
             <div className="text-sm text-green-700">Overall Health</div>
           </div>
 
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">
-              {(integrationMetrics as { activeIntegrations?: number })
-                .activeIntegrations || 0}
+              {integrationMetrics.activeIntegrations || 0}
             </div>
             <div className="text-sm text-blue-700">Active Integrations</div>
           </div>
 
           <div className="text-center p-4 bg-yellow-50 rounded-lg">
             <div className="text-2xl font-bold text-yellow-600">
-              {(integrationMetrics as { failedIntegrations?: number })
-                .failedIntegrations || 0}
+              {integrationMetrics.failedIntegrations || 0}
             </div>
             <div className="text-sm text-yellow-700">Failed Integrations</div>
           </div>
 
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <div className="text-2xl font-bold text-purple-600">
-              {(integrationMetrics as { lastSyncHours?: number })
-                .lastSyncHours || 0}
-              h
+              {integrationMetrics.lastSyncHours || 0}h
             </div>
             <div className="text-sm text-purple-700">Last Sync</div>
           </div>
@@ -78,14 +92,11 @@ export const IntelligenceIntegrationsTab: React.FC<
           </h3>
         </div>
 
-        {integrationMetrics &&
-        typeof integrationMetrics === 'object' &&
-        'integrations' in integrationMetrics &&
-        Array.isArray(integrationMetrics.integrations) &&
+        {integrationMetrics?.integrations &&
         integrationMetrics.integrations.length > 0 ? (
           <div className="space-y-4">
             {integrationMetrics.integrations.map(
-              (integration: unknown, index: number) => (
+              (integration: Integration, index: number) => (
                 <div
                   key={index}
                   className="border border-gray-200 rounded-lg p-4"
@@ -209,10 +220,7 @@ export const IntelligenceIntegrationsTab: React.FC<
           <h4 className="font-medium text-gray-900 mb-2">Last System Check</h4>
           <div className="flex items-center text-sm text-gray-600">
             <Icon path={mdiClock} size={0.8} className="mr-2" />
-            {integrationMetrics &&
-            typeof integrationMetrics === 'object' &&
-            'lastSystemCheck' in integrationMetrics &&
-            typeof integrationMetrics.lastSystemCheck === 'string'
+            {integrationMetrics?.lastSystemCheck
               ? new Date(integrationMetrics.lastSystemCheck).toLocaleString()
               : 'Never'}
           </div>

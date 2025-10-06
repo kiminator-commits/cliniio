@@ -256,9 +256,8 @@ export class InventoryBulkOperationsProvider {
           try {
             const archivedItem = await this.adapter.updateInventoryItem(id, {
               status: 'archived',
-              archivedAt: new Date().toISOString(),
               archiveReason: reason,
-            });
+            } as Record<string, unknown>);
             archivedItems.push(archivedItem);
             cacheInvalidationService.invalidateRelated('inventory:update', id);
             successCount++;
@@ -330,9 +329,8 @@ export class InventoryBulkOperationsProvider {
           try {
             const restoredItem = await this.adapter.updateInventoryItem(id, {
               status: 'active',
-              archivedAt: null,
               archiveReason: null,
-            });
+            } as Record<string, unknown>);
             restoredItems.push(restoredItem);
             cacheInvalidationService.invalidateRelated('inventory:update', id);
             successCount++;

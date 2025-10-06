@@ -32,7 +32,7 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
 
     // Use tasks from homeData instead of fetching separately
     const tasks = useMemo(() => homeData.tasks || [], [homeData.tasks]);
-    const totalTasksCount = homeData.totalTasksCount || 0;
+    const totalTasksCount = tasks.length;
 
     // Simple pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -112,7 +112,9 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
           category: task.category,
           priority: 'medium' as const,
           dueDate: task.createdAt,
-          status: task.isCompleted ? 'completed' : 'pending',
+          status: task.isCompleted
+            ? ('completed' as const)
+            : ('pending' as const),
         })),
       [tasks]
     );
@@ -137,14 +139,20 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
       } => {
         return (
           data &&
-          typeof data.streak === 'number' &&
-          data.streak >= 0 &&
-          typeof data.level === 'number' &&
-          data.level >= 1 &&
-          typeof data.rank === 'number' &&
-          data.rank >= 1 &&
-          typeof data.totalScore === 'number' &&
-          data.totalScore >= 0
+          typeof data === 'object' &&
+          data !== null &&
+          'streak' in data &&
+          typeof (data as Record<string, unknown>).streak === 'number' &&
+          (data as Record<string, unknown>).streak >= 0 &&
+          'level' in data &&
+          typeof (data as Record<string, unknown>).level === 'number' &&
+          (data as Record<string, unknown>).level >= 1 &&
+          'rank' in data &&
+          typeof (data as Record<string, unknown>).rank === 'number' &&
+          (data as Record<string, unknown>).rank >= 1 &&
+          'totalScore' in data &&
+          typeof (data as Record<string, unknown>).totalScore === 'number' &&
+          (data as Record<string, unknown>).totalScore >= 0
         );
       };
 
@@ -192,7 +200,7 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
           const { userId } = await FacilityService.getCurrentUserAndFacility();
           if (!userId) throw new Error('No authenticated user for task toggle');
 
-          await completeTask(taskId, userId);
+          await completeTask(taskId);
 
           // Show success message with points awarded
           if (points && points > 0) {

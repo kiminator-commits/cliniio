@@ -21,7 +21,7 @@ export class InMemoryCache {
     try {
       const item = this.cache.get(this.getKey(key));
       if (item && item.expires > Date.now()) {
-        return item.value;
+        return item.value as T;
       }
       if (item) {
         this.cache.delete(this.getKey(key));

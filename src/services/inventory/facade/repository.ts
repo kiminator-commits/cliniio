@@ -14,7 +14,7 @@ import { InventoryAnalyticsProvider } from './providers/InventoryAnalyticsProvid
 import { InventoryStatsProvider } from './providers/InventoryStatsProvider';
 
 // Re-export utility functions for backward compatibility
-export { normalizeCategory, categorizeItems, withNormalizedCategory };
+export { categorizeItems, withNormalizedCategory };
 
 export class InventoryRepository {
   private currentAdapter: InventoryDataAdapter | null = null;
@@ -111,7 +111,7 @@ export class InventoryRepository {
         const normalized = withNormalizedCategory(items);
 
         // Use the unified categorization function
-        const categorized = categorizeItems(normalized);
+        const categorized = categorizeItems(normalized as unknown);
 
         // Ensure no duplicates by checking IDs
         const allItemIds = new Set();
@@ -144,10 +144,10 @@ export class InventoryRepository {
         ) as string[];
 
         return {
-          tools: categorized.tools as LocalInventoryItem[],
-          supplies: categorized.supplies as LocalInventoryItem[],
-          equipment: categorized.equipment as LocalInventoryItem[],
-          officeHardware: categorized.officeHardware as LocalInventoryItem[],
+          tools: categorized.tools as unknown,
+          supplies: categorized.supplies as unknown,
+          equipment: categorized.equipment as unknown,
+          officeHardware: categorized.officeHardware as unknown,
           categories,
           isLoading: false,
           error: response.error,
@@ -308,7 +308,7 @@ export class InventoryRepository {
     data: Record<string, unknown> | null;
     error: string | null;
   }> {
-    return this.statsProvider!.getInventoryStats();
+    return this.statsProvider!.getInventoryStats() as unknown;
   }
 
   /**

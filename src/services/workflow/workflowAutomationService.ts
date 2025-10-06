@@ -14,19 +14,25 @@ export async function runWorkflowAutomation({
       case 'STERILIZATION_CYCLE_COMPLETE':
         await supabase
           .from('sterilization_events')
-          .insert([{ ...scanData.payload, facility_id: facilityId }]);
+          .insert([
+            { ...(scanData.payload as unknown), facility_id: facilityId },
+          ]);
         break;
 
       case 'BI_FAILURE_DETECTED':
         await supabase
           .from('bi_failures')
-          .insert([{ ...scanData.payload, facility_id: facilityId }]);
+          .insert([
+            { ...(scanData.payload as unknown), facility_id: facilityId },
+          ]);
         break;
 
       case 'CLEANING_TASK_COMPLETE':
         await supabase
           .from('environmental_cleaning_log')
-          .insert([{ ...scanData.payload, facility_id: facilityId }]);
+          .insert([
+            { ...(scanData.payload as unknown), facility_id: facilityId },
+          ]);
         break;
 
       default:

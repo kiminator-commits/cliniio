@@ -75,7 +75,8 @@ export class InventoryStatsProvider {
             .length,
           lowStockItems: allItems.filter((item) => {
             const quantity = item.quantity || 0;
-            const minStock = item.minimumStock || 0;
+            const minStock =
+              (item as Record<string, unknown>).minimumStock || 0;
             return quantity > 0 && quantity <= minStock;
           }).length,
           outOfStockItems: allItems.filter((item) => (item.quantity || 0) === 0)
@@ -239,8 +240,9 @@ export class InventoryStatsProvider {
 
         allItems.forEach((item) => {
           const quantity = item.quantity || 0;
-          const minStock = item.minimumStock || 0;
-          const maxStock = item.maximumStock || Infinity;
+          const minStock = (item as Record<string, unknown>).minimumStock || 0;
+          const maxStock =
+            (item as Record<string, unknown>).maximumStock || Infinity;
 
           if (quantity === 0) {
             outOfStock++;
@@ -293,15 +295,15 @@ export class InventoryStatsProvider {
         const trendingItems = allItems
           .sort(
             (a, b) =>
-              new Date(b.lastUpdated || b.createdAt).getTime() -
-              new Date(a.lastUpdated || a.createdAt).getTime()
+              new Date(b.lastUpdated || b.created_at).getTime() -
+              new Date(a.lastUpdated || a.created_at).getTime()
           )
           .slice(0, limit)
           .map((item) => ({
             id: item.id,
             name: item.name || item.item || 'Unknown',
             category: item.category || 'Unknown',
-            lastUpdated: item.lastUpdated || item.createdAt,
+            lastUpdated: item.lastUpdated || item.created_at,
             updateCount: itemUpdateCounts[item.id] || 1,
           }));
 
@@ -326,14 +328,14 @@ export class InventoryStatsProvider {
     const metadata = inventoryAdapterFactory.getAdapterMetadata(
       this.adapterType
     );
-    return metadata;
+    return (metadata as unknown) || null;
   }
 
   /**
    * Get available adapters
    */
   getAvailableAdapters(): AdapterMetadata[] {
-    return inventoryAdapterFactory.getAvailableAdapters();
+    return inventoryAdapterFactory.getAvailableAdapters() as unknown;
   }
 
   /**
@@ -415,11 +417,14 @@ export class InventoryStatsProvider {
           });
 
           // Check data consistency
-          if (item.quantity !== undefined && item.minimumStock !== undefined) {
+          if (
+            item.quantity !== undefined &&
+            (item as Record<string, unknown>).minimumStock !== undefined
+          ) {
             if (item.quantity < 0) {
               issues.push(`Negative quantity for item ${item.id}`);
             }
-            if (item.minimumStock < 0) {
+            if ((item as Record<string, unknown>).minimumStock < 0) {
               issues.push(`Negative minimum stock for item ${item.id}`);
             }
           }

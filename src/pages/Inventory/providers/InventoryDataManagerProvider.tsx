@@ -133,7 +133,7 @@ export const InventoryDataManagerProvider: React.FC<
         if (filters) {
           return Object.entries(filters).every(([key, value]) => {
             if (value === undefined || value === null) return true;
-            return (item as Record<string, unknown>)[key] === value;
+            return (item as unknown as Record<string, unknown>)[key] === value;
           });
         }
 

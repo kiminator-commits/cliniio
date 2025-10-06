@@ -298,7 +298,8 @@ function calculateRiskScore(incidents: BIIncident[]): number {
   return incidents.reduce((score, incident) => {
     const severityWeights = { low: 1, medium: 2, high: 3, critical: 4 };
     const severity =
-      incident.severity_level || (incident as { severity: string }).severity;
+      incident.severity_level ||
+      (incident as unknown as { severity: string }).severity;
     return score + (severityWeights[severity] || 0);
   }, 0);
 }
@@ -386,7 +387,8 @@ export function analyzeIncidentPatterns(incidents: BIIncident[]): {
   const severityCounts = incidents.reduce(
     (acc, incident) => {
       const severity =
-        incident.severity_level || (incident as { severity: string }).severity;
+        incident.severity_level ||
+        (incident as unknown as { severity: string }).severity;
       acc[severity] = (acc[severity] || 0) + 1;
       return acc;
     },

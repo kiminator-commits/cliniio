@@ -136,7 +136,7 @@ export class StaticDataAdapter extends BaseInventoryDataAdapter {
         id: 'mock-1',
         facility_id: 'mock-facility',
         name: 'Surgical Scissors',
-        _category: 'Surgical Instruments',
+        category: 'Surgical Instruments',
         location: 'Operating Room 1',
         status: 'Available',
         quantity: 5,

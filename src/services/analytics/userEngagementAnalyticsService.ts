@@ -167,20 +167,16 @@ export class UserEngagementAnalyticsService {
             (cleaningTasks?.length || 0);
 
           const completedTasks =
-            (sterilizationTasks?.filter(
-              (task: SterilizationTaskRow) => task.status === 'completed'
-            ).length || 0) +
-            (cleaningTasks?.filter(
-              (task: CleaningTaskRow) => task.status === 'completed'
-            ).length || 0);
+            (sterilizationTasks?.filter((task) => task.status === 'completed')
+              .length || 0) +
+            (cleaningTasks?.filter((task) => task.status === 'completed')
+              .length || 0);
 
           const failedTasks =
-            (sterilizationTasks?.filter(
-              (task: SterilizationTaskRow) => task.status === 'failed'
-            ).length || 0) +
-            (cleaningTasks?.filter(
-              (task: CleaningTaskRow) => task.status === 'failed'
-            ).length || 0);
+            (sterilizationTasks?.filter((task) => task.status === 'failed')
+              .length || 0) +
+            (cleaningTasks?.filter((task) => task.status === 'failed').length ||
+              0);
 
           // Calculate points (simplified)
           const pointsEarned =
@@ -316,38 +312,30 @@ export class UserEngagementAnalyticsService {
       });
 
       // Process sterilization tasks
-      ((sterilizationTasks as SterilizationTaskRow[]) || []).forEach(
-        (task: SterilizationTaskRow) => {
-          const taskDate = new Date(task.created_at)
-            .toISOString()
-            .split('T')[0];
-          if (dailyData.has(taskDate)) {
-            const dayData = dailyData.get(taskDate)!;
-            dayData.totalTasks++;
-            if (task.status === 'completed') {
-              dayData.completedTasks++;
-            }
-            dailyData.set(taskDate, dayData);
+      ((sterilizationTasks as SterilizationTaskRow[]) || []).forEach((task) => {
+        const taskDate = new Date(task.created_at).toISOString().split('T')[0];
+        if (dailyData.has(taskDate)) {
+          const dayData = dailyData.get(taskDate)!;
+          dayData.totalTasks++;
+          if (task.status === 'completed') {
+            dayData.completedTasks++;
           }
+          dailyData.set(taskDate, dayData);
         }
-      );
+      });
 
       // Process cleaning tasks
-      ((cleaningTasks as CleaningTaskRow[]) || []).forEach(
-        (task: CleaningTaskRow) => {
-          const taskDate = new Date(task.created_at)
-            .toISOString()
-            .split('T')[0];
-          if (dailyData.has(taskDate)) {
-            const dayData = dailyData.get(taskDate)!;
-            dayData.totalTasks++;
-            if (task.status === 'completed') {
-              dayData.completedTasks++;
-            }
-            dailyData.set(taskDate, dayData);
+      ((cleaningTasks as CleaningTaskRow[]) || []).forEach((task) => {
+        const taskDate = new Date(task.created_at).toISOString().split('T')[0];
+        if (dailyData.has(taskDate)) {
+          const dayData = dailyData.get(taskDate)!;
+          dayData.totalTasks++;
+          if (task.status === 'completed') {
+            dayData.completedTasks++;
           }
+          dailyData.set(taskDate, dayData);
         }
-      );
+      });
 
       // Calculate averages and fill missing data
       const trends = Array.from(dailyData.values()).map((dayData) => {
@@ -423,19 +411,16 @@ export class UserEngagementAnalyticsService {
         taskType: 'Sterilization',
         totalAssigned: sterilizationTasks?.length || 0,
         completedCount:
-          sterilizationTasks?.filter(
-            (task: SterilizationTaskRow) => task.status === 'completed'
-          ).length || 0,
+          sterilizationTasks?.filter((task) => task.status === 'completed')
+            .length || 0,
         failedCount:
-          sterilizationTasks?.filter(
-            (task: SterilizationTaskRow) => task.status === 'failed'
-          ).length || 0,
+          sterilizationTasks?.filter((task) => task.status === 'failed')
+            .length || 0,
         avgCompletionTime: 45, // Simplified average
         successRate:
           sterilizationTasks && sterilizationTasks.length > 0
-            ? (sterilizationTasks.filter(
-                (task: SterilizationTaskRow) => task.status === 'completed'
-              ).length /
+            ? (sterilizationTasks.filter((task) => task.status === 'completed')
+                .length /
                 sterilizationTasks.length) *
               100
             : 0,
@@ -447,19 +432,15 @@ export class UserEngagementAnalyticsService {
         taskType: 'Environmental Cleaning',
         totalAssigned: cleaningTasks?.length || 0,
         completedCount:
-          cleaningTasks?.filter(
-            (task: CleaningTaskRow) => task.status === 'completed'
-          ).length || 0,
+          cleaningTasks?.filter((task) => task.status === 'completed').length ||
+          0,
         failedCount:
-          cleaningTasks?.filter(
-            (task: CleaningTaskRow) => task.status === 'failed'
-          ).length || 0,
+          cleaningTasks?.filter((task) => task.status === 'failed').length || 0,
         avgCompletionTime: 30, // Simplified average
         successRate:
           cleaningTasks && cleaningTasks.length > 0
-            ? (cleaningTasks.filter(
-                (task: CleaningTaskRow) => task.status === 'completed'
-              ).length /
+            ? (cleaningTasks.filter((task) => task.status === 'completed')
+                .length /
                 cleaningTasks.length) *
               100
             : 0,
@@ -533,12 +514,10 @@ export class UserEngagementAnalyticsService {
       const totalTasks =
         (sterilizationTasks?.length || 0) + (cleaningTasks?.length || 0);
       const completedTasks =
-        (sterilizationTasks?.filter(
-          (task: SterilizationTaskRow) => task.status === 'completed'
-        ).length || 0) +
-        (cleaningTasks?.filter(
-          (task: CleaningTaskRow) => task.status === 'completed'
-        ).length || 0);
+        (sterilizationTasks?.filter((task) => task.status === 'completed')
+          .length || 0) +
+        (cleaningTasks?.filter((task) => task.status === 'completed').length ||
+          0);
 
       // Calculate metrics
       const taskEfficiency =

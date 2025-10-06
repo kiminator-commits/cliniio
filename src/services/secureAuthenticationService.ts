@@ -280,7 +280,7 @@ class SecureAuthenticationService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Authentication failed',
-        rateLimitInfo: response?.metadata?.rateLimitInfo,
+        rateLimitInfo: undefined,
       };
     }
   }

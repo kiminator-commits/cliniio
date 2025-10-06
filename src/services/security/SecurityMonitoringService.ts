@@ -197,7 +197,7 @@ export class SecurityMonitoringService {
     return this.metricsProvider.getSecurityDashboard(
       incidents,
       threatIndicators
-    );
+    ) as unknown;
   }
 
   /**

@@ -181,15 +181,15 @@ export class AIGapScannerProvider {
         id: generateGapId(),
         type: 'equipment',
         priority: 'medium',
-        title: `Tool Maintenance Required: ${tool.tool_name || tool.id}`,
-        description: `Tool ${tool.tool_name || tool.id} requires maintenance. Check condition and repair if possible.`,
+        title: `Tool Maintenance Required: ${tool.name || tool.id}`,
+        description: `Tool ${tool.name || tool.id} requires maintenance. Check condition and repair if possible.`,
         category: 'equipment',
         dueDate: new Date().toISOString().split('T')[0],
         estimatedPoints: 50,
         estimatedDuration: 45,
         assignedRole: 'technician',
         facilityId,
-        metadata: { toolId: tool.id, toolName: tool.tool_name || tool.id },
+        metadata: { toolId: tool.id, toolName: tool.name || tool.id },
       });
     });
 
@@ -344,8 +344,8 @@ export class AIGapScannerProvider {
         id: generateGapId(),
         type: 'operational',
         priority: 'medium',
-        title: `Tool Stuck in Phase: ${tool.tool_name || tool.id}`,
-        description: `Tool ${tool.tool_name || tool.id} appears to be stuck in ${tool.status} phase. Check workflow status.`,
+        title: `Tool Stuck in Phase: ${tool.name || tool.id}`,
+        description: `Tool ${tool.name || tool.id} appears to be stuck in ${tool.status} phase. Check workflow status.`,
         category: 'operational',
         dueDate: new Date().toISOString().split('T')[0],
         estimatedPoints: 40,
@@ -354,7 +354,7 @@ export class AIGapScannerProvider {
         facilityId,
         metadata: {
           toolId: tool.id,
-          toolName: tool.tool_name || tool.id,
+          toolName: tool.name || tool.id,
           currentPhase: tool.status,
         },
       });

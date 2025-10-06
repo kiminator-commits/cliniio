@@ -6,7 +6,8 @@
 // Browser-safe environment detection
 const isBrowser = typeof window !== 'undefined';
 const isTest =
-  typeof vi !== 'undefined' ||
+  (typeof globalThis !== 'undefined' &&
+    (globalThis as Record<string, unknown>).vi !== undefined) ||
   (isBrowser && window.location.hostname === 'localhost');
 
 let _provider: ErrorReportingProvider = 'console';

@@ -1,8 +1,4 @@
-import {
-  ContentItem,
-  ContentCategory,
-  ContentStatus,
-} from '../../KnowledgeHub/types';
+import { ContentItem, ContentCategory, ContentStatus } from '../../types';
 
 /**
  * Safe type conversion utilities to prevent data loss

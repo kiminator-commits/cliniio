@@ -227,7 +227,7 @@ export class QuizService {
           time_spent_seconds: attemptRow.time_spent_minutes
             ? attemptRow.time_spent_minutes * 60
             : 0,
-          answers: attemptRow.answers as QuizAnswer[],
+          answers: attemptRow.answers as unknown as QuizAnswer[],
         } as QuizAttempt;
       }
 
@@ -398,7 +398,7 @@ export class QuizService {
           time_spent_seconds: item.time_spent_minutes
             ? item.time_spent_minutes * 60
             : 0,
-          answers: (item.answers as QuizAnswer[]) || [],
+          answers: (item.answers as unknown as QuizAnswer[]) || [],
         })
       );
     } catch (error) {

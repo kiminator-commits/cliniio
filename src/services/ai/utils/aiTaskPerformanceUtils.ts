@@ -2,7 +2,7 @@ import {
   DailyOperationsTaskRow,
   AITaskPerformance,
   UserGamificationStatsRow,
-} from '@/types/aiTaskPerformanceTypes';
+} from '../../../types/aiTaskPerformanceTypes';
 
 /**
  * Calculate time saved between estimated and actual duration

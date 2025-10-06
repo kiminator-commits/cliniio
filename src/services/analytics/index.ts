@@ -42,14 +42,14 @@ export type {
   TrainingKnowledgeGaps,
   EfficiencyROITracker,
   IntelligenceSummary,
-} from './forecastingAnalyticsService';
+} from '../../types/forecastingAnalyticsTypes';
 
 // NEW: Advanced intelligence types
 export type {
   IntelligenceRecommendation,
   OptimizationTip,
   RiskAlert,
-} from './intelligenceRecommendationService';
+} from '../../types/intelligenceRecommendationTypes';
 
 export type {
   KnowledgeHubIntegration,

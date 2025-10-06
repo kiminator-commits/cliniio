@@ -50,13 +50,13 @@ export class RecommendationService {
       };
 
       // Save to database
-      const insertData: Partial<PersonalizedRecommendationRow> = {
+      const insertData = {
         facility_id: result.facility_id,
         user_id: result.user_id,
         recommended_content: result.recommended_content as Json,
         recommendation_reasoning: formatRecommendationReasoning(
           result.recommendation_reasoning
-        ),
+        ) as Json,
         confidence_scores: result.confidence_scores as Json,
         learning_path_suggestions: result.learning_path_suggestions as Json,
         skill_development_areas: result.skill_development_areas as Json,
@@ -93,7 +93,7 @@ export class RecommendationService {
         user_id: resultData.user_id ?? '',
         recommended_content: (resultData.recommended_content as string[]) ?? [],
         recommendation_reasoning: parseRecommendationReasoning(
-          resultData.recommendation_reasoning
+          resultData.recommendation_reasoning as unknown as string
         ),
         confidence_scores: (resultData.confidence_scores as number[]) ?? [],
         learning_path_suggestions:

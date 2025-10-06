@@ -94,7 +94,7 @@ class HomeSterilizationIntegrationService {
     // Convert database response to expected format
     if (data && Array.isArray(data) && data.length > 0) {
       return this.mapDatabaseResponseToMetrics(
-        data[0] as SterilizationHomeMetricsDB
+        data[0] as unknown as SterilizationHomeMetricsDB
       );
     }
 
@@ -223,7 +223,7 @@ class HomeSterilizationIntegrationService {
     try {
       const tools = await ToolService.getToolsByFacilityAndStatus(
         facilityId,
-        'in_cycle'
+        'in_cycle' as string
       );
       return tools.length;
     } catch (error) {
@@ -236,7 +236,7 @@ class HomeSterilizationIntegrationService {
     try {
       const tools = await ToolService.getToolsByFacilityAndStatus(
         facilityId,
-        'available'
+        'available' as string
       );
       // Filter by today's date since ToolService doesn't handle date filtering yet
       const today = new Date().toISOString().split('T')[0];

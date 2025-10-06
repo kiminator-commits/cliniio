@@ -54,7 +54,7 @@ export function useEnhancedProfileForm(
           timezone: profile.timezone || 'UTC',
         };
 
-        setUserData(profile as Record<string, unknown>);
+        setUserData(profile as unknown as Record<string, unknown>);
         setLastSavedData(formData);
         return formData;
       }

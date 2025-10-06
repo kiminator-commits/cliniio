@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '@mdi/react';
 import { mdiLightbulbOn } from '@mdi/js';
-import { UnifiedAISettings } from '../../../../services/ai/aiSettingsService';
+import { UnifiedAISettings } from '../../../../../services/ai/aiSettingsService';
 import { UI_TEXT } from '../../AIAnalyticsSettings.config';
 import ToggleSwitch from './ToggleSwitch';
 import FormGroup from './FormGroup';

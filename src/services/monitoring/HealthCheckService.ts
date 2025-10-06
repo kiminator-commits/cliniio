@@ -261,7 +261,7 @@ export class HealthCheckService {
           message: `AI services operational (${errorRate.toFixed(1)}% error rate)`,
           duration,
           timestamp: new Date(),
-          metadata: metrics,
+          metadata: metrics as Record<string, unknown>,
         };
       } catch (error) {
         return {
@@ -404,6 +404,18 @@ export class HealthCheckService {
       100;
 
     return Math.round(score);
+  }
+
+  async getSystemHealth(): Promise<SystemHealthReport> {
+    const checks = await this.runAllChecks();
+    const overall = this.determineOverallStatus(checks);
+    const score = this.calculateHealthScore(checks);
+
+    return {
+      overall,
+      score,
+      checks,
+    };
   }
 }
 

@@ -151,7 +151,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
         throw new Error(result.error || 'Failed to get items by category');
       }
 
-      return result.data;
+      return result.data as unknown;
     } catch (error) {
       throw new Error(
         `Failed to get items by category: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -179,7 +179,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
         throw new Error(result.error || 'Failed to get filtered items');
       }
 
-      return result.data;
+      return result.data as unknown;
     } catch (error) {
       throw new Error(
         `Failed to get filtered items: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -292,7 +292,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
   }
 
   async fetchInventoryItems(): Promise<InventoryItem[]> {
-    return this.getAllItems();
+    return this.getAllItems() as unknown;
   }
 
   async addInventoryItem(item: InventoryItem): Promise<InventoryItem> {

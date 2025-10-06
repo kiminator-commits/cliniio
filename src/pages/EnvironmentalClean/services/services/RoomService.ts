@@ -5,7 +5,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { Database } from '@/types/database.types';
+// import { Database } from '@/types/database.types';
 import { Room, RoomStatusType } from '../../models';
 import { auditLogger } from '@/utils/auditLogger';
 import { createUserFriendlyError } from '../errors/EnvironmentalCleanServiceError';
@@ -72,8 +72,13 @@ export class RoomService {
         (item: {
           room_id?: string;
           id?: string;
+          room_name?: string;
           status: string;
           cleaning_type?: string;
+          scheduled_time?: string;
+          completed_time?: string;
+          quality_score?: number;
+          compliance_score?: number;
           last_cleaned?: string;
           next_cleaning?: string;
           notes?: string;
@@ -163,7 +168,7 @@ export class RoomService {
         .update({
           status: mapRoomStatusToDatabaseStatus(status),
           updated_at: new Date().toISOString(),
-        } as Database['public']['Tables']['environmental_cleans_enhanced']['Update'])
+        } as Record<string, unknown>)
         .eq('room_id', roomId)
         .eq('facility_id', currentTenant);
 
@@ -189,24 +194,21 @@ export class RoomService {
     try {
       const currentTenant = await getCurrentTenant();
 
-      const insertData: Database['public']['Tables']['environmental_cleans_enhanced']['Insert'] =
-        {
-          room_id: roomData.id ?? '',
-          room_name: roomData.name ?? '',
-          status: 'pending',
-          cleaning_type: 'routine',
-          scheduled_time: new Date().toISOString(),
-          checklist_items: [],
-          completed_items: [],
-          failed_items: [],
-          facility_id: currentTenant,
-        };
+      const insertData: Record<string, unknown> = {
+        room_id: roomData.id ?? '',
+        room_name: roomData.name ?? '',
+        status: 'pending',
+        cleaning_type: 'routine',
+        scheduled_time: new Date().toISOString(),
+        checklist_items: [],
+        completed_items: [],
+        failed_items: [],
+        facility_id: currentTenant,
+      };
 
       const { data, error } = await supabase
         .from('environmental_cleans_enhanced')
-        .insert(
-          insertData as Database['public']['Tables']['environmental_cleans_enhanced']['Insert']
-        )
+        .insert(insertData as Record<string, unknown>[])
         .select()
         .single();
 
@@ -266,9 +268,7 @@ export class RoomService {
 
       const query = supabase
         .from('environmental_cleans_enhanced')
-        .update(
-          updateData as Database['public']['Tables']['environmental_cleans_enhanced']['Update']
-        )
+        .update(updateData as Record<string, unknown>)
         .eq('room_id', id)
         .eq('facility_id', currentTenant);
 
@@ -352,7 +352,7 @@ export class RoomService {
           status: 'completed',
           completed_time: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        } as Database['public']['Tables']['environmental_cleans_enhanced']['Update'])
+        } as Record<string, unknown>)
         .eq('room_id', roomId)
         .eq('facility_id', currentTenant);
 

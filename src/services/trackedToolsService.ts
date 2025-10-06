@@ -106,7 +106,10 @@ class TrackedToolsService {
     newStatus: string
   ): void {
     // Check if tool became available
-    if (this.isCleanStatus(newStatus) && !this.isCleanStatus(oldStatus)) {
+    if (
+      this.isCleanStatus(newStatus as unknown) &&
+      !this.isCleanStatus(oldStatus as unknown)
+    ) {
       this.handleToolBecameAvailable(toolId);
     }
 

@@ -103,7 +103,7 @@ export function generatePatternBasedRecommendations(
   if (patterns.highFrequencyPeriods.length > 0) {
     recommendations.push({
       id: 'frequency-pattern',
-      type: 'preventive',
+      type: 'pattern',
       priority: 'high',
       title: 'Implement Preventive Measures During High-Frequency Periods',
       description:
@@ -129,7 +129,7 @@ export function generatePatternBasedRecommendations(
   if (patterns.commonRootCauses.length > 0) {
     recommendations.push({
       id: 'root-cause-prevention',
-      type: 'preventive',
+      type: 'pattern',
       priority: 'high',
       title: 'Address Common Root Causes',
       description:
@@ -155,7 +155,7 @@ export function generatePatternBasedRecommendations(
   if (patterns.equipmentFailureRate > 0.3) {
     recommendations.push({
       id: 'equipment-maintenance',
-      type: 'preventive',
+      type: 'pattern',
       priority: 'medium',
       title: 'Enhance Equipment Maintenance Schedule',
       description: 'Improve equipment maintenance to reduce failure rates',
@@ -180,7 +180,7 @@ export function generatePatternBasedRecommendations(
   if (patterns.responseTimeTrend > 1.2) {
     recommendations.push({
       id: 'response-time-optimization',
-      type: 'preventive',
+      type: 'pattern',
       priority: 'medium',
       title: 'Optimize Incident Response Procedures',
       description: 'Improve response times to incidents',
@@ -273,7 +273,7 @@ export function generateRiskBasedRecommendations(
     if (factor.status === 'critical') {
       recommendations.push({
         id: `critical-${factor.factor.toLowerCase().replace(/\s+/g, '-')}`,
-        type: 'reactive',
+        type: 'corrective',
         priority: 'critical',
         title: `Address Critical ${factor.factor}`,
         description: `Critical risk factor detected: ${factor.description}`,
@@ -386,7 +386,7 @@ export function generateTrendBasedRecommendations(
   if (trendAnalysis.weeklyPrediction > 5) {
     recommendations.push({
       id: 'high-weekly-prediction',
-      type: 'reactive',
+      type: 'corrective',
       priority: 'medium',
       title: 'Prepare for High Incident Volume',
       description: 'High incident volume predicted for next week',

@@ -167,14 +167,19 @@ export class TypedSupabaseAdapter {
         };
       }
 
-      if (!response.data || !isSupabaseInventoryRow(response.data)) {
+      if (
+        !(response as unknown).data ||
+        !isSupabaseInventoryRow((response as unknown).data)
+      ) {
         return {
           success: false,
           error: 'Item not found or invalid format',
         };
       }
 
-      const transformed = this.transformRowToInventoryItem(response.data);
+      const transformed = this.transformRowToInventoryItem(
+        (response as unknown).data
+      );
       return transformed;
     } catch (error) {
       return {
@@ -229,14 +234,19 @@ export class TypedSupabaseAdapter {
         };
       }
 
-      if (!response.data || !isSupabaseInventoryRow(response.data)) {
+      if (
+        !(response as unknown).data ||
+        !isSupabaseInventoryRow((response as unknown).data)
+      ) {
         return {
           success: false,
           error: 'Failed to create item or invalid response format',
         };
       }
 
-      const transformed = this.transformRowToInventoryItem(response.data);
+      const transformed = this.transformRowToInventoryItem(
+        (response as unknown).data
+      );
       return transformed;
     } catch (error) {
       return {
@@ -289,14 +299,19 @@ export class TypedSupabaseAdapter {
         };
       }
 
-      if (!response.data || !isSupabaseInventoryRow(response.data)) {
+      if (
+        !(response as unknown).data ||
+        !isSupabaseInventoryRow((response as unknown).data)
+      ) {
         return {
           success: false,
           error: 'Item not found or invalid response format',
         };
       }
 
-      const transformed = this.transformRowToInventoryItem(response.data);
+      const transformed = this.transformRowToInventoryItem(
+        (response as unknown).data
+      );
       return transformed;
     } catch (error) {
       return {
@@ -370,7 +385,7 @@ export class TypedSupabaseAdapter {
     const channel = supabase
       .channel('inventory_changes')
       .on(
-        'postgres_changes',
+        'postgres_changes' as string,
         {
           event: options?.event || '*',
           schema: options?.schema || 'public',

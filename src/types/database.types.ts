@@ -405,6 +405,213 @@ export type Database = {
           updated_at?: string;
         };
       };
+      home_daily_operations_tasks: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          status: string;
+          priority: string;
+          assigned_to: string | null;
+          facility_id: string;
+          created_at: string;
+          updated_at: string;
+          due_date: string | null;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          status?: string;
+          priority?: string;
+          assigned_to?: string | null;
+          facility_id: string;
+          created_at?: string;
+          updated_at?: string;
+          due_date?: string | null;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          status?: string;
+          priority?: string;
+          assigned_to?: string | null;
+          facility_id?: string;
+          created_at?: string;
+          updated_at?: string;
+          due_date?: string | null;
+          completed_at?: string | null;
+        };
+      };
+      ai_task_performance: {
+        Row: {
+          id: string;
+          user_id: string;
+          facility_id: string;
+          task_id: string;
+          task_type: string;
+          completion_time_ms: number;
+          accuracy_score: number;
+          user_satisfaction: number;
+          completed_at: string;
+          baseline_time: number;
+          actual_duration: number;
+          time_saved: number;
+          efficiency_score: number;
+          data: Json | null;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          facility_id: string;
+          task_id: string;
+          task_type: string;
+          completion_time_ms: number;
+          accuracy_score: number;
+          user_satisfaction: number;
+          completed_at: string;
+          baseline_time: number;
+          actual_duration: number;
+          time_saved: number;
+          efficiency_score: number;
+          data?: Json | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          facility_id?: string;
+          task_id?: string;
+          task_type?: string;
+          completion_time_ms?: number;
+          accuracy_score?: number;
+          user_satisfaction?: number;
+          completed_at?: string;
+          baseline_time?: number;
+          actual_duration?: number;
+          time_saved?: number;
+          efficiency_score?: number;
+          data?: Json | null;
+        };
+      };
+      performance_metrics: {
+        Row: {
+          id: string;
+          date: string | null;
+          month: string | null;
+          metric_type: string;
+          daily_time_saved: number | null;
+          monthly_time_saved: number | null;
+          time_savings: number | null;
+          proactive_mgmt: number | null;
+          skills: number | null;
+          inventory: number | null;
+          sterilization: number | null;
+          facility_id: string;
+        };
+        Insert: {
+          id?: string;
+          date?: string | null;
+          month?: string | null;
+          metric_type: string;
+          daily_time_saved?: number | null;
+          monthly_time_saved?: number | null;
+          time_savings?: number | null;
+          proactive_mgmt?: number | null;
+          skills?: number | null;
+          inventory?: number | null;
+          sterilization?: number | null;
+          facility_id: string;
+        };
+        Update: {
+          id?: string;
+          date?: string | null;
+          month?: string | null;
+          metric_type?: string;
+          daily_time_saved?: number | null;
+          monthly_time_saved?: number | null;
+          time_savings?: number | null;
+          proactive_mgmt?: number | null;
+          skills?: number | null;
+          inventory?: number | null;
+          sterilization?: number | null;
+          facility_id?: string;
+        };
+      };
+      user_gamification_stats: {
+        Row: {
+          id: string;
+          user_id: string;
+          facility_id: string;
+          date: string;
+          total_tasks: number | null;
+          completed_tasks: number | null;
+          total_points: number | null;
+          current_streak: number | null;
+          best_streak: number | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          facility_id: string;
+          date: string;
+          total_tasks?: number | null;
+          completed_tasks?: number | null;
+          total_points?: number | null;
+          current_streak?: number | null;
+          best_streak?: number | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          facility_id?: string;
+          date?: string;
+          total_tasks?: number | null;
+          completed_tasks?: number | null;
+          total_points?: number | null;
+          current_streak?: number | null;
+          best_streak?: number | null;
+        };
+      };
+      user_learning_progress: {
+        Row: {
+          id: string;
+          user_id: string;
+          progress: number | null;
+          score: number | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          progress?: number | null;
+          score?: number | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          progress?: number | null;
+          score?: number | null;
+        };
+      };
+      inventory_checks: {
+        Row: {
+          id: string;
+          facility_id: string;
+          accuracy: number | null;
+        };
+        Insert: {
+          id?: string;
+          facility_id: string;
+          accuracy?: number | null;
+        };
+        Update: {
+          id?: string;
+          facility_id?: string;
+          accuracy?: number | null;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -413,7 +620,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      tool_status: 'active' | 'inactive' | 'maintenance' | 'retired';
+      tool_status: 'dirty' | 'clean' | 'problem' | 'new_barcode' | 'active';
     };
     CompositeTypes: {
       [_ in never]: never;

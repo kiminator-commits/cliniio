@@ -52,7 +52,7 @@ export class PerformanceMonitoringIntegration {
    * Get comprehensive performance status
    */
   getPerformanceStatus(): PerformanceStatus {
-    const health = performanceMonitor.getSystemHealthSync();
+    const health = (performanceMonitor as unknown).getSystemHealthSync();
     const alerts = performanceMonitor.getActiveAlerts();
     const alertStats = performanceAlertingService.getAlertStatistics();
     const insights = performanceMonitor.getPerformanceInsights();

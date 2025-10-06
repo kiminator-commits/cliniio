@@ -1,10 +1,23 @@
 import React, { useMemo } from 'react';
 import { useHomeStore } from '../../../store/homeStore';
 import ModalContainer from '../../../components/ModalContainer';
-import { LeaderboardUser } from '@/types/task';
 import { GamificationData } from '../../../store/homeStore';
-import { useTopUsers } from '@/hooks/useTopUsers';
-import { LeaderboardData } from '../../../services/leaderboardService';
+
+// Define the LeaderboardData interface that matches what the component expects
+interface LeaderboardData {
+  users: LeaderboardUser[];
+  userRank: number;
+  totalUsers?: number;
+}
+
+// Define LeaderboardUser interface that matches the actual data structure
+interface LeaderboardUser {
+  id: string;
+  full_name?: string;
+  score: number;
+  rank: number;
+  avatar?: string;
+}
 
 interface HomeModalsProps {
   leaderboardData: LeaderboardData;
@@ -27,9 +40,14 @@ export default function HomeModals({ leaderboardData }: HomeModalsProps) {
     return leaderboardData.users || [];
   }, [leaderboardData.users]);
 
-  const topUsers = useTopUsers(typedLeaderboardUsers);
-
-  // Removed unused variable: sortedLeaderboard
+  // Get top 3 users from the leaderboard
+  const topUsers = useMemo(() => {
+    if (!typedLeaderboardUsers || typedLeaderboardUsers.length === 0) return [];
+    return typedLeaderboardUsers
+      .slice()
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+  }, [typedLeaderboardUsers]);
 
   const leaderboardRank = useMemo(() => {
     return leaderboardData.userRank || 1;

@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient';
-import { Database } from '@/types/database.types';
+// import { Database } from '@/types/database.types';
 import { ToolStatus } from './types/sterilizationTypes';
 
 async function getCurrentFacilityId(): Promise<string> {
@@ -38,13 +38,10 @@ export class ToolService {
         throw new Error(`Failed to fetch cycle tools: ${error.message}`);
       }
 
-      return (
-        (tools as unknown as Database['public']['Tables']['tools']['Row'][]) ||
-        []
-      ).map((tool) => {
+      return (tools || []).map((tool) => {
         return {
           id: tool.id,
-          name: tool.tool_name,
+          name: tool.name,
           barcode: tool.barcode,
           toolType: tool.tool_type,
           priority: tool.priority as unknown as 'P1' | 'P2',

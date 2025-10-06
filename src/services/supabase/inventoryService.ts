@@ -94,6 +94,9 @@ export class SupabaseInventoryService {
         ...item,
         name: item.name || 'Unnamed Item', // Provide default name if missing
         facility_id: item.facility_id || 'default', // Provide default facility if missing
+        data: (item.data as Record<string, unknown>) || {},
+        category: item.category || 'general',
+        quantity: item.quantity || 0, // Provide default quantity
       };
 
       const result = await InventoryCrudOperations.createItem(itemWithDefaults);

@@ -23,9 +23,7 @@ type SupabaseClientType = SupabaseClient<
   Database,
   'public',
   'public',
-  {
-    PostgrestVersion: '12.2.12 (cd3cf9e)';
-  }
+  Record<string, unknown>
 >;
 type SupabaseError = {
   message: string;

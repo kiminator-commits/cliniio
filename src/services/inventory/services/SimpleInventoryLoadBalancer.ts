@@ -59,7 +59,7 @@ export class SimpleInventoryLoadBalancer {
     filters?: InventoryFilters,
     _priority: 'high' | 'medium' | 'low' = 'medium'
   ): Promise<InventoryResponse> {
-    return inventorySupabaseService.getItems(filters);
+    return inventorySupabaseService.getItems(filters) as unknown;
   }
 
   /**

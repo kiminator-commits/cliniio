@@ -233,8 +233,8 @@ export const useHomeDataLoader = (): HomeData => {
           ? (() => {
               const stats = gamificationStats.value;
               const leaderboard =
-                leaderboardData.status === 'fulfilled' && leaderboardData.value
-                  ? leaderboardData.value
+                leaderboardData.status === 'fulfilled' && leaderboardData.values
+                  ? leaderboardData.values
                   : { userRank: 1, totalUsers: 1 };
 
               // Validate and sanitize all values

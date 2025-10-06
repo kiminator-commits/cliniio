@@ -95,7 +95,9 @@ export class InventoryCategoryProvider {
     const officeHardware: Record<string, unknown>[] = [];
 
     normalized.forEach((item) => {
-      const normalizedCategory = this.normalizeCategory(item.category || '');
+      const normalizedCategory = this.normalizeCategory(
+        String(item.category || '')
+      );
 
       switch (normalizedCategory) {
         case 'Tools':

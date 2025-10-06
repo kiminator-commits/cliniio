@@ -6,16 +6,22 @@ import ChecklistItem from './ChecklistItem';
 import { StolenItemsSection } from './StolenItemsSection';
 import { PrnItemsSection } from './PrnItemsSection';
 import { NotesSection } from './NotesSection';
-import { Checklist } from '../types/cleaningChecklists';
+import {
+  Checklist,
+  Category,
+  StolenItem,
+  PrnItem,
+  SDSSheet,
+} from '../types/cleaningChecklists';
 
 interface ChecklistModalProps {
   showModal: boolean;
-  selectedCategory: unknown;
+  selectedCategory: Category | null;
   selectedChecklist: Checklist | null;
   bypassedItems: Set<string>;
   adjustedQuantities: Record<string, number>;
-  stolenItems: unknown[];
-  prnItems: unknown[];
+  stolenItems: StolenItem[];
+  prnItems: PrnItem[];
   notes: string;
   isListening: boolean;
   transcript: string;
@@ -23,8 +29,12 @@ interface ChecklistModalProps {
   onChecklistSelect: (checklist: Checklist) => void;
   onSetSelectedChecklist: (checklist: Checklist | null) => void;
   onBypassItem: (itemId: string) => void;
-  onAdjustQuantity: (itemId: string, quantity: number) => void;
-  onViewSDS: (sds: unknown) => void;
+  onAdjustQuantity: (
+    itemId: string,
+    inventoryItemId: string,
+    adjustment: number
+  ) => void;
+  onViewSDS: (sds: SDSSheet) => void;
   onAddStolenItem: () => void;
   onUpdateStolenItem: (
     index: number,

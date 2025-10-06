@@ -75,7 +75,7 @@ export class ServiceRegistry {
       }
     }
 
-    return this.services.get(name);
+    return this.services.get(name) as T;
   }
 
   /**

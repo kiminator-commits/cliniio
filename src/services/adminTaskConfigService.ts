@@ -74,6 +74,16 @@ export class AdminTaskConfigService {
   }
 
   /**
+   * Update admin task configuration
+   */
+  static async updateConfig(
+    facilityId: string,
+    config: Partial<AdminTaskConfig>
+  ): Promise<AdminTaskConfig> {
+    return this.upsertConfig(facilityId, config);
+  }
+
+  /**
    * Create or update admin task configuration
    */
   static async upsertConfig(
@@ -89,10 +99,7 @@ export class AdminTaskConfigService {
         facility_id: facilityId,
         max_tasks_per_user: validatedConfig.maxTasksPerUser,
         enabled_categories: validatedConfig.enabledCategories as string[],
-        priority_thresholds: validatedConfig.priorityThresholds as Record<
-          string,
-          number
-        >,
+        priority_thresholds: validatedConfig.priorityThresholds,
         auto_assignment: validatedConfig.autoAssignment,
         ai_sensitivity: validatedConfig.aiSensitivity,
         ai_confidence_threshold: 0.75, // Default value
@@ -160,7 +167,7 @@ export class AdminTaskConfigService {
           medium: 2,
           high: 3,
           urgent: 4,
-        } as Record<string, number>,
+        },
         auto_assignment: true,
         ai_sensitivity: 'medium',
         ai_confidence_threshold: 0.75,
@@ -238,11 +245,41 @@ export class AdminTaskConfigService {
         (dbConfig as { enabled_categories?: string[] }).enabled_categories ||
         [],
       priorityThresholds: (
-        dbConfig as { priority_thresholds?: Record<string, number> }
+        dbConfig as {
+          priority_thresholds?: {
+            low: number;
+            medium: number;
+            high: number;
+            urgent: number;
+          };
+        }
       ).priority_thresholds || { low: 1, medium: 2, high: 3, urgent: 4 },
+      priorityWeights: (
+        dbConfig as {
+          priority_weights?: {
+            low: number;
+            medium: number;
+            high: number;
+            urgent: number;
+          };
+        }
+      ).priority_weights || { low: 1, medium: 2, high: 3, urgent: 4 },
+      rolePreferences:
+        (dbConfig as { role_category_mapping?: Record<string, string[]> })
+          .role_category_mapping || {},
+      timeConstraints: (
+        dbConfig as {
+          time_constraints?: {
+            maxTaskDuration?: number;
+            minTaskDuration?: number;
+          };
+        }
+      ).time_constraints || { maxTaskDuration: 120, minTaskDuration: 5 },
       autoAssignment: dbConfig.auto_assignment,
       aiSensitivity:
-        (dbConfig as { ai_sensitivity?: string }).ai_sensitivity || 'medium',
+        (dbConfig as { ai_sensitivity?: 'low' | 'medium' | 'high' })
+          .ai_sensitivity || 'medium',
+      aiEnabled: (dbConfig as { ai_enabled?: boolean }).ai_enabled ?? true,
     };
   }
 
@@ -287,6 +324,44 @@ export class AdminTaskConfigService {
     } catch (error) {
       logger.error('Error getting all admin task configs:', error);
       throw new Error('Failed to retrieve admin task configurations');
+    }
+  }
+
+  /**
+   * Get configuration history for a facility
+   */
+  static async getConfigHistory(facilityId: string): Promise<
+    Array<{
+      id: string;
+      config: AdminTaskConfig;
+      updatedAt: Date;
+      updatedBy: string;
+      changes: string[];
+    }>
+  > {
+    try {
+      const { data, error } = await supabase
+        .from('admin_task_config')
+        .select('*')
+        .eq('facility_id', facilityId)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return (data || []).map((record) => ({
+        id: record.id,
+        config: this.mapDatabaseToConfig(
+          record as unknown as DatabaseAdminTaskConfig
+        ),
+        updatedAt: new Date(record.updated_at),
+        updatedBy: record.updated_by || 'Unknown',
+        changes: [], // This would need to be implemented based on audit requirements
+      }));
+    } catch (error) {
+      logger.error('Error getting configuration history:', error);
+      return [];
     }
   }
 

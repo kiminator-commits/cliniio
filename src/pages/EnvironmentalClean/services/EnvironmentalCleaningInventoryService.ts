@@ -294,11 +294,21 @@ export class EnvironmentalCleaningInventoryService {
 
       const taskData = (data || []) as Array<{
         id: string;
-        name: string;
-        category: string;
-        quantity: number;
-        unit_cost: number;
-        data?: { barcode?: string };
+        environmental_clean_id: string;
+        task_name: string;
+        task_description: string;
+        task_order: number;
+        is_required: boolean;
+        is_completed: boolean;
+        start_time?: string;
+        end_time?: string;
+        duration_minutes?: number;
+        quality_score?: number;
+        notes?: string;
+        photos?: { photos?: string[] };
+        completed_by?: string;
+        created_at: string;
+        updated_at: string;
       }>;
       return taskData.map((item) => ({
         taskName: item.task_name || '',

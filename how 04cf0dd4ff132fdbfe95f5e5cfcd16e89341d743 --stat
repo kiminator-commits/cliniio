@@ -1,0 +1,476 @@
+[33mcommit 04cf0dd4ff132fdbfe95f5e5cfcd16e89341d743[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;33mtag: [m[1;33mv0.9-rls-hardening[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: kiminator-commits <kiminator-commits@users.noreply.github.com>
+Date:   Mon Oct 6 06:17:04 2025 -0230
+
+    Regenerated Supabase types after RLS hardening (v0.9)
+
+[1mdiff --git a/src/components/ChallengeModal.tsx b/src/components/ChallengeModal.tsx[m
+[1mindex d8b70346..56fa0b5b 100644[m
+[1m--- a/src/components/ChallengeModal.tsx[m
+[1m+++ b/src/components/ChallengeModal.tsx[m
+[36m@@ -89,8 +89,23 @@[m [mconst ChallengeModal: React.FC<ChallengeModalProps> = ({[m
+     const loadChallenges = async () => {[m
+       try {[m
+         setLoading(true);[m
+[31m-        const fetchedChallenges = await challengeService.fetchChallenges();[m
+[31m-        setChallenges(fetchedChallenges);[m
+[32m+[m[32m        const fetchedChallenges = await challengeService.fetchUserChallenges();[m
+[32m+[m
+[32m+[m[32m        // Transform the data to match the Challenge interface[m
+[32m+[m[32m        const transformedChallenges: Challenge[] = fetchedChallenges.map([m
+[32m+[m[32m          (challenge: Record<string, unknown>) => ({[m
+[32m+[m[32m            id: challenge.id,[m
+[32m+[m[32m            title: challenge.title,[m
+[32m+[m[32m            description: challenge.description,[m
+[32m+[m[32m            category: challenge.category,[m
+[32m+[m[32m            difficulty: challenge.difficulty,[m
+[32m+[m[32m            points: challenge.points,[m
+[32m+[m[32m            timeEstimate: challenge.time_estimate,[m
+[32m+[m[32m            completed: challenge.isCompleted || false,[m
+[32m+[m[32m          })[m
+[32m+[m[32m        );[m
+[32m+[m
+[32m+[m[32m        setChallenges(transformedChallenges);[m
+       } catch (error) {[m
+         console.error('Error loading challenges:', error);[m
+       } finally {[m
+[1mdiff --git a/src/pages/EnvironmentalClean/services/services/RoomService.ts b/src/pages/EnvironmentalClean/services/services/RoomService.ts[m
+[1mindex 4cc551ea..1665c0e8 100644[m
+[1m--- a/src/pages/EnvironmentalClean/services/services/RoomService.ts[m
+[1m+++ b/src/pages/EnvironmentalClean/services/services/RoomService.ts[m
+[36m@@ -1,3 +1,9 @@[m
+[32m+[m[32m/**[m
+[32m+[m[32m * Tenant-scoped Room Service[m
+[32m+[m[32m * All queries restricted by facility_id = currentTenant[m
+[32m+[m[32m * Date: 2025-10-06[m
+[32m+[m[32m */[m
+[32m+[m
+ import { supabase } from '@/lib/supabase';[m
+ import { Database } from '@/types/database.types';[m
+ import { Room, RoomStatusType } from '../../models';[m
+[36m@@ -7,6 +13,12 @@[m [mimport {[m
+   mapDatabaseStatusToRoomStatus,[m
+   mapRoomStatusToDatabaseStatus,[m
+ } from '../utils/statusMapper';[m
+[32m+[m[32mimport { FacilityService } from '@/services/facilityService';[m
+[32m+[m
+[32m+[m[32m// Get current facility ID for tenant isolation[m
+[32m+[m[32mconst getCurrentTenant = async (): Promise<string> => {[m
+[32m+[m[32m  return await FacilityService.getCurrentFacilityId();[m
+[32m+[m[32m};[m
+ [m
+ // Row type for Supabase mapping[m
+ interface EnvironmentalCleanRow {[m
+[36m@@ -29,19 +41,12 @@[m [minterface EnvironmentalCleanRow {[m
+ export class RoomService {[m
+   static async fetchRooms(): Promise<Room[]> {[m
+     try {[m
+[31m-      // Get current user for facility scoping[m
+[31m-      const {[m
+[31m-        data: { user },[m
+[31m-        error: authError,[m
+[31m-      } = await supabase.auth.getUser();[m
+[31m-[m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[31m-      }[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+ [m
+[31m-      const query = supabase.from('environmental_cleans_enhanced').select([m
+[31m-        `[m
+[32m+[m[32m      const query = supabase[m
+[32m+[m[32m        .from('environmental_cleans_enhanced')[m
+[32m+[m[32m        .select([m
+[32m+[m[32m          `[m
+           id,[m
+           room_id,[m
+           room_name,[m
+[36m@@ -54,12 +59,8 @@[m [mexport class RoomService {[m
+           created_at,[m
+           updated_at[m
+         `[m
+[31m-      );[m
+[31m-[m
+[31m-      // Only add facility scoping if facility_id is available[m
+[31m-      if (facilityId) {[m
+[31m-        query.eq('facility_id', facilityId); // Enforces tenant isolation[m
+[31m-      }[m
+[32m+[m[32m        )[m
+[32m+[m[32m        .eq('facility_id', currentTenant);[m
+ [m
+       const { data, error } = await query.order('scheduled_time', {[m
+         ascending: false,[m
+[36m@@ -155,16 +156,7 @@[m [mexport class RoomService {[m
+     status: RoomStatusType[m
+   ): Promise<void> {[m
+     try {[m
+[31m-      // Get current user for facility scoping[m
+[31m-      const {[m
+[31m-        data: { user },[m
+[31m-        error: authError,[m
+[31m-      } = await supabase.auth.getUser();[m
+[31m-[m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[31m-      }[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+ [m
+       const query = supabase[m
+         .from('environmental_cleans_enhanced')[m
+[36m@@ -172,12 +164,8 @@[m [mexport class RoomService {[m
+           status: mapRoomStatusToDatabaseStatus(status),[m
+           updated_at: new Date().toISOString(),[m
+         } as Database['public']['Tables']['environmental_cleans_enhanced']['Update'])[m
+[31m-        .eq('room_id', roomId);[m
+[31m-[m
+[31m-      // Only add facility scoping if facility_id is available[m
+[31m-      if (facilityId) {[m
+[31m-        query.eq('facility_id', facilityId); // Enforces tenant isolation[m
+[31m-      }[m
+[32m+[m[32m        .eq('room_id', roomId)[m
+[32m+[m[32m        .eq('facility_id', currentTenant);[m
+ [m
+       const { error } = await query;[m
+ [m
+[36m@@ -199,16 +187,7 @@[m [mexport class RoomService {[m
+     roomData: Partial<Room>[m
+   ): Promise<Room> {[m
+     try {[m
+[31m-      // Get current user for facility scoping[m
+[31m-      const {[m
+[31m-        data: { user },[m
+[31m-        error: authError,[m
+[31m-      } = await supabase.auth.getUser();[m
+[31m-[m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[31m-      }[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+ [m
+       const insertData: Database['public']['Tables']['environmental_cleans_enhanced']['Insert'] =[m
+         {[m
+[36m@@ -220,13 +199,9 @@[m [mexport class RoomService {[m
+           checklist_items: [],[m
+           completed_items: [],[m
+           failed_items: [],[m
+[32m+[m[32m          facility_id: currentTenant,[m
+         };[m
+ [m
+[31m-      // Only add facility_id if available[m
+[31m-      if (facilityId) {[m
+[31m-        insertData.facility_id = facilityId; // Enforces tenant isolation[m
+[31m-      }[m
+[31m-[m
+       const { data, error } = await supabase[m
+         .from('environmental_cleans_enhanced')[m
+         .insert([m
+[36m@@ -276,16 +251,7 @@[m [mexport class RoomService {[m
+     roomData: Partial<Room>[m
+   ): Promise<Room> {[m
+     try {[m
+[31m-      // Get current user for facility scoping[m
+[31m-      const {[m
+[31m-        data: { user },[m
+[31m-        error: authError,[m
+[31m-      } = await supabase.auth.getUser();[m
+[31m-[m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[31m-      }[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+ [m
+       const updateData: Partial<EnvironmentalCleanRow> = {[m
+         updated_at: new Date().toISOString(),[m
+[36m@@ -303,12 +269,8 @@[m [mexport class RoomService {[m
+         .update([m
+           updateData as Database['public']['Tables']['environmental_cleans_enhanced']['Update'][m
+         )[m
+[31m-        .eq('room_id', id);[m
+[31m-[m
+[31m-      // Only add facility scoping if facility_id is available[m
+[31m-      if (facilityId) {[m
+[31m-        query.eq('facility_id', facilityId); // Enforces tenant isolation[m
+[31m-      }[m
+[32m+[m[32m        .eq('room_id', id)[m
+[32m+[m[32m        .eq('facility_id', currentTenant);[m
+ [m
+       const { data, error } = await query.select().single();[m
+ [m
+[36m@@ -355,26 +317,13 @@[m [mexport class RoomService {[m
+ [m
+   static async deleteEnvironmentalClean(id: string): Promise<void> {[m
+     try {[m
+[31m-      // Get current user for facility scoping[m
+[31m-      const {[m
+[31m-        data: { user },[m
+[31m-        error: authError,[m
+[31m-      } = await supabase.auth.getUser();[m
+[31m-[m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[31m-      }[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+ [m
+       const query = supabase[m
+         .from('environmental_cleans_enhanced')[m
+         .delete()[m
+[31m-        .eq('room_id', id);[m
+[31m-[m
+[31m-      // Only add facility scoping if facility_id is available[m
+[31m-      if (facilityId) {[m
+[31m-        query.eq('facility_id', facilityId); // Enforces tenant isolation[m
+[31m-      }[m
+[32m+[m[32m        .eq('room_id', id)[m
+[32m+[m[32m        .eq('facility_id', currentTenant);[m
+ [m
+       const { error } = await query;[m
+ [m
+[36m@@ -395,16 +344,7 @@[m [mexport class RoomService {[m
+     try {[m
+       if (!roomId) throw new Error('Room ID is required');[m
+ [m
+[31m-      // Get current user for facility scoping[m
+[31m-      const {[m
+[31m-        data: { user },[m
+[31m-        error: authError,[m
+[31m-      } = await supabase.auth.getUser();[m
+[31m-[m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[31m-      }[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+ [m
+       const query = supabase[m
+         .from('environmental_cleans_enhanced')[m
+[36m@@ -413,12 +353,8 @@[m [mexport class RoomService {[m
+           completed_time: new Date().toISOString(),[m
+           updated_at: new Date().toISOString(),[m
+         } as Database['public']['Tables']['environmental_cleans_enhanced']['Update'])[m
+[31m-        .eq('room_id', roomId);[m
+[31m-[m
+[31m-      // Only add facility scoping if facility_id is available[m
+[31m-      if (facilityId) {[m
+[31m-        query.eq('facility_id', facilityId); // Enforces tenant isolation[m
+[31m-      }[m
+[32m+[m[32m        .eq('room_id', roomId)[m
+[32m+[m[32m        .eq('facility_id', currentTenant);[m
+ [m
+       const { error } = await query;[m
+ [m
+[1mdiff --git a/src/services/autoclaveReceiptService.ts b/src/services/autoclaveReceiptService.ts[m
+[1mindex be9af3e4..e809e4af 100644[m
+[1m--- a/src/services/autoclaveReceiptService.ts[m
+[1m+++ b/src/services/autoclaveReceiptService.ts[m
+[36m@@ -1,9 +1,22 @@[m
+[32m+[m[32m/**[m
+[32m+[m[32m * Autoclave Receipt Service (Tenant-Scoped)[m
+[32m+[m[32m * - All receipt access restricted by tenant_id = currentTenant[m
+[32m+[m[32m * - Public URLs removed; signed URLs only (1-hour expiry)[m
+[32m+[m[32m * Date: 2025-10-06[m
+[32m+[m[32m */[m
+[32m+[m
+ import { supabase } from '@/lib/supabaseClient';[m
+ import {[m
+   AutoclaveReceipt,[m
+   AutoclaveReceiptUpload,[m
+   FacilitySettings,[m
+ } from '../types/sterilizationTypes';[m
+[32m+[m[32mimport { FacilityService } from '@/services/facilityService';[m
+[32m+[m
+[32m+[m[32m// Get current facility ID for tenant isolation[m
+[32m+[m[32mconst getCurrentTenant = async (): Promise<string> => {[m
+[32m+[m[32m  return await FacilityService.getCurrentFacilityId();[m
+[32m+[m[32m};[m
+ [m
+ export class AutoclaveReceiptService {[m
+   /**[m
+[36m@@ -61,6 +74,8 @@[m [mexport class AutoclaveReceiptService {[m
+     _operator: string[m
+   ): Promise<AutoclaveReceipt> {[m
+     try {[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+[32m+[m
+       // Get current user for authentication and facility_id[m
+       const {[m
+         data: { user },[m
+[36m@@ -81,6 +96,11 @@[m [mexport class AutoclaveReceiptService {[m
+         throw new Error('User facility not found');[m
+       }[m
+ [m
+[32m+[m[32m      // Validate tenant ownership[m
+[32m+[m[32m      if (userProfile.facility_id !== currentTenant) {[m
+[32m+[m[32m        throw new Error('Unauthorized: tenant mismatch');[m
+[32m+[m[32m      }[m
+[32m+[m
+       // Compress the image for storage optimization[m
+       const compressedFile = await this.compressImage(upload.photoFile);[m
+ [m
+[36m@@ -101,13 +121,18 @@[m [mexport class AutoclaveReceiptService {[m
+       }[m
+ [m
+       // Generate signed URL for secure access[m
+[31m-      const { data: signedUrlData, error: signedUrlError } =[m
+[32m+[m[32m      const { data: _signedUrlData, error: signedUrlError } =[m
+         await supabase.storage[m
+           .from('autoclave-receipts')[m
+           .createSignedUrl(filename, 3600); // 1-hour expiry[m
+ [m
+       if (signedUrlError) throw signedUrlError;[m
+ [m
+[32m+[m[32m      // Basic audit log[m
+[32m+[m[32m      console.info([m
+[32m+[m[32m        `[AutoclaveReceipt] Signed URL created for tenant ${currentTenant} → ${filename}`[m
+[32m+[m[32m      );[m
+[32m+[m
+       // Calculate retention date (default 24 months)[m
+       const retentionMonths = 24; // Default retention period[m
+       const retentionUntil = new Date();[m
+[36m@@ -120,6 +145,7 @@[m [mexport class AutoclaveReceiptService {[m
+           autoclave_id: null, // Will be linked when autoclave is identified[m
+           receipt_number: upload.batchCode, // Using batch code as receipt number[m
+           facility_id: userProfile.facility_id, // Enforces tenant isolation[m
+[32m+[m[32m          tenant_id: currentTenant, // Additional tenant scoping[m
+         })[m
+         .select()[m
+         .single();[m
+[36m@@ -146,26 +172,40 @@[m [mexport class AutoclaveReceiptService {[m
+     batchCode: string[m
+   ): Promise<AutoclaveReceipt[]> {[m
+     try {[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+[32m+[m
+       // Get current user for facility scoping[m
+       const {[m
+         data: { user },[m
+         error: authError,[m
+       } = await supabase.auth.getUser();[m
+[32m+[m[32m      if (authError || !user) {[m
+[32m+[m[32m        throw new Error('User not authenticated. Please log in again.');[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      // Get user's facility_id from users table[m
+[32m+[m[32m      const { data: userProfile, error: userError } = await supabase[m
+[32m+[m[32m        .from('users')[m
+[32m+[m[32m        .select('facility_id')[m
+[32m+[m[32m        .eq('id', user.id)[m
+[32m+[m[32m        .single();[m
+ [m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[32m+[m[32m      if (userError || !userProfile?.facility_id) {[m
+[32m+[m[32m        throw new Error('User facility not found');[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      const facilityId = userProfile.facility_id;[m
+[32m+[m
+[32m+[m[32m      // Validate tenant ownership[m
+[32m+[m[32m      if (facilityId !== currentTenant) {[m
+[32m+[m[32m        throw new Error('Unauthorized: tenant mismatch');[m
+       }[m
+ [m
+       const query = supabase[m
+         .from('autoclave_receipts')[m
+         .select('*')[m
+[31m-        .eq('receipt_number', batchCode);[m
+[31m-[m
+[31m-      // Only add facility scoping if facility_id is available[m
+[31m-      if (facilityId) {[m
+[31m-        query.eq('facility_id', facilityId); // Enforces tenant isolation[m
+[31m-      }[m
+[32m+[m[32m        .eq('receipt_number', batchCode)[m
+[32m+[m[32m        .eq('tenant_id', currentTenant); // Enforces tenant isolation[m
+ [m
+       const { data, error } = await query.order('created_at', {[m
+         ascending: false,[m
+[36m@@ -190,24 +230,40 @@[m [mexport class AutoclaveReceiptService {[m
+     offset = 0[m
+   ): Promise<AutoclaveReceipt[]> {[m
+     try {[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+[32m+[m
+       // Get current user for facility scoping[m
+       const {[m
+         data: { user },[m
+         error: authError,[m
+       } = await supabase.auth.getUser();[m
+[32m+[m[32m      if (authError || !user) {[m
+[32m+[m[32m        throw new Error('User not authenticated. Please log in again.');[m
+[32m+[m[32m      }[m
+ [m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[32m+[m[32m      // Get user's facility_id from users table[m
+[32m+[m[32m      const { data: userProfile, error: userError } = await supabase[m
+[32m+[m[32m        .from('users')[m
+[32m+[m[32m        .select('facility_id')[m
+[32m+[m[32m        .eq('id', user.id)[m
+[32m+[m[32m        .single();[m
+[32m+[m
+[32m+[m[32m      if (userError || !userProfile?.facility_id) {[m
+[32m+[m[32m        throw new Error('User facility not found');[m
+       }[m
+ [m
+[31m-      const query = supabase.from('autoclave_receipts').select('*');[m
+[32m+[m[32m      const facilityId = userProfile.facility_id;[m
+ [m
+[31m-      // Only add facility scoping if facility_id is available[m
+[31m-      if (facilityId) {[m
+[31m-        query.eq('facility_id', facilityId); // Enforces tenant isolation[m
+[32m+[m[32m      // Validate tenant ownership[m
+[32m+[m[32m      if (facilityId !== currentTenant) {[m
+[32m+[m[32m        throw new Error('Unauthorized: tenant mismatch');[m
+       }[m
+ [m
+[32m+[m[32m      const query = supabase[m
+[32m+[m[32m        .from('autoclave_receipts')[m
+[32m+[m[32m        .select('*')[m
+[32m+[m[32m        .eq('tenant_id', currentTenant); // Enforces tenant isolation[m
+[32m+[m
+       const { data, error } = await query[m
+         .order('created_at', { ascending: false })[m
+         .range(offset, offset + limit - 1);[m
+[36m@@ -228,27 +284,41 @@[m [mexport class AutoclaveReceiptService {[m
+    */[m
+   static async deleteReceipt(receiptId: string): Promise<void> {[m
+     try {[m
+[32m+[m[32m      const currentTenant = await getCurrentTenant();[m
+[32m+[m
+       // Get current user for facility scoping[m
+       const {[m
+         data: { user },[m
+         error: authError,[m
+       } = await supabase.auth.getUser();[m
+[32m+[m[32m      if (authError || !user) {[m
+[32m+[m[32m        throw new Error('User not authenticated. Please log in again.');[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      // Get user's facility_id from users table[m
+[32m+[m[32m      const { data: userProfile, error: userError } = await supabase[m
+[32m+[m[32m        .from('users')[m
+[32m+[m[32m        .select('facility_id')[m
+[32m+[m[32m        .eq('id', user.id)[m
+[32m+[m[32m        .single();[m
+[32m+[m
+[32m+[m[32m      if (userError || !userProfile?.facility_id) {[m
+[32m+[m[32m        throw new Error('User facility not found');[m
+[32m+[m[32m      }[m
+ [m
+[31m-      let facilityId: string | null = null;[m
+[31m-      if (!authError && user) {[m
+[31m-        facilityId = user.user_metadata?.facility_id || null;[m
+[32m+[m[32m      const facilityId = userProfile.facility_id;[m
+[32m+[m
+[32m+[m[32m      // Validate tenant ownership[m
+[32m+[m[32m      if (facilityId !== currentTenant) {[m
+[32m+[m[32m        throw new Error('Unauthorized: tenant mismatch');[m
+       }[m
+ [m
+[31m-      // Get receipt

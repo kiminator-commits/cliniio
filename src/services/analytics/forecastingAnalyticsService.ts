@@ -11,8 +11,8 @@ import {
   AuditRiskScore,
   TrainingKnowledgeGaps,
   EfficiencyROITracker,
-  IntelligenceSummary,
 } from '../../types/forecastingAnalyticsTypes';
+import type { IntelligenceSummary } from '../../types/forecastingAnalyticsTypes';
 import { DEFAULT_CACHE_TTL } from './forecastingAnalyticsConfig';
 
 // Import sub-services
@@ -312,3 +312,6 @@ export class ForecastingAnalyticsService {
 }
 
 export default ForecastingAnalyticsService;
+
+// Re-export types for convenience
+export type { IntelligenceSummary } from '../../types/forecastingAnalyticsTypes';

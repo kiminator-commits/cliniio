@@ -71,7 +71,7 @@ export class InventoryDataProvider {
         filters
       );
 
-      const { data, error, count } = await query
+      const { data, error, count } = await (query as unknown)
         .eq('tenant_id', currentTenant)
         .order('created_at', {
           ascending: false,
@@ -114,7 +114,9 @@ export class InventoryDataProvider {
     item: Omit<InventoryItem, 'id' | 'lastUpdated'>
   ): Promise<InventoryItem> {
     try {
-      const data = await InventoryActionService.processItemCreation(item);
+      const data = await (
+        InventoryActionService as unknown
+      ).processItemCreation(item);
       return data;
     } catch (error) {
       console.error('Error creating item:', error);
@@ -127,7 +129,10 @@ export class InventoryDataProvider {
     updates: Partial<InventoryItem>
   ): Promise<InventoryItem> {
     try {
-      const data = await InventoryActionService.processItemUpdate(id, updates);
+      const data = await (InventoryActionService as unknown).processItemUpdate(
+        id,
+        updates
+      );
       return data;
     } catch (error) {
       console.error('Error updating item:', error);
@@ -137,7 +142,7 @@ export class InventoryDataProvider {
 
   static async deleteItemFromSupabase(id: string): Promise<void> {
     try {
-      await InventoryActionService.processItemDeletion(id);
+      await (InventoryActionService as unknown).processItemDeletion(id);
     } catch (error) {
       throw new Error(`Failed to delete item: ${getErrorMessage(error)}`);
     }
@@ -147,9 +152,11 @@ export class InventoryDataProvider {
     try {
       const currentTenant = await getCurrentTenant();
 
-      const result = await InventoryFilterOperations.applyFiltersToCategories(
-        supabase,
-        'inventory_items'
+      const result = await (
+        InventoryFilterOperations.applyFiltersToCategories(
+          supabase,
+          'inventory_items'
+        ) as unknown
       ).eq('tenant_id', currentTenant);
 
       if (!result) {
@@ -176,9 +183,11 @@ export class InventoryDataProvider {
     try {
       const currentTenant = await getCurrentTenant();
 
-      const result = await InventoryFilterOperations.applyFiltersToLocations(
-        supabase,
-        'inventory_items'
+      const result = await (
+        InventoryFilterOperations.applyFiltersToLocations(
+          supabase,
+          'inventory_items'
+        ) as unknown
       ).eq('tenant_id', currentTenant);
 
       if (!result) {

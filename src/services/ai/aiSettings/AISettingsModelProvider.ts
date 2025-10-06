@@ -95,7 +95,7 @@ export class AISettingsModelProvider {
             sterilizationSettings.ai_confidence_threshold || 0.8,
           ai_data_retention_days:
             sterilizationSettings.ai_data_retention_days || 90,
-        } as Record<string, unknown>),
+        }),
         this.inventoryAI.saveSettings(inventorySettings),
         this.environmentalAI.saveSettings(environmentalSettings),
         this.learningAI.saveSettings(learningSettings),
@@ -352,81 +352,83 @@ export class AISettingsModelProvider {
     // Merge sterilization settings
     if (sterilization) {
       defaults.computerVision.toolConditionAssessment =
-        sterilization.tool_condition_assessment ??
+        Boolean(sterilization.tool_condition_assessment) ??
         defaults.computerVision.toolConditionAssessment;
       defaults.computerVision.barcodeQualityDetection =
-        sterilization.barcode_quality_detection ??
+        Boolean(sterilization.barcode_quality_detection) ??
         defaults.computerVision.barcodeQualityDetection;
       defaults.computerVision.toolTypeRecognition =
-        sterilization.tool_type_recognition ??
+        Boolean(sterilization.tool_type_recognition) ??
         defaults.computerVision.toolTypeRecognition;
       defaults.predictiveAnalytics.cycleOptimization =
-        sterilization.cycle_optimization ??
+        Boolean(sterilization.cycle_optimization) ??
         defaults.predictiveAnalytics.cycleOptimization;
       defaults.predictiveAnalytics.failurePrediction =
-        sterilization.failure_prediction ??
+        Boolean(sterilization.failure_prediction) ??
         defaults.predictiveAnalytics.failurePrediction;
       defaults.aiConfig.aiConfidenceThreshold =
-        sterilization.ai_confidence_threshold ??
+        Number(sterilization.ai_confidence_threshold) ??
         defaults.aiConfig.aiConfidenceThreshold;
       defaults.aiConfig.aiDataRetentionDays =
-        sterilization.ai_data_retention_days ??
+        Number(sterilization.ai_data_retention_days) ??
         defaults.aiConfig.aiDataRetentionDays;
     }
 
     // Merge inventory settings
     if (inventory) {
       defaults.computerVision.imageRecognition =
-        inventory.image_recognition_enabled ??
+        Boolean(inventory.image_recognition_enabled) ??
         defaults.computerVision.imageRecognition;
       defaults.computerVision.qualityAssessment =
-        inventory.quality_assessment_enabled ??
+        Boolean(inventory.quality_assessment_enabled) ??
         defaults.computerVision.qualityAssessment;
       defaults.predictiveAnalytics.demandForecasting =
-        inventory.demand_forecasting_enabled ??
+        Boolean(inventory.demand_forecasting_enabled) ??
         defaults.predictiveAnalytics.demandForecasting;
       defaults.predictiveAnalytics.costOptimization =
-        inventory.cost_optimization_enabled ??
+        Boolean(inventory.cost_optimization_enabled) ??
         defaults.predictiveAnalytics.costOptimization;
       defaults.smartWorkflow.smartCategorization =
-        inventory.smart_categorization_enabled ??
+        Boolean(inventory.smart_categorization_enabled) ??
         defaults.smartWorkflow.smartCategorization;
     }
 
     // Merge environmental settings
     if (environmental) {
       defaults.environmental.predictiveCleaning =
-        environmental.predictive_cleaning_enabled ??
+        Boolean(environmental.predictive_cleaning_enabled) ??
         defaults.environmental.predictiveCleaning;
       defaults.environmental.smartScheduling =
-        environmental.smart_scheduling ??
+        Boolean(environmental.smart_scheduling) ??
         defaults.environmental.smartScheduling;
       defaults.environmental.contaminationPrediction =
-        environmental.contamination_prediction ??
+        Boolean(environmental.contamination_prediction) ??
         defaults.environmental.contaminationPrediction;
       defaults.environmental.resourceOptimization =
-        environmental.resource_optimization ??
+        Boolean(environmental.resource_optimization) ??
         defaults.environmental.resourceOptimization;
       defaults.environmental.efficiencyAnalytics =
-        environmental.efficiency_analytics ??
+        Boolean(environmental.efficiency_analytics) ??
         defaults.environmental.efficiencyAnalytics;
     }
 
     // Merge learning settings
     if (learning) {
       defaults.learning.personalizedRecommendations =
-        learning.personalized_recommendations ??
+        Boolean(learning.personalized_recommendations) ??
         defaults.learning.personalizedRecommendations;
       defaults.learning.skillGapAnalysis =
-        learning.skill_gap_analysis ?? defaults.learning.skillGapAnalysis;
+        Boolean(learning.skill_gap_analysis) ??
+        defaults.learning.skillGapAnalysis;
       defaults.learning.learningPathOptimization =
-        learning.learning_path_optimization ??
+        Boolean(learning.learning_path_optimization) ??
         defaults.learning.learningPathOptimization;
       defaults.learning.performancePrediction =
-        learning.performance_prediction ??
+        Boolean(learning.performance_prediction) ??
         defaults.learning.performancePrediction;
       defaults.learning.adaptiveDifficulty =
-        learning.adaptive_difficulty ?? defaults.learning.adaptiveDifficulty;
+        Boolean(learning.adaptive_difficulty) ??
+        defaults.learning.adaptiveDifficulty;
     }
 
     return defaults;

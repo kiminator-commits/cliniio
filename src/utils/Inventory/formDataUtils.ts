@@ -96,8 +96,10 @@ export const transformFormDataForModal = (
     id: String(id || defaultData.id || ''),
     location: String(location || defaultData.location || ''),
     purchaseDate: formatDateForInput(
-      (storeFormData as Record<string, unknown>)?.createdAt ||
-        defaultData.createdAt
+      String(
+        (storeFormData as Record<string, unknown>)?.createdAt ||
+          defaultData.createdAt
+      )
     ),
     vendor: String(
       (storeFormData as Record<string, unknown>)?.supplier ||
@@ -112,8 +114,10 @@ export const transformFormDataForModal = (
       (storeFormData as Record<string, unknown>)?.maintenanceSchedule || ''
     ),
     lastServiced: formatDateForInput(
-      (storeFormData as Record<string, unknown>)?.lastServiced ||
-        defaultData.updated_at
+      String(
+        (storeFormData as Record<string, unknown>)?.lastServiced ||
+          defaultData.updated_at
+      )
     ),
     nextDue: String((storeFormData as Record<string, unknown>)?.nextDue || ''),
     serviceProvider: String(

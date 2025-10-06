@@ -103,7 +103,10 @@ const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 !error &&
                 safeData.topUsers.map((user, index) => (
                   <motion.div
-                    key={user.id || (user as { full_name: string }).full_name}
+                    key={
+                      user.id ||
+                      (user as unknown as { full_name: string }).full_name
+                    }
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: index * 0.2 + 0.2 }}
@@ -126,7 +129,7 @@ const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                       </div>
                       <div className="ml-3">
                         <div className="text-sm font-semibold text-gray-700">
-                          {(user as { full_name: string }).full_name}
+                          {(user as unknown as { full_name: string }).full_name}
                         </div>
                         <div className="text-xs text-gray-500">
                           Rank #{index + 1}

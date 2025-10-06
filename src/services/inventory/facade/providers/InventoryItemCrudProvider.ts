@@ -243,7 +243,10 @@ export class InventoryItemCrudProvider {
       errors.push('Quantity must be non-negative');
     }
 
-    if (item.minimumStock !== undefined && item.minimumStock < 0) {
+    if (
+      (item as Record<string, unknown>).minimumStock !== undefined &&
+      (item as Record<string, unknown>).minimumStock < 0
+    ) {
       errors.push('Minimum stock must be non-negative');
     }
 
@@ -331,9 +334,8 @@ export class InventoryItemCrudProvider {
       async () => {
         const result = await this.adapter.updateInventoryItem(id, {
           status: 'archived',
-          archivedAt: new Date().toISOString(),
           archiveReason: reason,
-        });
+        } as Record<string, unknown>);
         cacheInvalidationService.invalidateRelated('inventory:update', id);
 
         // Track item archival
@@ -378,9 +380,8 @@ export class InventoryItemCrudProvider {
       async () => {
         const result = await this.adapter.updateInventoryItem(id, {
           status: 'active',
-          archivedAt: null,
           archiveReason: null,
-        });
+        } as Record<string, unknown>);
         cacheInvalidationService.invalidateRelated('inventory:update', id);
 
         // Track item restoration

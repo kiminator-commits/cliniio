@@ -7,6 +7,9 @@ import {
   PerformanceTrend,
   PerformanceInsight,
 } from '../../types/performanceMonitorTypes';
+
+// Re-export types for external use
+export type { PerformanceAlert, PerformanceSnapshot };
 import {
   calculateAggregatedMetrics,
   calculatePerformanceTrends,
@@ -463,7 +466,7 @@ export class PerformanceMonitor {
     const health = this.getSystemHealthSync();
     return generatePerformanceInsights(
       health,
-      (metricName) => this.getPerformanceTrends(metricName),
+      (metricName) => this.getPerformanceTrends(metricName) as unknown,
       (name) => this.getAggregatedMetrics(name)
     );
   }

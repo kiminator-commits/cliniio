@@ -126,6 +126,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
           room_temperature_celsius: 22,
           humidity_percent: 45,
           equipment_used: 'Default Equipment',
+          operator: user.id,
           operator_id: user.id,
           facility_id: userData.facility_id as string,
           test_date: new Date().toISOString(),
@@ -135,7 +136,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
       // Save to Supabase with real user/facility data
       const biTestData = {
         facility_id: facilityId,
-        operator_id: user.id,
+        operator: user.id,
         // cycle_id: undefined, // Removed - NOT NULL constraint in database
         test_date: new Date().toISOString(),
         result: result.status === 'pending' ? 'pass' : result.status,
@@ -292,14 +293,17 @@ export const createBiologicalIndicatorSlice: StateCreator<
           if (!existingActivityIds.has(activityId)) {
             newActivities.push({
               id: activityId,
-              type: 'incident-resolution',
+              type: 'bi-failure' as string,
               title: 'BI Failure Incident Resolved',
-              time: new Date(incident.resolved_at || incident.updated_at),
-              toolCount: incident.metadata?.affected_tools_count || 1,
+              time: new Date(
+                String(incident.resolved_at || incident.updated_at)
+              ),
+              toolCount:
+                (incident.metadata as unknown)?.affected_tools_count || 1,
               color: 'bg-blue-500',
               metadata: {
                 incidentId: incident.id,
-                operatorId: incident.resolved_by_operator_id,
+                operatorId: incident.resolved_by_operator,
                 resolutionNotes: incident.resolution_notes,
               },
             });
@@ -341,13 +345,13 @@ export const createBiologicalIndicatorSlice: StateCreator<
       // Convert database format to component format for BI Test Results display
       const testResults: BITestResult[] = (data || []).map(
         (row: Record<string, unknown>) => ({
-          id: row.id,
-          facility_id: row.facility_id,
-          test_number: row.test_number,
-          test_date: row.test_date, // Keep as string
-          result: row.result,
+          id: String(row.id),
+          facility_id: String(row.facility_id),
+          test_number: String(row.test_number),
+          test_date: String(row.test_date), // Keep as string
+          result: String(row.result),
           status: row.result, // Map result to status for component compatibility
-          operator_id: row.operator_id,
+          operator: row.operator,
           cycle_id: row.cycle_id,
           bi_lot_number: row.bi_lot_number,
           bi_expiry_date: row.bi_expiry_date,
@@ -358,7 +362,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
           skip_reason: row.skip_reason,
           compliance_notes: row.compliance_notes,
           // Add component-expected fields
-          date: new Date(row.test_date), // Convert to Date object for component
+          date: new Date(String(row.test_date)), // Convert to Date object for component
           toolId: row.test_number || 'default-tool', // Use test_number as toolId
           passed: row.result === 'pass',
           notes: row.compliance_notes || row.failure_reason || row.skip_reason,
@@ -381,12 +385,12 @@ export const createBiologicalIndicatorSlice: StateCreator<
               id: activityId,
               type: 'bi-test',
               title: test.passed ? 'BI Test Passed' : 'BI Test Failed',
-              time: new Date(test.test_date),
+              time: new Date(String((test as unknown).test_date)),
               toolCount: 1,
               color: test.passed ? 'bg-green-500' : 'bg-red-500',
               metadata: {
-                testNumber: test.test_number,
-                operatorId: test.operator_id,
+                testNumber: String((test as unknown).test_number),
+                operatorId: test.operator,
               },
             });
           }
@@ -415,7 +419,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
     failure_date: string;
     affected_tools_count: number;
     affected_batch_ids: string[];
-    detected_by_operator_id?: string;
+    detected_by_operator?: string;
   }) =>
     set({
       biFailureActive: incident.status === 'active',
@@ -426,7 +430,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
               date: new Date(incident.failure_date),
               affectedToolsCount: incident.affected_tools_count,
               affectedBatchIds: incident.affected_batch_ids,
-              operator: incident.detected_by_operator_id || 'System Alert',
+              operator: incident.detected_by_operator || 'System Alert',
             }
           : null,
     }),

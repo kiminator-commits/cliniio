@@ -8,17 +8,34 @@ import {
   InventoryItemData,
   BulkOperationResult,
 } from '@/types/inventoryActionTypes';
-import {
-  ExportOptions,
-  ImportOptions,
-  ImportResult,
-} from '../../pages/Inventory/services/inventoryExportService';
+
+// Simple analytics tracking function
+const trackAnalyticsEvent = (event: string, data: Record<string, unknown>) => {
+  console.log(`Analytics Event: ${event}`, data);
+};
+import { ExportOptions } from '../../pages/Inventory/services/inventoryExportService';
 import { BulkOperationConfig } from '../../pages/Inventory/services/inventoryBulkProgressService';
 import { InventoryExportService } from '../../pages/Inventory/services/inventoryExportService';
 import { InventoryImportService } from '../../pages/Inventory/services/inventoryImportService';
 import { InventoryBulkProgressService } from '../../pages/Inventory/services/inventoryBulkProgressService';
+// Define missing types
+type ImportOptions = {
+  delimiter?: string;
+  hasHeader?: boolean;
+  skipEmptyRows?: boolean;
+  validateData?: boolean;
+  skipDuplicates?: boolean;
+  createMissingCategories?: boolean;
+  format?: unknown;
+};
+
+type ImportResult = {
+  success: boolean;
+  importedCount: number;
+  errors: string[];
+  data?: unknown[];
+};
 import { logEvent, trackUserAction } from '@/utils/monitoring';
-import { trackEvent as trackAnalyticsEvent } from '@/services/analytics';
 import {
   validateItemData,
   buildInventoryPayload,
@@ -213,7 +230,7 @@ export async function handleBulkImport(
 
     const importResult = await InventoryImportService.importItems(
       file,
-      options
+      options as Record<string, unknown>
     );
 
     logEvent(
@@ -540,7 +557,7 @@ async function processBulkExport(
 ): Promise<BulkOperationResult> {
   try {
     const _exportResult = await InventoryExportService.exportItems(
-      itemIds,
+      itemIds as string[],
       exportOptions
     );
 

@@ -353,11 +353,11 @@ export class ToolService {
       );
       // Sort since ToolService doesn't handle sorting yet
       const sortedTools = facilityTools.sort((a, b) =>
-        (a.tool_name || '').localeCompare(b.tool_name || '')
+        (a.name || '').localeCompare(b.name || '')
       );
 
       return sortedTools.map((tool): Tool => {
-        const toolData = tool as ToolRow;
+        const toolData = tool as Record<string, unknown>;
         return {
           id: toolData.id,
           name: toolData.tool_name,

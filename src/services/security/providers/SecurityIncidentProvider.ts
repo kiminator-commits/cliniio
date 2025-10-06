@@ -418,6 +418,9 @@ export class SecurityIncidentProvider {
         timestamp: incident.detectedAt, // Would need to track actual assignment time
         event: 'Incident Assigned',
         details: {
+          title: incident.title,
+          severity: incident.severity,
+          threatIndicatorId: incident.threatIndicatorId,
           assignedTo: incident.assignedTo,
         },
       });
@@ -428,6 +431,9 @@ export class SecurityIncidentProvider {
         timestamp: incident.resolvedAt,
         event: 'Incident Resolved',
         details: {
+          title: incident.title,
+          severity: incident.severity,
+          threatIndicatorId: incident.threatIndicatorId,
           resolvedBy: incident.resolvedBy,
           resolution: incident.resolution,
         },

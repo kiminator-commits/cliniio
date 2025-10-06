@@ -1,5 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { PerformanceMetrics } from '../services/inventoryBulkProgressService';
+// import { PerformanceMetrics } from '../services/inventoryBulkProgressService';
+import { PerformanceMetric } from '../../../types/performanceTypes';
+
+// Temporary type declarations for window services
+declare global {
+  interface Window {
+    InventoryBulkProgressService?: {
+      getAllPerformanceMetrics(): PerformanceMetric[];
+      getPerformanceMetrics(operationId: string): PerformanceMetric | null;
+      clearPerformanceMetrics(): void;
+      getCacheStats(): { size: number; hitRate: number };
+    };
+    InventoryExportService?: {
+      getCacheStats(): { size: number; maxSize: number };
+      getMemoryStats(): { current: number; limit: number };
+    };
+  }
+}
 
 interface PerformanceMonitorProps {
   operationId?: string;
@@ -10,9 +27,9 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   operationId,
   onClose,
 }) => {
-  const [metrics, setMetrics] = useState<PerformanceMetrics[]>([]);
+  const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
   const [selectedMetric, setSelectedMetric] =
-    useState<PerformanceMetrics | null>(null);
+    useState<PerformanceMetric | null>(null);
   // const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -50,18 +67,19 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     return `${seconds.toFixed(2)}s`;
   };
 
-  const formatProcessingRate = (rate: number) => {
+  const _formatProcessingRate = (rate: number) => {
     return `${rate} items/sec`;
   };
 
-  const getPerformanceGrade = (metric: PerformanceMetrics) => {
-    const avgTime = metric.averageProcessingTime;
-    const memoryEfficiency = metric.peakMemoryUsage / (1024 * 1024); // MB
+  const getPerformanceGrade = (metric: PerformanceMetric) => {
+    const duration = metric.duration || 0;
+    const memoryEfficiency = (metric.metadata?.peakMemoryUsage as number) || 0;
+    const memoryEfficiencyMB = memoryEfficiency / (1024 * 1024); // MB
 
-    if (avgTime < 100 && memoryEfficiency < 50) return 'A+';
-    if (avgTime < 200 && memoryEfficiency < 100) return 'A';
-    if (avgTime < 500 && memoryEfficiency < 200) return 'B';
-    if (avgTime < 1000 && memoryEfficiency < 500) return 'C';
+    if (duration < 100 && memoryEfficiencyMB < 50) return 'A+';
+    if (duration < 200 && memoryEfficiencyMB < 100) return 'A';
+    if (duration < 500 && memoryEfficiencyMB < 200) return 'B';
+    if (duration < 1000 && memoryEfficiencyMB < 500) return 'C';
     return 'D';
   };
 
@@ -116,25 +134,27 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
             <div>
               <div className="text-sm text-blue-600">Items Processed</div>
               <div className="text-lg font-bold text-blue-900">
-                {selectedMetric.processedItems}/{selectedMetric.totalItems}
+                {selectedMetric.itemsProcessed}/{selectedMetric.totalItems}
               </div>
             </div>
             <div>
-              <div className="text-sm text-blue-600">Processing Rate</div>
+              <div className="text-sm text-blue-600">Progress</div>
               <div className="text-lg font-bold text-blue-900">
-                {formatProcessingRate(selectedMetric.processingRate)}
+                {selectedMetric.progress}%
               </div>
             </div>
             <div>
-              <div className="text-sm text-blue-600">Memory Usage</div>
+              <div className="text-sm text-blue-600">Status</div>
               <div className="text-lg font-bold text-blue-900">
-                {formatMemoryUsage(selectedMetric.peakMemoryUsage)}
+                {selectedMetric.status}
               </div>
             </div>
             <div>
-              <div className="text-sm text-blue-600">Workers</div>
+              <div className="text-sm text-blue-600">Duration</div>
               <div className="text-lg font-bold text-blue-900">
-                {selectedMetric.concurrentWorkers}
+                {selectedMetric.duration
+                  ? formatProcessingTime(selectedMetric.duration)
+                  : 'N/A'}
               </div>
             </div>
           </div>
@@ -157,16 +177,16 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                   Items
                 </th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Processing Time
+                  Progress
                 </th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rate
+                  Status
                 </th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Memory
+                  Duration
                 </th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Workers
+                  Type
                 </th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Grade
@@ -182,21 +202,33 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                       : 'N/A'}
                   </td>
                   <td className="px-4 py-2 text-sm text-gray-900">
-                    {metric.processedItems}/{metric.totalItems}
+                    {metric.itemsProcessed}/{metric.totalItems}
                   </td>
                   <td className="px-4 py-2 text-sm text-gray-900">
-                    {metric.endTime
-                      ? formatProcessingTime(metric.endTime - metric.startTime)
+                    {metric.progress}%
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        metric.status === 'completed'
+                          ? 'bg-green-100 text-green-800'
+                          : metric.status === 'running'
+                            ? 'bg-blue-100 text-blue-800'
+                            : metric.status === 'failed'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {metric.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {metric.duration
+                      ? formatProcessingTime(metric.duration)
                       : 'In Progress'}
                   </td>
                   <td className="px-4 py-2 text-sm text-gray-900">
-                    {formatProcessingRate(metric.processingRate)}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-900">
-                    {formatMemoryUsage(metric.peakMemoryUsage)}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-900">
-                    {metric.concurrentWorkers}
+                    {metric.operationType}
                   </td>
                   <td className="px-4 py-2 text-sm">
                     <span

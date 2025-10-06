@@ -1,5 +1,5 @@
 import { supabase } from '../../../../lib/supabase';
-import { ContentItem } from '../../KnowledgeHub/types';
+import { ContentItem } from '../../types';
 import { KHDataTransformationProvider } from './KHDataTransformationProvider';
 
 export class KHContentFetchProvider {

@@ -125,7 +125,7 @@ export class InventorySearchFilterProvider {
 
         if (filters.dateRange) {
           filteredItems = filteredItems.filter((item) => {
-            const itemDate = new Date(item.lastUpdated || item.createdAt);
+            const itemDate = new Date(item.lastUpdated || item.created_at);
             return (
               itemDate >= filters.dateRange!.start &&
               itemDate <= filters.dateRange!.end
@@ -208,7 +208,7 @@ export class InventorySearchFilterProvider {
 
         if (filters.dateRange) {
           filteredItems = filteredItems.filter((item) => {
-            const itemDate = new Date(item.lastUpdated || item.createdAt);
+            const itemDate = new Date(item.lastUpdated || item.created_at);
             return (
               itemDate >= filters.dateRange!.start &&
               itemDate <= filters.dateRange!.end
@@ -432,8 +432,8 @@ export class InventorySearchFilterProvider {
           bValue = b.quantity || 0;
           break;
         case 'lastUpdated':
-          aValue = new Date(a.lastUpdated || a.createdAt);
-          bValue = new Date(b.lastUpdated || b.createdAt);
+          aValue = new Date(a.lastUpdated || a.created_at);
+          bValue = new Date(b.lastUpdated || b.created_at);
           break;
         default:
           aValue = a.name || '';

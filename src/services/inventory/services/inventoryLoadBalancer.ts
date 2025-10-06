@@ -80,7 +80,7 @@ export class InventoryLoadBalancer {
       () => inventorySupabaseService.getItems(filters),
       priority,
       cacheKey
-    );
+    ) as unknown;
   }
 
   /**

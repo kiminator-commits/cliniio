@@ -31,19 +31,16 @@ export function validateItemData(itemData: InventoryItemData): {
     errors.push('Quantity cannot be negative');
   }
 
-  if (itemData.minQuantity !== undefined && itemData.minQuantity < 0) {
+  if (itemData.quantity !== undefined && itemData.quantity < 0) {
     errors.push('Minimum quantity cannot be negative');
   }
 
-  if (itemData.maxQuantity !== undefined && itemData.maxQuantity < 0) {
+  if (itemData.quantity !== undefined && itemData.quantity < 0) {
     errors.push('Maximum quantity cannot be negative');
   }
 
-  if (
-    itemData.minQuantity !== undefined &&
-    itemData.maxQuantity !== undefined
-  ) {
-    if (itemData.minQuantity > itemData.maxQuantity) {
+  if (itemData.quantity !== undefined && itemData.quantity !== undefined) {
+    if (itemData.quantity > itemData.quantity) {
       errors.push('Minimum quantity cannot be greater than maximum quantity');
     }
   }
@@ -53,8 +50,8 @@ export function validateItemData(itemData: InventoryItemData): {
   }
 
   if (
-    itemData.expirationDate &&
-    new Date(itemData.expirationDate) < new Date()
+    itemData.expiration_date &&
+    new Date(itemData.expiration_date) < new Date()
   ) {
     errors.push('Expiration date cannot be in the past');
   }
@@ -86,13 +83,11 @@ export function buildInventoryPayload(
     location: itemData.location?.trim(),
     status: itemData.status || 'available',
     quantity: itemData.quantity || 0,
-    minQuantity: itemData.minQuantity || 0,
-    maxQuantity: itemData.maxQuantity || 0,
     cost: itemData.cost || 0,
     supplier: itemData.supplier?.trim(),
     serialNumber: itemData.serialNumber?.trim(),
     barcode: itemData.barcode?.trim(),
-    expirationDate: itemData.expirationDate,
+    expiration_date: itemData.expiration_date,
     lastUpdated: new Date().toISOString(),
   };
 
@@ -156,13 +151,11 @@ export function mapInventoryItemToData(item: InventoryItem): InventoryItemData {
     location: item.location,
     status: item.status,
     quantity: item.quantity,
-    minQuantity: item.minQuantity,
-    maxQuantity: item.maxQuantity,
     cost: item.cost,
     supplier: item.supplier,
     serialNumber: item.serialNumber,
     barcode: item.barcode,
-    expirationDate: item.expirationDate,
+    expiration_date: item.expiration_date,
     lastUpdated: item.lastUpdated,
   };
 }
@@ -181,13 +174,11 @@ export function mapItemDataToInventoryItem(
     location: itemData.location,
     status: itemData.status,
     quantity: itemData.quantity,
-    minQuantity: itemData.minQuantity,
-    maxQuantity: itemData.maxQuantity,
     cost: itemData.cost,
     supplier: itemData.supplier,
     serialNumber: itemData.serialNumber,
     barcode: itemData.barcode,
-    expirationDate: itemData.expirationDate,
+    expiration_date: itemData.expiration_date,
     lastUpdated: itemData.lastUpdated,
   };
 }
@@ -208,7 +199,7 @@ export function calculateLowStockItems(
   items: InventoryItem[]
 ): InventoryItem[] {
   return items.filter((item) => {
-    return item.quantity <= item.minQuantity;
+    return item.quantity <= item.quantity;
   });
 }
 
@@ -223,9 +214,9 @@ export function calculateExpiringItems(
   futureDate.setDate(futureDate.getDate() + days);
 
   return items.filter((item) => {
-    if (!item.expirationDate) return false;
-    const expirationDate = new Date(item.expirationDate);
-    return expirationDate <= futureDate;
+    if (!item.expiration_date) return false;
+    const expiration_date = new Date(item.expiration_date);
+    return expiration_date <= futureDate;
   });
 }
 

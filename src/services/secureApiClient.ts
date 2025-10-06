@@ -160,7 +160,7 @@ class SecureApiClient {
 
     const cached = this.cache.get(key);
     if (cached && cached.expires > Date.now()) {
-      return cached.data;
+      return cached.data as T;
     }
 
     if (cached) {
@@ -244,7 +244,7 @@ class SecureApiClient {
     // Check for pending identical requests
     const requestKey = `${options.method}:${options.endpoint}:${JSON.stringify(options.data || {})}`;
     if (this.pendingRequests.has(requestKey)) {
-      return await this.pendingRequests.get(requestKey);
+      return (await this.pendingRequests.get(requestKey)) as SecureResponse<T>;
     }
 
     const requestPromise = this.executeRequest<T>(

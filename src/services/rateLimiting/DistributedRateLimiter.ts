@@ -65,7 +65,7 @@ export class DistributedRateLimiter {
     }
 
     // Fallback to in-memory cache
-    return this.checkInMemoryRateLimit(key, effectiveConfig, now, windowStart);
+    return this.checkInMemoryRateLimit(key, effectiveConfig, now);
   }
 
   /**
@@ -80,7 +80,7 @@ export class DistributedRateLimiter {
     const client = redisManager.getClient();
 
     // Use Redis pipeline for atomic operations
-    const pipeline = client.multi();
+    const pipeline = (client as unknown).multi();
 
     // Remove expired entries
     pipeline.zRemRangeByScore(key, '-inf', windowStart);
@@ -119,7 +119,7 @@ export class DistributedRateLimiter {
         };
       } else {
         // Block expired, remove it
-        await client.del(blockKey);
+        await (client as unknown).del(blockKey);
       }
     }
 
@@ -128,7 +128,7 @@ export class DistributedRateLimiter {
       // Set block if configured
       if (config.blockDurationMs) {
         const blockUntil = now + config.blockDurationMs;
-        await client.setEx(
+        await (client as unknown).setEx(
           blockKey,
           Math.ceil(config.blockDurationMs / 1000),
           blockUntil.toString()
@@ -235,8 +235,8 @@ export class DistributedRateLimiter {
     try {
       if (redisManager.isHealthy()) {
         const client = redisManager.getClient();
-        await client.del(key);
-        await client.del(`${key}:blocked`);
+        await (client as unknown).del(key);
+        await (client as unknown).del(`${key}:blocked`);
       }
     } catch (error) {
       logger.warn('Failed to reset Redis rate limit:', error);
@@ -264,7 +264,7 @@ export class DistributedRateLimiter {
 
         // Check if blocked
         const blockKey = `${key}:blocked`;
-        const isBlocked = await client.get(blockKey);
+        const isBlocked = await (client as unknown).get(blockKey);
 
         if (isBlocked) {
           const blockUntil = parseInt(isBlocked);
@@ -279,7 +279,11 @@ export class DistributedRateLimiter {
         }
 
         // Count current requests
-        const currentCount = await client.zCount(key, windowStart, '+inf');
+        const currentCount = await (client as unknown).zCount(
+          key,
+          windowStart,
+          '+inf'
+        );
 
         return {
           allowed: currentCount < effectiveConfig.maxRequests,

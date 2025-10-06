@@ -11,7 +11,7 @@ import {
   getActivitySummary,
 } from './utils/computedValues';
 import { BITestService } from '../../services/bi/BITestService';
-import { BIFailureIncidentService } from '../../services/bi/BIFailureIncidentService';
+import { BIFailureIncidentService } from '../../services/bi/failure/BIFailureIncidentService';
 import { supabase } from '../../lib/supabaseClient';
 import { FacilityService } from '../../services/facilityService';
 

@@ -145,7 +145,7 @@ class PerformanceMetricsCache {
           return cached;
         }
       }
-    } catch {
+    } catch (err) {
       logger.debug(
         'PerformanceMetricsCache: Could not read from localStorage:',
         err

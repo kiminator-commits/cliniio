@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { sterilizationWorkflowService } from '@/services/sterilization/sterilizationWorkflowService';
+import { sterilizationWorkflowService } from '@/pages/Sterilization/services/sterilizationWorkflowService';
 import { environmentalService } from '@/services/environmental/environmentalService';
 
 interface ScanResult {
