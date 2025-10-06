@@ -1,9 +1,22 @@
+/**
+ * Autoclave Receipt Service (Tenant-Scoped)
+ * - All receipt access restricted by tenant_id = currentTenant
+ * - Public URLs removed; signed URLs only (1-hour expiry)
+ * Date: 2025-10-06
+ */
+
 import { supabase } from '@/lib/supabaseClient';
 import {
   AutoclaveReceipt,
   AutoclaveReceiptUpload,
   FacilitySettings,
 } from '../types/sterilizationTypes';
+import { FacilityService } from '@/services/facilityService';
+
+// Get current facility ID for tenant isolation
+const getCurrentTenant = async (): Promise<string> => {
+  return await FacilityService.getCurrentFacilityId();
+};
 
 export class AutoclaveReceiptService {
   /**
@@ -61,6 +74,8 @@ export class AutoclaveReceiptService {
     _operator: string
   ): Promise<AutoclaveReceipt> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       // Get current user for authentication and facility_id
       const {
         data: { user },
@@ -79,6 +94,11 @@ export class AutoclaveReceiptService {
 
       if (userError || !userProfile?.facility_id) {
         throw new Error('User facility not found');
+      }
+
+      // Validate tenant ownership
+      if (userProfile.facility_id !== currentTenant) {
+        throw new Error('Unauthorized: tenant mismatch');
       }
 
       // Compress the image for storage optimization
@@ -101,12 +121,17 @@ export class AutoclaveReceiptService {
       }
 
       // Generate signed URL for secure access
-      const { data: signedUrlData, error: signedUrlError } =
+      const { data: _signedUrlData, error: signedUrlError } =
         await supabase.storage
           .from('autoclave-receipts')
           .createSignedUrl(filename, 3600); // 1-hour expiry
 
       if (signedUrlError) throw signedUrlError;
+
+      // Basic audit log
+      console.info(
+        `[AutoclaveReceipt] Signed URL created for tenant ${currentTenant} → ${filename}`
+      );
 
       // Calculate retention date (default 24 months)
       const retentionMonths = 24; // Default retention period
@@ -120,6 +145,7 @@ export class AutoclaveReceiptService {
           autoclave_id: null, // Will be linked when autoclave is identified
           receipt_number: upload.batchCode, // Using batch code as receipt number
           facility_id: userProfile.facility_id, // Enforces tenant isolation
+          tenant_id: currentTenant, // Additional tenant scoping
         })
         .select()
         .single();
@@ -146,26 +172,40 @@ export class AutoclaveReceiptService {
     batchCode: string
   ): Promise<AutoclaveReceipt[]> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       // Get current user for facility scoping
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated. Please log in again.');
+      }
 
-      let facilityId: string | null = null;
-      if (!authError && user) {
-        facilityId = user.user_metadata?.facility_id || null;
+      // Get user's facility_id from users table
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userProfile?.facility_id) {
+        throw new Error('User facility not found');
+      }
+
+      const facilityId = userProfile.facility_id;
+
+      // Validate tenant ownership
+      if (facilityId !== currentTenant) {
+        throw new Error('Unauthorized: tenant mismatch');
       }
 
       const query = supabase
         .from('autoclave_receipts')
         .select('*')
-        .eq('receipt_number', batchCode);
-
-      // Only add facility scoping if facility_id is available
-      if (facilityId) {
-        query.eq('facility_id', facilityId); // Enforces tenant isolation
-      }
+        .eq('receipt_number', batchCode)
+        .eq('tenant_id', currentTenant); // Enforces tenant isolation
 
       const { data, error } = await query.order('created_at', {
         ascending: false,
@@ -190,23 +230,39 @@ export class AutoclaveReceiptService {
     offset = 0
   ): Promise<AutoclaveReceipt[]> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       // Get current user for facility scoping
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-
-      let facilityId: string | null = null;
-      if (!authError && user) {
-        facilityId = user.user_metadata?.facility_id || null;
+      if (authError || !user) {
+        throw new Error('User not authenticated. Please log in again.');
       }
 
-      const query = supabase.from('autoclave_receipts').select('*');
+      // Get user's facility_id from users table
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
 
-      // Only add facility scoping if facility_id is available
-      if (facilityId) {
-        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      if (userError || !userProfile?.facility_id) {
+        throw new Error('User facility not found');
       }
+
+      const facilityId = userProfile.facility_id;
+
+      // Validate tenant ownership
+      if (facilityId !== currentTenant) {
+        throw new Error('Unauthorized: tenant mismatch');
+      }
+
+      const query = supabase
+        .from('autoclave_receipts')
+        .select('*')
+        .eq('tenant_id', currentTenant); // Enforces tenant isolation
 
       const { data, error } = await query
         .order('created_at', { ascending: false })
@@ -228,27 +284,41 @@ export class AutoclaveReceiptService {
    */
   static async deleteReceipt(receiptId: string): Promise<void> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       // Get current user for facility scoping
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-
-      let facilityId: string | null = null;
-      if (!authError && user) {
-        facilityId = user.user_metadata?.facility_id || null;
+      if (authError || !user) {
+        throw new Error('User not authenticated. Please log in again.');
       }
 
-      // Get receipt info first with facility scoping
+      // Get user's facility_id from users table
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userProfile?.facility_id) {
+        throw new Error('User facility not found');
+      }
+
+      const facilityId = userProfile.facility_id;
+
+      // Validate tenant ownership
+      if (facilityId !== currentTenant) {
+        throw new Error('Unauthorized: tenant mismatch');
+      }
+
+      // Get receipt info first with tenant scoping
       const query = supabase
         .from('autoclave_receipts')
         .select('id')
-        .eq('id', receiptId);
-
-      // Only add facility scoping if facility_id is available
-      if (facilityId) {
-        query.eq('facility_id', facilityId); // Enforces tenant isolation
-      }
+        .eq('id', receiptId)
+        .eq('tenant_id', currentTenant); // Enforces tenant isolation
 
       const { data: _receipt, error: fetchError } = await query.single();
 
@@ -256,16 +326,12 @@ export class AutoclaveReceiptService {
         throw new Error(`Failed to fetch receipt: ${fetchError.message}`);
       }
 
-      // Delete from database with facility scoping
+      // Delete from database with tenant scoping
       const deleteQuery = supabase
         .from('autoclave_receipts')
         .delete()
-        .eq('id', receiptId);
-
-      // Only add facility scoping if facility_id is available
-      if (facilityId) {
-        deleteQuery.eq('facility_id', facilityId); // Enforces tenant isolation
-      }
+        .eq('id', receiptId)
+        .eq('tenant_id', currentTenant); // Enforces tenant isolation
 
       const { error: deleteError } = await deleteQuery;
 
@@ -317,24 +383,41 @@ export class AutoclaveReceiptService {
    */
   static async cleanupExpiredReceipts(): Promise<number> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       // Get current user for facility scoping
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-
-      let facilityId: string | null = null;
-      if (!authError && user) {
-        facilityId = user.user_metadata?.facility_id || null;
+      if (authError || !user) {
+        throw new Error('User not authenticated. Please log in again.');
       }
 
-      // Get expired receipts with facility scoping
-      const query = supabase.from('autoclave_receipts').select('id').limit(0); // Return no results since we don't have expiration tracking
+      // Get user's facility_id from users table
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
 
-      // Only add facility scoping if facility_id is available
-      if (facilityId) {
-        query.eq('facility_id', facilityId); // Enforces tenant isolation
+      if (userError || !userProfile?.facility_id) {
+        throw new Error('User facility not found');
       }
+
+      const facilityId = userProfile.facility_id;
+
+      // Validate tenant ownership
+      if (facilityId !== currentTenant) {
+        throw new Error('Unauthorized: tenant mismatch');
+      }
+
+      // Get expired receipts with tenant scoping
+      const query = supabase
+        .from('autoclave_receipts')
+        .select('id')
+        .limit(0)
+        .eq('tenant_id', currentTenant); // Enforces tenant isolation
 
       const { data: expiredReceipts, error: fetchError } = await query;
 
@@ -356,12 +439,8 @@ export class AutoclaveReceiptService {
       const deleteQuery = supabase
         .from('autoclave_receipts')
         .delete()
-        .in('id', receiptIds);
-
-      // Only add facility scoping if facility_id is available
-      if (facilityId) {
-        deleteQuery.eq('facility_id', facilityId); // Enforces tenant isolation
-      }
+        .in('id', receiptIds)
+        .eq('tenant_id', currentTenant); // Enforces tenant isolation
 
       const { error: deleteError } = await deleteQuery;
 

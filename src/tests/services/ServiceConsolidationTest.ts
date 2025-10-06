@@ -2,11 +2,11 @@
 // SERVICE CONSOLIDATION TEST SUITE - Comprehensive Testing
 // ============================================================================
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { UnifiedAIService } from '../../services/ai/UnifiedAIService';
 import { SecureAuthService } from '../../services/secureAuthService';
 import { KnowledgeHubService } from '../../pages/KnowledgeHub/services/knowledgeHubService';
-import { BIFailureService } from '../../services/bi/failure';
+import { biFailureService } from '../../services/bi/failure';
 import { InventoryServiceFacade } from '../../services/inventory/InventoryServiceFacade';
 import { ServiceRegistry } from '../../services/ServiceRegistry';
 import { servicePerformanceMonitor } from '../../services/_core/ServicePerformanceMonitor';
@@ -122,7 +122,7 @@ describe('Service Consolidation Test Suite', () => {
   describe('BIFailureService', () => {
     it('should retrieve active incidents', async () => {
       const facilityId = 'test-facility';
-      const incidents = await BIFailureService.getActiveIncidents(facilityId);
+      const incidents = await biFailureService.getActiveIncidents(facilityId);
 
       expect(incidents).toBeDefined();
       expect(Array.isArray(incidents)).toBe(true);
@@ -135,7 +135,7 @@ describe('Service Consolidation Test Suite', () => {
       ).toISOString();
       const endDate = new Date().toISOString();
 
-      const analytics = await BIFailureService.getAnalyticsSummary(
+      const analytics = await biFailureService.getAnalyticsSummary(
         facilityId,
         startDate,
         endDate
@@ -146,7 +146,7 @@ describe('Service Consolidation Test Suite', () => {
     });
 
     it('should send regulatory notifications', async () => {
-      const result = await BIFailureService.sendRegulatoryNotification(
+      const result = await biFailureService.sendRegulatoryNotification(
         'test-incident',
         'test-facility',
         'low',
@@ -298,7 +298,7 @@ describe('Service Consolidation Test Suite', () => {
       expect(UnifiedAIService).toBeDefined();
       expect(SecureAuthService).toBeDefined();
       expect(KnowledgeHubService).toBeDefined();
-      expect(BIFailureService).toBeDefined();
+      expect(biFailureService).toBeDefined();
       expect(InventoryServiceFacade).toBeDefined();
       expect(ServiceRegistry).toBeDefined();
       expect(servicePerformanceMonitor).toBeDefined();
@@ -309,7 +309,7 @@ describe('Service Consolidation Test Suite', () => {
       const services = [
         UnifiedAIService,
         KnowledgeHubService,
-        BIFailureService,
+        biFailureService,
         InventoryServiceFacade,
       ];
 

@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { incidentService } from '@/services/bi/failure/incidentService';
 import { observabilityService } from '@/services/observability/observabilityService';
 import { facilityCacheService } from '@/services/cache/facilityCacheService';
+import { BIFailureIncident } from '@/services/bi/failure/BIFailureIncidentService';
 
 // ── Store shape extended with init error state
 interface BIState {
@@ -224,3 +225,6 @@ export const biFailureService = {
     }
   },
 };
+
+// Export types
+export { BIFailureIncident };

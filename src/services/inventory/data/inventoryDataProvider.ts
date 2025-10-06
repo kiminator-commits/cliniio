@@ -1,3 +1,9 @@
+/**
+ * Tenant-scoped Inventory Data Provider
+ * All queries restricted by tenant_id = currentTenant
+ * Date: 2025-10-06
+ */
+
 import { supabase } from '@/lib/supabaseClient';
 import { InventoryItem } from '@/types/inventoryTypes';
 import {
@@ -7,6 +13,12 @@ import {
 import { InventoryDataTransformer } from '../utils/inventoryTransformers';
 import { InventoryFilterOperations } from '../utils/inventoryFilterOperations';
 import { InventoryActionService } from '@/pages/Inventory/services/inventoryActionService';
+import { FacilityService } from '@/services/facilityService';
+
+// Get current facility ID for tenant isolation
+const getCurrentTenant = async (): Promise<string> => {
+  return await FacilityService.getCurrentFacilityId();
+};
 
 // Helper function for safe number conversion
 const safeNumber = (value: unknown, defaultValue: number = 0): number => {
@@ -43,6 +55,8 @@ export class InventoryDataProvider {
     filters?: InventoryFilters
   ): Promise<InventoryResponse> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       const _filterSummary =
         InventoryFilterOperations.getFilterSummary(filters);
 
@@ -51,15 +65,17 @@ export class InventoryDataProvider {
         throw new Error('Invalid filter parameters');
       }
 
-      const query = InventoryFilterOperations.applyFiltersToTable(
+      const query = await InventoryFilterOperations.applyFiltersToTable(
         supabase,
         'inventory_items',
         filters
       );
 
-      const { data, error, count } = await query.order('created_at', {
-        ascending: false,
-      });
+      const { data, error, count } = await query
+        .eq('tenant_id', currentTenant)
+        .order('created_at', {
+          ascending: false,
+        });
 
       if (error) {
         console.error('Error fetching items from Supabase:', error);
@@ -129,10 +145,12 @@ export class InventoryDataProvider {
 
   static async getCategories(): Promise<string[]> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       const result = await InventoryFilterOperations.applyFiltersToCategories(
         supabase,
         'inventory_items'
-      );
+      ).eq('tenant_id', currentTenant);
 
       if (!result) {
         console.error('❌ Error fetching categories');
@@ -156,10 +174,12 @@ export class InventoryDataProvider {
 
   static async getLocations(): Promise<string[]> {
     try {
+      const currentTenant = await getCurrentTenant();
+
       const result = await InventoryFilterOperations.applyFiltersToLocations(
         supabase,
         'inventory_items'
-      );
+      ).eq('tenant_id', currentTenant);
 
       if (!result) {
         console.error('❌ Error fetching locations');

@@ -66,10 +66,16 @@ export const challengeService = {
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError || !user) throw new Error('Unauthorized user');
+      if (userError || !user) {
+        console.warn('⚠️ No authenticated user, returning empty challenges');
+        return [];
+      }
 
       const facilityId = user.user_metadata?.facility_id;
-      if (!facilityId) throw new Error('Missing facility context');
+      if (!facilityId) {
+        console.warn('⚠️ Missing facility context, returning empty challenges');
+        return [];
+      }
 
       const cacheKey = `challenges_and_completions:${facilityId}`;
       const cached =

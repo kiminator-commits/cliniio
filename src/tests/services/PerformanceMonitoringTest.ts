@@ -2,7 +2,7 @@
 // PERFORMANCE MONITORING TEST SUITE - Performance System Testing
 // ============================================================================
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { servicePerformanceMonitor } from '../../services/_core/ServicePerformanceMonitor';
 import { ServiceRegistry } from '../../services/ServiceRegistry';
 import { UnifiedAIService } from '../../services/ai/UnifiedAIService';

@@ -2,14 +2,14 @@
 // This file provides comprehensive type definitions for the Knowledge Hub module
 
 // Re-export all types from modules
-export {
+export type {
   KnowledgeHubCourse,
   KnowledgeHubCourseInsert,
   KnowledgeHubCourseUpdate,
   KnowledgeHubCourseTable,
 } from './knowledgeHub/courseTypes';
 
-export {
+export type {
   KnowledgeHubUserProgress,
   KnowledgeHubUserProgressInsert,
   KnowledgeHubUserProgressUpdate,
@@ -20,7 +20,7 @@ export {
   KnowledgeHubAssignmentsTable,
 } from './knowledgeHub/progressTypes';
 
-export {
+export type {
   KnowledgeHubAchievement,
   KnowledgeHubAchievementInsert,
   KnowledgeHubAchievementUpdate,
@@ -31,7 +31,7 @@ export {
   KnowledgeHubUserAchievementsTable,
 } from './knowledgeHub/achievementTypes';
 
-export {
+export type {
   KnowledgeHubLearningPath,
   KnowledgeHubLearningPathInsert,
   KnowledgeHubLearningPathUpdate,
@@ -42,14 +42,14 @@ export {
   KnowledgeHubCertificatesTable,
 } from './knowledgeHub/learningTypes';
 
-export {
+export type {
   KnowledgeHubContent,
   KnowledgeHubContentInsert,
   KnowledgeHubContentUpdate,
   KnowledgeHubContentTable,
 } from './knowledgeHub/contentTypes';
 
-export {
+export type {
   KnowledgeHubViews,
   KnowledgeHubFunctions,
 } from './knowledgeHub/viewsAndFunctions';

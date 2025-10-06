@@ -50,11 +50,32 @@ export class InventoryFilterOperations {
   /**
    * Apply filters to a Supabase query with table name
    */
-  static applyFiltersToTable(
+  static async applyFiltersToTable(
     supabase: SupabaseClient,
     tableName: string,
     filters?: InventoryFilters
-  ): unknown {
+  ): Promise<unknown> {
+    // Get current user for facility scoping
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data: userProfile, error: userError } = await supabase
+      .from('users')
+      .select('facility_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userProfile?.facility_id) {
+      throw new Error('User facility not found');
+    }
+
+    const facilityId = userProfile.facility_id;
+
     const query = supabase.from(tableName).select(
       `
       id,
@@ -70,7 +91,11 @@ export class InventoryFilterOperations {
     `,
       { count: 'exact' }
     );
-    return this.applyFilters(query, filters);
+
+    // Add facility scoping - this is critical for tenant isolation
+    const facilityScopedQuery = query.eq('facility_id', facilityId);
+
+    return this.applyFilters(facilityScopedQuery, filters);
   }
 
   /**
@@ -100,26 +125,70 @@ export class InventoryFilterOperations {
   /**
    * Apply filters to a Supabase query for categories
    */
-  static applyFiltersToCategories(
+  static async applyFiltersToCategories(
     supabase: SupabaseClient,
     tableName: string
-  ): unknown {
+  ): Promise<unknown> {
+    // Get current user for facility scoping
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data: userProfile, error: userError } = await supabase
+      .from('users')
+      .select('facility_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userProfile?.facility_id) {
+      throw new Error('User facility not found');
+    }
+
+    const facilityId = userProfile.facility_id;
+
     return supabase
       .from(tableName)
       .select('category')
+      .eq('facility_id', facilityId) // Enforces tenant isolation
       .not('category', 'is', null);
   }
 
   /**
    * Apply filters to a Supabase query for locations
    */
-  static applyFiltersToLocations(
+  static async applyFiltersToLocations(
     supabase: SupabaseClient,
     tableName: string
-  ): unknown {
+  ): Promise<unknown> {
+    // Get current user for facility scoping
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data: userProfile, error: userError } = await supabase
+      .from('users')
+      .select('facility_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userProfile?.facility_id) {
+      throw new Error('User facility not found');
+    }
+
+    const facilityId = userProfile.facility_id;
+
     return supabase
       .from(tableName)
       .select('location')
+      .eq('facility_id', facilityId) // Enforces tenant isolation
       .not('location', 'is', null);
   }
 

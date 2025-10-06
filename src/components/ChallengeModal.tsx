@@ -89,8 +89,23 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
     const loadChallenges = async () => {
       try {
         setLoading(true);
-        const fetchedChallenges = await challengeService.fetchChallenges();
-        setChallenges(fetchedChallenges);
+        const fetchedChallenges = await challengeService.fetchUserChallenges();
+
+        // Transform the data to match the Challenge interface
+        const transformedChallenges: Challenge[] = fetchedChallenges.map(
+          (challenge: Record<string, unknown>) => ({
+            id: challenge.id,
+            title: challenge.title,
+            description: challenge.description,
+            category: challenge.category,
+            difficulty: challenge.difficulty,
+            points: challenge.points,
+            timeEstimate: challenge.time_estimate,
+            completed: challenge.isCompleted || false,
+          })
+        );
+
+        setChallenges(transformedChallenges);
       } catch (error) {
         console.error('Error loading challenges:', error);
       } finally {
