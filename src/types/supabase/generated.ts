@@ -5055,7 +5055,7 @@ export type Database = {
     };
     Functions: {
       seed_daily_operations_tasks: {
-        Args: Record<PropertyKey, never>;
+        Args: {};
         Returns: undefined;
       };
     };

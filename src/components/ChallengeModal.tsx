@@ -94,14 +94,14 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({
         // Transform the data to match the Challenge interface
         const transformedChallenges: Challenge[] = fetchedChallenges.map(
           (challenge: Record<string, unknown>) => ({
-            id: challenge.id,
-            title: challenge.title,
-            description: challenge.description,
-            category: challenge.category,
-            difficulty: challenge.difficulty,
-            points: challenge.points,
-            timeEstimate: challenge.time_estimate,
-            completed: challenge.isCompleted || false,
+            id: challenge.id as string,
+            title: challenge.title as string,
+            description: challenge.description as string,
+            category: challenge.category as ChallengeCategory,
+            difficulty: challenge.difficulty as ChallengeDifficulty,
+            points: challenge.points as number,
+            timeEstimate: challenge.time_estimate as string,
+            completed: (challenge.isCompleted as boolean) || false,
           })
         );
 

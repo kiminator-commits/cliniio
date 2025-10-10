@@ -76,7 +76,7 @@ export class InMemoryCache {
   // Cleanup expired items
   cleanup(): void {
     const now = Date.now();
-    for (const [key, item] of this.cache.entries()) {
+    for (const [key, item] of Array.from(this.cache.entries())) {
       if (item.expires <= now) {
         this.cache.delete(key);
       }

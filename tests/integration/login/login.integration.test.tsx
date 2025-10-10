@@ -37,14 +37,13 @@ vi.mock('react-router-dom', async () => ({
 
 import { LOGIN_LABELS } from '@/constants/loginConstants';
 // import * as api from '@/services/api';
-import { setupSupabaseMocks } from '@/__mocks__/supabaseMock';
 
 describe('LoginForm Integration', () => {
   let _mockNavigate: any;
 
   beforeEach(() => {
     setupTestEnvironment();
-    setupSupabaseMocks('success');
+    // setupSupabaseMocks('success'); // Removed - using global mock
 
     // Setup login test with proper mocks
     setupLoginTest();

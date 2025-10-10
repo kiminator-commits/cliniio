@@ -111,7 +111,9 @@ export class InventoryRepository {
         const normalized = withNormalizedCategory(items);
 
         // Use the unified categorization function
-        const categorized = categorizeItems(normalized as unknown);
+        const categorized = categorizeItems(
+          normalized as unknown as Record<string, unknown>[]
+        );
 
         // Ensure no duplicates by checking IDs
         const allItemIds = new Set();
@@ -144,10 +146,11 @@ export class InventoryRepository {
         ) as string[];
 
         return {
-          tools: categorized.tools as unknown,
-          supplies: categorized.supplies as unknown,
-          equipment: categorized.equipment as unknown,
-          officeHardware: categorized.officeHardware as unknown,
+          tools: categorized.tools as unknown as LocalInventoryItem[],
+          supplies: categorized.supplies as unknown as LocalInventoryItem[],
+          equipment: categorized.equipment as unknown as LocalInventoryItem[],
+          officeHardware:
+            categorized.officeHardware as unknown as LocalInventoryItem[],
           categories,
           isLoading: false,
           error: response.error,
@@ -155,7 +158,15 @@ export class InventoryRepository {
       }
     );
 
-    return result;
+    return {
+      tools: result.tools || [],
+      supplies: result.supplies || [],
+      equipment: result.equipment || [],
+      officeHardware: result.officeHardware || [],
+      categories: result.categories,
+      isLoading: result.isLoading,
+      error: result.error,
+    };
   }
 
   /**
@@ -308,7 +319,11 @@ export class InventoryRepository {
     data: Record<string, unknown> | null;
     error: string | null;
   }> {
-    return this.statsProvider!.getInventoryStats() as unknown;
+    const statsResult = await this.statsProvider!.getInventoryStats();
+    return {
+      data: statsResult.data as unknown as Record<string, unknown> | null,
+      error: statsResult.error,
+    };
   }
 
   /**

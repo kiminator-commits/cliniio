@@ -30,12 +30,12 @@ import {
 } from '../../../services/inventoryActions/inventoryActionHandlers';
 
 // Types and constants
-import { InventoryItem } from '@/types/inventoryTypes';
-import { ToolStatus } from '@/types/toolTypes';
+import { InventoryItem } from '../../../types/inventoryTypes';
+import { ToolStatus } from '../../../types/toolTypes';
 import {
   InventoryItemData,
   BulkOperationResult,
-} from '@/types/inventoryActionTypes';
+} from '../../../types/inventoryActionTypes';
 import { ExportOptions } from './inventoryExportService';
 import { BulkOperationConfig } from './inventoryBulkProgressService';
 import { ImportOptions, ImportResult } from './inventoryImportService';

@@ -2,7 +2,7 @@ import { ContentItem as LibraryContentItem } from '../../libraryTypes';
 import {
   ContentItem as KnowledgeHubContentItem,
   ContentCategory,
-} from '../../../pages/KnowledgeHub/types';
+} from '../../../../pages/KnowledgeHub/types';
 import { AutoCategorizationResult } from '../types/categoryTypes';
 import { CategoryMappingService } from '../mapping/CategoryMappingService';
 

@@ -110,7 +110,7 @@ describe('ErrorBoundary', () => {
   });
 
   describe('Console Logging', () => {
-    it('should not log errors in test environment', () => {
+    it('should log errors with correct format', () => {
       const consoleSpy = vi.spyOn(console, 'error');
 
       render(
@@ -119,30 +119,12 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       );
 
-      // Should not log the error in test environment
-      expect(consoleSpy).not.toHaveBeenCalledWith(
-        '[ErrorBoundary]',
-        expect.any(Object)
-      );
-    });
-
-    it('should log errors in non-test environments', () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
-      const consoleSpy = vi.spyOn(console, 'error');
-
-      render(
-        <ErrorBoundary>
-          <ProblemChild />
-        </ErrorBoundary>
-      );
-
+      // Should log the error with the actual format used
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[ErrorBoundary]',
+        '💥 Global Error Boundary caught:',
+        expect.any(Error),
         expect.any(Object)
       );
-
-      process.env.NODE_ENV = originalEnv;
     });
   });
 

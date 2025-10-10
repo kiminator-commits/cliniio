@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 
 /**
  * Loads BI compliance configuration for the specified facility.
@@ -58,19 +58,24 @@ export async function syncWithSupabase(
           await supabase
             .from('bi_failures')
             .update({
-              status: change.payload.status,
-              resolved_at: change.payload.resolved_at,
-              resolved_by: change.payload.resolved_by,
+              status: (change.payload as Record<string, unknown>).status,
+              resolved_at: (change.payload as Record<string, unknown>)
+                .resolved_at,
+              resolved_by: (change.payload as Record<string, unknown>)
+                .resolved_by,
             })
-            .eq('id', change.payload.id)
+            .eq('id', (change.payload as Record<string, unknown>).id)
             .eq('facility_id', facilityId);
           successCount++;
           break;
 
         case 'CREATE_INCIDENT':
-          await supabase
-            .from('bi_failures')
-            .insert([{ ...change.payload, facility_id: facilityId }]);
+          await supabase.from('bi_failures').insert([
+            {
+              ...(change.payload as Record<string, unknown>),
+              facility_id: facilityId,
+            },
+          ]);
           successCount++;
           break;
 
@@ -78,7 +83,7 @@ export async function syncWithSupabase(
           await supabase
             .from('bi_failures')
             .delete()
-            .eq('id', change.payload.id)
+            .eq('id', (change.payload as Record<string, unknown>).id)
             .eq('facility_id', facilityId);
           successCount++;
           break;
@@ -87,9 +92,13 @@ export async function syncWithSupabase(
           await supabase
             .from('bi_compliance_settings')
             .update({
-              auto_close_failures: change.payload.auto_close_failures,
-              alert_threshold_minutes: change.payload.alert_threshold_minutes,
-              email_notifications: change.payload.email_notifications,
+              auto_close_failures: (change.payload as Record<string, unknown>)
+                .auto_close_failures,
+              alert_threshold_minutes: (
+                change.payload as Record<string, unknown>
+              ).alert_threshold_minutes,
+              email_notifications: (change.payload as Record<string, unknown>)
+                .email_notifications,
               last_synced_at: new Date().toISOString(),
             })
             .eq('facility_id', facilityId);

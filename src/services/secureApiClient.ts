@@ -183,7 +183,7 @@ class SecureApiClient {
     // Cleanup expired cache entries
     if (this.cache.size > 100) {
       const now = Date.now();
-      for (const [cacheKey, entry] of this.cache.entries()) {
+      for (const [cacheKey, entry] of Array.from(this.cache.entries())) {
         if (entry.expires < now) {
           this.cache.delete(cacheKey);
         }

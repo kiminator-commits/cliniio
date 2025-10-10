@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { supabase } from '@/lib/supabaseClient';
-import { observabilityService } from '@/services/observability/observabilityService';
+import { supabase } from '../lib/supabaseClient';
+import { observabilityService } from '../services/observability/observabilityService';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();

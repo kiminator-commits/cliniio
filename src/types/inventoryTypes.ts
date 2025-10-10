@@ -1,55 +1,11 @@
 // Unified Inventory Item Type System
-// This now uses the canonical Supabase-generated type
+// This now uses the consolidated type definitions
 
-// import { Database } from '@/types/database.types';
-import { ToolStatus } from '@/types/toolTypes';
+import { InventoryItem as BaseInventoryItem } from './consolidated';
+import { ToolStatus } from './toolTypes';
 
-export interface InventoryItem {
-  id: string;
-  facility_id: string | null;
-  name: string | null;
-  quantity: number | null;
-  data: Record<string, unknown> | null;
-  created_at: string | null;
-  updated_at: string | null;
-  reorder_point: number | null;
-  expiration_date: string | null;
-  unit_cost: number | null;
-  category: string | null;
-  // New database columns
-  status?: string | null;
-  location?: string | null;
-  item?: string | null;
-  supplier?: string | null;
-  cost?: number | null;
-  vendor?: string | null;
-  warranty?: string | null;
-  maintenance_schedule?: string | null;
-  next_due?: string | null;
-  service_provider?: string | null;
-  assigned_to?: string | null;
-  notes?: string | null;
-  tool_id?: string | null;
-  supply_id?: string | null;
-  equipment_id?: string | null;
-  hardware_id?: string | null;
-  p2_status?: string | null;
-  serial_number?: string | null;
-  manufacturer?: string | null;
-  image_url?: string | null;
-  tags?: string[] | null;
-  favorite?: boolean | null;
-  tracked?: boolean | null;
-  barcode?: string | null;
-  sku?: string | null;
-  description?: string | null;
-  current_phase?: string | null;
-  is_active?: boolean | null;
-  unit?: string | null;
-  expiration?: string | null;
-  purchase_date?: string | null;
-  last_serviced?: string | null;
-  last_updated?: string | null;
+// Extend the base inventory item with legacy compatibility
+export interface InventoryItem extends BaseInventoryItem {
   // Legacy aliases for backward compatibility
   lastUpdated?: string | null;
   expiryDate?: string | null;
@@ -68,6 +24,13 @@ export interface InventoryItem {
   isActive?: boolean | null;
   purchaseDate?: string | null;
   lastServiced?: string | null;
+  // Additional properties that might be missing from base type
+  item?: string | null;
+  description?: string | null;
+  sku?: string | null;
+  tracked?: boolean | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 // Type guards for safe property access

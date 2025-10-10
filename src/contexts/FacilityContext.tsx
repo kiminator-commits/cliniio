@@ -43,6 +43,12 @@ export const FacilityProvider: React.FC<{ children: ReactNode }> = ({
 
       // Use the cached facility service instead of direct database calls
       const facilityId = await FacilityService.getCurrentFacilityId();
+
+      // If no facility ID (user not authenticated), use fallback
+      if (!facilityId) {
+        throw new Error('No facility ID available - user not authenticated');
+      }
+
       const facility = await FacilityService.getFacilityById(facilityId);
 
       setCurrentFacility(facility);
@@ -84,6 +90,15 @@ export const FacilityProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
+    // Don't try to load facility data on login page
+    if (
+      typeof window !== 'undefined' &&
+      window.location.pathname === '/login'
+    ) {
+      setIsLoading(false);
+      return;
+    }
+
     refreshFacility().catch((error) => {
       setError(error.message);
     });

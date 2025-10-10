@@ -109,7 +109,7 @@ export class AIMetricsService {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // Get current facility ID
-    const { FacilityService } = await import('@/services/facilityService');
+    const { FacilityService } = await import('../services/facilityService');
     const { facilityId } = await FacilityService.getCurrentUserAndFacility();
 
     // Get AI task performance data
@@ -348,7 +348,7 @@ export class AIMetricsService {
   private async calculateResourceOptimization(): Promise<number> {
     try {
       // Get current facility ID
-      const { FacilityService } = await import('@/services/facilityService');
+      const { FacilityService } = await import('../services/facilityService');
       const { facilityId } = await FacilityService.getCurrentUserAndFacility();
 
       // Get sterilization cycle data
@@ -392,7 +392,7 @@ export class AIMetricsService {
   private async calculateWorkflowStreamlining(): Promise<number> {
     try {
       // Get current facility ID
-      const { FacilityService } = await import('@/services/facilityService');
+      const { FacilityService } = await import('../services/facilityService');
       const { facilityId } = await FacilityService.getCurrentUserAndFacility();
 
       // Get task completion data

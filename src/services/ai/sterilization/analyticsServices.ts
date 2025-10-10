@@ -407,9 +407,9 @@ export class AnalyticsServices {
             this.getHistoricalTrends('month'),
           ]);
           reportData = {
-            insights: insights as Record<string, unknown>,
-            predictive: predictive as Record<string, unknown>,
-            historical: historical as Record<string, unknown>,
+            insights: insights as unknown as Record<string, unknown>,
+            predictive: predictive as unknown as Record<string, unknown>,
+            historical: historical as unknown as Record<string, unknown>,
           };
           break;
         }

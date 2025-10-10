@@ -1,7 +1,6 @@
 import React from 'react';
 import { useInventoryPageLogic } from '@/hooks/inventory/useInventoryPageLogic';
 import InventoryModals from '@/components/Inventory/modals/InventoryModals';
-import { TransformedFormData } from '@/utils/Inventory/formDataUtils';
 
 interface InventoryModalsWrapperProps {
   isEditMode: boolean;
@@ -10,34 +9,19 @@ interface InventoryModalsWrapperProps {
 }
 
 const InventoryModalsWrapper: React.FC<InventoryModalsWrapperProps> = ({
-  isEditMode,
-  formData,
-  progressInfo,
+  isEditMode: _isEditMode,
+  formData: _formData,
+  progressInfo: _progressInfo,
 }) => {
   const {
-    expandedSections,
-    handleCloseAddModal,
-    handleSave,
-    handleToggleSection,
-    handleFormChangeWrapper,
+    expandedSections: _expandedSections,
+    handleCloseAddModal: _handleCloseAddModal,
+    handleSave: _handleSave,
+    handleToggleSection: _handleToggleSection,
+    handleFormChangeWrapper: _handleFormChangeWrapper,
   } = useInventoryPageLogic();
 
-  return (
-    <InventoryModals
-      formData={formData as TransformedFormData}
-      isEditMode={isEditMode}
-      expandedSections={expandedSections}
-      handleCloseAddModal={handleCloseAddModal}
-      handleSave={handleSave}
-      toggleSection={handleToggleSection}
-      handleFormChange={handleFormChangeWrapper}
-      progressInfo={
-        progressInfo as
-          | { current: number; total: number; currentItemName: string }
-          | undefined
-      }
-    />
-  );
+  return <InventoryModals />;
 };
 
 export default InventoryModalsWrapper;

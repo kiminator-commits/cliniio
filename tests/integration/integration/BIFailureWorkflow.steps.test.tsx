@@ -15,7 +15,34 @@ vi.mock('@/lib/supabase', () => {
   };
 });
 
-vi.mock('@/services/biFailureService');
+vi.mock('@/services/bi/failure/index', () => ({
+  BIFailureService: {
+    resolveIncident: vi.fn(),
+    createIncident: vi.fn(),
+    getActiveIncidents: vi.fn(),
+    generatePatientExposureReport: vi.fn(),
+    subscribeToBIFailureUpdates: vi.fn(),
+  },
+  // Export the service with the alias that tests expect
+  biFailureService: {
+    resolveIncident: vi.fn(),
+    createIncident: vi.fn(),
+    getActiveIncidents: vi.fn(),
+    generatePatientExposureReport: vi.fn(),
+    subscribeToBIFailureUpdates: vi.fn(),
+  },
+}));
+vi.mock('@/contexts/UserContext', () => ({
+  UserProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="user-provider">{children}</div>
+  ),
+  useUser: () => ({
+    currentUser: { id: 'user-123', email: 'test@example.com' },
+    isLoading: false,
+    setCurrentUser: vi.fn(),
+    clearUserData: vi.fn(),
+  }),
+}));
 vi.mock('@/services/bi/failure/BIFailureIncidentService', () => ({
   BIFailureIncidentService: {
     resolveIncident: vi.fn(),
@@ -32,11 +59,13 @@ import React from 'react';
 import { vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import {
-  BIFailureService,
+  BIFailureService as biFailureService,
   BIFailureError as _BIFailureError,
-} from '@/services/biFailureService';
+} from '@/services/bi/failure/index';
 import { useSterilizationStore } from '@/store/sterilizationStore';
+import { UserProvider } from '@/contexts/UserContext';
 import GlobalBIFailureBanner from '@/components/Sterilization/GlobalBIFailureBanner';
 import { BIFailureResolutionModal } from '@/components/BIFailureResolution';
 
@@ -74,9 +103,9 @@ describe('BI Failure Workflow Steps Tests', () => {
       (mockChannel.subscribe as vi.Mock).mockClear();
     }
 
-    // Ensure BIFailureService methods are mocked
-    vi.spyOn(BIFailureService, 'resolveIncident').mockResolvedValue(true);
-    vi.spyOn(BIFailureService, 'createIncident').mockResolvedValue({
+    // Ensure biFailureService methods are mocked
+    vi.spyOn(biFailureService, 'resolveIncident').mockResolvedValue(true);
+    vi.spyOn(biFailureService, 'createIncident').mockResolvedValue({
       id: 'incident-123',
       incident_number: 'BI-FAIL-20240115-001',
       facility_id: 'facility-456',
@@ -88,7 +117,7 @@ describe('BI Failure Workflow Steps Tests', () => {
       regulatory_notification_sent: false,
       status: 'active' as const,
     });
-    vi.spyOn(BIFailureService, 'getActiveIncidents').mockResolvedValue([]);
+    vi.spyOn(biFailureService, 'getActiveIncidents').mockResolvedValue([]);
   });
 
   describe('Complete BI Failure Lifecycle', () => {
@@ -114,7 +143,13 @@ describe('BI Failure Workflow Steps Tests', () => {
       );
 
       // Step 3: Render the banner
-      render(<GlobalBIFailureBanner onDismiss={vi.fn()} />);
+      render(
+        <MemoryRouter>
+          <UserProvider>
+            <GlobalBIFailureBanner onDismiss={vi.fn()} />
+          </UserProvider>
+        </MemoryRouter>
+      );
 
       // Step 4: Verify banner is displayed
       await waitFor(() => {
@@ -169,12 +204,16 @@ describe('BI Failure Workflow Steps Tests', () => {
 
       // Mock the generatePatientExposureReport method to return the expected data
       vi.spyOn(
-        BIFailureService,
+        biFailureService,
         'generatePatientExposureReport'
       ).mockResolvedValue(mockExposureReport);
 
       // Render resolution modal
-      render(<BIFailureResolutionModal isOpen={true} onClose={vi.fn()} />);
+      render(
+        <UserProvider>
+          <BIFailureResolutionModal isOpen={true} onClose={vi.fn()} />
+        </UserProvider>
+      );
 
       // Verify the modal is displayed
       await waitFor(() => {
@@ -185,7 +224,7 @@ describe('BI Failure Workflow Steps Tests', () => {
 
       // Look for the patient exposure report button
       const exposureButton = screen.getByRole('button', {
-        name: /view patient exposure report/i,
+        name: /view exposure report/i,
       });
       expect(exposureButton).toBeInTheDocument();
 
@@ -209,7 +248,13 @@ describe('BI Failure Workflow Steps Tests', () => {
       };
       (useSterilizationStore as unknown as vi.Mock).mockReturnValue(mockStore);
 
-      render(<GlobalBIFailureBanner onDismiss={vi.fn()} />);
+      render(
+        <MemoryRouter>
+          <UserProvider>
+            <GlobalBIFailureBanner onDismiss={vi.fn()} />
+          </UserProvider>
+        </MemoryRouter>
+      );
 
       expect(
         screen.getByText('🚨 TOOL RECALL: BI TEST FAILURE')

@@ -12,7 +12,7 @@ import { CardSkeleton, SearchSkeleton } from '../../components/ui/Skeleton';
 
 import { useLibraryContent } from './hooks/useLibraryContent';
 import { ContentItem } from './libraryTypes';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabaseClient';
 
 import { useLibraryRootState } from './hooks/useLibraryRootState';
 

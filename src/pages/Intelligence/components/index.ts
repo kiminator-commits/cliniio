@@ -1,5 +1,5 @@
 export { IntelligenceHeader } from './IntelligenceHeader';
-export { IntelligenceTabNavigation } from './IntelligenceTabNavigation';
+export { default as IntelligenceTabNavigation } from './IntelligenceTabNavigation';
 export { IntelligenceCard } from './IntelligenceCard';
 export {
   IntelligenceMetricsGrid,

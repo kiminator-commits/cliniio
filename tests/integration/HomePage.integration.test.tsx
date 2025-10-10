@@ -49,6 +49,29 @@ let mockTasks = [
 ];
 
 // Mock hooks and stores used in HomePage
+// Mock authentication-related hooks and stores
+vi.mock('@/contexts/UserContext', () => ({
+  UserProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="user-provider">{children}</div>
+  ),
+  useUser: () => ({
+    currentUser: { id: 'user-123', email: 'test@example.com' },
+    isLoading: false,
+    setCurrentUser: vi.fn(),
+    clearUserData: vi.fn(),
+  }),
+}));
+
+vi.mock('@/stores/useLoginStore', () => ({
+  useLoginStore: vi.fn((selector) => {
+    const state = {
+      authToken: 'mock-token',
+      isTokenExpired: () => false,
+    };
+    return selector(state);
+  }),
+}));
+
 vi.mock('@/hooks/useHomeTasksManager', () => ({
   useHomeTasksManager: () => ({
     tasks: mockTasks,

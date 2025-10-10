@@ -1,6 +1,6 @@
 import React from 'react';
 import { vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '../../utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import { BIFailureResolution as BIFailureResolutionModal } from '../../../src/components/Sterilization/BIFailureResolution';
 import { BIFailureError } from '../../../src/services/bi/failure/BIFailureError';

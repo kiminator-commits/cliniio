@@ -247,8 +247,8 @@ class AuthMigrationService {
       // Clear any Supabase client instances
       if (typeof window !== 'undefined') {
         // Remove any global Supabase references
-        delete (window as Record<string, unknown>).supabase;
-        delete (window as Record<string, unknown>).supabaseClient;
+        delete (window as unknown as Record<string, unknown>).supabase;
+        delete (window as unknown as Record<string, unknown>).supabaseClient;
       }
 
       console.log('[MIGRATION] Old authentication tokens cleared');

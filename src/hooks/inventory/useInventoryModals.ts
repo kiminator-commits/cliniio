@@ -4,6 +4,7 @@ import { useInventoryStore } from '../../store/useInventoryStore';
 import { InventoryItem, InventoryFormData } from '../../types/inventory';
 import { inventoryServiceFacade } from '../../services/inventory/InventoryServiceFacade';
 import { useCentralizedInventoryData } from '../useCentralizedInventoryData';
+import { Json } from '../../types/supabase';
 
 /**
  * Hook to manage inventory modal business logic
@@ -80,17 +81,17 @@ export const useInventoryModals = () => {
         reorder_point: null,
         expiration_date: null,
         data: {
-          warranty: formData.warranty,
-          notes: formData.notes,
-          purchaseDate: formData.purchaseDate,
-          supplier: formData.supplier,
-          manufacturer: formData.manufacturer,
-          expiry_date: formData.expiry_date,
-          assetTag: formData.assetTag,
-          brand: formData.brand,
-          model: formData.model,
-          serialNumber: formData.serialNumber,
-        },
+          warranty: formData.warranty || null,
+          notes: formData.notes || null,
+          purchaseDate: formData.purchaseDate || null,
+          supplier: formData.supplier || null,
+          manufacturer: formData.manufacturer || null,
+          expiry_date: formData.expiry_date || null,
+          assetTag: formData.assetTag || null,
+          brand: formData.brand || null,
+          model: formData.model || null,
+          serialNumber: formData.serialNumber || null,
+        } as Json,
       };
 
       console.log('📦 Converted item to save:', itemToSave);

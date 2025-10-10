@@ -146,8 +146,8 @@ export const getRoomDetails = (
   if (room.name) {
     return {
       name: room.name,
-      department: room.metadata?.department || '',
-      floor: room.metadata?.floor || '',
+      department: (room.metadata?.department as string) || '',
+      floor: (room.metadata?.floor as string) || '',
     };
   }
 

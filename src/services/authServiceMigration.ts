@@ -164,8 +164,8 @@ export class AuthMigrationUtilities {
 
       // Clear any global Supabase references
       if (typeof window !== 'undefined') {
-        delete (window as Record<string, unknown>).supabase;
-        delete (window as Record<string, unknown>).supabaseClient;
+        delete (window as unknown as Record<string, unknown>).supabase;
+        delete (window as unknown as Record<string, unknown>).supabaseClient;
       }
 
       console.log('Old authentication data cleaned up');

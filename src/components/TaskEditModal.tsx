@@ -56,6 +56,7 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({
       setErrors({});
       setSubmitError(null);
     }
+    return undefined;
   }, [task]);
 
   // Reset form when modal closes
@@ -72,6 +73,7 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({
       setSubmitError(null);
       setIsSubmitting(false);
     }
+    return undefined;
   }, [isOpen]);
 
   // Validate form data
@@ -181,6 +183,7 @@ export const TaskEditModal: React.FC<TaskEditModalProps> = ({
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
     }
+    return undefined;
   }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen || !task) {

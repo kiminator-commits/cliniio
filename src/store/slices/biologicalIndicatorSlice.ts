@@ -1,14 +1,14 @@
 import { StateCreator } from 'zustand';
-import { BITestResult, ToolStatus } from '@/types/toolTypes';
+import { BITestResult, ToolStatus } from '../../types/toolTypes';
 import { ActivityLogItem } from './types/biWorkflowTypes';
 import {
   BITestKitService,
   BITestKit,
   TestConditions,
-} from '@/services/bi/BITestKitService';
-import { BIWorkflowService } from '@/services/biWorkflowService';
-import { calculateNextBIDue } from '@/utils/calculateNextBIDue';
-import { supabase } from '@/lib/supabaseClient';
+} from '../../services/bi/BITestKitService';
+import { BIWorkflowService } from '../../services/biWorkflowService';
+import { calculateNextBIDue } from '../../utils/calculateNextBIDue';
+import { supabase } from '../../lib/supabaseClient';
 
 export interface BiologicalIndicatorState {
   // Core BI test state
@@ -293,13 +293,14 @@ export const createBiologicalIndicatorSlice: StateCreator<
           if (!existingActivityIds.has(activityId)) {
             newActivities.push({
               id: activityId,
-              type: 'bi-failure' as string,
+              type: 'bi-failure',
               title: 'BI Failure Incident Resolved',
               time: new Date(
                 String(incident.resolved_at || incident.updated_at)
               ),
               toolCount:
-                (incident.metadata as unknown)?.affected_tools_count || 1,
+                (incident.metadata as { affected_tools_count?: number })
+                  ?.affected_tools_count || 1,
               color: 'bg-blue-500',
               metadata: {
                 incidentId: incident.id,
@@ -350,24 +351,29 @@ export const createBiologicalIndicatorSlice: StateCreator<
           test_number: String(row.test_number),
           test_date: String(row.test_date), // Keep as string
           result: String(row.result),
-          status: row.result, // Map result to status for component compatibility
-          operator: row.operator,
-          cycle_id: row.cycle_id,
-          bi_lot_number: row.bi_lot_number,
-          bi_expiry_date: row.bi_expiry_date,
-          incubation_time_minutes: row.incubation_time_minutes,
-          incubation_temperature_celsius: row.incubation_temperature_celsius,
-          test_conditions: row.test_conditions || {},
-          failure_reason: row.failure_reason,
-          skip_reason: row.skip_reason,
-          compliance_notes: row.compliance_notes,
+          status: String(row.result) as 'pending' | 'pass' | 'fail' | 'skip', // Cast to proper status type
+          operator: String(row.operator),
+          cycle_id: String(row.cycle_id),
+          bi_lot_number: String(row.bi_lot_number),
+          bi_expiry_date: String(row.bi_expiry_date),
+          incubation_time_minutes: Number(row.incubation_time_minutes),
+          incubation_temperature_celsius: Number(
+            row.incubation_temperature_celsius
+          ),
+          test_conditions:
+            (row.test_conditions as Record<string, unknown>) || {},
+          failure_reason: String(row.failure_reason),
+          skip_reason: String(row.skip_reason),
+          compliance_notes: String(row.compliance_notes),
           // Add component-expected fields
           date: new Date(String(row.test_date)), // Convert to Date object for component
-          toolId: row.test_number || 'default-tool', // Use test_number as toolId
+          toolId: String(row.test_number || 'default-tool'), // Use test_number as toolId
           passed: row.result === 'pass',
-          notes: row.compliance_notes || row.failure_reason || row.skip_reason,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
+          notes: String(
+            row.compliance_notes || row.failure_reason || row.skip_reason
+          ),
+          created_at: String(row.created_at),
+          updated_at: String(row.updated_at),
         })
       );
 
@@ -385,11 +391,15 @@ export const createBiologicalIndicatorSlice: StateCreator<
               id: activityId,
               type: 'bi-test',
               title: test.passed ? 'BI Test Passed' : 'BI Test Failed',
-              time: new Date(String((test as unknown).test_date)),
+              time: new Date(
+                String((test as { test_date?: string | Date }).test_date)
+              ),
               toolCount: 1,
               color: test.passed ? 'bg-green-500' : 'bg-red-500',
               metadata: {
-                testNumber: String((test as unknown).test_number),
+                testNumber: String(
+                  (test as { test_number?: string | number }).test_number
+                ),
                 operatorId: test.operator,
               },
             });

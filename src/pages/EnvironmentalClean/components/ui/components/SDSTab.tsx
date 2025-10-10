@@ -2,14 +2,24 @@ import React from 'react';
 import Icon from '@mdi/react';
 import { mdiClose, mdiMagnify, mdiFileDocument } from '@mdi/js';
 
+interface SDSSheet {
+  id: string;
+  name: string;
+  category: string;
+  lastUpdated?: string;
+  url: string;
+  sections: string[];
+  [key: string]: unknown;
+}
+
 interface SDSTabProps {
   searchQuery: string;
   sdsCategory: string;
-  filteredSDSSheets: unknown[];
+  filteredSDSSheets: SDSSheet[];
   onTabChange: (tab: string) => void;
   onSearchQueryChange: (query: string) => void;
   onSdsCategoryChange: (category: string) => void;
-  onSDSSelect: (sds: unknown) => void;
+  onSDSSelect: (sds: SDSSheet) => void;
 }
 
 export const SDSTab: React.FC<SDSTabProps> = ({

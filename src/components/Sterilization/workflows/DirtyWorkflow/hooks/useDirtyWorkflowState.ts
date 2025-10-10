@@ -5,7 +5,39 @@ import {
   BarcodeCountService,
   BarcodeCountResult,
 } from '@/services/barcodeCountService';
-import { SterilizationCycleService } from '@/services/sterilization/SterilizationCycleService';
+import { supabase } from '@/lib/supabaseClient';
+
+// Helper function to show success messages
+const showSuccessMessage = (message: string) => {
+  // Try to use global toast if available, otherwise use console
+  if (
+    typeof window !== 'undefined' &&
+    (window as { toast?: { success?: (msg: string) => void } }).toast?.success
+  ) {
+    (window as { toast: { success: (msg: string) => void } }).toast.success(
+      message
+    );
+  } else {
+    console.info('✅', message);
+  }
+};
+
+// Helper function to get current facility ID
+async function getCurrentFacilityId(): Promise<string> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
+  const { data: userData, error } = await supabase
+    .from('users')
+    .select('facility_id')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !userData) throw new Error('Failed to get user facility');
+  return userData.facility_id;
+}
 
 interface ScanMessage {
   type: 'success' | 'error' | 'warning' | 'info';
@@ -187,31 +219,72 @@ export const useDirtyWorkflowState = (onBeginCycle: () => void) => {
       // Get tool IDs from dirty tools
       const toolIds = dirtyTools.map((dt) => dt.tool.id);
 
-      // Create sterilization cycle and assign tools via Supabase
-      const result = await SterilizationCycleService.createCycleAndAssignTools(
-        toolIds,
-        'routine',
-        `Dirty tools batch - ${dirtyTools.length} tools`
-      );
-
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-
-      // Update local store status
+      // Update local store status first
       dirtyTools.forEach((dirtyTool) => {
         updateToolStatus(dirtyTool.tool.id, 'bath1');
       });
 
       setCycleStarted(true);
-      setScanMessage({
-        type: 'success',
-        text: `${dirtyTools.length} tool(s) sent to Bath 1. Cycle ID: ${result.cycleId}`,
-      });
 
-      // Store cycle ID for management
-      if (result.cycleId) {
-        localStorage.setItem('currentCycleId', result.cycleId);
+      // Persist to Supabase with transaction
+      try {
+        const currentFacilityId = await getCurrentFacilityId();
+
+        const { data: cycle, error: cycleError } = await supabase
+          .from('sterilization_cycles')
+          .insert({
+            phase: 'bath1',
+            status: 'active',
+            started_at: new Date(),
+            facility_id: currentFacilityId,
+          })
+          .select()
+          .single();
+
+        if (cycleError) throw cycleError;
+
+        const { error: mapError } = await supabase
+          .from('sterilization_cycle_tools')
+          .insert(
+            toolIds.map((id) => ({
+              cycle_id: cycle.id,
+              tool_id: id,
+              facility_id: currentFacilityId,
+            }))
+          );
+        if (mapError) throw mapError;
+
+        const { error: updateError } = await supabase
+          .from('sterilization_tools')
+          .update({ currentPhase: 'bath1' })
+          .in('id', toolIds)
+          .eq('facility_id', currentFacilityId);
+        if (updateError) throw updateError;
+
+        await supabase.from('audit_logs').insert({
+          event_type: 'cycle_start',
+          description: `Bath 1 cycle started with ${toolIds.length} tools`,
+          facility_id: currentFacilityId,
+          created_at: new Date(),
+        });
+
+        // ✅ Notify user
+        showSuccessMessage('Bath 1 started successfully.');
+
+        setScanMessage({
+          type: 'success',
+          text: `${dirtyTools.length} tool(s) sent to Bath 1. Cycle ID: ${cycle.id}`,
+        });
+
+        // Store cycle ID for management
+        localStorage.setItem('currentCycleId', cycle.id);
+      } catch (err) {
+        console.error('❌ Error persisting Bath 1 transition:', err);
+        setScanMessage({
+          type: 'error',
+          text: 'Failed to persist Bath 1 cycle to database. Please try again.',
+        });
+        return;
       }
 
       // Call the parent's onBeginCycle function

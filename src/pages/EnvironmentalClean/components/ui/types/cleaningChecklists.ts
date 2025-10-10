@@ -37,6 +37,7 @@ export interface SDSSheet {
   lastUpdated: string;
   url: string;
   sections: string[];
+  [key: string]: unknown;
 }
 
 export interface StolenItem {

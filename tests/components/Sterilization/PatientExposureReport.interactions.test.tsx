@@ -6,14 +6,14 @@ import {
   waitFor,
   fireEvent,
   act,
-} from '@testing-library/react';
+} from '../../utils/testUtils';
 import userEvent from '@testing-library/user-event';
 
 import { PatientExposureReport } from '../../../src/components/Sterilization/PatientExposureReport';
-import { BIFailureService } from '../../../src/services/biFailureService';
+import { BIFailureService } from '../../../src/services/bi/failure/index';
 
 // Mock the BIFailureService
-vi.mock('../../../src/services/biFailureService');
+vi.mock('../../../src/services/bi/failure/index');
 const mockBIFailureService = BIFailureService as vi.Mocked<
   typeof BIFailureService
 >;
@@ -101,7 +101,7 @@ describe('PatientExposureReport Interactions', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Patient Exposure Report')).toBeInTheDocument();
+        expect(screen.getByText('Exposure Report')).toBeInTheDocument();
       });
 
       const closeButton = screen.getByLabelText('Close exposure report');
@@ -118,7 +118,7 @@ describe('PatientExposureReport Interactions', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Patient Exposure Report')).toBeInTheDocument();
+        expect(screen.getByText('Exposure Report')).toBeInTheDocument();
       });
 
       const backdrop = screen.getByLabelText('Close modal backdrop');
@@ -133,7 +133,7 @@ describe('PatientExposureReport Interactions', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Patient Exposure Report')).toBeInTheDocument();
+        expect(screen.getByText('Exposure Report')).toBeInTheDocument();
       });
 
       // Clear any previous calls
@@ -154,7 +154,7 @@ describe('PatientExposureReport Interactions', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Patient Exposure Report')).toBeInTheDocument();
+        expect(screen.getByText('Exposure Report')).toBeInTheDocument();
       });
 
       const closeButton = screen.getByText('Close');

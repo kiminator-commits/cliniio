@@ -1,5 +1,12 @@
-import { QueryOptions, PaginatedResponse } from '@/types/QueryOptions';
+import { QueryOptions, PaginatedResponse } from '../types/QueryOptions';
 import { logger } from './_core/logger';
+
+// Define interface for Supabase query methods
+interface SupabaseQuery {
+  limit: (count: number) => SupabaseQuery;
+  range: (from: number, to: number) => SupabaseQuery;
+  order: (column: string, options?: { ascending: boolean }) => SupabaseQuery;
+}
 
 export interface SafeQueryOptions extends QueryOptions {
   limit: number;
@@ -157,14 +164,14 @@ export function applyQuerySafety(
  * Apply pagination to a Supabase query
  */
 export function applyPagination(
-  query: unknown,
+  query: SupabaseQuery,
   options: QueryOptions = {},
   tableName: string = 'default'
-): { query: unknown; offset: number; limit: number } {
+): { query: SupabaseQuery; offset: number; limit: number } {
   const safeOptions = applyQuerySafety(options, tableName);
 
   // Apply limit
-  const limitedQuery = (query as unknown).limit(safeOptions.limit);
+  const limitedQuery = query.limit(safeOptions.limit);
 
   // Apply offset using range
   const paginatedQuery = limitedQuery.range(
@@ -183,13 +190,13 @@ export function applyPagination(
  * Apply ordering to a Supabase query
  */
 export function applyOrdering(
-  query: unknown,
+  query: SupabaseQuery,
   options: QueryOptions = {},
   tableName: string = 'default'
-): unknown {
+): SupabaseQuery {
   const safeOptions = applyQuerySafety(options, tableName);
 
-  return (query as unknown).order(safeOptions.orderBy, {
+  return query.order(safeOptions.orderBy, {
     ascending: safeOptions.orderDirection === 'asc',
   });
 }
@@ -311,7 +318,11 @@ export function createSafeQueryBuilder(
   const safeOptions = applyQuerySafety(options, tableName);
 
   // Apply ordering
-  const orderedQuery = applyOrdering(baseQuery, safeOptions, tableName);
+  const orderedQuery = applyOrdering(
+    baseQuery as SupabaseQuery,
+    safeOptions,
+    tableName
+  );
 
   // Apply pagination
   const { query } = applyPagination(orderedQuery, safeOptions, tableName);

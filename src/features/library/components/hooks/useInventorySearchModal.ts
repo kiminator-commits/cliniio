@@ -39,7 +39,7 @@ export const useInventorySearchModal = ({
 
   // Debounced search effect
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return undefined;
 
     const timeoutId = setTimeout(() => {
       if (
@@ -63,6 +63,7 @@ export const useInventorySearchModal = ({
       const searchFilters = buildSearchFilters(searchQuery, filters);
       searchInventory(searchFilters);
     }
+    return undefined;
   }, [
     isOpen,
     selectedItems,

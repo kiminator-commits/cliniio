@@ -1,7 +1,6 @@
 import { supabase } from '../../../lib/supabaseClient';
 import { LearningAIModelProvider } from '../../learningAI/LearningAIModelProvider';
 import type { LearningPathOptimizationResult } from '../../../types/learningAITypes';
-import type { Json } from '../../../types/database.types';
 import type { LearningPathOptimizationRow } from '../../../types/learningAITypes';
 import {
   calculateProcessingTime,
@@ -50,13 +49,19 @@ export class PathwayAnalysisService {
       const insertData: Partial<LearningPathOptimizationRow> = {
         facility_id: result.facility_id,
         user_id: result.user_id,
-        optimized_learning_path: result.optimized_learning_path as Json,
+        optimized_learning_path:
+          result.optimized_learning_path as unknown as string[],
         path_efficiency_score: result.path_efficiency_score,
         estimated_total_time: result.estimated_total_time,
-        difficulty_progression: result.difficulty_progression as Json,
-        prerequisite_mapping: result.prerequisite_mapping as Json,
-        alternative_paths: result.alternative_paths as Json,
-        optimization_factors: result.optimization_factors as Json,
+        difficulty_progression:
+          result.difficulty_progression as unknown as string[],
+        prerequisite_mapping: result.prerequisite_mapping as unknown as Record<
+          string,
+          string[]
+        >,
+        alternative_paths: result.alternative_paths as unknown as string[][],
+        optimization_factors:
+          result.optimization_factors as unknown as string[],
         confidence_score: result.confidence_score,
         processing_time_ms: result.processing_time_ms,
         created_at: result.created_at,

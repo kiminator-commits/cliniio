@@ -66,7 +66,7 @@ export class EfficiencyRoiForecastService {
       const completedCycles = (
         sterilizationData as _SterilizationCycleRow[]
       ).filter(
-        (cycle: _SterilizationCycleRow) => cycle.status === 'completed'
+        (cycle: _SterilizationCycleRow) => cycle.status === 'clean'
       ).length;
       const efficiencyRate =
         totalCycles > 0 ? (completedCycles / totalCycles) * 100 : 0;

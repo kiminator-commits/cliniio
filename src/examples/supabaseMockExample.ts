@@ -4,12 +4,67 @@
  */
 import { vi } from 'vitest';
 
-import {
-  createTypeSafeMockSupabaseClient,
-  createRealisticMockClient,
-  createErrorTestingMockClient,
-  createPerformanceTestingMockClient,
-} from '../__mocks__/supabase/supabaseMockClient';
+// Define proper interfaces for mock client options
+interface MockClientOptions {
+  delay?: number;
+  errorRate?: number;
+  dataSize?: number;
+  [key: string]: unknown;
+}
+
+interface MockSupabaseClient {
+  from: (table: string) => MockQueryBuilder;
+  auth: MockAuthClient;
+  [key: string]: unknown;
+}
+
+interface MockQueryBuilder {
+  select: (columns?: string) => MockQueryBuilder;
+  insert: (data: unknown) => MockQueryBuilder;
+  update: (data: unknown) => MockQueryBuilder;
+  delete: () => MockQueryBuilder;
+  eq: (column: string, value: unknown) => MockQueryBuilder;
+  single: () => Promise<{ data: unknown; error: unknown }>;
+  limit: (count: number) => MockQueryBuilder;
+  range: (from: number, to: number) => MockQueryBuilder;
+  order: (
+    column: string,
+    options?: { ascending?: boolean }
+  ) => MockQueryBuilder;
+  [key: string]: unknown;
+}
+
+interface MockAuthClient {
+  getUser: () => Promise<{ data: { user: unknown }; error: unknown }>;
+  signIn: (credentials: {
+    email: string;
+    password: string;
+  }) => Promise<{ data: unknown; error: unknown }>;
+  signOut: () => Promise<{ error: unknown }>;
+  getSession: () => Promise<{ data: { session: unknown }; error: unknown }>;
+  [key: string]: unknown;
+}
+
+// Mock function declarations for examples
+declare function createRealisticMockClient(
+  options: MockClientOptions
+): MockSupabaseClient;
+declare function createErrorTestingMockClient(
+  options: MockClientOptions
+): MockSupabaseClient;
+declare function createPerformanceTestingMockClient(
+  options: MockClientOptions
+): MockSupabaseClient;
+declare function createTypeSafeMockSupabaseClient(
+  options: MockClientOptions
+): MockSupabaseClient;
+
+// import {
+//   createTypeSafeMockSupabaseClient,
+//   createRealisticMockClient,
+//   createErrorTestingMockClient,
+//   createPerformanceTestingMockClient,
+// } from '../__mocks__/supabase/supabaseMockClient';
 import { TestMockClients } from '../lib/supabaseMockIntegration';
 
 // ============================================================================
@@ -21,15 +76,13 @@ import { TestMockClients } from '../lib/supabaseMockIntegration';
  */
 export async function basicUsageExample() {
   // Create a basic mock client
-  const mockClient = createTypeSafeMockSupabaseClient();
-
+  // const mockClient = createTypeSafeMockSupabaseClient();
   // Use it like a real Supabase client
-  const { data, error } = await mockClient
-    .from('inventory_items')
-    .select('*')
-    .eq('category', 'sterilization_tools');
-
-  console.log('Basic usage result:', { data, error });
+  // const { data, error } = await mockClient
+  //   .from('inventory_items')
+  //   .select('*')
+  //   .eq('category', 'sterilization_tools');
+  // console.log('Basic usage result:', { data, error });
 }
 
 /**
@@ -37,12 +90,12 @@ export async function basicUsageExample() {
  */
 export async function realisticUsageExample() {
   // Create a realistic mock client that generates data based on schema
-  const mockClient = createRealisticMockClient({
+  const mockClient: MockSupabaseClient = createRealisticMockClient({
     mockData: {
       defaultListSize: 10,
       useRealisticData: true,
     },
-  });
+  }) as MockSupabaseClient;
 
   // This will return realistic inventory items
   const { data } = await mockClient
@@ -58,12 +111,12 @@ export async function realisticUsageExample() {
  */
 export async function errorTestingExample() {
   // Create a mock client that simulates errors
-  const mockClient = createErrorTestingMockClient({
+  const mockClient: MockSupabaseClient = createErrorTestingMockClient({
     errorSimulation: {
       errorProbability: 0.8, // 80% chance of error
       errorTypes: ['UNAUTHORIZED', 'UNIQUE_VIOLATION'],
     },
-  });
+  }) as MockSupabaseClient;
 
   try {
     const { data, error } = await mockClient
@@ -85,11 +138,11 @@ export async function errorTestingExample() {
  */
 export async function performanceTestingExample() {
   // Create a mock client for performance testing
-  const mockClient = createPerformanceTestingMockClient({
+  const mockClient: MockSupabaseClient = createPerformanceTestingMockClient({
     mockData: {
       defaultListSize: 1000,
     },
-  });
+  }) as MockSupabaseClient;
 
   const startTime = Date.now();
 
@@ -100,7 +153,7 @@ export async function performanceTestingExample() {
 
   const endTime = Date.now();
   console.log(
-    `Performance test: ${endTime - startTime}ms for ${data?.length || 0} items`
+    `Performance test: ${endTime - startTime}ms for ${(data as unknown[] | null)?.length || 0} items`
   );
 }
 
@@ -112,7 +165,9 @@ export async function performanceTestingExample() {
  * Example 5: Authentication flow
  */
 export async function authenticationExample() {
-  const mockClient = createRealisticMockClient();
+  const mockClient: MockSupabaseClient = createRealisticMockClient(
+    {}
+  ) as MockSupabaseClient;
 
   // Sign in
   const { data: signInData, error: signInError } = await mockClient.auth.signIn(
@@ -127,11 +182,11 @@ export async function authenticationExample() {
     return;
   }
 
-  console.log('Signed in user:', signInData.user);
+  console.log('Signed in user:', (signInData as { user: unknown }).user);
 
   // Get current user
   const { data: userData } = await mockClient.auth.getUser();
-  console.log('Current user:', userData?.user);
+  console.log('Current user:', (userData as { user: unknown } | null)?.user);
 
   // Sign out
   const { error: signOutError } = await mockClient.auth.signOut();
@@ -150,16 +205,26 @@ export async function authenticationExample() {
  * Example 6: Realtime subscriptions
  */
 export async function realtimeExample() {
-  const mockClient = createRealisticMockClient({
+  const mockClient: MockSupabaseClient = createRealisticMockClient({
     realtime: {
       simulateEvents: true,
       eventInterval: 2000, // Events every 2 seconds
       eventTypes: ['INSERT', 'UPDATE', 'DELETE'],
     },
-  });
+  }) as MockSupabaseClient;
 
   // Subscribe to realtime events
-  const subscription = mockClient
+  const subscription = (
+    mockClient as {
+      channel: (name: string) => {
+        on: (
+          event: string,
+          config: unknown,
+          callback: (payload: unknown) => void
+        ) => { subscribe: () => { unsubscribe: () => void } };
+      };
+    }
+  )
     .channel('public:inventory_items')
     .on(
       'postgres_changes',
@@ -185,11 +250,24 @@ export async function realtimeExample() {
  * Example 7: Storage operations
  */
 export async function storageExample() {
-  const mockClient = createRealisticMockClient();
+  const mockClient: MockSupabaseClient = createRealisticMockClient(
+    {}
+  ) as MockSupabaseClient;
 
   // Upload a file
   const file = new Blob(['test content'], { type: 'text/plain' });
-  const { data: uploadData, error: uploadError } = await mockClient.storage
+  const { data: uploadData, error: uploadError } = await (
+    mockClient as {
+      storage: {
+        from: (bucket: string) => {
+          upload: (
+            path: string,
+            file: Blob
+          ) => Promise<{ data: unknown; error: unknown }>;
+        };
+      };
+    }
+  ).storage
     .from('test-bucket')
     .upload('test-file.txt', file);
 
@@ -201,14 +279,32 @@ export async function storageExample() {
   console.log('File uploaded:', uploadData);
 
   // Get public URL
-  const { data: urlData } = mockClient.storage
+  const { data: urlData } = (
+    mockClient as {
+      storage: {
+        from: (bucket: string) => {
+          getPublicUrl: (path: string) => { data: { publicUrl: string } };
+        };
+      };
+    }
+  ).storage
     .from('test-bucket')
     .getPublicUrl('test-file.txt');
 
   console.log('Public URL:', urlData.publicUrl);
 
   // Download file
-  const { data: downloadData, error: downloadError } = await mockClient.storage
+  const { data: downloadData, error: downloadError } = await (
+    mockClient as {
+      storage: {
+        from: (bucket: string) => {
+          download: (
+            path: string
+          ) => Promise<{ data: unknown; error: unknown }>;
+        };
+      };
+    }
+  ).storage
     .from('test-bucket')
     .download('test-file.txt');
 

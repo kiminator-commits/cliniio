@@ -58,7 +58,7 @@ export class CostAnalyticsService {
           break;
         case 'predictive':
           // This would need to be passed from forecasting service
-          reportData = {} as Record<string, unknown>;
+          reportData = {} as ComprehensiveReportData;
           break;
         case 'cost':
           reportData = await this.generateCostReport();

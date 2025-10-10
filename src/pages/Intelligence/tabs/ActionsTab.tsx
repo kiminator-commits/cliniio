@@ -13,8 +13,22 @@ import {
   OptimizationTip,
 } from '../../../services/analytics';
 
+interface ActionItem {
+  id: string;
+  title: string;
+  description: string;
+  urgency: 'low' | 'medium' | 'high' | 'critical';
+  category: string;
+  estimatedTime: string;
+  priority: number;
+}
+
+interface ExtendedIntelligenceSummary extends IntelligenceSummary {
+  actions?: ActionItem[];
+}
+
 interface ActionsTabProps {
-  summary?: IntelligenceSummary | null;
+  summary?: ExtendedIntelligenceSummary | null;
   recommendations?: IntelligenceRecommendation[];
   optimizationTips?: OptimizationTip[];
 }
@@ -26,7 +40,9 @@ export default function ActionsTab({
   // Helper function to get urgent actions
   const getUrgentActions = () => {
     if (!summary?.actions) return [];
-    return summary.actions.filter((action) => action.urgency === 'high');
+    return summary.actions.filter(
+      (action: ActionItem) => action.urgency === 'high'
+    );
   };
 
   // Use optimization tips from props or fallback to empty array
@@ -100,7 +116,7 @@ export default function ActionsTab({
             </h3>
             <div className="text-right">
               <div className="text-2xl font-bold text-blue-600">
-                {summary.trainingGaps?.totalGaps || 3}
+                {summary.trainingGaps?.usersWithGaps?.length || 0}
               </div>
               <div className="text-sm text-gray-500">Total Gaps</div>
             </div>
@@ -109,14 +125,14 @@ export default function ActionsTab({
           {summary.trainingGaps?.usersWithGaps &&
           summary.trainingGaps.usersWithGaps.length > 0 ? (
             <div className="space-y-4">
-              {summary.trainingGaps.usersWithGaps.map((user, index) => (
+              {summary.trainingGaps.usersWithGaps.map((user, index: number) => (
                 <div
                   key={index}
                   className="border border-gray-200 rounded-lg p-4"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium text-gray-900">
-                      {user.full_name}
+                      {user.userName || 'Unknown User'}
                     </h4>
                     <div className="flex items-center space-x-4 text-sm">
                       <span className="text-gray-500">ID: {user.userId}</span>
@@ -131,17 +147,20 @@ export default function ActionsTab({
                       Knowledge Gaps:
                     </h5>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {user.gaps && user.gaps.length > 0 ? (
-                        user.gaps.map((gap, gapIndex) => (
-                          <li key={gapIndex} className="flex items-center">
-                            <Icon
-                              path={mdiArrowRight}
-                              size={0.8}
-                              className="mr-2"
-                            />
-                            {gap}
-                          </li>
-                        ))
+                      {user.recommendedTraining &&
+                      user.recommendedTraining.length > 0 ? (
+                        user.recommendedTraining.map(
+                          (gap: string, gapIndex: number) => (
+                            <li key={gapIndex} className="flex items-center">
+                              <Icon
+                                path={mdiArrowRight}
+                                size={0.8}
+                                className="mr-2"
+                              />
+                              {gap}
+                            </li>
+                          )
+                        )
                       ) : (
                         <li className="text-gray-500">
                           No specific gaps identified

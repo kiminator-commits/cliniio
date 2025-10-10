@@ -1,4 +1,4 @@
-import { InventoryItem } from '@/types/inventoryTypes';
+import { InventoryItem } from '../../../types/inventoryTypes';
 
 export interface ExportTemplate {
   id: string;

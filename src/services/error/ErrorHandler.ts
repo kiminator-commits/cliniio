@@ -147,7 +147,7 @@ export class ErrorHandler {
         results.push(result);
       } catch (error) {
         errors.push({ index: i, error: error as Error });
-        results.push(null as unknown); // Placeholder for failed operation
+        results.push(null as unknown as T); // Placeholder for failed operation
       }
     }
 

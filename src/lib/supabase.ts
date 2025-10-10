@@ -1,5 +1,6 @@
 // Re-export the centralized Supabase client to avoid multiple instances
-export { supabase } from './supabaseClient';
+import { supabase } from './supabaseClient';
+export { supabase };
 import { getEnvVar } from './getEnv';
 import { getSupabaseCredentials } from '../config/supabaseCredentials';
 

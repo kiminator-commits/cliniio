@@ -1,5 +1,5 @@
-import { InventoryItem } from '@/types/inventoryTypes';
-import { InventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+import { InventoryItem } from '../../../types/inventoryTypes';
+import { InventoryServiceFacade } from '../../../services/inventory/InventoryServiceFacade';
 
 export type ImportFormat = 'csv' | 'json';
 
@@ -305,14 +305,55 @@ export class InventoryImportService {
           data: {
             vendor: item.vendor || '',
             purchaseDate:
-              (item.data?.purchaseDate as string) || new Date().toISOString(),
-            warranty: (item.data?.warranty as string) || '',
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'purchaseDate' in item.data &&
+              typeof item.data.purchaseDate === 'string'
+                ? item.data.purchaseDate
+                : new Date().toISOString(),
+            warranty:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'warranty' in item.data &&
+              typeof item.data.warranty === 'string'
+                ? item.data.warranty
+                : '',
             maintenanceSchedule: item.maintenanceSchedule || '',
-            lastServiced: (item.data?.lastServiced as string) || undefined,
+            lastServiced:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'lastServiced' in item.data &&
+              typeof item.data.lastServiced === 'string'
+                ? item.data.lastServiced
+                : undefined,
             nextDue: item.nextDue || undefined,
-            serviceProvider: (item.data?.serviceProvider as string) || '',
-            assignedTo: (item.data?.assignedTo as string) || '',
-            notes: (item.data?.notes as string) || '',
+            serviceProvider:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'serviceProvider' in item.data &&
+              typeof item.data.serviceProvider === 'string'
+                ? item.data.serviceProvider
+                : '',
+            assignedTo:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'assignedTo' in item.data &&
+              typeof item.data.assignedTo === 'string'
+                ? item.data.assignedTo
+                : '',
+            notes:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'notes' in item.data &&
+              typeof item.data.notes === 'string'
+                ? item.data.notes
+                : '',
           },
         };
 
@@ -399,14 +440,63 @@ export class InventoryImportService {
           expiration_date: null,
           data: {
             vendor: item.vendor,
-            purchaseDate: item.data?.purchaseDate,
-            warranty: item.data?.warranty,
+            purchaseDate:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'purchaseDate' in item.data &&
+              typeof item.data.purchaseDate === 'string'
+                ? item.data.purchaseDate
+                : '',
+            warranty:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'warranty' in item.data &&
+              typeof item.data.warranty === 'string'
+                ? item.data.warranty
+                : '',
             maintenanceSchedule: item.maintenanceSchedule,
-            lastServiced: item.data?.lastServiced,
-            nextDue: item.data?.nextDue,
-            serviceProvider: item.data?.serviceProvider,
-            assignedTo: item.data?.assignedTo,
-            notes: item.data?.notes,
+            lastServiced:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'lastServiced' in item.data &&
+              typeof item.data.lastServiced === 'string'
+                ? item.data.lastServiced
+                : '',
+            nextDue:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'nextDue' in item.data &&
+              typeof item.data.nextDue === 'string'
+                ? item.data.nextDue
+                : '',
+            serviceProvider:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'serviceProvider' in item.data &&
+              typeof item.data.serviceProvider === 'string'
+                ? item.data.serviceProvider
+                : '',
+            assignedTo:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'assignedTo' in item.data &&
+              typeof item.data.assignedTo === 'string'
+                ? item.data.assignedTo
+                : '',
+            notes:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'notes' in item.data &&
+              typeof item.data.notes === 'string'
+                ? item.data.notes
+                : '',
           },
         });
 
@@ -438,7 +528,7 @@ export class InventoryImportService {
 
       // Find items with same name and category
       const duplicate = allItems.find(
-        (existingItem) =>
+        (existingItem: { item?: string; category?: string }) =>
           existingItem.item?.toLowerCase() === item.item?.toLowerCase() &&
           existingItem.category?.toLowerCase() === item.category?.toLowerCase()
       );

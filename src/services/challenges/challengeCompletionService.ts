@@ -12,17 +12,17 @@ export async function completeChallenge({
   pointsAwarded: number;
 }) {
   try {
-    const { error } = await supabase.from('challenge_completions').upsert(
+    const { error } = await supabase.from('home_challenge_completions').upsert(
       [
         {
           user_id: userId,
           challenge_id: challengeId,
           facility_id: facilityId,
-          points_awarded: pointsAwarded,
+          points_earned: pointsAwarded,
           completed_at: new Date().toISOString(),
         },
       ],
-      { onConflict: 'user_id,challenge_id,facility_id' }
+      { onConflict: 'challenge_id,user_id' }
     );
 
     if (error) throw error;

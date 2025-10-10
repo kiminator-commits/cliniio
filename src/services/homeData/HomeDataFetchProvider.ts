@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabaseClient';
+import { getScopedClient } from '../../lib/supabaseClient';
 import { HomePageData, HomeTask } from '../../types/homeTypes';
 import { logger } from '../../utils/logger';
 
@@ -6,15 +6,20 @@ export class HomeDataFetchProvider {
   /**
    * Fetch fresh data from the database
    */
-  async fetchFreshData(user: {
-    id: string;
-    facility_id?: string;
-    lastCheck: number;
-  }): Promise<HomePageData> {
+  async fetchFreshData(
+    user: {
+      id: string;
+      facility_id?: string;
+      lastCheck: number;
+    },
+    facilityId?: string
+  ): Promise<HomePageData> {
     logger.info(
       'HomeDataService: Fetching fresh data for facility:',
-      user.facility_id
+      facilityId || user.facility_id
     );
+
+    const supabase = getScopedClient(facilityId || user.facility_id);
 
     // Fetch challenges and completions separately to avoid complex SQL parsing issues
     const { data: challengesData, error: challengesError } = await supabase
@@ -22,10 +27,7 @@ export class HomeDataFetchProvider {
       .select(
         'id, title, description, points, created_at, updated_at, facility_id'
       )
-      .eq(
-        'facility_id',
-        user.facility_id || '550e8400-e29b-41d4-a716-446655440000'
-      )
+      .eq('facility_id', facilityId || user.facility_id)
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -45,10 +47,7 @@ export class HomeDataFetchProvider {
       .from('home_challenge_completions')
       .select('challenge_id, points_earned')
       .eq('user_id', user.id)
-      .eq(
-        'facility_id',
-        user.facility_id || '550e8400-e29b-41d4-a716-446655440000'
-      );
+      .eq('facility_id', facilityId || user.facility_id);
 
     if (completionsError) {
       logger.error('Error fetching completions:', completionsError);
@@ -104,7 +103,8 @@ export class HomeDataFetchProvider {
       lastCheck: number;
     },
     page: number = 1,
-    pageSize: number = 20
+    pageSize: number = 20,
+    facilityId?: string
   ): Promise<{
     tasks: HomeTask[];
     totalCount: number;
@@ -112,12 +112,13 @@ export class HomeDataFetchProvider {
     availablePoints: number;
   }> {
     const offset = (page - 1) * pageSize;
+    const supabase = getScopedClient(facilityId || user.facility_id);
 
     // First, get total count for pagination
     const { count: totalCount } = await supabase
       .from('home_challenges')
       .select('*', { count: 'exact', head: true })
-      .eq('facility_id', user.facility_id as string)
+      .eq('facility_id', facilityId || user.facility_id)
       .eq('is_active', true);
 
     // Then fetch paginated data with completions
@@ -133,7 +134,7 @@ export class HomeDataFetchProvider {
         )
       `
       )
-      .eq('facility_id', user.facility_id as string)
+      .eq('facility_id', facilityId || user.facility_id)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .range(offset, offset + pageSize - 1);
@@ -178,7 +179,7 @@ export class HomeDataFetchProvider {
       .from('home_challenge_completions')
       .select('points_earned')
       .eq('user_id', user.id)
-      .eq('facility_id', user.facility_id as string);
+      .eq('facility_id', facilityId || user.facility_id);
 
     if (pointsError) {
       logger.error('Error fetching points:', pointsError);
@@ -195,7 +196,7 @@ export class HomeDataFetchProvider {
       .from('home_challenge_completions')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .eq('facility_id', user.facility_id as string);
+      .eq('facility_id', facilityId || user.facility_id);
 
     if (completedError) {
       logger.error('Error fetching completed count:', completedError);

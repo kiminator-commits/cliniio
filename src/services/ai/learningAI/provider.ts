@@ -25,22 +25,26 @@ export class LearningAIProviderService {
   }
 
   // Process personalized recommendations with AI
-  async processPersonalizedRecommendationsWithAI(): Promise<AIPersonalizedRecommendationResult> {
+  async processPersonalizedRecommendationsWithAI(): Promise<
+    Record<string, unknown>
+  > {
     return await processPersonalizedRecommendationsWithAI();
   }
 
   // Process skill gap analysis with AI
-  async processSkillGapAnalysisWithAI(): Promise<AISkillGapAnalysisResult> {
+  async processSkillGapAnalysisWithAI(): Promise<Record<string, unknown>> {
     return await processSkillGapAnalysisWithAI();
   }
 
   // Process learning path optimization with AI
-  async processLearningPathOptimizationWithAI(): Promise<AILearningPathOptimizationResult> {
+  async processLearningPathOptimizationWithAI(): Promise<
+    Record<string, unknown>
+  > {
     return await processLearningPathOptimizationWithAI();
   }
 
   // Process performance prediction with AI
-  async processPerformancePredictionWithAI(): Promise<AIPerformancePredictionResult> {
+  async processPerformancePredictionWithAI(): Promise<Record<string, unknown>> {
     return await processPerformancePredictionWithAI();
   }
 

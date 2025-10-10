@@ -6,9 +6,15 @@ import {
 
 export const useLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>({
-    users: [],
-    userRank: 1,
-    totalUsers: 0,
+    id: '',
+    user_id: '',
+    facility_id: '',
+    points: 0,
+    rank: 1,
+    user_name: '',
+    department: '',
+    created_at: '',
+    updated_at: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

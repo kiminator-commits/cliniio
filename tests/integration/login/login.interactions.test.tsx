@@ -10,7 +10,6 @@ import { renderWithProviders } from '../../utils/renderWithProviders';
 import LoginForm from '@/pages/Login/LoginForm';
 import { LOGIN_LABELS } from '@/constants/loginConstants';
 import { SecureAuthService } from '@/services/secureAuthService';
-import { setupSupabaseMocks } from '@/__mocks__/supabaseMock';
 import { useLoginStore } from '@/stores/useLoginStore';
 
 const mockNavigate = vi.fn();
@@ -35,7 +34,7 @@ vi.mock('@/services/secureAuthService', () => ({
 describe('LoginForm Interactions', () => {
   beforeEach(() => {
     setupTestEnvironment();
-    setupSupabaseMocks('success');
+    // setupSupabaseMocks('success'); // Removed - using global mock
     // Reset the login store to ensure clean state
     useLoginStore.getState().reset();
   });

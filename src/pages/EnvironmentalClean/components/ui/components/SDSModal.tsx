@@ -1,8 +1,14 @@
 import React from 'react';
 import { BaseModal } from '@/components/BaseModal';
 
+interface SDSData {
+  name: string;
+  sections: string[];
+  [key: string]: unknown;
+}
+
 interface SDSModalProps {
-  selectedSDS: unknown;
+  selectedSDS: SDSData | null;
   onClose: () => void;
 }
 

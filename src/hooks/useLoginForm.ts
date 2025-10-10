@@ -1,16 +1,16 @@
 import { useEffect, useCallback } from 'react';
-import { useLoginStore } from '@/stores/useLoginStore';
-import { useUser } from '@/contexts/UserContext';
-import { logger } from '@/utils/_core/logger';
-import { LOGIN_ERROR_MESSAGES } from '@/constants/errorMessages';
+import { useLoginStore } from '../stores/useLoginStore';
+import { useUser } from '../contexts/UserContext';
+import { logger } from '../utils/_core/logger';
+import { LOGIN_ERROR_MESSAGES } from '../constants/errorMessages';
 
 // Lazy load heavy services only when needed
 const loadSecureAuthService = () =>
-  import('@/services/secureAuthService').then((m) => m.SecureAuthService);
+  import('../services/secureAuthService').then((m) => m.SecureAuthService);
 const loadAuditService = () =>
-  import('@/services/auditService').then((m) => m.logAudit);
+  import('../services/auditService').then((m) => m.logAudit);
 const loadErrorReportingService = () =>
-  import('@/services/errorReportingService').then(
+  import('../services/errorReportingService').then(
     (m) => m.ErrorReportingService
   );
 
@@ -111,6 +111,7 @@ export const useLoginForm = () => {
     const interval = setInterval(
       async () => {
         try {
+          const SecureAuthService = await loadSecureAuthService();
           const authService = new SecureAuthService();
           const refreshed = await authService.refreshToken();
 
@@ -125,6 +126,7 @@ export const useLoginForm = () => {
 
           // Clear invalid session and logout
           useLoginStore.getState().reset();
+          const SecureAuthService = await loadSecureAuthService();
           const authService = new SecureAuthService();
           await authService.logout();
         }
@@ -248,7 +250,7 @@ export const useLoginForm = () => {
 
         // Report error to service
         try {
-          ErrorReportingService.reportError(
+          _ErrorReportingService.reportError(
             error instanceof Error ? error : new Error(String(error)),
             undefined,
             {
@@ -295,7 +297,9 @@ export const useLoginForm = () => {
 
       // Call secure logout
       console.log('[AUTH] Calling logout()...');
-      await logout();
+      const SecureAuthService = await loadSecureAuthService();
+      const authService = new SecureAuthService();
+      await authService.logout();
 
       // Clear all local state
       console.log('[AUTH] Calling login store reset()...');

@@ -3,7 +3,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { SharedLayout } from '@/components/Layout/SharedLayout';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import EnvironmentalCleanErrorFallback from './components/EnvironmentalCleanErrorFallback';
-import { WorkflowService } from '../../services/workflowService';
 import EnvironmentalCleanContent from './components/EnvironmentalCleanContent';
 
 const EnvironmentalCleanPage: React.FC = () => {
@@ -19,12 +18,9 @@ const EnvironmentalCleanPage: React.FC = () => {
     // Cleanup: end session on unmount
     return () => {
       if (currentSessionId) {
-        WorkflowService.endSession(currentSessionId).catch((error) => {
-          console.error(
-            '❌ Failed to end environmental cleaning workflow session:',
-            error
-          );
-        });
+        // Note: endSession method is currently commented out in WorkflowService
+        // TODO: Implement proper session cleanup when workflow_sessions table is restored
+        console.log('Session cleanup needed for:', currentSessionId);
       }
     };
   }, [currentSessionId]);

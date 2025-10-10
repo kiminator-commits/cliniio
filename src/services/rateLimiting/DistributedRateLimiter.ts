@@ -1,5 +1,5 @@
-import { redisManager } from '@/lib/redisClient';
-import { logger } from '@/utils/_core/logger';
+import { redisManager } from '../../lib/redisClient';
+import { logger } from '../../utils/_core/logger';
 
 export interface RateLimitConfig {
   maxRequests: number;
@@ -80,7 +80,7 @@ export class DistributedRateLimiter {
     const client = redisManager.getClient();
 
     // Use Redis pipeline for atomic operations
-    const pipeline = (client as unknown).multi();
+    const pipeline = (client as { multi: () => unknown }).multi();
 
     // Remove expired entries
     pipeline.zRemRangeByScore(key, '-inf', windowStart);
@@ -119,7 +119,9 @@ export class DistributedRateLimiter {
         };
       } else {
         // Block expired, remove it
-        await (client as unknown).del(blockKey);
+        await (client as { del: (key: string) => Promise<unknown> }).del(
+          blockKey
+        );
       }
     }
 
@@ -128,7 +130,15 @@ export class DistributedRateLimiter {
       // Set block if configured
       if (config.blockDurationMs) {
         const blockUntil = now + config.blockDurationMs;
-        await (client as unknown).setEx(
+        await (
+          client as {
+            setEx: (
+              key: string,
+              seconds: number,
+              value: string
+            ) => Promise<unknown>;
+          }
+        ).setEx(
           blockKey,
           Math.ceil(config.blockDurationMs / 1000),
           blockUntil.toString()
@@ -235,8 +245,10 @@ export class DistributedRateLimiter {
     try {
       if (redisManager.isHealthy()) {
         const client = redisManager.getClient();
-        await (client as unknown).del(key);
-        await (client as unknown).del(`${key}:blocked`);
+        await (client as { del: (key: string) => Promise<unknown> }).del(key);
+        await (client as { del: (key: string) => Promise<unknown> }).del(
+          `${key}:blocked`
+        );
       }
     } catch (error) {
       logger.warn('Failed to reset Redis rate limit:', error);
@@ -264,7 +276,9 @@ export class DistributedRateLimiter {
 
         // Check if blocked
         const blockKey = `${key}:blocked`;
-        const isBlocked = await (client as unknown).get(blockKey);
+        const isBlocked = await (
+          client as { get: (key: string) => Promise<string | null> }
+        ).get(blockKey);
 
         if (isBlocked) {
           const blockUntil = parseInt(isBlocked);
@@ -279,11 +293,11 @@ export class DistributedRateLimiter {
         }
 
         // Count current requests
-        const currentCount = await (client as unknown).zCount(
-          key,
-          windowStart,
-          '+inf'
-        );
+        const currentCount = await (
+          client as {
+            zCount: (key: string, min: number, max: string) => Promise<number>;
+          }
+        ).zCount(key, windowStart, '+inf');
 
         return {
           allowed: currentCount < effectiveConfig.maxRequests,
@@ -327,7 +341,7 @@ export class DistributedRateLimiter {
   private startCleanupInterval(): void {
     this.cleanupInterval = setInterval(() => {
       const now = Date.now();
-      for (const [key, entry] of this.fallbackCache.entries()) {
+      for (const [key, entry] of Array.from(this.fallbackCache.entries())) {
         if (entry.resetTime < now) {
           this.fallbackCache.delete(key);
         }

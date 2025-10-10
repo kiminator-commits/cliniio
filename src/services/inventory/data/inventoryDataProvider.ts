@@ -4,7 +4,7 @@
  * Date: 2025-10-06
  */
 
-import { supabase } from '@/lib/supabaseClient';
+import { getScopedClient } from '@/lib/supabaseClient';
 import { InventoryItem } from '@/types/inventoryTypes';
 import {
   InventoryResponse,
@@ -52,10 +52,12 @@ const getErrorMessage = (error: unknown): string => {
 
 export class InventoryDataProvider {
   static async getItemsFromSupabase(
-    filters?: InventoryFilters
+    filters?: InventoryFilters,
+    facilityId?: string
   ): Promise<InventoryResponse> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       const _filterSummary =
         InventoryFilterOperations.getFilterSummary(filters);
@@ -71,8 +73,19 @@ export class InventoryDataProvider {
         filters
       );
 
-      const { data, error, count } = await (query as unknown)
-        .eq('tenant_id', currentTenant)
+      const { data, error, count } = await (
+        query as {
+          eq: (
+            column: string,
+            value: string
+          ) => {
+            order: (config: {
+              ascending: boolean;
+            }) => Promise<{ data: unknown; error: unknown; count: number }>;
+          };
+        }
+      )
+        .eq('facility_id', currentTenant)
         .order('created_at', {
           ascending: false,
         });
@@ -115,7 +128,11 @@ export class InventoryDataProvider {
   ): Promise<InventoryItem> {
     try {
       const data = await (
-        InventoryActionService as unknown
+        InventoryActionService as {
+          processItemCreation: (
+            item: Omit<InventoryItem, 'id' | 'lastUpdated'>
+          ) => Promise<InventoryItem>;
+        }
       ).processItemCreation(item);
       return data;
     } catch (error) {
@@ -129,10 +146,14 @@ export class InventoryDataProvider {
     updates: Partial<InventoryItem>
   ): Promise<InventoryItem> {
     try {
-      const data = await (InventoryActionService as unknown).processItemUpdate(
-        id,
-        updates
-      );
+      const data = await (
+        InventoryActionService as {
+          processItemUpdate: (
+            id: string,
+            updates: Partial<InventoryItem>
+          ) => Promise<InventoryItem>;
+        }
+      ).processItemUpdate(id, updates);
       return data;
     } catch (error) {
       console.error('Error updating item:', error);
@@ -142,22 +163,32 @@ export class InventoryDataProvider {
 
   static async deleteItemFromSupabase(id: string): Promise<void> {
     try {
-      await (InventoryActionService as unknown).processItemDeletion(id);
+      await (
+        InventoryActionService as {
+          processItemDeletion: (id: string) => Promise<void>;
+        }
+      ).processItemDeletion(id);
     } catch (error) {
       throw new Error(`Failed to delete item: ${getErrorMessage(error)}`);
     }
   }
 
-  static async getCategories(): Promise<string[]> {
+  static async getCategories(facilityId?: string): Promise<string[]> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       const result = await (
         InventoryFilterOperations.applyFiltersToCategories(
-          supabase,
+          supabase as { from: (table: string) => unknown },
           'inventory_items'
-        ) as unknown
-      ).eq('tenant_id', currentTenant);
+        ) as {
+          eq: (
+            column: string,
+            value: string
+          ) => Promise<{ data: Record<string, unknown>[] }>;
+        }
+      ).eq('facility_id', currentTenant);
 
       if (!result) {
         console.error('❌ Error fetching categories');
@@ -179,16 +210,22 @@ export class InventoryDataProvider {
     return this.getCategories();
   }
 
-  static async getLocations(): Promise<string[]> {
+  static async getLocations(facilityId?: string): Promise<string[]> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       const result = await (
         InventoryFilterOperations.applyFiltersToLocations(
-          supabase,
+          supabase as { from: (table: string) => unknown },
           'inventory_items'
-        ) as unknown
-      ).eq('tenant_id', currentTenant);
+        ) as {
+          eq: (
+            column: string,
+            value: string
+          ) => Promise<{ data: Record<string, unknown>[] }>;
+        }
+      ).eq('facility_id', currentTenant);
 
       if (!result) {
         console.error('❌ Error fetching locations');

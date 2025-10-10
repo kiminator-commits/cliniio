@@ -9,7 +9,7 @@ import React, {
 import { useEnvironmentalCleanDataManager } from '../hooks/useEnvironmentalCleanDataManager';
 import { EnvironmentalCleanService } from '../services/EnvironmentalCleanService';
 
-type RoomStatusType =
+export type RoomStatusType =
   | 'Available'
   | 'Dirty'
   | 'LowInventory'
@@ -84,7 +84,7 @@ export const RoomStatusProvider: React.FC<RoomStatusProviderProps> = ({
   useEffect(() => {
     const initialRooms = environmentalCleanRooms.map((room) => ({
       id: room.id,
-      status: room.status, // No mapping needed - already correctly mapped by RoomService
+      status: room.status as RoomStatusType, // Cast to RoomStatusType
       name: room.name,
       metadata: room.metadata,
     }));

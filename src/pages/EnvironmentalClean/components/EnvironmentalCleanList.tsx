@@ -42,7 +42,7 @@ const EnvironmentalCleanList: React.FC<EnvironmentalCleanListProps> = ({
 
     // Use helper functions for consistent display
     return {
-      color: getStatusColorClass(finalStatus as RoomStatusType),
+      color: getStatusColorClass(),
       icon:
         finalStatus === 'clean' || finalStatus === 'available'
           ? mdiCheckCircle

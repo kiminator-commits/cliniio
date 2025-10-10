@@ -1,7 +1,7 @@
 // Typed Supabase adapter for inventory operations
 // This adapter provides type-safe operations without any casts
 
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../../lib/supabaseClient';
 import { InventoryItem } from '../inventoryTypes';
 import {
   SupabaseInventoryRow,
@@ -167,19 +167,15 @@ export class TypedSupabaseAdapter {
         };
       }
 
-      if (
-        !(response as unknown).data ||
-        !isSupabaseInventoryRow((response as unknown).data)
-      ) {
+      const responseData = response.data as SupabaseInventoryRow | null;
+      if (!responseData || !isSupabaseInventoryRow(responseData)) {
         return {
           success: false,
           error: 'Item not found or invalid format',
         };
       }
 
-      const transformed = this.transformRowToInventoryItem(
-        (response as unknown).data
-      );
+      const transformed = this.transformRowToInventoryItem(responseData);
       return transformed;
     } catch (error) {
       return {
@@ -234,19 +230,15 @@ export class TypedSupabaseAdapter {
         };
       }
 
-      if (
-        !(response as unknown).data ||
-        !isSupabaseInventoryRow((response as unknown).data)
-      ) {
+      const responseData = response.data as SupabaseInventoryRow | null;
+      if (!responseData || !isSupabaseInventoryRow(responseData)) {
         return {
           success: false,
           error: 'Failed to create item or invalid response format',
         };
       }
 
-      const transformed = this.transformRowToInventoryItem(
-        (response as unknown).data
-      );
+      const transformed = this.transformRowToInventoryItem(responseData);
       return transformed;
     } catch (error) {
       return {
@@ -299,19 +291,15 @@ export class TypedSupabaseAdapter {
         };
       }
 
-      if (
-        !(response as unknown).data ||
-        !isSupabaseInventoryRow((response as unknown).data)
-      ) {
+      const responseData = response.data as SupabaseInventoryRow | null;
+      if (!responseData || !isSupabaseInventoryRow(responseData)) {
         return {
           success: false,
           error: 'Item not found or invalid response format',
         };
       }
 
-      const transformed = this.transformRowToInventoryItem(
-        (response as unknown).data
-      );
+      const transformed = this.transformRowToInventoryItem(responseData);
       return transformed;
     } catch (error) {
       return {
@@ -385,14 +373,14 @@ export class TypedSupabaseAdapter {
     const channel = supabase
       .channel('inventory_changes')
       .on(
-        'postgres_changes' as string,
+        'postgres_changes' as const,
         {
           event: options?.event || '*',
           schema: options?.schema || 'public',
           table: options?.table || this.tableName,
           filter: options?.filter,
         },
-        (payload) => {
+        (payload: unknown) => {
           if (isRealtimeInventoryPayload(payload)) {
             callback(payload);
           } else {

@@ -56,6 +56,7 @@ export const NavigationProvider: React.FC<NavigationProviderProps> = ({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [isDrawerOpen]);
 
   const openDrawer = useCallback(() => {

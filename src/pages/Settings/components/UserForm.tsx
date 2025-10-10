@@ -38,7 +38,9 @@ const UserForm: React.FC<UserFormProps> = ({
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto scrollbar-hide">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
-            {mode === 'add' ? 'Add New User' : `Edit: ${user?.full_name}`}
+            {mode === 'add'
+              ? 'Add New User'
+              : `Edit: ${(user as { full_name?: string })?.full_name || 'Unknown User'}`}
           </h3>
           <button
             onClick={onClose}
@@ -66,7 +68,11 @@ const UserForm: React.FC<UserFormProps> = ({
                   id="firstName"
                   type="text"
                   placeholder="Enter first name"
-                  defaultValue={user?.full_name?.split(' ')[0] || ''}
+                  defaultValue={
+                    (user as { full_name?: string })?.full_name?.split(
+                      ' '
+                    )[0] || ''
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]"
                 />
               </div>
@@ -82,7 +88,10 @@ const UserForm: React.FC<UserFormProps> = ({
                   type="text"
                   placeholder="Enter last name"
                   defaultValue={
-                    user?.full_name?.split(' ').slice(1).join(' ') || ''
+                    (user as { full_name?: string })?.full_name
+                      ?.split(' ')
+                      .slice(1)
+                      .join(' ') || ''
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]"
                 />

@@ -203,8 +203,12 @@ export const formatItemForTable = (
     category: formatCategory(item.category || ''),
     status: formatStatus(item.status || ''),
     expiryDate: formatExpiryDate(item.expiryDate),
-    createdAt: formatDate(item.data?.createdAt as string),
-    updatedAt: formatDate(item.data?.updatedAt as string),
+    createdAt: formatDate(
+      (item.data as { createdAt?: string })?.createdAt as string
+    ),
+    updatedAt: formatDate(
+      (item.data as { updatedAt?: string })?.updatedAt as string
+    ),
   };
 };
 

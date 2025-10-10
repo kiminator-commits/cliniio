@@ -34,7 +34,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
   const [alerts, setAlerts] = useState<AlertData[]>([]);
 
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible) return undefined;
 
     const updateMetrics = () => {
       setMetrics(performanceMonitor.getAllMetrics());

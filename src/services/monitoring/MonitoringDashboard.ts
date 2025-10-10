@@ -162,9 +162,9 @@ export class MonitoringDashboard {
       return healthReport.checks.map((check) => ({
         name: check.name,
         status:
-          check.status === 'pass'
+          check.status === 'healthy'
             ? 'healthy'
-            : check.status === 'warn'
+            : check.status === 'degraded'
               ? 'degraded'
               : 'unhealthy',
         responseTime: check.duration,

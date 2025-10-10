@@ -1,7 +1,9 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { useSterilizationStore } from '@/store/sterilizationStore';
 import { Tool } from '@/types/sterilizationTypes';
 import { PackagingService } from '@/services/packagingService';
+
+// ✅ Connected to packagingSessionSlice for real batching and session control
 
 interface LocalPackageInfo {
   packageType: string;
@@ -13,7 +15,16 @@ export const usePackagingWorkflow = (
   onClose: () => void,
   isBatchMode: boolean
 ) => {
-  const storeData = useSterilizationStore();
+  // ✅ Connected to packagingSessionSlice for real batching and session control
+  const {
+    currentSession,
+    startPackagingSession,
+    addToolToSession,
+    removeToolFromSession,
+    generateBatchId,
+    assignBatchIdToSession,
+    endPackagingSession,
+  } = useSterilizationStore();
 
   // Local state - must be called before any early returns
   const [operatorName, setOperatorName] = useState('');
@@ -32,40 +43,11 @@ export const usePackagingWorkflow = (
   const [availableTools, setAvailableTools] = useState<Tool[]>([]);
   const [scannedTools, setScannedTools] = useState<Tool[]>([]);
 
-  // Extract store data with defaults to avoid destructuring errors
-  const currentPackagingSession = storeData?.currentPackagingSession || null;
-  const currentBatch = storeData?.currentBatch || null;
-  const batchLoading = storeData?.batchLoading || false;
-
-  // Memoize store functions to prevent dependency changes
-  const startPackagingSession = useMemo(
-    () => storeData?.startPackagingSession || (() => {}),
-    [storeData]
-  );
-  const endPackagingSession = useMemo(
-    () => storeData?.endPackagingSession || (() => {}),
-    [storeData]
-  );
-  const addToolToSession = useMemo(
-    () => storeData?.addToolToSession || (() => {}),
-    [storeData]
-  );
-  const removeToolFromSession = useMemo(
-    () => storeData?.removeToolFromSession || (() => {}),
-    [storeData]
-  );
-  const addToolToBatch = useMemo(
-    () => storeData?.addToolToBatch || (() => {}),
-    [storeData]
-  );
-  const removeToolFromBatch = useMemo(
-    () => storeData?.removeToolFromBatch || (() => {}),
-    [storeData]
-  );
-  const createBatch = useMemo(
-    () => storeData?.createBatch || (() => {}),
-    [storeData]
-  );
+  // Extract other store data with defaults to avoid destructuring errors
+  const currentBatch =
+    useSterilizationStore((state) => state.currentBatch) || null;
+  const batchLoading =
+    useSterilizationStore((state) => state.batchLoading) || false;
 
   // Load tools ready for packaging from Supabase
   const loadToolsReadyForPackaging = useCallback(async () => {
@@ -104,11 +86,13 @@ export const usePackagingWorkflow = (
       // Add tool to scanned tools
       setScannedTools((prev) => [...prev, tool]);
 
-      // Add tool to session if using store
-      addToolToSession(tool.id);
+      // ✅ Connected to packagingSessionSlice for real batching and session control
+      // Add tool barcode to session
+      addToolToSession(barcode);
 
       // If in batch mode, also add to batch
       if (isBatchMode && currentBatch) {
+        const addToolToBatch = useSterilizationStore.getState().addToolToBatch;
         addToolToBatch(tool.id);
       }
 
@@ -122,14 +106,7 @@ export const usePackagingWorkflow = (
         setScanResult(null);
       }, 2000);
     },
-    [
-      availableTools,
-      scannedTools,
-      addToolToSession,
-      isBatchMode,
-      currentBatch,
-      addToolToBatch,
-    ]
+    [availableTools, scannedTools, addToolToSession, isBatchMode, currentBatch]
   );
 
   // Simulate scanning for demo
@@ -146,26 +123,39 @@ export const usePackagingWorkflow = (
   }, [availableTools, handleScan]);
 
   // Handle new autoclave load
-  const handleNewAutoclaveLoad = useCallback(async () => {
-    if (!currentPackagingSession) {
-      setScanMessage('Please start a packaging session first');
-      return;
-    }
+  const handleNewAutoclaveLoad = useCallback(
+    async (batchPrefix?: string) => {
+      if (!currentSession) {
+        setScanMessage('Please start a packaging session first');
+        return;
+      }
 
-    try {
-      setScanMessage('Creating new autoclave load...');
-      await createBatch(operatorName, true);
-      setScanMessage('New autoclave load created successfully!');
+      try {
+        setScanMessage('Creating new autoclave load...');
 
-      // Clear message after 2 seconds
-      setTimeout(() => {
-        setScanMessage('');
-      }, 2000);
-    } catch (error) {
-      setScanMessage('Error creating new autoclave load');
-      console.error('Error creating new autoclave load:', error);
-    }
-  }, [currentPackagingSession, operatorName, createBatch]);
+        // ✅ Connected to packagingSessionSlice for real batching and session control
+        // Generate batch ID and assign to session
+        const batchId = batchPrefix
+          ? `${batchPrefix}${Math.floor(1000 + Math.random() * 9000)}`
+          : generateBatchId();
+        // ✅ Dynamic batch prefix from Packaging Settings
+        assignBatchIdToSession(batchId);
+
+        const createBatch = useSterilizationStore.getState().createBatch;
+        await createBatch(operatorName, true);
+        setScanMessage('New autoclave load created successfully!');
+
+        // Clear message after 2 seconds
+        setTimeout(() => {
+          setScanMessage('');
+        }, 2000);
+      } catch (error) {
+        setScanMessage('Error creating new autoclave load');
+        console.error('Error creating new autoclave load:', error);
+      }
+    },
+    [currentSession, operatorName, generateBatchId, assignBatchIdToSession]
+  );
 
   // Handle import receipt
   const handleImportReceipt = useCallback(() => {
@@ -254,14 +244,22 @@ export const usePackagingWorkflow = (
   // Handle remove tool
   const handleRemoveTool = useCallback(
     (toolId: string) => {
-      setScannedTools((prev) => prev.filter((t) => t.id !== toolId));
-      removeToolFromSession(toolId);
+      const tool = scannedTools.find((t) => t.id === toolId);
+      if (tool) {
+        setScannedTools((prev) => prev.filter((t) => t.id !== toolId));
 
-      if (isBatchMode && currentBatch) {
-        removeToolFromBatch(toolId);
+        // ✅ Connected to packagingSessionSlice for real batching and session control
+        // Remove tool barcode from session
+        removeToolFromSession(tool.barcode);
+
+        if (isBatchMode && currentBatch) {
+          const removeToolFromBatch =
+            useSterilizationStore.getState().removeToolFromBatch;
+          removeToolFromBatch(toolId);
+        }
       }
     },
-    [removeToolFromSession, isBatchMode, currentBatch, removeToolFromBatch]
+    [scannedTools, removeToolFromSession, isBatchMode, currentBatch]
   );
 
   // Handle start session
@@ -270,7 +268,11 @@ export const usePackagingWorkflow = (
       setScanMessage('Please enter operator name');
       return;
     }
-    startPackagingSession(operatorName);
+
+    // ✅ Connected to packagingSessionSlice for real batching and session control
+    // Start packaging session with operator name and facility ID
+    const facilityId = 'default-facility'; // TODO: Get from context or props
+    startPackagingSession(operatorName, facilityId);
   }, [operatorName, startPackagingSession]);
 
   return {
@@ -284,7 +286,7 @@ export const usePackagingWorkflow = (
     showReceiptUpload,
     scannedTools,
     batchLoading,
-    currentPackagingSession,
+    currentSession,
     availableTools,
 
     // Actions

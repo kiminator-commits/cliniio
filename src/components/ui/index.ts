@@ -18,3 +18,7 @@ export {
 // UI Components
 export { Badge } from './badge';
 export { Progress } from './progress';
+export { default as Input } from './input';
+export { default as Label } from './label';
+export { Checkbox } from './checkbox';
+export { Switch } from './switch';

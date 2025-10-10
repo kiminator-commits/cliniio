@@ -32,12 +32,14 @@ export const EnvironmentalCleanProvider = ({
   const statusOptions: RoomStatusOption[] = [
     ...getCoreStatusTypes().map((status) => ({
       key: status.name,
+      value: status.name,
       label: status.name,
       icon: status.icon,
       color: status.color,
     })),
     ...getPublishedStatusTypes().map((status) => ({
       key: status.name,
+      value: status.name,
       label: status.name,
       icon: status.icon,
       color: status.color,

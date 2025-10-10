@@ -2,7 +2,7 @@
 // INVENTORY SERVICE TYPES - SIMPLIFIED
 // ============================================================================
 
-import { InventoryItem } from '@/types/inventoryTypes';
+import { InventoryItem } from './inventoryTypes';
 
 // ============================================================================
 // SERVICE INTERFACES

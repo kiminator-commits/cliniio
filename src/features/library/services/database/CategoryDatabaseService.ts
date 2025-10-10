@@ -6,6 +6,24 @@ import {
 } from '../../../../pages/KnowledgeHub/types';
 import { CategoryStatistics } from '../types/categoryTypes';
 
+// Define interface for database item
+interface DatabaseContentItem {
+  id: string;
+  title: string;
+  category: string;
+  status: string;
+  due_date?: string;
+  progress?: number;
+  department?: string;
+  updated_at?: string;
+  description?: string;
+  tags?: string[];
+  domain?: string;
+  content_type?: string;
+  created_by: string;
+  created_at: string;
+}
+
 export class CategoryDatabaseService {
   private tableName = 'knowledge_hub_content';
 
@@ -121,11 +139,13 @@ export class CategoryDatabaseService {
             dueDate: (item.due_date as string) || '',
             progress: (item.progress as number) || 0,
             department: item.department as string,
-            lastUpdated: item.updated_at as string,
-            description: item.description as string,
-            tags: (item.tags as string[]) || [],
-            domain: item.domain as string,
-            contentType: item.content_type as string,
+            lastUpdated:
+              (item as DatabaseContentItem).updated_at ||
+              new Date().toISOString(),
+            description: (item as DatabaseContentItem).description || '',
+            tags: (item as DatabaseContentItem).tags || [],
+            domain: (item as DatabaseContentItem).domain || '',
+            contentType: (item as DatabaseContentItem).content_type || '',
           })
         ) || []
       );

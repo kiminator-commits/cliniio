@@ -100,7 +100,7 @@ export class IntelligenceIntegrationService {
           title: content.title,
           category: content.category.toLowerCase(),
           relevance: this.calculateRelevance(
-            content as Record<string, unknown>,
+            content as unknown as Record<string, unknown>,
             keywords
           ),
           lastUpdated: content.lastUpdated || new Date().toISOString(),
@@ -202,7 +202,8 @@ export class IntelligenceIntegrationService {
           action: log.action,
           details: log.metadata ? JSON.stringify(log.metadata) : '',
           impact: this.determineImpact(log.action),
-          status: log.status ?? 'completed',
+          status:
+            (log.status as 'failed' | 'pending' | 'completed') ?? 'completed',
         })
       );
 

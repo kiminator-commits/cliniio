@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { LoginFormData, FormErrors } from '@/pages/Login/types';
+import { LoginFormData, FormErrors } from '../pages/Login/types';
 
 interface LoginStore {
   formData: LoginFormData;
@@ -152,7 +152,7 @@ export const useLoginStore = create<LoginStore>((set, get) => {
 
       // Clear Supabase session
       try {
-        const { supabase } = await import('@/lib/supabaseClient');
+        const { supabase } = await import('../lib/supabaseClient');
         await supabase.auth.signOut();
       } catch (error) {
         console.error('Failed to clear Supabase session:', error);

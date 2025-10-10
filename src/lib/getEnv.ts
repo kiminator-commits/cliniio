@@ -3,20 +3,25 @@
  * Uses process.env for environment variable access
  */
 
+// Extend Window interface to include env property
+interface WindowWithEnv extends Window {
+  env?: Record<string, string>;
+}
+
 // Type-safe environment variable access
 export const getEnvVar = (key: string, fallback = ''): string => {
-  // Use import.meta.env for Vite environment variable access
-  if (
-    typeof import.meta !== 'undefined' &&
-    import.meta.env &&
-    key in import.meta.env
-  ) {
-    return import.meta.env[key] as string;
-  }
-
-  // Fallback to process.env for Node.js environments
+  // Try process.env first (Node.js environment)
   if (typeof process !== 'undefined' && process?.env && key in process.env) {
     return process.env[key]!;
+  }
+
+  // Try window.env (custom environment setup)
+  if (
+    typeof window !== 'undefined' &&
+    (window as WindowWithEnv).env &&
+    key in (window as WindowWithEnv).env!
+  ) {
+    return (window as WindowWithEnv).env![key] as string;
   }
 
   // Return fallback if not found
@@ -28,11 +33,6 @@ export const getEnvVar = (key: string, fallback = ''): string => {
 
 // Check if we're in development mode
 export const isDevelopment = (): boolean => {
-  // Check Vite's DEV environment variable (browser)
-  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV === true) {
-    return true;
-  }
-
   // Check NODE_ENV (Node.js)
   if (
     typeof process !== 'undefined' &&
@@ -46,11 +46,6 @@ export const isDevelopment = (): boolean => {
 
 // Check if we're in production mode
 export const isProduction = (): boolean => {
-  // Check Vite's PROD environment variable (browser)
-  if (typeof import.meta !== 'undefined' && import.meta.env?.PROD === true) {
-    return true;
-  }
-
   // Check NODE_ENV (Node.js)
   if (
     typeof process !== 'undefined' &&

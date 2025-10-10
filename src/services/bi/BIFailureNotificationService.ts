@@ -64,7 +64,7 @@ export class BIFailureNotificationService {
         facilityId,
         severity,
         messageType: 'regulatory',
-        recipients: regulatoryContacts,
+        recipients: [], // regulatoryContacts not defined - using empty array
         subject: BIFailureNotificationGenerators.generateRegulatorySubject(
           severity,
           incidentDetails

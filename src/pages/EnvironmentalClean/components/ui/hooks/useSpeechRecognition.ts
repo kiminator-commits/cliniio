@@ -13,9 +13,7 @@ interface UseSpeechRecognitionReturn {
   transcript: string;
   startSpeechRecognition: () => void;
   stopSpeechRecognition: () => void;
-  applyTranscriptToNotes: (
-    setNotes: (value: string | ((prev: string) => string)) => void
-  ) => void;
+  applyTranscriptToNotes: (setNotes: (notes: string) => void) => void;
 }
 
 export const useSpeechRecognition = (): UseSpeechRecognitionReturn => {
@@ -91,11 +89,9 @@ export const useSpeechRecognition = (): UseSpeechRecognitionReturn => {
     setIsListening(false);
   };
 
-  const applyTranscriptToNotes = (
-    setNotes: (value: string | ((prev: string) => string)) => void
-  ) => {
+  const applyTranscriptToNotes = (setNotes: (notes: string) => void) => {
     if (transcript.trim()) {
-      setNotes((prev) => prev + (prev ? ' ' : '') + transcript);
+      setNotes(transcript);
       setTranscript('');
     }
   };

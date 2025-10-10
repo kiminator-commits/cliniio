@@ -82,7 +82,7 @@ export class TheftLossForecastService {
         sterilizationData as _SterilizationCycleRow[]
       ).filter(
         (cycle: _SterilizationCycleRow) =>
-          cycle.status !== 'completed' && cycle.status !== 'failed'
+          cycle.status !== 'clean' && cycle.status !== 'problem'
       ).length;
 
       const estimatedLossPercentage = Math.min(
@@ -93,7 +93,7 @@ export class TheftLossForecastService {
 
       // Identify flagged items based on incomplete cycles
       const flaggedItems = (sterilizationData as _SterilizationCycleRow[])
-        .filter((cycle: _SterilizationCycleRow) => cycle.status !== 'completed')
+        .filter((cycle: _SterilizationCycleRow) => cycle.status !== 'clean')
         .map((cycle: _SterilizationCycleRow) => `Tool ${cycle.id}`)
         .slice(0, 3);
 

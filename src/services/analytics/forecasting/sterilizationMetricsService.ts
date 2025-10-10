@@ -178,7 +178,7 @@ export class SterilizationMetricsService {
       let cycleEfficiency = 100;
       if (cycles && cycles.length > 0) {
         const completedCycles = (cycles as _SterilizationCycleRow[]).filter(
-          (cycle: _SterilizationCycleRow) => cycle.status === 'completed'
+          (cycle: _SterilizationCycleRow) => cycle.status === 'clean'
         ).length;
         cycleEfficiency = Math.round((completedCycles / cycles.length) * 100);
       }

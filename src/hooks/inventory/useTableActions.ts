@@ -6,12 +6,34 @@ export const useTableActions = () => {
 
   const getItemId = (item: InventoryItem): string => {
     return (
-      (typeof item.data?.toolId === 'string' ? item.data.toolId : '') ||
-      (typeof item.data?.supplyId === 'string' ? item.data.supplyId : '') ||
-      (typeof item.data?.equipmentId === 'string'
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'toolId' in item.data &&
+      typeof item.data.toolId === 'string'
+        ? item.data.toolId
+        : '') ||
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'supplyId' in item.data &&
+      typeof item.data.supplyId === 'string'
+        ? item.data.supplyId
+        : '') ||
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'equipmentId' in item.data &&
+      typeof item.data.equipmentId === 'string'
         ? item.data.equipmentId
         : '') ||
-      (typeof item.data?.hardwareId === 'string' ? item.data.hardwareId : '') ||
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'hardwareId' in item.data &&
+      typeof item.data.hardwareId === 'string'
+        ? item.data.hardwareId
+        : '') ||
       item.id
     );
   };

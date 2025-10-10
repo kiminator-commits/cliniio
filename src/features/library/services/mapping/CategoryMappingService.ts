@@ -1,4 +1,4 @@
-import { ContentCategory } from '../../../pages/KnowledgeHub/types';
+import { ContentCategory } from '../../../../pages/KnowledgeHub/types';
 import { CategoryMapping } from '../types/categoryTypes';
 
 export class CategoryMappingService {

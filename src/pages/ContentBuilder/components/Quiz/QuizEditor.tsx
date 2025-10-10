@@ -229,7 +229,8 @@ const QuizEditor: React.FC<QuizEditorProps> = ({
                 onChange={(e) =>
                   updateQuestionField(
                     'randomizeQuestions' as keyof QuizQuestion,
-                    e.target.checked as QuizQuestion[keyof QuizQuestion]
+                    e.target
+                      .checked as unknown as QuizQuestion[keyof QuizQuestion]
                   )
                 }
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"

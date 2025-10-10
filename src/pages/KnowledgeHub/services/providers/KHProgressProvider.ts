@@ -1,5 +1,5 @@
 import { supabase } from '../../../../lib/supabase';
-import { ApiError, ErrorType, ErrorSeverity } from '../../../types/errors';
+import { ApiError, ErrorType, ErrorSeverity } from '../../types/errors';
 import { KHDataTransformationProvider } from './KHDataTransformationProvider';
 
 export interface UserProgress {

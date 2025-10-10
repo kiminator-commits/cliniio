@@ -421,7 +421,6 @@ export class SecurityIncidentProvider {
           title: incident.title,
           severity: incident.severity,
           threatIndicatorId: incident.threatIndicatorId,
-          assignedTo: incident.assignedTo,
         },
       });
     }
@@ -434,8 +433,6 @@ export class SecurityIncidentProvider {
           title: incident.title,
           severity: incident.severity,
           threatIndicatorId: incident.threatIndicatorId,
-          resolvedBy: incident.resolvedBy,
-          resolution: incident.resolution,
         },
       });
     }

@@ -5,7 +5,7 @@ import SterilizationDashboard from '../../components/Sterilization/Sterilization
 import { ChartSkeleton } from '../../components/ui/Skeleton';
 
 const SterilizationAnalytics = lazy(
-  () => import('@/components/Sterilization/SterilizationAnalytics')
+  () => import('../../components/Sterilization/SterilizationAnalytics')
 );
 
 const SterilizationErrorFallback = () => (

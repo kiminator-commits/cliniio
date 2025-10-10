@@ -129,7 +129,7 @@ const EnvironmentalCleaningSettings: React.FC = () => {
               }`}
             >
               <Icon path={tab.icon} size={1} />
-              {tab.label || tab.name}
+              {tab.label || (tab as { name?: string }).name}
             </button>
           ))}
         </nav>

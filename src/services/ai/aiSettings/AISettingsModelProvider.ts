@@ -42,10 +42,12 @@ export class AISettingsModelProvider {
       // Merge existing settings with defaults
       return this.mergeSettings(
         defaultSettings,
-        sterilizationSettings || undefined,
-        inventorySettings || undefined,
-        environmentalSettings || undefined,
-        learningSettings || undefined
+        (sterilizationSettings as unknown as Record<string, unknown>) ||
+          undefined,
+        (inventorySettings as unknown as Record<string, unknown>) || undefined,
+        (environmentalSettings as unknown as Record<string, unknown>) ||
+          undefined,
+        (learningSettings as unknown as Record<string, unknown>) || undefined
       );
     } catch (error) {
       console.error('Error loading unified AI settings:', error);
@@ -76,26 +78,28 @@ export class AISettingsModelProvider {
           ai_enabled: true,
           ai_version: '1.0',
           computer_vision_enabled:
-            sterilizationSettings.tool_condition_assessment || false,
+            Boolean(sterilizationSettings.tool_condition_assessment) || false,
           tool_condition_assessment:
-            sterilizationSettings.tool_condition_assessment || false,
+            Boolean(sterilizationSettings.tool_condition_assessment) || false,
           barcode_quality_detection:
-            sterilizationSettings.barcode_quality_detection || false,
+            Boolean(sterilizationSettings.barcode_quality_detection) || false,
           tool_type_recognition:
-            sterilizationSettings.tool_type_recognition || false,
+            Boolean(sterilizationSettings.tool_type_recognition) || false,
           cleaning_validation: false,
           predictive_analytics_enabled:
-            sterilizationSettings.failure_prediction || false,
-          cycle_optimization: sterilizationSettings.cycle_optimization || false,
-          failure_prediction: sterilizationSettings.failure_prediction || false,
+            Boolean(sterilizationSettings.failure_prediction) || false,
+          cycle_optimization:
+            Boolean(sterilizationSettings.cycle_optimization) || false,
+          failure_prediction:
+            Boolean(sterilizationSettings.failure_prediction) || false,
           efficiency_optimization: false,
           resource_planning: false,
           smart_workflow_enabled: false,
           ai_confidence_threshold:
-            sterilizationSettings.ai_confidence_threshold || 0.8,
+            Number(sterilizationSettings.ai_confidence_threshold) || 0.8,
           ai_data_retention_days:
-            sterilizationSettings.ai_data_retention_days || 90,
-        }),
+            Number(sterilizationSettings.ai_data_retention_days) || 90,
+        } as Record<string, unknown>),
         this.inventoryAI.saveSettings(inventorySettings),
         this.environmentalAI.saveSettings(environmentalSettings),
         this.learningAI.saveSettings(learningSettings),

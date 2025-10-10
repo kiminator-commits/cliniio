@@ -189,8 +189,8 @@ export class PerformanceTrackedService {
     });
   }
 
-  getService(): unknown {
-    return this.originalService;
+  getService(): T {
+    return this.originalService as T;
   }
 }
 

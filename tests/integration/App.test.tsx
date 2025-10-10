@@ -71,6 +71,11 @@ vi.mock('../../src/contexts/UserContext', () => ({
   UserProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="user-provider">{children}</div>
   ),
+  useUser: () => ({
+    currentUser: null,
+    setCurrentUser: vi.fn(),
+    clearUserData: vi.fn(),
+  }),
 }));
 
 // Mock ErrorBoundary

@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { performanceMonitor } from '@/services/monitoring/PerformanceMonitor';
 import {
   PerformanceAlert,
+  PerformanceSnapshot,
+} from '@/services/monitoring/PerformanceMonitor';
+import {
   PerformanceTrend,
   PerformanceInsight,
   SystemHealth,
-  PerformanceSnapshot,
-} from '@/services/monitoring/PerformanceMonitor';
+} from '@/types/performanceMonitorTypes';
 
 interface AdvancedPerformanceDashboardProps {
   isVisible?: boolean;

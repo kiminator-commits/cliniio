@@ -65,7 +65,7 @@ export class AuditRiskForecastService {
         sterilizationData as _SterilizationCycleRow[]
       ).filter(
         (cycle: _SterilizationCycleRow) =>
-          cycle.status !== 'completed' && cycle.status !== 'failed'
+          cycle.status !== 'clean' && cycle.status !== 'problem'
       ).length;
 
       // Get actual BI/CI test data from biological_indicators table
@@ -209,12 +209,12 @@ export class AuditRiskForecastService {
           acc[userId].cycles.push(cycle);
 
           // Track failed or incomplete cycles as failed steps
-          if (cycle.status !== 'completed') {
+          if (cycle.status !== 'clean') {
             acc[userId].failedSteps.push(`Cycle ${cycle.id} - ${cycle.status}`);
           }
 
           // Track performance metrics for all users
-          if (cycle.status === 'completed') {
+          if (cycle.status === 'clean') {
             acc[userId].performanceMetrics.push({
               cycleId: cycle.id ?? '',
               duration: (cycle.duration_minutes as number) ?? 0,

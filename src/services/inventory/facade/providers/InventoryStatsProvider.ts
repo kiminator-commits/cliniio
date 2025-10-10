@@ -76,7 +76,7 @@ export class InventoryStatsProvider {
           lowStockItems: allItems.filter((item) => {
             const quantity = item.quantity || 0;
             const minStock =
-              (item as Record<string, unknown>).minimumStock || 0;
+              (item as { minimumStock?: number }).minimumStock || 0;
             return quantity > 0 && quantity <= minStock;
           }).length,
           outOfStockItems: allItems.filter((item) => (item.quantity || 0) === 0)
@@ -240,9 +240,10 @@ export class InventoryStatsProvider {
 
         allItems.forEach((item) => {
           const quantity = item.quantity || 0;
-          const minStock = (item as Record<string, unknown>).minimumStock || 0;
+          const minStock =
+            (item as { minimumStock?: number }).minimumStock || 0;
           const maxStock =
-            (item as Record<string, unknown>).maximumStock || Infinity;
+            (item as { maximumStock?: number }).maximumStock || Infinity;
 
           if (quantity === 0) {
             outOfStock++;
@@ -328,14 +329,14 @@ export class InventoryStatsProvider {
     const metadata = inventoryAdapterFactory.getAdapterMetadata(
       this.adapterType
     );
-    return (metadata as unknown) || null;
+    return (metadata as AdapterMetadata) || null;
   }
 
   /**
    * Get available adapters
    */
   getAvailableAdapters(): AdapterMetadata[] {
-    return inventoryAdapterFactory.getAvailableAdapters() as unknown;
+    return inventoryAdapterFactory.getAvailableAdapters() as unknown as AdapterMetadata[];
   }
 
   /**
@@ -419,12 +420,12 @@ export class InventoryStatsProvider {
           // Check data consistency
           if (
             item.quantity !== undefined &&
-            (item as Record<string, unknown>).minimumStock !== undefined
+            (item as { minimumStock?: number }).minimumStock !== undefined
           ) {
             if (item.quantity < 0) {
               issues.push(`Negative quantity for item ${item.id}`);
             }
-            if ((item as Record<string, unknown>).minimumStock < 0) {
+            if ((item as { minimumStock?: number }).minimumStock < 0) {
               issues.push(`Negative minimum stock for item ${item.id}`);
             }
           }

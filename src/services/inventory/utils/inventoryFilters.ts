@@ -35,13 +35,22 @@ export class InventoryFilterManager {
           (item.name && item.name.toLowerCase().includes(searchLower)) ||
           (item.category &&
             item.category.toLowerCase().includes(searchLower)) ||
-          (item.data?.description &&
+          (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'description' in item.data &&
             typeof item.data.description === 'string' &&
             item.data.description.toLowerCase().includes(searchLower)) ||
-          (item.data?.barcode &&
+          (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'barcode' in item.data &&
             typeof item.data.barcode === 'string' &&
             item.data.barcode.toLowerCase().includes(searchLower)) ||
-          (item.data?.serialNumber &&
+          (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'serialNumber' in item.data &&
             typeof item.data.serialNumber === 'string' &&
             item.data.serialNumber.toLowerCase().includes(searchLower))
       );

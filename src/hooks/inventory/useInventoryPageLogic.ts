@@ -131,22 +131,38 @@ export const useInventoryPageLogic = () => {
         id: item.id,
         location: item.location || '',
         createdAt:
-          (item.data?.purchaseDate as string) || new Date().toISOString(),
+          (item.data && typeof item.data === 'object' && item.data !== null
+            ? ((item.data as Record<string, unknown>).purchaseDate as string)
+            : null) || new Date().toISOString(),
         supplier: item.supplier || '',
         unit_cost: item.unit_cost || 0,
         unitCost: item.unit_cost || 0,
-        notes: (item.data?.notes as string) || '',
+        notes:
+          (item.data && typeof item.data === 'object' && item.data !== null
+            ? ((item.data as Record<string, unknown>).notes as string)
+            : null) || '',
         updated_at:
-          (item.data?.lastServiced as string) || new Date().toISOString(),
+          (item.data && typeof item.data === 'object' && item.data !== null
+            ? ((item.data as Record<string, unknown>).lastServiced as string)
+            : null) || new Date().toISOString(),
         status: item.status || '',
         quantity: item.quantity || 1,
         reorder_point: item.reorder_point || 0,
         minimumQuantity: 0,
         maximumQuantity: 999,
         // maximumQuantity removed - not in Supabase schema
-        barcode: (item.data?.barcode as string) || '',
-        sku: (item.data?.sku as string) || '',
-        description: (item.data?.description as string) || '',
+        barcode:
+          (item.data && typeof item.data === 'object' && item.data !== null
+            ? ((item.data as Record<string, unknown>).barcode as string)
+            : null) || '',
+        sku:
+          (item.data && typeof item.data === 'object' && item.data !== null
+            ? ((item.data as Record<string, unknown>).sku as string)
+            : null) || '',
+        description:
+          (item.data && typeof item.data === 'object' && item.data !== null
+            ? ((item.data as Record<string, unknown>).description as string)
+            : null) || '',
       };
 
       // Set form data and open modal in edit mode
@@ -180,10 +196,19 @@ export const useInventoryPageLogic = () => {
     try {
       if (isEditMode && formData.id) {
         // ✅ Update existing
-        await InventoryActionService.processItemUpdate(formData.id, itemToSave);
+        await InventoryActionService.handleUpdateItem(
+          formData.id,
+          itemToSave,
+          () => console.log('Item updated successfully'),
+          (error) => console.error('Update failed:', error)
+        );
       } else {
         // ✅ Create new
-        await InventoryActionService.processItemCreation(itemToSave);
+        await InventoryActionService.handleCreateItem(
+          itemToSave,
+          () => console.log('Item created successfully'),
+          (error) => console.error('Creation failed:', error)
+        );
       }
       // Close modal - data will refresh naturally
       handleCloseAddModal();

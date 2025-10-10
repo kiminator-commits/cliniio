@@ -5,13 +5,13 @@
  * Date: 2025-10-06
  */
 
-import { supabase } from '@/lib/supabaseClient';
+import { getScopedClient } from '../lib/supabaseClient';
 import {
   AutoclaveReceipt,
   AutoclaveReceiptUpload,
   FacilitySettings,
 } from '../types/sterilizationTypes';
-import { FacilityService } from '@/services/facilityService';
+import { FacilityService } from './facilityService';
 
 // Get current facility ID for tenant isolation
 const getCurrentTenant = async (): Promise<string> => {
@@ -71,10 +71,12 @@ export class AutoclaveReceiptService {
    */
   static async uploadReceipt(
     upload: AutoclaveReceiptUpload,
-    _operator: string
+    _operator: string,
+    facilityId?: string
   ): Promise<AutoclaveReceipt> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       // Get current user for authentication and facility_id
       const {
@@ -120,11 +122,11 @@ export class AutoclaveReceiptService {
         throw new Error(`Failed to upload file: ${uploadError.message}`);
       }
 
-      // Generate signed URL for secure access
-      const { data: _signedUrlData, error: signedUrlError } =
+      // ✅ Secure signed URLs + real timestamp-based retention cleanup
+      const { data: signedUrlData, error: signedUrlError } =
         await supabase.storage
           .from('autoclave-receipts')
-          .createSignedUrl(filename, 3600); // 1-hour expiry
+          .createSignedUrl(filename, 3600); // 1 hour expiry
 
       if (signedUrlError) throw signedUrlError;
 
@@ -133,19 +135,16 @@ export class AutoclaveReceiptService {
         `[AutoclaveReceipt] Signed URL created for tenant ${currentTenant} → ${filename}`
       );
 
-      // Calculate retention date (default 24 months)
-      const retentionMonths = 24; // Default retention period
-      const retentionUntil = new Date();
-      retentionUntil.setMonth(retentionUntil.getMonth() + retentionMonths);
-
-      // Insert receipt metadata into database
+      // ✅ Schema-aligned insert (RLS-compliant)
       const { data: receiptData, error: insertError } = await supabase
         .from('autoclave_receipts')
         .insert({
-          autoclave_id: null, // Will be linked when autoclave is identified
-          receipt_number: upload.batchCode, // Using batch code as receipt number
-          facility_id: userProfile.facility_id, // Enforces tenant isolation
-          tenant_id: currentTenant, // Additional tenant scoping
+          receipt_number: upload.batchCode,
+          autoclave_id: null,
+          facility_id: userProfile.facility_id,
+          tenant_id: currentTenant,
+          photo_url: signedUrlData.signedUrl, // use signed URL for secure access
+          created_at: new Date().toISOString(),
         })
         .select()
         .single();
@@ -169,10 +168,12 @@ export class AutoclaveReceiptService {
    * Get receipts for a specific batch
    */
   static async getReceiptsByBatch(
-    batchCode: string
+    batchCode: string,
+    _facilityId?: string
   ): Promise<AutoclaveReceipt[]> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = _facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       // Get current user for facility scoping
       const {
@@ -227,10 +228,12 @@ export class AutoclaveReceiptService {
    */
   static async getAllReceipts(
     limit = 50,
-    offset = 0
+    offset = 0,
+    _facilityId?: string
   ): Promise<AutoclaveReceipt[]> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = _facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       // Get current user for facility scoping
       const {
@@ -282,9 +285,13 @@ export class AutoclaveReceiptService {
   /**
    * Delete an expired receipt
    */
-  static async deleteReceipt(receiptId: string): Promise<void> {
+  static async deleteReceipt(
+    receiptId: string,
+    _facilityId?: string
+  ): Promise<void> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = _facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       // Get current user for facility scoping
       const {
@@ -381,9 +388,10 @@ export class AutoclaveReceiptService {
   /**
    * Clean up expired receipts (called by scheduled job)
    */
-  static async cleanupExpiredReceipts(): Promise<number> {
+  static async cleanupExpiredReceipts(_facilityId?: string): Promise<number> {
     try {
-      const currentTenant = await getCurrentTenant();
+      const currentTenant = _facilityId || (await getCurrentTenant());
+      const supabase = getScopedClient(currentTenant);
 
       // Get current user for facility scoping
       const {
@@ -412,14 +420,15 @@ export class AutoclaveReceiptService {
         throw new Error('Unauthorized: tenant mismatch');
       }
 
-      // Get expired receipts with tenant scoping
-      const query = supabase
-        .from('autoclave_receipts')
-        .select('id')
-        .limit(0)
-        .eq('tenant_id', currentTenant); // Enforces tenant isolation
+      // ✅ Secure signed URLs + real timestamp-based retention cleanup
+      const expirationDate = new Date();
+      expirationDate.setMonth(expirationDate.getMonth() - 24); // 24-month retention
 
-      const { data: expiredReceipts, error: fetchError } = await query;
+      const { data: expiredReceipts, error: fetchError } = await supabase
+        .from('autoclave_receipts')
+        .select('id, photo_url')
+        .lt('created_at', expirationDate.toISOString())
+        .eq('tenant_id', currentTenant); // Enforces tenant isolation
 
       if (fetchError) {
         throw new Error(
@@ -431,28 +440,15 @@ export class AutoclaveReceiptService {
         return 0;
       }
 
-      // Delete from database with facility scoping
-      const receiptIds = (expiredReceipts as Record<string, unknown>[]).map(
-        (r: Record<string, unknown>) => r.id as string
-      );
-
-      const deleteQuery = supabase
-        .from('autoclave_receipts')
-        .delete()
-        .in('id', receiptIds)
-        .eq('tenant_id', currentTenant); // Enforces tenant isolation
-
-      const { error: deleteError } = await deleteQuery;
-
-      if (deleteError) {
-        throw new Error(
-          `Failed to delete expired receipts: ${deleteError.message}`
-        );
+      // Delete files from storage and database
+      for (const receipt of expiredReceipts) {
+        // Extract filename from signed URL for storage cleanup
+        const filename = receipt.photo_url?.split('/').pop();
+        if (filename) {
+          await supabase.storage.from('autoclave-receipts').remove([filename]);
+        }
+        await supabase.from('autoclave_receipts').delete().eq('id', receipt.id);
       }
-
-      // Delete files from storage (if we had filename storage)
-      // Note: Since we don't store filenames in the current schema,
-      // we can't clean up storage files
 
       return expiredReceipts.length;
     } catch (error) {

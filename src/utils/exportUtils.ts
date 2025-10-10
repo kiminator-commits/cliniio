@@ -72,7 +72,7 @@ export function convertToCSV(
   }
 
   // Use provided headers or extract from first object
-  const csvHeaders = headers || Object.keys(data[0]);
+  const csvHeaders = headers || (data[0] ? Object.keys(data[0]) : []);
 
   const rows = data.map((item) =>
     csvHeaders.map((header) => {
@@ -166,7 +166,7 @@ export async function convertToPDF(
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
 
-      const itemHeaders = headers || Object.keys(item);
+      const itemHeaders = headers || (item ? Object.keys(item) : []);
       const details = itemHeaders
         .filter(
           (header) => header !== 'title' && header !== 'name' && header !== 'id'

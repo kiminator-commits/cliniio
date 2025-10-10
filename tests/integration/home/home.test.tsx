@@ -9,6 +9,17 @@ import { FacilityProvider } from '../../../src/contexts/FacilityContext';
 
 // Mock hooks and stores used in HomePage
 
+// Mock the useLoginStore hook
+vi.mock('@/stores/useLoginStore', () => ({
+  useLoginStore: vi.fn((selector) => {
+    const state = {
+      authToken: 'mock-token',
+      isTokenExpired: () => false,
+    };
+    return selector(state);
+  }),
+}));
+
 // Mock the useHomeTasksManager hook
 vi.mock('@/hooks/useHomeTasksManager', () => ({
   useHomeTasksManager: () => ({
@@ -117,6 +128,15 @@ vi.mock('@/hooks/useHomeDataLoader', () => ({
     aiMetrics: null,
     sterilizationMetrics: null,
     integrationMetrics: null,
+  }),
+}));
+
+// Mock the useUser hook
+vi.mock('@/contexts/UserContext', () => ({
+  UserProvider: ({ children }: { children: React.ReactNode }) => children,
+  useUser: () => ({
+    currentUser: { id: 'user-123', email: 'test@example.com' },
+    isLoading: false,
   }),
 }));
 

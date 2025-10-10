@@ -20,18 +20,46 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
+   * Normalize non-JPEG images to JPEG format for consistency and compliance
+   */
+  const normalizeToJPEG = async (file: File): Promise<File> => {
+    if (file.type === 'image/jpeg') return file;
+
+    const imageBitmap = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = imageBitmap.width;
+    canvas.height = imageBitmap.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+
+    ctx.drawImage(imageBitmap, 0, 0);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.8)
+    );
+    if (!blob) return file;
+
+    return new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+      type: 'image/jpeg',
+    });
+  };
+
+  /**
    * Handle file selection from file input
    */
   const handleFileSelect = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file && file.type.startsWith('image/')) {
+        // ✅ Normalized desktop uploads to compressed JPEG format for consistency and compliance
+        let selectedFile = file;
+        selectedFile = await normalizeToJPEG(selectedFile);
+
         const reader = new FileReader();
         reader.onload = (e) => {
           const previewUrl = e.target?.result as string;
-          onFileSelect(file, previewUrl);
+          onFileSelect(selectedFile, previewUrl);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(selectedFile);
       }
     },
     [onFileSelect]

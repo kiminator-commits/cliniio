@@ -19,17 +19,37 @@ vi.mock('@/config/devAuthConfig', () => ({
 }));
 
 vi.mock('@/lib/getEnv', () => ({
+  getEnvVar: vi.fn().mockImplementation((key) => {
+    if (key === 'NODE_ENV') return 'test';
+    return 'mock-value';
+  }),
   isDevelopment: vi.fn(),
 }));
 
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: {
     auth: {
-      signInWithPassword: vi.fn(),
-      getUser: vi.fn(),
-      refreshSession: vi.fn(),
+      signInWithPassword: vi.fn().mockResolvedValue({
+        data: {
+          user: { id: 'mock-user', email: 'mock@example.com' },
+          session: { access_token: 'mock-token', expires_at: '2024-12-31T23:59:59Z' },
+        },
+        error: null,
+      }),
+      getUser: vi.fn().mockResolvedValue({
+        data: {
+          user: { id: 'mock-user', email: 'mock@example.com' },
+        },
+        error: null,
+      }),
+      refreshSession: vi.fn().mockResolvedValue({
+        data: {
+          session: { expires_at: '2024-12-31T23:59:59Z' },
+        },
+        error: null,
+      }),
       getSession: vi.fn(),
-      signOut: vi.fn(),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
     },
   },
 }));

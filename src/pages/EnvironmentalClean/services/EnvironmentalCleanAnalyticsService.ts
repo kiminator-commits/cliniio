@@ -172,7 +172,9 @@ export class EnvironmentalCleanAnalyticsService {
       const recentlyCleaned = roomData.map((item: EnvironmentalCleanRoom) => ({
         room: (item.room_name as string) || 'Unknown Room',
         cleanedAt: item.completed_time as string,
-        cleanedBy: item.cleaner_id ? `Cleaner ${item.cleaner_id}` : 'System',
+        cleanedBy: (item as { cleaner_id?: string }).cleaner_id
+          ? `Cleaner ${(item as { cleaner_id?: string }).cleaner_id}`
+          : 'System',
       }));
 
       return recentlyCleaned;

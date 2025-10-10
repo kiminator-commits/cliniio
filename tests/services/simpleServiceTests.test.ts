@@ -28,11 +28,29 @@ vi.mock('@/lib/supabaseClient', () => ({
       getSession: vi.fn(),
       signOut: vi.fn(),
     },
-    from: vi.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(),
+        })),
+      })),
+      insert: vi.fn(() => ({
+        select: vi.fn(),
+      })),
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          select: vi.fn(),
+        })),
+      })),
+    })),
   },
 }));
 
 vi.mock('@/lib/getEnv', () => ({
+  getEnvVar: vi.fn().mockImplementation((key) => {
+    if (key === 'NODE_ENV') return 'test';
+    return 'mock-value';
+  }),
   isDevelopment: vi.fn(() => false),
 }));
 
@@ -138,8 +156,8 @@ describe('Service Coverage Tests', () => {
       mockSignIn.mockResolvedValue({
         data: {
           session: {
-            access_token: 'token',
-            expires_at: 1735689599,
+            access_token: 'mock-token',
+            expires_at: '2024-12-31T23:59:59.000Z',
           },
           user: { id: 'user-123' },
         },
@@ -181,7 +199,7 @@ describe('Service Coverage Tests', () => {
         data: {
           session: {
             access_token: 'new-token',
-            expires_at: 1735689599,
+            expires_at: '2024-12-31T23:59:59.000Z',
           },
         },
         error: null,

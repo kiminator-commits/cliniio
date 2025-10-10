@@ -8,11 +8,20 @@ interface ErrorBoundaryState {
   error?: Error;
 }
 
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?:
+    | React.ComponentType<{ error?: Error; errorInfo?: React.ErrorInfo }>
+    | React.ReactElement;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  componentName?: string;
+}
+
 export class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
+  ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  constructor(props: { children: React.ReactNode }) {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -24,6 +33,11 @@ export class ErrorBoundary extends React.Component<
   async componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('💥 Global Error Boundary caught:', error, errorInfo);
 
+    // Call custom error handler if provided
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+
     await observabilityService.logCritical('Global React component crash', {
       error: error.message,
       stack: error.stack,
@@ -33,6 +47,23 @@ export class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
+      // Use custom fallback if provided
+      if (this.props.fallback) {
+        // Check if it's a React element (JSX) or a component type
+        if (React.isValidElement(this.props.fallback)) {
+          return this.props.fallback;
+        } else {
+          const FallbackComponent = this.props.fallback as React.ComponentType<{
+            error?: Error;
+            errorInfo?: React.ErrorInfo;
+          }>;
+          return (
+            <FallbackComponent error={this.state.error} errorInfo={undefined} />
+          );
+        }
+      }
+
+      // Default fallback UI
       return (
         <div className="p-6 text-center text-red-700 bg-red-50 rounded-xl">
           <h2 className="font-semibold mb-2">Something went wrong.</h2>

@@ -135,7 +135,7 @@ const ChecklistItemForm: React.FC<ChecklistItemFormProps> = ({
       item.requiredInventory || []
     ).map((inv) => ({
       id: inv.id,
-      facility_id: 'unknown',
+      facility_id: null,
       name: inv.name,
       quantity: inv.available,
       data: null,
@@ -144,9 +144,39 @@ const ChecklistItemForm: React.FC<ChecklistItemFormProps> = ({
       reorder_point: null,
       expiration_date: null,
       unit_cost: null,
-      category: 'Unknown',
-      status: 'Unknown',
-      location: 'Unknown',
+      category: null,
+      status: null,
+      location: null,
+      supplier: null,
+      cost: null,
+      vendor: null,
+      warranty: null,
+      maintenance_schedule: null,
+      next_due: null,
+      service_provider: null,
+      assigned_to: null,
+      notes: null,
+      tool_id: null,
+      supply_id: null,
+      equipment_id: null,
+      hardware_id: null,
+      p2_status: null,
+      serial_number: null,
+      manufacturer: null,
+      image_url: null,
+      tags: null,
+      favorite: null,
+      tracked: null,
+      barcode: null,
+      sku: null,
+      description: null,
+      current_phase: null,
+      is_active: null,
+      unit: null,
+      expiration: null,
+      purchase_date: null,
+      last_serviced: null,
+      last_updated: null,
     }));
     setSelectedInventoryItems(placeholderItems);
   };
@@ -202,6 +232,9 @@ const ChecklistItemForm: React.FC<ChecklistItemFormProps> = ({
 
       return () => clearTimeout(timeoutId);
     }
+
+    // Return empty cleanup function if no timeout was set
+    return () => {};
   };
 
   // AI Item Description Simulation

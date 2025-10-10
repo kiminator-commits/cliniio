@@ -233,12 +233,13 @@ export function generatePerformanceInsights(
   const responseTimeTrend = getPerformanceTrends('response_time')[0];
   if (
     responseTimeTrend &&
-    (responseTimeTrend as Record<string, unknown>).trend === 'degrading'
+    (responseTimeTrend as unknown as Record<string, unknown>).trend ===
+      'degrading'
   ) {
     insights.push({
       type: 'warning',
       title: 'Response Time Degradation',
-      description: `Response time has increased by ${(responseTimeTrend as Record<string, unknown>).changePercent}%`,
+      description: `Response time has increased by ${(responseTimeTrend as unknown as Record<string, unknown>).changePercent}%`,
       impact: 'medium',
       recommendations: [
         'Optimize database queries',
@@ -252,12 +253,12 @@ export function generatePerformanceInsights(
   const memoryTrend = getPerformanceTrends('memory_usage')[0];
   if (
     memoryTrend &&
-    (memoryTrend as Record<string, unknown>).trend === 'degrading'
+    (memoryTrend as unknown as Record<string, unknown>).trend === 'degrading'
   ) {
     insights.push({
       type: 'warning',
       title: 'Memory Usage Increasing',
-      description: `Memory usage has increased by ${(memoryTrend as Record<string, unknown>).changePercent}%`,
+      description: `Memory usage has increased by ${(memoryTrend as unknown as Record<string, unknown>).changePercent}%`,
       impact: 'medium',
       recommendations: [
         'Check for memory leaks',

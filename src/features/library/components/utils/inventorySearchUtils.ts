@@ -5,11 +5,15 @@ import {
 } from '../types/InventorySearchModalTypes';
 
 export const getExpiryStatus = (item: InventoryItem): ExpiryStatus | null => {
-  if (!item.data?.expiration && !item.expiryDate) return null;
+  // Safely access expiration from data object
+  const dataExpiration =
+    item.data && typeof item.data === 'object' && item.data !== null
+      ? (item.data as Record<string, unknown>).expiration
+      : null;
 
-  const expiryDate = new Date(
-    String(item.data?.expiration || item.expiryDate || '')
-  );
+  if (!dataExpiration && !item.expiryDate) return null;
+
+  const expiryDate = new Date(String(dataExpiration || item.expiryDate || ''));
   const today = new Date();
   const thirtyDaysFromNow = new Date();
   thirtyDaysFromNow.setDate(today.getDate() + 30);

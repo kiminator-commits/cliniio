@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient';
-import { Database } from '../../types/database.types';
+import { Database, Json } from '../../types/database.types';
 import {
   Facility,
   Operator,
@@ -179,15 +179,9 @@ export class BIFacilityCycleService {
         cycle_number: cycleNumber,
         start_time: new Date().toISOString(),
         status: cycleData.status || 'pending',
-        parameters:
-          (cycleData.cycle_parameters as unknown as Record<string, unknown>) ||
-          {},
-        results:
-          (cycleData.environmental_factors as unknown as Record<
-            string,
-            unknown
-          >) || {},
-        tools: (cycleData.tools as unknown as unknown[]) || [],
+        parameters: (cycleData.cycle_parameters as unknown as Json) || {},
+        results: (cycleData.environmental_factors as unknown as Json) || {},
+        tools: (cycleData.tools as unknown as Json) || [],
         notes: cycleData.notes,
         autoclave_id: 'default-autoclave', // Default autoclave ID
         tool_batch_id: 'default-batch', // Default batch ID

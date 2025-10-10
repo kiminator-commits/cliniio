@@ -143,16 +143,16 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
           data !== null &&
           'streak' in data &&
           typeof (data as Record<string, unknown>).streak === 'number' &&
-          (data as Record<string, unknown>).streak >= 0 &&
+          Number((data as Record<string, unknown>).streak) >= 0 &&
           'level' in data &&
           typeof (data as Record<string, unknown>).level === 'number' &&
-          (data as Record<string, unknown>).level >= 1 &&
+          Number((data as Record<string, unknown>).level) >= 1 &&
           'rank' in data &&
           typeof (data as Record<string, unknown>).rank === 'number' &&
-          (data as Record<string, unknown>).rank >= 1 &&
+          Number((data as Record<string, unknown>).rank) >= 1 &&
           'totalScore' in data &&
           typeof (data as Record<string, unknown>).totalScore === 'number' &&
-          (data as Record<string, unknown>).totalScore >= 0
+          Number((data as Record<string, unknown>).totalScore) >= 0
         );
       };
 

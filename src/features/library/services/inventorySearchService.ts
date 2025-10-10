@@ -59,15 +59,23 @@ class InventorySearchServiceImpl implements InventorySearchService {
 
       // Apply additional filters that aren't handled by the inventory service
       if (filters.manufacturer && !filters.searchQuery) {
-        filteredItems = filteredItems.filter(
-          (item) => item.data?.manufacturer === filters.manufacturer
-        );
+        filteredItems = filteredItems.filter((item) => {
+          const dataManufacturer =
+            item.data && typeof item.data === 'object' && item.data !== null
+              ? (item.data as Record<string, unknown>).manufacturer
+              : null;
+          return dataManufacturer === filters.manufacturer;
+        });
       }
 
       if (filters.supplier && !filters.searchQuery) {
-        filteredItems = filteredItems.filter(
-          (item) => item.data?.supplier === filters.supplier
-        );
+        filteredItems = filteredItems.filter((item) => {
+          const dataSupplier =
+            item.data && typeof item.data === 'object' && item.data !== null
+              ? (item.data as Record<string, unknown>).supplier
+              : null;
+          return dataSupplier === filters.supplier;
+        });
       }
 
       // Apply expiry date filter
@@ -77,10 +85,15 @@ class InventorySearchServiceImpl implements InventorySearchService {
         thirtyDaysFromNow.setDate(today.getDate() + 30);
 
         filteredItems = filteredItems.filter((item) => {
-          if (!item.data?.expiration && !item.expiration_date) return false;
+          const dataExpiration =
+            item.data && typeof item.data === 'object' && item.data !== null
+              ? (item.data as Record<string, unknown>).expiration
+              : null;
+
+          if (!dataExpiration && !item.expiration_date) return false;
 
           const expiryDate = new Date(
-            String(item.data?.expiration || item.expiration_date || '')
+            String(dataExpiration || item.expiration_date || '')
           );
 
           switch (filters.expiryDate) {
@@ -114,14 +127,23 @@ class InventorySearchServiceImpl implements InventorySearchService {
               aValue = a.quantity || 0;
               bValue = b.quantity || 0;
               break;
-            case 'expiration':
+            case 'expiration': {
+              const aDataExpiration =
+                a.data && typeof a.data === 'object' && a.data !== null
+                  ? (a.data as Record<string, unknown>).expiration
+                  : null;
+              const bDataExpiration =
+                b.data && typeof b.data === 'object' && b.data !== null
+                  ? (b.data as Record<string, unknown>).expiration
+                  : null;
               aValue = new Date(
-                String(a.data?.expiration || a.expiration_date || '')
+                String(aDataExpiration || a.expiration_date || '')
               );
               bValue = new Date(
-                String(b.data?.expiration || b.expiration_date || '')
+                String(bDataExpiration || b.expiration_date || '')
               );
               break;
+            }
             case 'unit_cost':
               aValue = a.unit_cost || 0;
               bValue = b.unit_cost || 0;
@@ -154,7 +176,7 @@ class InventorySearchServiceImpl implements InventorySearchService {
         return [];
       }
 
-      const categories = Array.from(
+      const categories: string[] = Array.from(
         new Set(
           (response.data || [])
             .map((item) => item.category)
@@ -178,10 +200,16 @@ class InventorySearchServiceImpl implements InventorySearchService {
         return [];
       }
 
-      const manufacturers = Array.from(
+      const manufacturers: string[] = Array.from(
         new Set(
           (response.data || [])
-            .map((item) => item.data?.manufacturer)
+            .map((item) => {
+              const dataManufacturer =
+                item.data && typeof item.data === 'object' && item.data !== null
+                  ? (item.data as Record<string, unknown>).manufacturer
+                  : null;
+              return dataManufacturer;
+            })
             .filter((manufacturer): manufacturer is string =>
               Boolean(manufacturer)
             )
@@ -204,10 +232,16 @@ class InventorySearchServiceImpl implements InventorySearchService {
         return [];
       }
 
-      const suppliers = Array.from(
+      const suppliers: string[] = Array.from(
         new Set(
           (response.data || [])
-            .map((item) => item.data?.supplier)
+            .map((item) => {
+              const dataSupplier =
+                item.data && typeof item.data === 'object' && item.data !== null
+                  ? (item.data as Record<string, unknown>).supplier
+                  : null;
+              return dataSupplier;
+            })
             .filter((supplier): supplier is string => Boolean(supplier))
         )
       );
@@ -228,7 +262,7 @@ class InventorySearchServiceImpl implements InventorySearchService {
         return [];
       }
 
-      const locations = Array.from(
+      const locations: string[] = Array.from(
         new Set(
           (response.data || [])
             .map((item) => item.location)
@@ -252,7 +286,7 @@ class InventorySearchServiceImpl implements InventorySearchService {
         return [];
       }
 
-      const statuses = Array.from(
+      const statuses: string[] = Array.from(
         new Set(
           (response.data || [])
             .map((item) => item.status)

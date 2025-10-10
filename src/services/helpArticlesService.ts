@@ -29,6 +29,7 @@ export interface HelpArticlePreview {
   priority: number;
   is_featured: boolean;
   view_count: number;
+  is_published: boolean;
 }
 
 class HelpArticlesService {

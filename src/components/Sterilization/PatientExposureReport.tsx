@@ -10,7 +10,7 @@ import {
   mdiDownload,
   mdiPrinter,
 } from '@mdi/js';
-import { biFailureService } from '../../services/bi/failure/index';
+import { BIFailureService } from '../../services/bi/failure/index';
 import { useSterilizationStore } from '@/store/sterilizationStore';
 import { exportService } from '@/services/bi/failure/exportService';
 
@@ -84,7 +84,7 @@ interface ExposureReport {
   }>;
 }
 
-export const ExposureReport: React.FC<ExposureReportProps> = ({
+export const PatientExposureReport: React.FC<ExposureReportProps> = ({
   isOpen,
   onClose,
   incidentId,
@@ -105,7 +105,7 @@ export const ExposureReport: React.FC<ExposureReportProps> = ({
       }
 
       const exposureReport =
-        await biFailureService.generateExposureReport(currentIncidentId);
+        await BIFailureService.generatePatientExposureReport(currentIncidentId);
       setReport(exposureReport);
     } catch (err) {
       setError(

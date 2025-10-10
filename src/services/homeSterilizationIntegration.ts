@@ -223,7 +223,7 @@ class HomeSterilizationIntegrationService {
     try {
       const tools = await ToolService.getToolsByFacilityAndStatus(
         facilityId,
-        'in_cycle' as string
+        'in_cycle' as 'active' | 'dirty' | 'clean' | 'problem' | 'new_barcode'
       );
       return tools.length;
     } catch (error) {
@@ -236,7 +236,7 @@ class HomeSterilizationIntegrationService {
     try {
       const tools = await ToolService.getToolsByFacilityAndStatus(
         facilityId,
-        'available' as string
+        'available' as 'active' | 'dirty' | 'clean' | 'problem' | 'new_barcode'
       );
       // Filter by today's date since ToolService doesn't handle date filtering yet
       const today = new Date().toISOString().split('T')[0];

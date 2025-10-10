@@ -1,6 +1,6 @@
-import { supabase } from '@/lib/supabaseClient';
-import { Database } from '@/types/database.types';
-import { ToolStatus } from '@/types/toolTypes';
+import { supabase } from '../../lib/supabaseClient';
+import { Database } from '../../types/database.types';
+import { ToolStatus } from '../../types/toolTypes';
 
 export type ToolRow = Database['public']['Tables']['tools']['Row'];
 type ToolUpdate = Database['public']['Tables']['tools']['Update'];
@@ -117,13 +117,16 @@ export const ToolService = {
         model: 'Test Model',
         manufacturer: 'Test Manufacturer',
         serial_number: 'TEST-001',
+        is_p2_tool: false,
       } as unknown as ToolRow;
     }
 
     const facilityId = await getCurrentFacilityId();
     const { data, error } = await supabase
       .from('tools')
-      .select('*')
+      .select(
+        'id, tool_name, barcode, facility_id, current_cycle_id, status, is_p2_tool'
+      )
       .eq('barcode', barcode)
       .eq('status', status)
       .eq('facility_id', facilityId)
@@ -135,7 +138,9 @@ export const ToolService = {
   async getToolsByFacilityAndStatus(facilityId: string, status: ToolStatus) {
     const { data, error } = await supabase
       .from('tools')
-      .select('*')
+      .select(
+        'id, tool_name, barcode, facility_id, current_cycle_id, status, is_p2_tool'
+      )
       .eq('facility_id', facilityId)
       .eq('status', status);
     if (error) throw error;
@@ -146,7 +151,9 @@ export const ToolService = {
     const facilityId = await getCurrentFacilityId();
     const { data, error } = await supabase
       .from('tools')
-      .select('*')
+      .select(
+        'id, tool_name, barcode, facility_id, current_cycle_id, status, is_p2_tool'
+      )
       .in('status', statuses)
       .eq('facility_id', facilityId);
     if (error) throw error;
@@ -274,6 +281,81 @@ export const ToolService = {
       .select();
     if (error) throw error;
     return data ?? [];
+  },
+
+  async persistProblemTool(
+    toolId: string,
+    problemType: string,
+    notes?: string
+  ) {
+    // Handle mock tool case - don't try to update database for mock tools
+    if (toolId.startsWith('mock-tool-')) {
+      console.log('🧪 Skipping database update for mock tool:', toolId);
+      return {
+        id: toolId,
+        status: 'problem',
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    const facilityId = await getCurrentFacilityId();
+    const userId = await _getCurrentUserId();
+
+    // Update tool status to 'problem'
+    const updates: Record<string, unknown> = {
+      status: 'problem',
+      facility_id: facilityId,
+      updated_at: new Date().toISOString(),
+      notes: notes
+        ? `PROBLEM: ${problemType} - ${notes}`
+        : `PROBLEM: ${problemType}`,
+    };
+
+    const { data, error } = await supabase
+      .from('tools')
+      .update(updates)
+      .eq('id', toolId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Remove tool from any active cycle
+    await this.clearCycleAssignment([toolId], 'problem');
+
+    // Log audit event
+    const { error: auditError } = await supabase.from('audit_logs').insert({
+      id: crypto.randomUUID(),
+      module: 'sterilization',
+      table_name: 'tools',
+      action: 'tool_marked_problem',
+      record_id: toolId,
+      user_id: userId,
+      facility_id: facilityId,
+      old_values: { status: 'available' },
+      new_values: {
+        status: 'problem',
+        notes: (updates as Record<string, unknown>).notes,
+      },
+      metadata: {
+        problem_type: problemType,
+        problem_notes: notes,
+        timestamp: new Date().toISOString(),
+      },
+      created_at: new Date().toISOString(),
+    });
+
+    if (auditError) {
+      console.error('Failed to log problem tool audit event:', auditError);
+    }
+
+    await supabase
+      .from('inventory_items')
+      .update({ is_available: false })
+      .eq('tool_id', toolId)
+      .eq('facility_id', facilityId);
+
+    return data;
   },
 
   // Add more methods like:

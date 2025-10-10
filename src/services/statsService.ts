@@ -1,4 +1,17 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
+
+export interface CumulativeStats {
+  toolsSterilized: number;
+  inventoryChecks: number;
+  perfectDays: number;
+  totalTasks: number;
+  completedTasks: number;
+  currentStreak: number;
+  bestStreak: number;
+  totalPoints: number;
+  challengesCompleted: number;
+  totalChallenges: number;
+}
 
 export const statsService = {
   async fetchStats() {

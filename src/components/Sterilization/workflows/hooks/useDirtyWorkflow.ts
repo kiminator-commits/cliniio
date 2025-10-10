@@ -4,6 +4,21 @@ import { useTimerStore } from '@/store/timerStore';
 import { Tool } from '@/types/sterilizationTypes';
 import { PHASE_CONFIG } from '@/config/workflowConfig';
 
+// Helper function to show error messages
+const showErrorMessage = (message: string) => {
+  // Try to use global toast if available, otherwise use console
+  if (
+    typeof window !== 'undefined' &&
+    (window as { toast?: { error?: (msg: string) => void } }).toast?.error
+  ) {
+    (window as { toast: { error: (msg: string) => void } }).toast.error(
+      message
+    );
+  } else {
+    console.warn('⚠️', message);
+  }
+};
+
 interface UseDirtyWorkflowProps {
   scannedData: string;
   toolId?: string;
@@ -62,75 +77,89 @@ export const useDirtyWorkflow = ({
   }, [currentCycle, tool]);
 
   // Handle tool scanning
-  const handleScanTool = useCallback(async () => {
-    setIsScanning(true);
-    setScanMessage(null);
-
-    try {
-      // Simulate scanning delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Use the actual scannedData instead of random selection
-      const barcodeToScan = scannedData || 'FORC001'; // Fallback for testing
-
-      const foundTool = findToolByBarcode(barcodeToScan);
-
-      if (!foundTool) {
-        setScanMessage({
-          type: 'error',
-          text: `Tool with barcode "${barcodeToScan}" not found in inventory.`,
-        });
-        return;
-      }
-
-      // Check if tool is already scanned
-      if (scannedTools.find((t) => t.id === foundTool.id)) {
-        setScanMessage({
-          type: 'error',
-          text: `Tool "${foundTool.name}" already scanned.`,
-        });
-        return;
-      }
-
-      // Check if tool needs replacement (200 cycles reached)
-      const sterilizationStore = useSterilizationStore.getState();
+  const handleScanTool = useCallback(
+    async (scannedData?: string) => {
+      // 🚫 Stop using hardcoded fallback
       if (
-        sterilizationStore.checkToolReplacementNeeded &&
-        sterilizationStore.checkToolReplacementNeeded(foundTool.id)
+        !scannedData ||
+        typeof scannedData !== 'string' ||
+        scannedData.trim() === ''
       ) {
-        setReplacementAlert({ show: true, tool: foundTool });
+        // Use helper function to show error message
+        showErrorMessage('No barcode detected — please rescan.');
         return;
       }
 
-      // Add to scanned tools list (both single and batch modes)
-      setScannedTools((prev) => {
-        const newScannedTools = [...prev, foundTool];
+      const barcode = scannedData.trim();
+      console.info('✅ Scanned barcode received:', barcode);
 
-        // Set success message with the correct count
-        if (batchMode) {
+      setIsScanning(true);
+      setScanMessage(null);
+
+      try {
+        // Simulate scanning delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const foundTool = findToolByBarcode(barcode);
+
+        if (!foundTool) {
           setScanMessage({
-            type: 'success',
-            text: `Tool "${foundTool.name}" added to batch. Total: ${newScannedTools.length} tools.`,
+            type: 'error',
+            text: `Tool with barcode "${barcode}" not found in inventory.`,
           });
-        } else {
-          setScanMessage({
-            type: 'success',
-            text: `Tool "${foundTool.name}" scanned successfully. Ready for sterilization.`,
-          });
+          return;
         }
 
-        return newScannedTools;
-      });
-    } catch (error) {
-      setScanMessage({
-        type: 'error',
-        text: 'Failed to scan tool. Please try again.',
-      });
-      console.error('Scan error:', error);
-    } finally {
-      setIsScanning(false);
-    }
-  }, [findToolByBarcode, batchMode, scannedTools, scannedData]);
+        // Check if tool is already scanned
+        if (scannedTools.find((t) => t.id === foundTool.id)) {
+          setScanMessage({
+            type: 'error',
+            text: `Tool "${foundTool.name}" already scanned.`,
+          });
+          return;
+        }
+
+        // Check if tool needs replacement (200 cycles reached)
+        const sterilizationStore = useSterilizationStore.getState();
+        if (
+          sterilizationStore.checkToolReplacementNeeded &&
+          sterilizationStore.checkToolReplacementNeeded(foundTool.id)
+        ) {
+          setReplacementAlert({ show: true, tool: foundTool });
+          return;
+        }
+
+        // Add to scanned tools list (both single and batch modes)
+        setScannedTools((prev) => {
+          const newScannedTools = [...prev, foundTool];
+
+          // Set success message with the correct count
+          if (batchMode) {
+            setScanMessage({
+              type: 'success',
+              text: `Tool "${foundTool.name}" added to batch. Total: ${newScannedTools.length} tools.`,
+            });
+          } else {
+            setScanMessage({
+              type: 'success',
+              text: `Tool "${foundTool.name}" scanned successfully. Ready for sterilization.`,
+            });
+          }
+
+          return newScannedTools;
+        });
+      } catch (error) {
+        setScanMessage({
+          type: 'error',
+          text: 'Failed to scan tool. Please try again.',
+        });
+        console.error('Scan error:', error);
+      } finally {
+        setIsScanning(false);
+      }
+    },
+    [findToolByBarcode, batchMode, scannedTools]
+  );
 
   // Get cycle status for display
   const cycleStatus = useCallback(() => {
@@ -276,6 +305,7 @@ export const useDirtyWorkflow = ({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [scanMessage]);
 
   return {

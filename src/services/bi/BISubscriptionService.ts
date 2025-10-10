@@ -1,5 +1,5 @@
-import { isSupabaseConfigured } from '@/lib/supabase';
-import { RealtimeManager } from '@/services/_core/realtimeManager';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { RealtimeManager } from '../_core/realtimeManager';
 
 /**
  * BI Subscription Service

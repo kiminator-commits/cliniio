@@ -62,13 +62,14 @@ export const calculateAnalyticsFromViewData = (
   );
   const averageCleaningTime =
     completedRooms.length > 0
-      ? completedRooms.reduce(
-          (sum: number, room) =>
+      ? completedRooms.reduce((sum: number, room) => {
+          const duration =
+            Number((room as Record<string, unknown>).duration_seconds) || 0;
+          return (
             sum +
-            (((room as Record<string, unknown>).duration_seconds as number) ||
-              0),
-          0
-        ) / completedRooms.length
+            (typeof duration === 'number' && !isNaN(duration) ? duration : 0)
+          );
+        }, 0) / completedRooms.length
       : 0;
 
   return {

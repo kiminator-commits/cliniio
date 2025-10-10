@@ -32,8 +32,8 @@ export const parseBarcodeData = (barcodeData: string): BarcodeData | null => {
   const parts = barcodeData.split('-');
 
   if (parts.length >= 3) {
-    const prefix = parts[0].toUpperCase();
-    const itemId = parts[1];
+    const prefix = parts[0]?.toUpperCase() || '';
+    const itemId = parts[1] || '';
     const itemName = parts.slice(2).join('-');
 
     // Determine category based on prefix
@@ -82,8 +82,8 @@ export const parseBarcodeData = (barcodeData: string): BarcodeData | null => {
   // Handle simple barcode format (just the barcode itself)
   if (barcodeData.length > 0) {
     return {
-      itemId: barcodeData,
-      itemName: barcodeData,
+      itemId: barcodeData || '',
+      itemName: barcodeData || '',
       category: 'tools', // Default category
     };
   }

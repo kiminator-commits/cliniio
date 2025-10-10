@@ -1,12 +1,12 @@
 import React from 'react';
 import { vi } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act } from '../../utils/testUtils';
 
 import { PatientExposureReport } from '../../../src/components/Sterilization/PatientExposureReport';
-import { BIFailureService } from '../../../src/services/biFailureService';
+import { BIFailureService } from '../../../src/services/bi/failure/index';
 
 // Mock the BIFailureService
-vi.mock('../../../src/services/biFailureService');
+vi.mock('../../../src/services/bi/failure/index');
 const mockBIFailureService = BIFailureService as vi.Mocked<
   typeof BIFailureService
 >;
@@ -32,33 +32,23 @@ vi.mock('react-dom', () => ({
 
 const mockExposureReport = {
   incidentNumber: 'INC-2024-001',
-  totalPatientsExposed: 15,
-  exposureSummary: {
-    totalPatientsExposed: 15,
-    exposureWindowPatients: 12,
-    quarantineBreachPatients: 3,
-  },
-  riskBreakdown: {
-    high: 5,
-    medium: 7,
-    low: 3,
-  },
-  patientDetails: [
+  totalRoomsAffected: 3,
+  roomDetails: [
     {
-      patientId: 'P001',
-      patientName: 'John Doe',
-      riskLevel: 'high' as const,
-      exposureType: 'exposure_window' as const,
-      lastProcedureDate: '2024-01-14',
-      affectedTools: ['Tool-001', 'Tool-002'],
+      roomId: 'ROOM-001',
+      roomName: 'Operating Room 1',
+      contaminationDate: '2024-01-15T10:00:00Z',
+      roomUsedDate: '2024-01-15T09:00:00Z',
+      usersInvolved: ['Dr. Smith', 'Nurse Johnson'],
+      contaminatedTools: ['Tool-001', 'Tool-002'],
     },
     {
-      patientId: 'P002',
-      patientName: 'Jane Smith',
-      riskLevel: 'medium' as const,
-      exposureType: 'quarantine_breach' as const,
-      lastProcedureDate: '2024-01-13',
-      affectedTools: ['Tool-003'],
+      roomId: 'ROOM-002',
+      roomName: 'Operating Room 2',
+      contaminationDate: '2024-01-15T14:00:00Z',
+      roomUsedDate: '2024-01-15T13:00:00Z',
+      usersInvolved: ['Dr. Brown'],
+      contaminatedTools: ['Tool-003'],
     },
   ],
 };
@@ -89,7 +79,7 @@ describe('PatientExposureReport UI', () => {
     it('should not render when isOpen is false', () => {
       render(<PatientExposureReport isOpen={false} onClose={mockOnClose} />);
       expect(
-        screen.queryByText('Patient Exposure Report')
+        screen.queryByText('Exposure Report')
       ).not.toBeInTheDocument();
     });
 
@@ -98,10 +88,10 @@ describe('PatientExposureReport UI', () => {
         render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
       });
 
-      expect(screen.getByText('Patient Exposure Report')).toBeInTheDocument();
+      expect(screen.getByText('Exposure Report')).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Detailed analysis of patient exposure during BI failure incident'
+          'Tools scanned dirty in "IN USE" rooms during BI failure risk window'
         )
       ).toBeInTheDocument();
     });
@@ -118,205 +108,55 @@ describe('PatientExposureReport UI', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('15')).toBeInTheDocument(); // Total exposed
-        expect(screen.getByText('12')).toBeInTheDocument(); // Exposure window
-        const breachCounts = screen.getAllByText('3');
-        expect(breachCounts).toHaveLength(2);
+        expect(screen.getByText('"IN USE" Rooms with Tool Contamination')).toBeInTheDocument();
+        expect(screen.getByText('3')).toBeInTheDocument(); // totalRoomsAffected
+        expect(screen.getByText('Room Exposure Analysis')).toBeInTheDocument();
       });
     });
   });
 
   describe('Summary Cards', () => {
-    it('should display total exposed patients', async () => {
+    it('should display total rooms affected', async () => {
       await act(async () => {
         render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Total Exposed')).toBeInTheDocument();
-        expect(screen.getByText('15')).toBeInTheDocument();
-        const labels = screen.getAllByText('patients');
-        expect(labels).toHaveLength(3);
+        expect(screen.getByText('"IN USE" Rooms with Tool Contamination')).toBeInTheDocument();
+          expect(screen.getByText('3')).toBeInTheDocument(); // totalRoomsAffected
+        expect(screen.getByText('Risk Window Analysis:')).toBeInTheDocument();
       });
     });
 
-    it('should display exposure window patients', async () => {
+    it('should display room exposure data when available', async () => {
       await act(async () => {
         render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
       });
 
       await waitFor(() => {
-        expect(screen.getAllByText('Exposure Window')).toHaveLength(2); // One in summary, one in table
-        expect(screen.getAllByText('12')).toHaveLength(1); // Only in summary
-      });
-    });
-
-    it('should display quarantine breach patients', async () => {
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        expect(screen.getAllByText('Quarantine Breach')).toHaveLength(2); // One in summary, one in table
-        expect(screen.getAllByText('3')).toHaveLength(2); // One in summary, one in risk breakdown
+        expect(screen.getByText('Room Exposure Analysis')).toBeInTheDocument();
+        expect(screen.getByText('Operating Room 1')).toBeInTheDocument();
+        expect(screen.getByText('Operating Room 2')).toBeInTheDocument();
+        expect(screen.getByText('Tool-001')).toBeInTheDocument();
+        expect(screen.getByText('Tool-002')).toBeInTheDocument();
+        expect(screen.getByText('Tool-003')).toBeInTheDocument();
       });
     });
   });
 
-  describe('Risk Breakdown', () => {
-    it('should display risk level breakdown', async () => {
+  describe('Room Data Display', () => {
+    it('should display room exposure data table', async () => {
       await act(async () => {
         render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Risk Level Breakdown')).toBeInTheDocument();
-        expect(screen.getByText('high Risk')).toBeInTheDocument();
-        expect(screen.getByText('medium Risk')).toBeInTheDocument();
-        expect(screen.getByText('low Risk')).toBeInTheDocument();
-        expect(screen.getAllByText('5')).toHaveLength(1); // High risk count
-        expect(screen.getAllByText('7')).toHaveLength(1); // Medium risk count
-        expect(screen.getAllByText('3')).toHaveLength(2); // Low risk count (also in quarantine breach)
-      });
-    });
-  });
-
-  describe('Patient Details Table', () => {
-    it('should display patient details table when data is available', async () => {
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText('Patient Details')).toBeInTheDocument();
-        expect(screen.getByText('Patient ID')).toBeInTheDocument();
-        expect(screen.getByText('Name')).toBeInTheDocument();
-        expect(screen.getByText('Risk Level')).toBeInTheDocument();
-        expect(screen.getByText('Exposure Type')).toBeInTheDocument();
-        expect(screen.getByText('Last Procedure')).toBeInTheDocument();
-      });
-    });
-
-    it('should display patient data in table', async () => {
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText('P001')).toBeInTheDocument();
-        expect(screen.getByText('John Doe')).toBeInTheDocument();
-        expect(screen.getByText('high')).toBeInTheDocument();
-        expect(screen.getAllByText('Exposure Window')).toHaveLength(2); // One in summary, one in table
-        expect(screen.getByText('P002')).toBeInTheDocument();
-        expect(screen.getByText('Jane Smith')).toBeInTheDocument();
-        expect(screen.getByText('medium')).toBeInTheDocument();
-        expect(screen.getAllByText('Quarantine Breach')).toHaveLength(2); // One in summary, one in table
-      });
-    });
-
-    it('should not display patient details table when no data', async () => {
-      const reportWithoutDetails = {
-        ...mockExposureReport,
-        patientDetails: undefined,
-      };
-      mockBIFailureService.generatePatientExposureReport.mockResolvedValue(
-        reportWithoutDetails
-      );
-
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByText('Patient Details')).not.toBeInTheDocument();
-      });
-    });
-
-    it('should not display patient details table when empty array', async () => {
-      const reportWithEmptyDetails = {
-        ...mockExposureReport,
-        patientDetails: [],
-      };
-      mockBIFailureService.generatePatientExposureReport.mockResolvedValue(
-        reportWithEmptyDetails
-      );
-
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByText('Patient Details')).not.toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Action Buttons', () => {
-    it('should display export and print buttons', async () => {
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText('Export Report')).toBeInTheDocument();
-        expect(screen.getByText('Print Report')).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Risk Level Styling', () => {
-    it('should apply correct styling for high risk level', async () => {
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        const highRiskElement = screen.getByText('high');
-        expect(highRiskElement).toBeInTheDocument();
-        // Check that the parent element has the correct styling classes
-        const parentElement = highRiskElement.closest('span');
-        expect(parentElement).toHaveClass(
-          'text-red-600',
-          'bg-red-50',
-          'border-red-200'
-        );
-      });
-    });
-
-    it('should apply correct styling for medium risk level', async () => {
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        const mediumRiskElement = screen.getByText('medium');
-        expect(mediumRiskElement).toBeInTheDocument();
-        const parentElement = mediumRiskElement.closest('span');
-        expect(parentElement).toHaveClass(
-          'text-orange-600',
-          'bg-orange-50',
-          'border-orange-200'
-        );
-      });
-    });
-
-    it('should apply correct styling for low risk level', async () => {
-      await act(async () => {
-        render(<PatientExposureReport isOpen={true} onClose={mockOnClose} />);
-      });
-
-      await waitFor(() => {
-        // Look for "low" in the risk breakdown section
-        const lowRiskElement = screen.getByText('low Risk');
-        expect(lowRiskElement).toBeInTheDocument();
-        // Check that the parent element has the correct styling classes
-        // The styling is on the grandparent div, not the immediate parent
-        const parentElement = lowRiskElement.closest('div').parentElement;
-        expect(parentElement).toHaveClass(
-          'text-green-600',
-          'bg-green-50',
-          'border-green-200'
-        );
+        expect(screen.getByText('Room Exposure Analysis')).toBeInTheDocument();
+        expect(screen.getByText('Operating Room 1')).toBeInTheDocument();
+        expect(screen.getByText('Operating Room 2')).toBeInTheDocument();
+        expect(screen.getByText('Dr. Smith')).toBeInTheDocument();
+        expect(screen.getByText('Nurse Johnson')).toBeInTheDocument();
+        expect(screen.getByText('Dr. Brown')).toBeInTheDocument();
       });
     });
   });
@@ -352,8 +192,9 @@ describe('PatientExposureReport UI', () => {
       await waitFor(() => {
         expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
         const h3Headings = screen.getAllByRole('heading', { level: 3 });
-        expect(h3Headings).toHaveLength(2); // Risk Level Breakdown and Patient Details
+        expect(h3Headings).toHaveLength(1); // Only "Room Exposure Analysis" heading
       });
     });
   });
 });
+

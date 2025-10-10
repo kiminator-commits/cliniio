@@ -1,6 +1,8 @@
 export const getRandomBarcode = (): string => {
   const demoBarcodes = ['SCAL001', 'FORC001', 'RETR001', 'SCAL002', 'FORC002'];
-  return demoBarcodes[Math.floor(Math.random() * demoBarcodes.length)];
+  return (
+    demoBarcodes[Math.floor(Math.random() * demoBarcodes.length)] || 'SCAL001'
+  );
 };
 
 export const getRandomRoomBarcode = (): string => {
@@ -14,5 +16,7 @@ export const getRandomRoomBarcode = (): string => {
     'PHY001',
     'ADM001',
   ];
-  return roomBarcodes[Math.floor(Math.random() * roomBarcodes.length)];
+  return (
+    roomBarcodes[Math.floor(Math.random() * roomBarcodes.length)] || 'OR001'
+  );
 };

@@ -3,8 +3,8 @@
  * Handles formatting, mapping, parsing, and validation functions
  */
 
-import { InventoryItem } from '@/types/inventoryTypes';
-import { InventoryItemData } from '@/types/inventoryActionTypes';
+import { InventoryItem } from '../../types/inventoryTypes';
+import { InventoryItemData } from '../../types/inventoryActionTypes';
 
 /**
  * Validate inventory item data

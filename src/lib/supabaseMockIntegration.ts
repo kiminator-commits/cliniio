@@ -277,36 +277,74 @@ export function createMockClientWithResponses(responses: {
   // Override auth responses if provided
   if (responses.auth) {
     if (responses.auth.getUser) {
-      (mockClient.auth.getUser as jest.Mock).mockResolvedValue(
-        responses.auth.getUser
-      );
+      (
+        mockClient.auth.getUser as {
+          mockResolvedValue: (
+            value: () => Promise<{
+              data: { user: unknown } | null;
+              error: unknown;
+            }>
+          ) => void;
+        }
+      ).mockResolvedValue(responses.auth.getUser);
     }
     if (responses.auth.getSession) {
-      (mockClient.auth.getSession as jest.Mock).mockResolvedValue(
-        responses.auth.getSession
-      );
+      (
+        mockClient.auth.getSession as {
+          mockResolvedValue: (
+            value: () => Promise<{
+              data: { session: unknown } | null;
+              error: unknown;
+            }>
+          ) => void;
+        }
+      ).mockResolvedValue(responses.auth.getSession);
     }
     if (responses.auth.signIn) {
-      (mockClient.auth.signIn as jest.Mock).mockResolvedValue(
-        responses.auth.signIn
-      );
+      (
+        mockClient.auth.signIn as {
+          mockResolvedValue: (
+            value: (credentials: {
+              email: string;
+              password: string;
+            }) => Promise<{ data: unknown; error: unknown }>
+          ) => void;
+        }
+      ).mockResolvedValue(responses.auth.signIn);
     }
     if (responses.auth.signUp) {
-      (mockClient.auth.signUp as jest.Mock).mockResolvedValue(
-        responses.auth.signUp
-      );
+      (
+        mockClient.auth.signUp as {
+          mockResolvedValue: (
+            value: (credentials: {
+              email: string;
+              password: string;
+            }) => Promise<{ data: unknown; error: unknown }>
+          ) => void;
+        }
+      ).mockResolvedValue(responses.auth.signUp);
     }
     if (responses.auth.signOut) {
-      (mockClient.auth.signOut as jest.Mock).mockResolvedValue(
-        responses.auth.signOut
-      );
+      (
+        mockClient.auth.signOut as {
+          mockResolvedValue: (value: () => Promise<{ error: unknown }>) => void;
+        }
+      ).mockResolvedValue(responses.auth.signOut);
     }
   }
 
   // Override database responses if provided
   if (responses.database) {
     const originalFrom = mockClient.from;
-    (mockClient.from as jest.Mock).mockImplementation(
+    (
+      mockClient.from as {
+        mockImplementation: (
+          fn: <T extends keyof Database['public']['Tables']>(
+            table: T
+          ) => MockTableBuilder
+        ) => void;
+      }
+    ).mockImplementation(
       <T extends keyof Database['public']['Tables']>(table: T) => {
         const tableBuilder = originalFrom(table as string) as MockTableBuilder;
 
@@ -316,10 +354,10 @@ export function createMockClientWithResponses(responses: {
             .fn()
             .mockImplementation((columns?: string) => {
               const selectBuilder = originalSelect(columns);
-              (selectBuilder as jest.Mock).then = vi
+              (selectBuilder as MockQueryBuilder).then = vi
                 .fn()
                 .mockResolvedValue(responses.database!.select);
-              (selectBuilder as jest.Mock).single = vi
+              (selectBuilder as MockQueryBuilder).single = vi
                 .fn()
                 .mockResolvedValue(responses.database!.select);
               return selectBuilder;
@@ -330,10 +368,10 @@ export function createMockClientWithResponses(responses: {
           const originalInsert = tableBuilder.insert;
           tableBuilder.insert = vi.fn().mockImplementation((data: unknown) => {
             const insertBuilder = originalInsert(data);
-            (insertBuilder as jest.Mock).then = vi
+            (insertBuilder as MockQueryBuilder).then = vi
               .fn()
               .mockResolvedValue(responses.database!.insert);
-            (insertBuilder as jest.Mock).single = vi
+            (insertBuilder as MockQueryBuilder).single = vi
               .fn()
               .mockResolvedValue(responses.database!.insert);
             return insertBuilder;
@@ -344,10 +382,10 @@ export function createMockClientWithResponses(responses: {
           const originalUpdate = tableBuilder.update;
           tableBuilder.update = vi.fn().mockImplementation((data: unknown) => {
             const updateBuilder = originalUpdate(data);
-            (updateBuilder as jest.Mock).then = vi
+            (updateBuilder as MockQueryBuilder).then = vi
               .fn()
               .mockResolvedValue(responses.database!.update);
-            (updateBuilder as jest.Mock).single = vi
+            (updateBuilder as MockQueryBuilder).single = vi
               .fn()
               .mockResolvedValue(responses.database!.update);
             return updateBuilder;
@@ -358,7 +396,7 @@ export function createMockClientWithResponses(responses: {
           const originalDelete = tableBuilder.delete;
           tableBuilder.delete = vi.fn().mockImplementation(() => {
             const deleteBuilder = originalDelete();
-            (deleteBuilder as jest.Mock).then = vi
+            (deleteBuilder as MockQueryBuilder).then = vi
               .fn()
               .mockResolvedValue(responses.database!.delete);
             return deleteBuilder;

@@ -1,4 +1,4 @@
-import { Database } from '@/types/database.types';
+import { Database } from '../types/database.types';
 
 export interface Tool {
   id: string;
@@ -33,6 +33,7 @@ export interface Tool {
   problemReportedBy?: string;
   problemReportedAt?: Date;
   isP2Status?: boolean; // Identifies tools that only go through Bath 1, Bath 2, and Drying (no autoclave)
+  is_p2_tool?: boolean; // true = skips Drying + Autoclave
 }
 
 // Simplified tool interface for testing - just barcode and name

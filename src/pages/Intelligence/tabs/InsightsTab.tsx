@@ -41,7 +41,7 @@ export default function InsightsTab({
   };
 
   // Use data from props or fallback to empty arrays
-  const summaryData = insightsSummary || {
+  const summaryData = (insightsSummary as Record<string, unknown>) || {
     totalRecommendations: 0,
     criticalItems: 0,
     estimatedSavings: 0,

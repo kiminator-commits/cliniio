@@ -221,11 +221,14 @@ export const handleBulkExport = async (itemIds?: string[]): Promise<void> => {
 
     // Use the existing export service
     const { InventoryExportService } = await import('./inventoryExportService');
-    const exportResult = await InventoryExportService.exportItems(validItems, {
-      format: 'csv',
-      includeHeaders: true,
-      fileName: `inventory_export_${new Date().toISOString().split('T')[0]}.csv`,
-    });
+    const exportResult = await InventoryExportService.exportItems(
+      validItems as LocalInventoryItem[],
+      {
+        format: 'csv',
+        includeHeaders: true,
+        fileName: `inventory_export_${new Date().toISOString().split('T')[0]}.csv`,
+      }
+    );
 
     if (!exportResult.success) {
       throw new Error(
@@ -268,17 +271,20 @@ export const handleExportData = async (
     // Get all inventory data
     const allItems = await InventoryServiceFacade.getAllItems();
 
-    if (allItems.length === 0) {
+    if ((allItems as LocalInventoryItem[]).length === 0) {
       throw new Error('No data available for export');
     }
 
     // Use the existing export service
     const { InventoryExportService } = await import('./inventoryExportService');
-    const exportResult = await InventoryExportService.exportItems(allItems, {
-      format,
-      includeHeaders: true,
-      fileName: `inventory_full_export_${new Date().toISOString().split('T')[0]}.${format}`,
-    });
+    const exportResult = await InventoryExportService.exportItems(
+      allItems as LocalInventoryItem[],
+      {
+        format,
+        includeHeaders: true,
+        fileName: `inventory_full_export_${new Date().toISOString().split('T')[0]}.${format}`,
+      }
+    );
 
     if (!exportResult.success) {
       throw new Error(
@@ -298,7 +304,7 @@ export const handleExportData = async (
 
     auditLogger.log('inventory', 'export_data', {
       format,
-      itemCount: allItems.length,
+      itemCount: (allItems as LocalInventoryItem[]).length,
       fileName: exportResult.fileName,
     });
   } catch (error) {

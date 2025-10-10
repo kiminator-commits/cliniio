@@ -133,6 +133,46 @@ export const useSecureAuth = () => {
     }
   }, [startTokenValidation]);
 
+  // Stop token validation
+  const stopTokenValidation = useCallback(() => {
+    if (tokenValidationInterval.current) {
+      clearInterval(tokenValidationInterval.current);
+      tokenValidationInterval.current = null;
+    }
+  }, []);
+
+  // Logout function
+  const logout = useCallback(async () => {
+    try {
+      setAuthState((prev) => ({ ...prev, isLoading: true }));
+
+      await secureAuthService.logout();
+
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        error: null,
+        migrationStatus: {
+          isComplete: true,
+          isRunning: false,
+          stepsCompleted: [],
+          errors: [],
+        },
+      });
+
+      // Stop token validation
+      stopTokenValidation();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: 'Logout failed',
+      }));
+    }
+  }, [stopTokenValidation]);
+
   // Start periodic token validation
   const startTokenValidation = useCallback(() => {
     if (tokenValidationInterval.current) {
@@ -154,14 +194,6 @@ export const useSecureAuth = () => {
       5 * 60 * 1000
     ); // Check every 5 minutes
   }, [logout]);
-
-  // Stop token validation
-  const stopTokenValidation = useCallback(() => {
-    if (tokenValidationInterval.current) {
-      clearInterval(tokenValidationInterval.current);
-      tokenValidationInterval.current = null;
-    }
-  }, []);
 
   // Login function
   const login = useCallback(
@@ -218,38 +250,6 @@ export const useSecureAuth = () => {
     [startTokenValidation]
   );
 
-  // Logout function
-  const logout = useCallback(async () => {
-    try {
-      setAuthState((prev) => ({ ...prev, isLoading: true }));
-
-      await secureAuthService.logout();
-
-      setAuthState({
-        isAuthenticated: false,
-        isLoading: false,
-        user: null,
-        error: null,
-        migrationStatus: {
-          isComplete: true,
-          isRunning: false,
-          stepsCompleted: [],
-          errors: [],
-        },
-      });
-
-      // Stop token validation
-      stopTokenValidation();
-    } catch (error) {
-      console.error('Logout failed:', error);
-      setAuthState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: 'Logout failed',
-      }));
-    }
-  }, [stopTokenValidation]);
-
   // Refresh token function
   const refreshToken = useCallback(async (): Promise<boolean> => {
     try {
@@ -288,7 +288,10 @@ export const useSecureAuth = () => {
   const reportSecurityEvent = useCallback(
     async (eventType: string, details: unknown): Promise<void> => {
       try {
-        await secureAuthService.reportSecurityEvent(eventType, details);
+        await secureAuthService.reportSecurityEvent(
+          eventType,
+          details as Record<string, unknown>
+        );
       } catch (error) {
         console.warn('Failed to report security event:', error);
       }

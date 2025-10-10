@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Database } from '@/types/database.types';
+import { Database } from '@/types/supabase/generated';
 import {
   aiChallengeGenerationService,
   AIChallenge,
@@ -149,7 +149,7 @@ export const useAIChallenges = () => {
   // Generate new AI challenges
   const generateNewChallenges = useCallback(
     async (count: number = 5) => {
-      if (!facilityId) return;
+      if (!facilityId) return [];
 
       try {
         setGenerating(true);
@@ -197,6 +197,7 @@ export const useAIChallenges = () => {
         const { error: insertError } = await supabase
           .from('ai_challenge_completions')
           .insert({
+            id: crypto.randomUUID(),
             challenge_id: challengeId,
             user_id: user.id,
             facility_id: facilityId,

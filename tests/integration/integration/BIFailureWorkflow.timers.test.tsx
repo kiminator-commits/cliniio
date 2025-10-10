@@ -15,7 +15,23 @@ vi.mock('@/lib/supabase', () => {
   };
 });
 
-vi.mock('@/services/biFailureService');
+vi.mock('@/services/bi/failure/index', () => ({
+  BIFailureService: {
+    resolveIncident: vi.fn(),
+    createIncident: vi.fn(),
+    getActiveIncidents: vi.fn(),
+    generatePatientExposureReport: vi.fn(),
+    subscribeToBIFailureUpdates: vi.fn(),
+  },
+  // Export the service with the alias that tests expect
+  biFailureService: {
+    resolveIncident: vi.fn(),
+    createIncident: vi.fn(),
+    getActiveIncidents: vi.fn(),
+    generatePatientExposureReport: vi.fn(),
+    subscribeToBIFailureUpdates: vi.fn(),
+  },
+}));
 vi.mock('@/services/bi/failure/BIFailureIncidentService', () => ({
   BIFailureIncidentService: {
     resolveIncident: vi.fn(),
@@ -35,7 +51,7 @@ import {
   screen as _screen,
   waitFor,
 } from '@testing-library/react';
-import { BIFailureService } from '@/services/biFailureService';
+import { biFailureService } from '@/services/bi/failure/index';
 import { useSterilizationStore } from '@/store/sterilizationStore';
 
 let mockStore: {
@@ -72,9 +88,9 @@ describe('BI Failure Workflow Timers Tests', () => {
       (mockChannel.subscribe as vi.Mock).mockClear();
     }
 
-    // Ensure BIFailureService methods are mocked
-    vi.spyOn(BIFailureService, 'resolveIncident').mockResolvedValue(true);
-    vi.spyOn(BIFailureService, 'createIncident').mockResolvedValue({
+    // Ensure biFailureService methods are mocked
+    vi.spyOn(biFailureService, 'resolveIncident').mockResolvedValue(true);
+    vi.spyOn(biFailureService, 'createIncident').mockResolvedValue({
       id: 'incident-123',
       incident_number: 'BI-FAIL-20240115-001',
       facility_id: 'facility-456',
@@ -86,7 +102,7 @@ describe('BI Failure Workflow Timers Tests', () => {
       regulatory_notification_sent: false,
       status: 'active' as const,
     });
-    vi.spyOn(BIFailureService, 'getActiveIncidents').mockResolvedValue([]);
+    vi.spyOn(biFailureService, 'getActiveIncidents').mockResolvedValue([]);
   });
 
   describe('Real-time Updates', () => {
@@ -102,7 +118,7 @@ describe('BI Failure Workflow Timers Tests', () => {
 
       // Mock the subscribeToBIFailureUpdates to directly call store methods
       vi.spyOn(
-        BIFailureService,
+        biFailureService,
         'subscribeToBIFailureUpdates'
       ).mockImplementation(async () => {
         // Simulate the subscription setup by directly calling the store method
@@ -117,7 +133,7 @@ describe('BI Failure Workflow Timers Tests', () => {
       });
 
       // Subscribe to updates
-      await BIFailureService.subscribeToBIFailureUpdates('facility-123');
+      await biFailureService.subscribeToBIFailureUpdates('facility-123');
 
       // Wait for the store method to be called
       await waitFor(
@@ -149,7 +165,7 @@ describe('BI Failure Workflow Timers Tests', () => {
 
       // Mock the subscribeToBIFailureUpdates to directly call store methods
       vi.spyOn(
-        BIFailureService,
+        biFailureService,
         'subscribeToBIFailureUpdates'
       ).mockImplementation(async () => {
         // Simulate the subscription setup by directly calling the store method
@@ -160,7 +176,7 @@ describe('BI Failure Workflow Timers Tests', () => {
       });
 
       // Subscribe to updates
-      await BIFailureService.subscribeToBIFailureUpdates('facility-123');
+      await biFailureService.subscribeToBIFailureUpdates('facility-123');
 
       // Wait for the store method to be called
       await waitFor(

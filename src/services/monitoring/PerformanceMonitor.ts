@@ -7,6 +7,7 @@ import {
   PerformanceTrend,
   PerformanceInsight,
 } from '../../types/performanceMonitorTypes';
+import { getEnvVar } from '../../lib/getEnv';
 
 // Re-export types for external use
 export type { PerformanceAlert, PerformanceSnapshot };
@@ -384,9 +385,11 @@ export class PerformanceMonitor {
     if (this.isMonitoring) return;
 
     // Only start monitoring in production or when explicitly enabled
-    const isDevelopment = import.meta.env.DEV;
+    const isDevelopment =
+      getEnvVar('NODE_ENV') === 'development' ||
+      getEnvVar('MODE') === 'development';
     const enableMonitoring =
-      import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING === 'true';
+      getEnvVar('VITE_ENABLE_PERFORMANCE_MONITORING') === 'true';
 
     if (isDevelopment && !enableMonitoring) {
       performanceAlertingProvider.logMonitoringDisabled();
@@ -466,7 +469,10 @@ export class PerformanceMonitor {
     const health = this.getSystemHealthSync();
     return generatePerformanceInsights(
       health,
-      (metricName) => this.getPerformanceTrends(metricName) as unknown,
+      (metricName) =>
+        this.getPerformanceTrends(
+          metricName
+        ) as unknown as PerformanceInsight[],
       (name) => this.getAggregatedMetrics(name)
     );
   }

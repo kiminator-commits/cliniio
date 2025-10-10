@@ -230,7 +230,12 @@ export class StreamingExportService {
       return JSON.stringify(value);
     }
 
-    if (value && typeof value === 'object' && value instanceof Date) {
+    if (
+      value &&
+      typeof value === 'object' &&
+      value !== null &&
+      (value as Date) instanceof Date
+    ) {
       return value.toISOString().split('T')[0];
     }
 

@@ -9,6 +9,7 @@ interface HelpSection {
   title: string;
   color: string;
   content: React.ReactNode;
+  slug?: string;
 }
 
 interface TaskManagementContentProps {

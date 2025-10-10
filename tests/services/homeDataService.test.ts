@@ -22,6 +22,34 @@ vi.mock('../../src/lib/supabaseClient', () => ({
       getUser: vi.fn().mockResolvedValue({
         data: { user: { id: 'user-123' } },
       }),
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { user: { id: 'user-123' } } },
+      }),
+    },
+    from: vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({
+              data: [],
+              error: { message: 'Database error' },
+            }),
+          }),
+          single: vi.fn().mockResolvedValue({
+            data: { facility_id: 'facility-123' },
+          }),
+        }),
+      }),
+    })),
+  },
+  getScopedClient: vi.fn().mockReturnValue({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+      }),
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { user: { id: 'user-123' } } },
+      }),
     },
     from: vi.fn().mockReturnValue({
       select: vi.fn().mockReturnValue({
@@ -36,7 +64,7 @@ vi.mock('../../src/lib/supabaseClient', () => ({
         }),
       }),
     }),
-  },
+  }),
 }));
 
 describe('HomeDataService', () => {
@@ -84,14 +112,17 @@ describe('HomeDataService', () => {
         }),
       });
 
-      // Mock challenges fetch error
-      supabase.from.mockReturnValueOnce({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
+      // Mock the getScopedClient to return a properly chained mock for the challenges query
+      const { getScopedClient } = await import('../../src/lib/supabaseClient');
+      getScopedClient.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
-              order: vi.fn().mockResolvedValue({
-                data: null,
-                error: { message: 'Database error' },
+              eq: vi.fn().mockReturnValue({
+                order: vi.fn().mockResolvedValue({
+                  data: [],
+                  error: { message: 'Database error' },
+                }),
               }),
             }),
           }),

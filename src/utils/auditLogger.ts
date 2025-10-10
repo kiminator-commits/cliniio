@@ -1,7 +1,7 @@
 import { generateAuditSignature } from './sterilizationUtils';
-import { supabase } from '@/lib/supabaseClient';
-import { isSupabaseConfigured } from '@/lib/supabase';
-import { FacilityService } from '@/services/facilityService';
+import { supabase } from '../lib/supabaseClient';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { FacilityService } from '../services/facilityService';
 
 // Debounce utility to prevent rapid successive audit calls
 const debounce = <T extends (...args: unknown[]) => unknown>(
@@ -189,4 +189,125 @@ export const auditLogger = {
       console.error('Error logging audit event:', error);
     }
   }, 100), // 100ms debounce
+
+  logProblemToolAction: async (
+    toolId: string,
+    userId: string,
+    facilityId: string,
+    previousStatus: string,
+    notes?: string
+  ) => {
+    const { error } = await supabase.from('audit_logs').insert({
+      event_type: 'tool_problem_flagged',
+      tool_id: toolId,
+      facility_id: facilityId,
+      user_id: userId,
+      previous_status: previousStatus,
+      new_status: 'problem',
+      details: notes || null,
+      happened_at: new Date().toISOString(),
+    });
+
+    if (error) console.error('Audit log insert failed:', error);
+
+    try {
+      // Check if Supabase is configured before using it
+      if (!isSupabaseConfigured()) {
+        console.warn(
+          '⚠️ Supabase not configured, skipping problem tool audit logging'
+        );
+        return;
+      }
+
+      const { error } = await supabase.from('audit_logs').insert({
+        id: crypto.randomUUID(),
+        module: 'sterilization',
+        table_name: 'tools',
+        action: 'tool_problem_action',
+        record_id: toolId,
+        user_id: userId,
+        facility_id: facilityId,
+        old_values: { status: previousStatus },
+        new_values: { status: 'problem' },
+        metadata: {
+          problem_notes: notes,
+          timestamp: new Date().toISOString(),
+        },
+        created_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error('Failed to log problem tool action:', error);
+      } else {
+        console.log('Problem tool action logged:', toolId);
+      }
+    } catch (error) {
+      console.error('Error logging problem tool action:', error);
+    }
+  },
 };
+
+// ✅ Packaging Workflow Audit Events — Session, Batch, and Tool tracking
+// ✅ Log packaging session start
+export async function logPackagingSessionStart(
+  sessionId: string,
+  operatorName: string,
+  facilityId: string
+) {
+  await supabase.from('audit_logs').insert({
+    event_type: 'PACKAGING_SESSION_STARTED',
+    session_id: sessionId,
+    operator_name: operatorName,
+    facility_id: facilityId,
+    happened_at: new Date().toISOString(),
+  });
+}
+
+// ✅ Log batch creation
+export async function logBatchCreated(
+  batchId: string,
+  operatorName: string,
+  facilityId: string
+) {
+  await supabase.from('audit_logs').insert({
+    event_type: 'BATCH_CREATED',
+    batch_id: batchId,
+    operator_name: operatorName,
+    facility_id: facilityId,
+    happened_at: new Date().toISOString(),
+  });
+}
+
+// ✅ Log tool packaged
+export async function logToolPackaged(
+  toolBarcode: string,
+  batchId: string,
+  operatorName: string,
+  facilityId: string
+) {
+  await supabase.from('audit_logs').insert({
+    event_type: 'TOOL_PACKAGED',
+    tool_barcode: toolBarcode,
+    batch_id: batchId,
+    operator_name: operatorName,
+    facility_id: facilityId,
+    happened_at: new Date().toISOString(),
+  });
+}
+
+// ✅ Log receipt uploaded
+export async function logReceiptUploaded(
+  receiptId: string,
+  batchId: string,
+  operatorName: string,
+  facilityId: string
+) {
+  await supabase.from('audit_logs').insert({
+    event_type: 'RECEIPT_UPLOADED',
+    receipt_id: receiptId,
+    batch_id: batchId,
+    operator_name: operatorName,
+    facility_id: facilityId,
+    happened_at: new Date().toISOString(),
+  });
+}

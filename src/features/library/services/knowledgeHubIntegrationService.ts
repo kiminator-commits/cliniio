@@ -1,5 +1,4 @@
 import { supabase } from '../../../lib/supabase';
-import { Database } from '@/types/database.types';
 import { ContentItem } from '../libraryTypes';
 import { ContentStatus } from '../../../pages/KnowledgeHub/types';
 import { categoryOrganizationService } from './categoryOrganizationService';
@@ -53,9 +52,7 @@ export class KnowledgeHubIntegrationService {
       // Insert into Knowledge Hub
       const { data, error } = await supabase
         .from('knowledge_hub_content')
-        .insert([
-          knowledgeHubItem,
-        ] as Database['public']['Tables']['knowledge_hub_content']['Insert'][])
+        .insert([knowledgeHubItem])
         .select()
         .single();
 

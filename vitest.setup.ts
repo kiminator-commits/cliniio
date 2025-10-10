@@ -77,21 +77,170 @@ vi.mock(
 export { mockDeleteContent, mockUpdateContentStatus, mockRefetchContent };
 
 // Mock supabase client
-vi.mock('@/lib/supabaseClient', () => ({
-  supabase: {
-    auth: {
-      getSession: vi
-        .fn()
-        .mockResolvedValue({ data: { session: null }, error: null }),
-      getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
-    },
-    from: vi.fn().mockReturnValue({
+vi.mock('@/lib/supabaseClient', () => {
+  const createMockQuery = (
+    finalResponse: { data: unknown[]; error: unknown } = {
+      data: [],
+      error: null,
+    }
+  ) => {
+    const mockSingle = vi.fn().mockResolvedValue(finalResponse);
+    const mockOrder = vi.fn().mockResolvedValue(finalResponse);
+    const mockGte = vi.fn().mockResolvedValue(finalResponse);
+
+    // Create a comprehensive mock that supports all chaining patterns
+    const createChainedMock = () => ({
       select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+        single: mockSingle,
+        order: mockOrder,
+        eq: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+          eq: vi.fn().mockReturnValue({
+            single: mockSingle,
+            order: mockOrder,
+          }),
+          gte: mockGte,
+        }),
+        gte: mockGte,
       }),
-    }),
-  },
-}));
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: mockSingle,
+            order: mockOrder,
+          }),
+          single: mockSingle,
+          order: mockOrder,
+        }),
+        select: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+        }),
+      }),
+      eq: vi.fn().mockReturnValue({
+        single: mockSingle,
+        order: mockOrder,
+        eq: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+        }),
+        gte: mockGte,
+      }),
+      order: mockOrder,
+      single: mockSingle,
+      gte: mockGte,
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+        }),
+      }),
+      delete: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue(finalResponse),
+      }),
+    });
+
+    return createChainedMock();
+  };
+
+  return {
+    supabase: {
+      auth: {
+        getSession: vi
+          .fn()
+          .mockResolvedValue({ data: { session: null }, error: null }),
+        getUser: vi
+          .fn()
+          .mockResolvedValue({ data: { user: null }, error: null }),
+      },
+      from: vi.fn().mockReturnValue(createMockQuery()),
+    },
+  };
+});
+
+// Also mock the relative path version
+vi.mock('../../src/lib/supabaseClient', () => {
+  const createMockQuery = (
+    finalResponse: { data: unknown[]; error: unknown } = {
+      data: [],
+      error: null,
+    }
+  ) => {
+    const mockSingle = vi.fn().mockResolvedValue(finalResponse);
+    const mockOrder = vi.fn().mockResolvedValue(finalResponse);
+    const mockGte = vi.fn().mockResolvedValue(finalResponse);
+
+    // Create a comprehensive mock that supports all chaining patterns
+    const createChainedMock = () => ({
+      select: vi.fn().mockReturnValue({
+        single: mockSingle,
+        order: mockOrder,
+        eq: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+          eq: vi.fn().mockReturnValue({
+            single: mockSingle,
+            order: mockOrder,
+          }),
+          gte: mockGte,
+        }),
+        gte: mockGte,
+      }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: mockSingle,
+            order: mockOrder,
+          }),
+          single: mockSingle,
+          order: mockOrder,
+        }),
+        select: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+        }),
+      }),
+      eq: vi.fn().mockReturnValue({
+        single: mockSingle,
+        order: mockOrder,
+        eq: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+        }),
+        gte: mockGte,
+      }),
+      order: mockOrder,
+      single: mockSingle,
+      gte: mockGte,
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: mockSingle,
+          order: mockOrder,
+        }),
+      }),
+      delete: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue(finalResponse),
+      }),
+    });
+
+    return createChainedMock();
+  };
+
+  return {
+    supabase: {
+      auth: {
+        getSession: vi
+          .fn()
+          .mockResolvedValue({ data: { session: null }, error: null }),
+        getUser: vi
+          .fn()
+          .mockResolvedValue({ data: { user: null }, error: null }),
+      },
+      from: vi.fn().mockReturnValue(createMockQuery()),
+    },
+  };
+});
 
 // Mock logger
 vi.mock('@/utils/_core/logger', () => ({

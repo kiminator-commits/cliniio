@@ -1,5 +1,6 @@
-import { supabase } from '@/lib/supabaseClient';
-import { Database } from '@/types/database.types';
+import { supabase } from '../../../lib/supabaseClient';
+import { Database } from '../../../types/database.types';
+import { Json } from '../../../types/database.types';
 import { getTableName as _getTableName } from '../../../config/inventoryConfig';
 import { InventoryItem } from '../../../types/inventory';
 import {
@@ -132,7 +133,7 @@ export class InventoryCrudOperations {
         facility_id: item.facility_id || '',
         name: item.name || '',
         quantity: item.quantity ?? undefined,
-        data: (item.data as Record<string, unknown>) ?? undefined,
+        data: (item.data as unknown as Json) ?? undefined,
         reorder_point: item.reorder_point ?? undefined,
         expiration_date: item.expiration_date ?? undefined,
         unit_cost: item.unit_cost ?? undefined,
@@ -167,7 +168,7 @@ export class InventoryCrudOperations {
       const result = await typedAdapter.updateItem(id, {
         name: updates.name ?? undefined,
         quantity: updates.quantity ?? undefined,
-        data: (updates.data as Record<string, unknown>) ?? undefined,
+        data: (updates.data as unknown as Json) ?? undefined,
         reorder_point: updates.reorder_point ?? undefined,
         expiration_date: updates.expiration_date ?? undefined,
         unit_cost: updates.unit_cost ?? undefined,

@@ -1,5 +1,6 @@
 import { LocalInventoryItem } from '../../types/inventoryTypes';
 import { InventoryFilters } from '@/types/inventoryServiceTypes';
+import { safeGetAs } from '../legacyTypeHelpers';
 
 export const filterInventoryData = (
   data: LocalInventoryItem[],
@@ -55,7 +56,7 @@ export const filterInventoryData = (
     // Filter by tracked only
     if (
       (filters.trackedOnly || filters.tracked || filters.showTrackedOnly) &&
-      !item.data?.tracked
+      !safeGetAs(item.data, 'tracked', false)
     ) {
       return false;
     }
@@ -76,11 +77,11 @@ export const filterInventoryData = (
       const query = searchQuery.toLowerCase();
       const searchableFields = [
         item.name || '',
-        item.item || '',
+        (item as { item?: string }).item || '',
         item.category || '',
         item.location || '',
-        item.data?.description || '',
-        item.data?.sku || '',
+        safeGetAs(item.data, 'description', ''),
+        safeGetAs(item.data, 'sku', ''),
       ];
 
       const matchesSearch = searchableFields.some((field) =>

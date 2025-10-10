@@ -411,7 +411,7 @@ export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
 
       filteredData = filteredData.filter((item) => {
         return searchableFields.some((field: string) => {
-          const value = (item as Record<string, unknown>)[field];
+          const value = (item as unknown as Record<string, unknown>)[field];
           if (!value) return false;
 
           const fieldValue = searchOptions.caseSensitive

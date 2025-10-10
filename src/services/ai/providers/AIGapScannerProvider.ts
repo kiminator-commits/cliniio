@@ -1,6 +1,6 @@
 import { supabase } from '../../../lib/supabaseClient';
 import { ToolService } from '../../tools/ToolService';
-import { ToolStatus } from '@/types/toolTypes';
+import { ToolStatus } from '../../../types/toolTypes';
 import { InventoryActionService } from '../../../pages/Inventory/services/inventoryActionService';
 import { OperationalGap, generateGapId } from '../../aiDailyTaskProgress';
 
@@ -333,7 +333,7 @@ export class AIGapScannerProvider {
       statuses.map((status) =>
         ToolService.getToolsByFacilityAndStatus(
           facilityId,
-          status as 'bath1' | 'bath2' | 'airDry' | 'autoclave'
+          status as 'active' | 'dirty' | 'clean' | 'problem' | 'new_barcode'
         )
       )
     );

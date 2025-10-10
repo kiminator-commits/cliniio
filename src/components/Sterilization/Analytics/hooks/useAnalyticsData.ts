@@ -172,13 +172,13 @@ export const useAnalyticsData = () => {
         // 7-day rolling window for recent tests
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        // Convert test_date string to Date for comparison
-        const testDate = new Date(result.test_date);
+        // Convert date to Date for comparison
+        const testDate = new Date(result.date);
         return testDate >= sevenDaysAgo;
       })
       .sort(
         (a: BITestResult, b: BITestResult) =>
-          new Date(b.test_date).getTime() - new Date(a.test_date).getTime()
+          new Date(b.date).getTime() - new Date(a.date).getTime()
       ) // Sort by most recent first
       .slice(0, 5); // Limit to 5 most recent tests for UI performance
   }, [biTestResults, isLoading]);

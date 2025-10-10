@@ -272,7 +272,11 @@ export class ServiceValidationTest {
         status: 'success',
         message: 'Inventory service responding correctly',
         details: {
-          itemsCount: inventoryData.items?.length || 0,
+          itemsCount:
+            (inventoryData.tools?.length || 0) +
+            (inventoryData.supplies?.length || 0) +
+            (inventoryData.equipment?.length || 0) +
+            (inventoryData.officeHardware?.length || 0),
           categoriesCount: inventoryData.categories?.length || 0,
         },
         responseTime,

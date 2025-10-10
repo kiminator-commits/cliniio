@@ -245,7 +245,7 @@ export class InventoryItemCrudProvider {
 
     if (
       (item as Record<string, unknown>).minimumStock !== undefined &&
-      (item as Record<string, unknown>).minimumStock < 0
+      ((item as Record<string, unknown>).minimumStock as number) < 0
     ) {
       errors.push('Minimum stock must be non-negative');
     }

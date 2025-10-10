@@ -30,31 +30,37 @@ export const useSterilizationAIDashboard = () => {
     new Set()
   );
 
+  // Create service instance
+  const aiService = useMemo(() => {
+    const facilityId = 'default-facility'; // TODO: Get from context
+    return new SterilizationAIService(facilityId);
+  }, []);
+
   const loadInsights = useCallback(async () => {
     setIsLoading(true);
     try {
       const [insightsData, analyticsData] = await Promise.all([
-        SterilizationAIService.getRealTimeInsights(),
-        SterilizationAIService.getPredictiveAnalytics(),
+        aiService.getRealTimeInsights(),
+        aiService.getPredictiveAnalytics(),
       ]);
 
-      setInsights(insightsData);
-      setPredictiveAnalytics(analyticsData);
+      setInsights(insightsData as SterilizationAIInsight[]);
+      setPredictiveAnalytics(analyticsData as PredictiveAnalytics);
     } catch (error) {
       console.error('Failed to load AI insights:', error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [aiService]);
 
   const loadHistoricalTrends = useCallback(async () => {
     try {
-      const trendsData = await SterilizationAIService.getHistoricalTrends();
+      const trendsData = await aiService.getHistoricalTrends(selectedTimeframe);
       setHistoricalData(trendsData);
     } catch (error) {
       console.error('Failed to load historical trends:', error);
     }
-  }, []);
+  }, [aiService, selectedTimeframe]);
 
   const toggleInsightExpansion = useCallback((insightId: string) => {
     setExpandedInsights((prev) => {
@@ -93,7 +99,10 @@ export const useSterilizationAIDashboard = () => {
       format: 'pdf' | 'csv' | 'excel' | 'json' = 'pdf'
     ) => {
       try {
-        const result = await SterilizationAIService.exportAnalyticsReport();
+        const result = await aiService.exportAnalyticsReport(
+          reportType,
+          format
+        );
 
         if (result.success && result.downloadUrl) {
           // Create download link
@@ -113,7 +122,7 @@ export const useSterilizationAIDashboard = () => {
         console.error('Export report failed:', error);
       }
     },
-    []
+    [aiService]
   );
 
   const filteredInsights = useMemo(

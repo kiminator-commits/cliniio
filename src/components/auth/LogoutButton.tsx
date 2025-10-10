@@ -1,16 +1,16 @@
 import { useNavigate } from 'react-router-dom';
-import { authService } from '@/services/authService';
+import { logout } from '@/services/authService';
 
 export default function LogoutButton() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const result = await authService.logout();
-    if (result.success) {
+    try {
+      await logout();
       // Redirect user to login after logout
       navigate('/login', { replace: true });
-    } else {
-      console.error('Logout failed:', result.error);
+    } catch (error) {
+      console.error('Logout failed:', error);
       alert('Logout failed. Please try again.');
     }
   };

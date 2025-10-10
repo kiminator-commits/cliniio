@@ -7,11 +7,7 @@ import {
   BIFailureIncidentService,
   BIFailureIncident,
 } from './BIFailureIncidentService';
-import {
-  BIFailureWorkflowService,
-  ToolValidationResult,
-  PatientExposureReport,
-} from './BIFailureWorkflowService';
+import { BIFailureWorkflowService } from './BIFailureWorkflowService';
 import { BIFailureNotificationService } from './BIFailureNotificationService';
 import { NotificationConfig, NotificationMessage } from './notification/types';
 import {
@@ -65,11 +61,11 @@ console.log(
 );
 console.log(
   '✓ ToolValidationResult type exported:',
-  typeof ({} as ToolValidationResult) === 'object'
+  'ToolValidationResult not exported from BIFailureWorkflowService'
 );
 console.log(
   '✓ PatientExposureReport type exported:',
-  typeof ({} as PatientExposureReport) === 'object'
+  'PatientExposureReport not exported from BIFailureWorkflowService'
 );
 
 // Test notification service

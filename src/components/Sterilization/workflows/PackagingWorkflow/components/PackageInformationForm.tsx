@@ -12,6 +12,8 @@ interface PackageInformationFormProps {
   onPackageInfoChange: (info: PackageInfo) => void;
   onFinalizePackage: () => void;
   onCancel: () => void;
+  packageTypes: string[];
+  packageSizes: string[];
 }
 
 const PackageInformationForm: React.FC<PackageInformationFormProps> = ({
@@ -20,6 +22,8 @@ const PackageInformationForm: React.FC<PackageInformationFormProps> = ({
   onPackageInfoChange,
   onFinalizePackage,
   onCancel,
+  packageTypes,
+  packageSizes,
 }) => {
   const handlePackageTypeChange = (packageType: string) => {
     onPackageInfoChange({ ...packageInfo, packageType });
@@ -51,10 +55,11 @@ const PackageInformationForm: React.FC<PackageInformationFormProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select package type</option>
-            <option value="pouch">Pouch</option>
-            <option value="wrap">Wrap</option>
-            <option value="container">Container</option>
-            <option value="tray">Tray</option>
+            {packageTypes.map((type) => (
+              <option key={type} value={type}>
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </option>
+            ))}
           </select>
         </div>
         <div>
@@ -71,10 +76,11 @@ const PackageInformationForm: React.FC<PackageInformationFormProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select package size</option>
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
-            <option value="extra-large">Extra Large</option>
+            {packageSizes.map((size) => (
+              <option key={size} value={size}>
+                {size.charAt(0).toUpperCase() + size.slice(1).replace('-', ' ')}
+              </option>
+            ))}
           </select>
         </div>
         <div>

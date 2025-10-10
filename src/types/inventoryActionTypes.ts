@@ -3,7 +3,7 @@
  * Extracted from inventoryActionService.ts
  */
 
-import { InventoryItem } from '@/types/inventoryTypes';
+import { InventoryItem } from './inventoryTypes';
 
 // Use the unified InventoryItem type for consistency
 export type InventoryItemData = Partial<InventoryItem>;

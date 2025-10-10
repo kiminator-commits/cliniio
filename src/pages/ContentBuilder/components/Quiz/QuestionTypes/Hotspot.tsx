@@ -70,7 +70,9 @@ const Hotspot: React.FC<HotspotProps> = ({
     }
   };
 
-  const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleImageClick = (
+    e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>
+  ) => {
     if (isPreview && onAnswerChange) {
       const rect = e.currentTarget.getBoundingClientRect();
       const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
@@ -78,6 +80,19 @@ const Hotspot: React.FC<HotspotProps> = ({
 
       const newAnswer = [...userAnswer, { x, y }];
       onAnswerChange(newAnswer);
+    }
+  };
+
+  const handleKeyboardClick = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      // Create a synthetic mouse event for the keyboard handler
+      const syntheticEvent = {
+        currentTarget: e.currentTarget,
+        clientX: e.currentTarget.offsetLeft + e.currentTarget.offsetWidth / 2,
+        clientY: e.currentTarget.offsetTop + e.currentTarget.offsetHeight / 2,
+      } as React.MouseEvent<HTMLDivElement | HTMLButtonElement>;
+      handleImageClick(syntheticEvent);
     }
   };
 
@@ -240,14 +255,7 @@ const Hotspot: React.FC<HotspotProps> = ({
         <div className="relative border border-gray-300 rounded-lg overflow-hidden">
           <button
             onClick={handleImageClick}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleImageClick(
-                  e as unknown as React.MouseEvent<HTMLDivElement>
-                );
-              }
-            }}
+            onKeyDown={handleKeyboardClick}
             className="w-full h-64 relative cursor-crosshair"
             aria-label="Click to mark hotspot answer points"
           >

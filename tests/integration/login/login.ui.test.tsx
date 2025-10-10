@@ -9,7 +9,6 @@ import { renderWithProviders } from '../../utils/renderWithProviders';
 import LoginForm from '@/pages/Login/LoginForm';
 import { LOGIN_LABELS } from '@/constants/loginConstants';
 import LoginPage from '@/pages/Login';
-import { setupSupabaseMocks } from '@/__mocks__/supabaseMock';
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => ({
@@ -20,7 +19,7 @@ vi.mock('react-router-dom', async () => ({
 describe('LoginForm UI', () => {
   beforeEach(() => {
     setupTestEnvironment();
-    setupSupabaseMocks('success');
+    // setupSupabaseMocks('success'); // Removed - using global mock
   });
 
   afterEach(() => {

@@ -111,11 +111,6 @@ const BIFailureBannerContent: React.FC<GlobalBIFailureBannerProps> = ({
       <BIFailureResolutionModal
         isOpen={showResolutionModal}
         onClose={() => setShowResolutionModal(false)}
-        onMinimize={() => {
-          setIsWorkflowMinimized(true);
-          setShowResolutionModal(false);
-        }}
-        isMinimized={isWorkflowMinimized}
       />
     </div>
   );

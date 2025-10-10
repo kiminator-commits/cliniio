@@ -109,7 +109,9 @@ export const useCentralizedInventoryData =
 
         // Filtered data methods (compatible with existing useFilteredInventoryData)
         getFilteredData: async (searchQuery: string) => {
-          const inventoryService = await getInventoryService();
+          const inventoryService = (await getInventoryService()) as {
+            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
+          };
           const allItems = await inventoryService.fetchInventoryItems();
           if (!allItems || !Array.isArray(allItems)) {
             return [];
@@ -122,7 +124,9 @@ export const useCentralizedInventoryData =
         },
 
         getFilteredSuppliesData: async (searchQuery: string) => {
-          const inventoryService = await getInventoryService();
+          const inventoryService = (await getInventoryService()) as {
+            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
+          };
           const allItems = await inventoryService.fetchInventoryItems();
           return allItems.filter(
             (item) =>
@@ -135,7 +139,9 @@ export const useCentralizedInventoryData =
         },
 
         getFilteredEquipmentData: async (searchQuery: string) => {
-          const inventoryService = await getInventoryService();
+          const inventoryService = (await getInventoryService()) as {
+            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
+          };
           const allItems = await inventoryService.fetchInventoryItems();
           return allItems.filter(
             (item) =>
@@ -148,7 +154,9 @@ export const useCentralizedInventoryData =
         },
 
         getFilteredOfficeHardwareData: async (searchQuery: string) => {
-          const inventoryService = await getInventoryService();
+          const inventoryService = (await getInventoryService()) as {
+            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
+          };
           const allItems = await inventoryService.fetchInventoryItems();
           return allItems.filter(
             (item) =>
@@ -182,7 +190,9 @@ export const useCentralizedInventoryData =
             while (retryCount < maxRetries) {
               try {
                 // Get the service instance through the factory
-                const inventoryService = await getInventoryService();
+                const inventoryService = (await getInventoryService()) as {
+                  fetchAllInventoryData: () => Promise<InventoryDataResponse>;
+                };
                 const data = await inventoryService.fetchAllInventoryData();
 
                 // Derive a unified "all items" array from the categorized data.

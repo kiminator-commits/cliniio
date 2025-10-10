@@ -72,7 +72,7 @@ export class IntelligenceRecommendationService {
     try {
       // Get AI learning insights for personalized tips
       const learningInsights =
-        (await this.aiLearningService.getLearningInsights()) as Record<
+        (await this.aiLearningService.getLearningInsights()) as unknown as Record<
           string,
           unknown
         > | null;

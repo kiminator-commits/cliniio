@@ -1,12 +1,12 @@
 import React from 'react';
 import { vi } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act } from '../../utils/testUtils';
 
 import { PatientExposureReport } from '../../../src/components/Sterilization/PatientExposureReport';
-import { BIFailureService } from '../../../src/services/biFailureService';
+import { BIFailureService } from '../../../src/services/bi/failure/index';
 
 // Mock the BIFailureService
-vi.mock('../../../src/services/biFailureService');
+vi.mock('../../../src/services/bi/failure/index');
 const mockBIFailureService = BIFailureService as vi.Mocked<
   typeof BIFailureService
 >;

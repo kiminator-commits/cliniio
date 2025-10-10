@@ -91,13 +91,13 @@ export class SupabaseInventoryService {
     try {
       // Ensure required fields are provided
       const itemWithDefaults = {
-        ...item,
         name: item.name || 'Unnamed Item', // Provide default name if missing
         facility_id: item.facility_id || 'default', // Provide default facility if missing
         data: (item.data as Record<string, unknown>) || {},
         category: item.category || 'general',
         quantity: item.quantity || 0, // Provide default quantity
-      };
+        created_at: new Date().toISOString(),
+      } as Omit<InventoryItem, 'id' | 'lastUpdated'>;
 
       const result = await InventoryCrudOperations.createItem(itemWithDefaults);
       return {

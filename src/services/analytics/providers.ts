@@ -97,10 +97,14 @@ export class AnalyticsProviderService {
           // Initialize gtag
           window.dataLayer = window.dataLayer || [];
           window.gtag = function (...args: unknown[]) {
-            window.dataLayer?.push(args);
+            window.dataLayer?.push(args as unknown[]);
           };
-          window.gtag('js', new Date().toISOString());
-          window.gtag('config', measurementId);
+          (
+            window as { gtag: (command: string, ...args: unknown[]) => void }
+          ).gtag('js', new Date().toISOString());
+          (
+            window as { gtag: (command: string, ...args: unknown[]) => void }
+          ).gtag('config', measurementId);
         }
       }
     } catch (error) {
@@ -114,7 +118,11 @@ export class AnalyticsProviderService {
   private static async initializeMixpanel(token: string): Promise<void> {
     try {
       if (typeof window !== 'undefined' && window.mixpanel) {
-        (window.mixpanel as { init: (token: string) => void }).init(token);
+        (
+          window.mixpanel as unknown as {
+            init: (token: string) => void;
+          }
+        ).init(token);
       }
     } catch (error) {
       console.error('Failed to initialize Mixpanel:', error);
@@ -128,7 +136,7 @@ export class AnalyticsProviderService {
     try {
       if (typeof window !== 'undefined' && window.amplitude) {
         (
-          window.amplitude as {
+          window.amplitude as unknown as {
             getInstance: () => { init: (apiKey: string) => void };
           }
         )

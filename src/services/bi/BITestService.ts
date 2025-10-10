@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 import {
   BITestResult,
   CreateBITestRequest,
@@ -51,7 +51,9 @@ export class BITestService {
         operator_id: testData.operator_id,
         cycle_id: testData.cycle_id || '00000000-0000-0000-0000-000000000000', // Use placeholder UUID for standalone tests
         test_number: testNumber,
-        test_date: testData.test_date || new Date().toISOString(),
+        test_date:
+          (testData as { test_date?: string }).test_date ||
+          new Date().toISOString(),
         result: testData.result,
         bi_lot_number: testData.bi_lot_number,
         bi_expiry_date: testData.bi_expiry_date,

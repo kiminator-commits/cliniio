@@ -23,6 +23,23 @@ export const useQuarantineData = (): QuarantineData => {
     useSterilizationStore();
 
   return useMemo(() => {
+    // Safety check for biTestResults
+    if (!biTestResults || !Array.isArray(biTestResults)) {
+      return {
+        lastPassedDate: null,
+        affectedCycles: [],
+        affectedTools: [],
+        totalToolsAffected: 0,
+        totalCyclesAffected: 0,
+        totalSterilizationEvents: 0,
+        toolsUsedMultipleTimes: 0,
+        uniqueOperators: [],
+        dateRange: null,
+        toolsByCategory: {},
+        hasCurrentCycleAffected: false,
+      };
+    }
+
     // Find the last passed BI test
     const lastPassedTest = biTestResults
       .filter((result: BITestResult) => result.passed)
@@ -60,13 +77,12 @@ export const useQuarantineData = (): QuarantineData => {
     // Get unique tool IDs with their frequency data
     const uniqueAffectedToolIds = Array.from(toolFrequencyMap.keys());
 
-    // Get detailed tool information with frequency data
+    // Get detailed tool information
     const affectedTools = uniqueAffectedToolIds.map((toolId) => {
       const availableTool = availableTools.find((t: Tool) => t.id === toolId);
-      const sterilizationFrequency = toolFrequencyMap.get(toolId) || 0;
 
-      return {
-        ...(availableTool || {
+      return (
+        availableTool || {
           id: toolId,
           name: `Tool ${toolId}`,
           barcode: toolId,
@@ -75,10 +91,8 @@ export const useQuarantineData = (): QuarantineData => {
           cycleCount: 0,
           lastSterilized: undefined,
           status: 'available' as const,
-        }),
-        // Add sterilization frequency within risk window
-        riskWindowCycles: sterilizationFrequency,
-      };
+        }
+      );
     });
 
     // Calculate statistics
@@ -86,12 +100,16 @@ export const useQuarantineData = (): QuarantineData => {
     const totalCyclesAffected = affectedCycles.length;
     const totalSterilizationEvents = allToolInstances.length; // Total sterilization events (including repeats)
     const toolsUsedMultipleTimes = affectedTools.filter(
-      (tool) => tool.riskWindowCycles > 1
+      (tool) => (toolFrequencyMap.get(tool.id) || 0) > 1
     ).length;
 
     const uniqueOperators = [
       ...new Set(
-        affectedCycles.map((cycle: SterilizationCycle) => cycle.operator)
+        affectedCycles
+          .map((cycle: SterilizationCycle) => cycle.operator)
+          .filter(
+            (operator): operator is string => typeof operator === 'string'
+          )
       ),
     ];
     const dateRange =

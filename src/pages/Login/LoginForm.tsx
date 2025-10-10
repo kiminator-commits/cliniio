@@ -98,6 +98,7 @@ const LoginForm: React.FC = () => {
                 formData={formData}
                 handleChange={handleChange}
                 disabled={loading}
+                showStrengthIndicator={true}
               />
 
               <CheckboxFields

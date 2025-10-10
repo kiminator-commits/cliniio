@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { BIFailureService } from '../../src/services/biFailureService';
+import { BIFailureService as biFailureService } from '../../src/services/bi/failure/index';
 import { BIFailureNotificationDataProvider as _BIFailureNotificationDataProvider } from '../../src/services/bi/notification/data/BIFailureNotificationDataProvider';
 import { BIFailureNotificationService as _BIFailureNotificationService } from '../../src/services/bi/failure/BIFailureNotificationService';
 import { BIFailureIncidentService } from '../../src/services/bi/failure/BIFailureIncidentService';
 import { BIFailureTrendAnalysisService as _BIFailureTrendAnalysisService } from '../../src/services/bi/failure/analytics/BIFailureTrendAnalysisService';
 import { BIFailurePredictiveService as _BIFailurePredictiveService } from '../../src/services/bi/failure/analytics/BIFailurePredictiveService';
 import { BIFailureComplianceService as _BIFailureComplianceService } from '../../src/services/bi/failure/analytics/BIFailureComplianceService';
-import { supabase } from '../../src/services/supabaseClient';
+import { supabase } from '../../src/lib/supabaseClient';
 
-// Mock Supabase client for BIFailureService
-vi.mock('../../src/services/supabaseClient', () => ({
+// Mock Supabase client for biFailureService
+vi.mock('../../src/lib/supabaseClient', () => ({
   supabase: {
     from: vi.fn(),
     rpc: vi.fn(),
@@ -22,7 +22,36 @@ vi.mock('../../src/services/supabaseClient', () => ({
 // Mock Supabase client for BIFailureIncidentService (uses @/lib/supabaseClient)
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: {
-    from: vi.fn(),
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
+            data: [],
+            error: null,
+          }),
+        }),
+      }),
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { id: 'incident-123' },
+            error: null,
+          }),
+        }),
+      }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            select: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
+                data: { id: 'incident-123' },
+                error: null,
+              }),
+            }),
+          }),
+        }),
+      }),
+    }),
     rpc: vi.fn(),
     auth: {
       getUser: vi.fn(),
@@ -148,7 +177,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
       });
 
       // Test basic operations
-      await BIFailureService.getActiveIncidents(facilityId);
+      await biFailureService.getActiveIncidents(facilityId);
       await BIFailureIncidentService.getIncidentById(incidentId, facilityId);
 
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');
@@ -198,7 +227,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
       mockQuery.select.mockResolvedValue({ data: [], error: null });
 
       // Test basic analytics query
-      await BIFailureService.getActiveIncidents(facility2Id);
+      await biFailureService.getActiveIncidents(facility2Id);
 
       // Verify that the query was made
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');
@@ -209,7 +238,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
     it('should handle empty facility_id gracefully', async () => {
       mockQuery.select.mockResolvedValue({ data: [], error: null });
 
-      await BIFailureService.getActiveIncidents('');
+      await biFailureService.getActiveIncidents('');
 
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');
     });
@@ -217,7 +246,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
     it('should handle null facility_id gracefully', async () => {
       mockQuery.select.mockResolvedValue({ data: [], error: null });
 
-      await BIFailureService.getActiveIncidents(null as any);
+      await biFailureService.getActiveIncidents(null as any);
 
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');
     });
@@ -225,7 +254,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
     it('should handle undefined facility_id gracefully', async () => {
       mockQuery.select.mockResolvedValue({ data: [], error: null });
 
-      await BIFailureService.getActiveIncidents(undefined as any);
+      await biFailureService.getActiveIncidents(undefined as any);
 
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');
     });
@@ -246,7 +275,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
       });
 
       // Execute basic operations
-      await BIFailureService.getActiveIncidents(facilityId);
+      await biFailureService.getActiveIncidents(facilityId);
       await BIFailureIncidentService.getIncidentById(incidentId, facilityId);
 
       // Verify that operations were called
@@ -259,7 +288,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
       mockQuery.select.mockResolvedValue({ data: [], error: null });
 
       // Test basic query
-      await BIFailureService.getActiveIncidents(facilityId);
+      await biFailureService.getActiveIncidents(facilityId);
 
       // Verify that the query was made
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');
@@ -273,7 +302,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
       mockQuery.select.mockResolvedValue({ data: [], error: null });
 
       // Execute basic query
-      await BIFailureService.getActiveIncidents(facilityId);
+      await biFailureService.getActiveIncidents(facilityId);
 
       // Verify that query was made
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');
@@ -290,7 +319,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
 
       mockQuery.select.mockResolvedValue({ data: largeDataset, error: null });
 
-      await BIFailureService.getActiveIncidents(facilityId);
+      await biFailureService.getActiveIncidents(facilityId);
 
       // Verify that the query was made
       expect(supabase.from).toHaveBeenCalledWith('bi_failure_incidents');

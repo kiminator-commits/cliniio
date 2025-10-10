@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
-import { SecureAuthService } from '@/services/secureAuthService';
-import { useLoginStore } from '@/stores/useLoginStore';
-import { logAudit } from '@/services/auditService';
+import { SecureAuthService } from '../services/secureAuthService';
+import { useLoginStore } from '../stores/useLoginStore';
+import { logAudit } from '../services/auditService';
 
 interface LoginFormData {
   email: string;

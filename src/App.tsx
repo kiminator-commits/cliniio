@@ -51,10 +51,26 @@ let facilityIdCache: { id: string; timestamp: number } | null = null;
 const FACILITY_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 async function updateFacilityIdCache() {
+  // Don't try to get facility ID on login page
+  if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+    return;
+  }
+
   try {
     // Dynamic import to avoid circular dependencies
     const { FacilityService } = await import('./services/facilityService');
     const facilityId = await FacilityService.getCurrentFacilityId();
+
+    // If no facility ID (user not authenticated), use development fallback
+    if (!facilityId) {
+      console.warn('No facility ID available - using development fallback');
+      facilityIdCache = {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        timestamp: Date.now(),
+      };
+      return;
+    }
+
     facilityIdCache = { id: facilityId, timestamp: Date.now() };
   } catch (error) {
     console.warn('Failed to update facility ID cache:', error);

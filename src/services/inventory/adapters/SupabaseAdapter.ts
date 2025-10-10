@@ -9,7 +9,7 @@ import { isSupabaseConfigured } from '../../../lib/supabase';
 import { InventoryDataTransformer } from '../utils/inventoryTransformers';
 import { InventoryCrudOperations } from '../utils/inventoryCrudOperations';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../../lib/supabase';
 import { TypedSupabaseAdapter } from './TypedSupabaseAdapter';
 import { RealtimeInventoryPayload } from '../types/supabaseTypes';
 
@@ -112,7 +112,9 @@ export class SupabaseAdapter implements InventoryDataAdapter {
     // Get facility ID from params or current user context
     let facilityId = params?.facilityId;
     if (!facilityId) {
-      const { FacilityService } = await import('@/services/facilityService');
+      const { FacilityService } = await import(
+        '../../../services/facilityService'
+      );
       facilityId = await FacilityService.getCurrentFacilityId();
     }
 
@@ -151,7 +153,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
         throw new Error(result.error || 'Failed to get items by category');
       }
 
-      return result.data as unknown;
+      return (result.data as unknown as InventoryItem[]) || [];
     } catch (error) {
       throw new Error(
         `Failed to get items by category: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -179,7 +181,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
         throw new Error(result.error || 'Failed to get filtered items');
       }
 
-      return result.data as unknown;
+      return (result.data as unknown as InventoryItem[]) || [];
     } catch (error) {
       throw new Error(
         `Failed to get filtered items: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -292,7 +294,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
   }
 
   async fetchInventoryItems(): Promise<InventoryItem[]> {
-    return this.getAllItems() as unknown;
+    return (this.getAllItems() as unknown as Promise<InventoryItem[]>) || [];
   }
 
   async addInventoryItem(item: InventoryItem): Promise<InventoryItem> {

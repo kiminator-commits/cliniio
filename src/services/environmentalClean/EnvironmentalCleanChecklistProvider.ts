@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { Checklist } from '../../pages/EnvironmentalClean/types';
 import { createUserFriendlyError } from '../../pages/EnvironmentalClean/services/errors/EnvironmentalCleanServiceError';
 
@@ -41,13 +41,17 @@ export class EnvironmentalCleanChecklistProvider {
           description: (item.data as { description?: string })
             ?.description as string,
           items: [], // Task items will be fetched separately if needed
-          isActive: (item as Record<string, unknown>).is_active ?? true,
-          createdAt:
+          isActive: Boolean(
+            (item as Record<string, unknown>).is_active ?? true
+          ),
+          createdAt: String(
             (item as Record<string, unknown>).created_at ??
-            new Date().toISOString(),
-          updatedAt:
+              new Date().toISOString()
+          ),
+          updatedAt: String(
             (item as Record<string, unknown>).updated_at ??
-            new Date().toISOString(),
+              new Date().toISOString()
+          ),
         })
       );
     } catch (error) {

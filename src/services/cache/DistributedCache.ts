@@ -24,7 +24,9 @@ export class DistributedCache {
     try {
       if (redisManager.isHealthy()) {
         const client = redisManager.getClient();
-        const value = await (client as unknown).get(this.getKey(key));
+        const value = await (
+          client as { get: (key: string) => Promise<string | null> }
+        ).get(this.getKey(key));
         return value ? JSON.parse(value) : null;
       } else {
         // Fallback to in-memory cache
@@ -45,11 +47,15 @@ export class DistributedCache {
       if (redisManager.isHealthy()) {
         const client = redisManager.getClient();
         const ttl = options.ttl || 300; // Default 5 minutes
-        await (client as unknown).setEx(
-          this.getKey(key),
-          ttl,
-          JSON.stringify(value)
-        );
+        await (
+          client as {
+            setEx: (
+              key: string,
+              seconds: number,
+              value: string
+            ) => Promise<unknown>;
+          }
+        ).setEx(this.getKey(key), ttl, JSON.stringify(value));
       } else {
         // Fallback to in-memory cache
         await this.fallbackCache.set(key, value, options);
@@ -64,7 +70,9 @@ export class DistributedCache {
     try {
       if (redisManager.isHealthy()) {
         const client = redisManager.getClient();
-        await (client as unknown).del(this.getKey(key));
+        await (client as { del: (key: string) => Promise<unknown> }).del(
+          this.getKey(key)
+        );
       } else {
         await this.fallbackCache.del(key);
       }
@@ -78,7 +86,9 @@ export class DistributedCache {
     try {
       if (redisManager.isHealthy()) {
         const client = redisManager.getClient();
-        const result = await (client as unknown).exists(this.getKey(key));
+        const result = await (
+          client as { exists: (key: string) => Promise<number> }
+        ).exists(this.getKey(key));
         return result === 1;
       } else {
         return await this.fallbackCache.exists(key);
@@ -93,9 +103,13 @@ export class DistributedCache {
     try {
       if (redisManager.isHealthy()) {
         const client = redisManager.getClient();
-        const keys = await (client as unknown).keys(this.getKey('*'));
+        const keys = await (
+          client as { keys: (pattern: string) => Promise<string[]> }
+        ).keys(this.getKey('*'));
         if (keys.length > 0) {
-          await (client as unknown).del(keys);
+          await (client as { del: (keys: string[]) => Promise<unknown> }).del(
+            keys
+          );
         }
       } else {
         await this.fallbackCache.clear();

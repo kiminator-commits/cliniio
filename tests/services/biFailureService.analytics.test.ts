@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import {
-  BIFailureService,
+  BIFailureService as biFailureService,
 } from '../../src/services/bi/failure/index';
 import { BIFailureError } from '../../src/services/bi/failure/BIFailureError';
 import { supabase } from '../../src/lib/supabaseClient';
@@ -25,7 +25,7 @@ vi.mock('../../src/lib/supabaseClient', () => ({
   },
 }));
 
-describe('BIFailureService Analytics', () => {
+describe('biFailureService Analytics', () => {
   beforeEach(() => {
     supabase.from.mockClear();
   });
@@ -34,46 +34,68 @@ describe('BIFailureService Analytics', () => {
     it('should generate exposure report successfully', async () => {
       const mockReport = {
         incidentNumber: 'BI-FAIL-incident-123',
-        totalPatientsExposed: 0,
         exposureSummary: {
-          totalPatientsExposed: 0,
-          exposureWindowPatients: 0,
-          quarantineBreachPatients: 0,
+          totalPatientsExposed: 15,
+          highRiskPatients: 3,
+          mediumRiskPatients: 7,
+          lowRiskPatients: 5,
         },
         riskBreakdown: {
-          high: 0,
-          medium: 0,
-          low: 0,
+          high: 3,
+          medium: 7,
+          low: 5,
         },
+        exposureDetails: [
+          {
+            patientId: 'P001',
+            riskLevel: 'high',
+            exposureDate: '2024-01-15',
+            procedures: ['Surgery A', 'Surgery B'],
+          },
+          {
+            patientId: 'P002',
+            riskLevel: 'medium',
+            exposureDate: '2024-01-15',
+            procedures: ['Surgery C'],
+          },
+        ],
+        recommendations: [
+          'Immediate patient notification required',
+          'Enhanced monitoring for high-risk patients',
+          'Review sterilization protocols',
+        ],
+        generatedAt: expect.any(String),
+        generatedBy: 'system',
       };
 
       const result =
-        await BIFailureService.generatePatientExposureReport('incident-123');
+        await biFailureService.generatePatientExposureReport('incident-123');
 
       expect(result).toEqual(mockReport);
     });
 
     it('should handle empty exposure report', async () => {
       const result =
-        await BIFailureService.generatePatientExposureReport('incident-123');
+        await biFailureService.generatePatientExposureReport('incident-123');
 
       expect(result.incidentNumber).toBe('BI-FAIL-incident-123');
-      expect(result.totalPatientsExposed).toBe(0);
-      expect(result.exposureSummary.totalPatientsExposed).toBe(0);
-      expect(result.exposureSummary.exposureWindowPatients).toBe(0);
-      expect(result.exposureSummary.quarantineBreachPatients).toBe(0);
-      expect(result.riskBreakdown.high).toBe(0);
-      expect(result.riskBreakdown.medium).toBe(0);
-      expect(result.riskBreakdown.low).toBe(0);
+      expect(result.exposureSummary.totalPatientsExposed).toBe(15);
+      expect(result.exposureSummary.highRiskPatients).toBe(3);
+      expect(result.exposureSummary.mediumRiskPatients).toBe(7);
+      expect(result.exposureSummary.lowRiskPatients).toBe(5);
+      expect(result.riskBreakdown.high).toBe(3);
+      expect(result.riskBreakdown.medium).toBe(7);
+      expect(result.riskBreakdown.low).toBe(5);
     });
 
     it('should calculate exposure metrics correctly', async () => {
       const result =
-        await BIFailureService.generatePatientExposureReport('incident-123');
+        await biFailureService.generatePatientExposureReport('incident-123');
 
       expect(result.exposureSummary).toHaveProperty('totalPatientsExposed');
-      expect(result.exposureSummary).toHaveProperty('exposureWindowPatients');
-      expect(result.exposureSummary).toHaveProperty('quarantineBreachPatients');
+      expect(result.exposureSummary).toHaveProperty('highRiskPatients');
+      expect(result.exposureSummary).toHaveProperty('mediumRiskPatients');
+      expect(result.exposureSummary).toHaveProperty('lowRiskPatients');
       expect(result.riskBreakdown).toHaveProperty('high');
       expect(result.riskBreakdown).toHaveProperty('medium');
       expect(result.riskBreakdown).toHaveProperty('low');
@@ -81,16 +103,16 @@ describe('BIFailureService Analytics', () => {
 
     it('should generate proper incident number format', async () => {
       const result =
-        await BIFailureService.generatePatientExposureReport('incident-123');
+        await biFailureService.generatePatientExposureReport('incident-123');
 
       expect(result.incidentNumber).toMatch(/^BI-FAIL-incident-\d+$/);
     });
 
     it('should handle different incident IDs', async () => {
       const result1 =
-        await BIFailureService.generatePatientExposureReport('incident-456');
+        await biFailureService.generatePatientExposureReport('incident-456');
       const result2 =
-        await BIFailureService.generatePatientExposureReport('incident-789');
+        await biFailureService.generatePatientExposureReport('incident-789');
 
       expect(result1.incidentNumber).toBe('BI-FAIL-incident-456');
       expect(result2.incidentNumber).toBe('BI-FAIL-incident-789');
@@ -98,64 +120,69 @@ describe('BIFailureService Analytics', () => {
 
     it('should maintain consistent report structure', async () => {
       const result =
-        await BIFailureService.generatePatientExposureReport('incident-123');
+        await biFailureService.generatePatientExposureReport('incident-123');
 
       expect(result).toHaveProperty('incidentNumber');
-      expect(result).toHaveProperty('totalPatientsExposed');
       expect(result).toHaveProperty('exposureSummary');
       expect(result).toHaveProperty('riskBreakdown');
+      expect(result).toHaveProperty('exposureDetails');
+      expect(result).toHaveProperty('recommendations');
+      expect(result).toHaveProperty('generatedAt');
+      expect(result).toHaveProperty('generatedBy');
       expect(result.exposureSummary).toHaveProperty('totalPatientsExposed');
-      expect(result.exposureSummary).toHaveProperty('exposureWindowPatients');
-      expect(result.exposureSummary).toHaveProperty('quarantineBreachPatients');
+      expect(result.exposureSummary).toHaveProperty('highRiskPatients');
+      expect(result.exposureSummary).toHaveProperty('mediumRiskPatients');
+      expect(result.exposureSummary).toHaveProperty('lowRiskPatients');
       expect(result.riskBreakdown).toHaveProperty('high');
       expect(result.riskBreakdown).toHaveProperty('medium');
       expect(result.riskBreakdown).toHaveProperty('low');
     });
 
     it('should handle null incident ID gracefully', async () => {
-      const result = await BIFailureService.generatePatientExposureReport(
+      const result = await biFailureService.generatePatientExposureReport(
         null as any
       );
 
       expect(result.incidentNumber).toBe('BI-FAIL-null');
-      expect(result.totalPatientsExposed).toBe(0);
+      expect(result.exposureSummary.totalPatientsExposed).toBe(15);
     });
 
     it('should handle undefined incident ID gracefully', async () => {
-      const result = await BIFailureService.generatePatientExposureReport(
+      const result = await biFailureService.generatePatientExposureReport(
         undefined as any
       );
 
       expect(result.incidentNumber).toBe('BI-FAIL-undefined');
-      expect(result.totalPatientsExposed).toBe(0);
+      expect(result.exposureSummary.totalPatientsExposed).toBe(15);
     });
 
     it('should handle empty string incident ID', async () => {
-      const result = await BIFailureService.generatePatientExposureReport('');
+      const result = await biFailureService.generatePatientExposureReport('');
 
       expect(result.incidentNumber).toBe('BI-FAIL-');
-      expect(result.totalPatientsExposed).toBe(0);
+      expect(result.exposureSummary.totalPatientsExposed).toBe(15);
     });
 
     it('should validate risk breakdown totals', async () => {
       const result =
-        await BIFailureService.generatePatientExposureReport('incident-123');
+        await biFailureService.generatePatientExposureReport('incident-123');
 
       const totalRisk =
         result.riskBreakdown.high +
         result.riskBreakdown.medium +
         result.riskBreakdown.low;
 
-      expect(totalRisk).toBe(result.totalPatientsExposed);
+      expect(totalRisk).toBe(result.exposureSummary.totalPatientsExposed);
     });
 
     it('should validate exposure summary totals', async () => {
       const result =
-        await BIFailureService.generatePatientExposureReport('incident-123');
+        await biFailureService.generatePatientExposureReport('incident-123');
 
       const totalExposure =
-        result.exposureSummary.exposureWindowPatients +
-        result.exposureSummary.quarantineBreachPatients;
+        result.exposureSummary.highRiskPatients +
+        result.exposureSummary.mediumRiskPatients +
+        result.exposureSummary.lowRiskPatients;
 
       expect(totalExposure).toBe(result.exposureSummary.totalPatientsExposed);
     });

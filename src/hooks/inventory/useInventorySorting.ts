@@ -53,7 +53,11 @@ export const useInventorySorting = ({
           return (
             item.status ||
             item.p2_status ||
-            (typeof item.data?.p2Status === 'string'
+            (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'p2Status' in item.data &&
+            typeof item.data.p2Status === 'string'
               ? item.data.p2Status
               : '') ||
             ''

@@ -45,7 +45,11 @@ const NavBar: React.FC<NavBarProps> = ({
   };
 
   return (
-    <header className="mb-6 pl-8" aria-label="Dashboard header">
+    <header
+      className="mb-6 pl-8"
+      aria-label="Dashboard header"
+      data-testid="nav-bar"
+    >
       <div className="flex items-center justify-between">
         <Greeting />
 

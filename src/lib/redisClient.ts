@@ -1,7 +1,25 @@
 import { logger } from '../utils/_core/logger';
 
+// Define interface for Redis client events
+interface RedisClient {
+  on: (event: string, callback: (data?: unknown) => void) => void;
+  off: (event: string, callback: (data?: unknown) => void) => void;
+  connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
+  get: (key: string) => Promise<string | null>;
+  set: (
+    key: string,
+    value: string,
+    options?: { EX?: number }
+  ) => Promise<string>;
+  del: (key: string) => Promise<number>;
+  exists: (key: string) => Promise<number>;
+  expire: (key: string, seconds: number) => Promise<number>;
+  ttl: (key: string) => Promise<number>;
+}
+
 // Optional Redis import - will fallback to in-memory if not available
-let createClient: ((config: unknown) => unknown) | null = null;
+let createClient: ((config: unknown) => RedisClient) | null = null;
 
 // Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -18,7 +36,7 @@ const initializeRedisClient = async (): Promise<void> => {
     const { createClient: serverCreateClient } = await import(
       './redisClient.server'
     );
-    createClient = serverCreateClient;
+    createClient = serverCreateClient as (config: unknown) => RedisClient;
   } catch {
     // Redis package not available, will use in-memory fallback
     // This is expected in environments without Redis
@@ -40,7 +58,7 @@ export interface RedisConfig {
 }
 
 class RedisManager {
-  private client: unknown = null;
+  private client: RedisClient | null = null;
   private config: RedisConfig;
   private isConnected = false;
 

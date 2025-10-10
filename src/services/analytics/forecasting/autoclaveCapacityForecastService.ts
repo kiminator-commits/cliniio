@@ -114,10 +114,10 @@ export class AutoclaveCapacityForecastService {
       ).map(([autoclaveId, cycles]) => {
         const totalCycles = cycles.length;
         const completedCycles = (cycles as _SterilizationCycleRow[]).filter(
-          (cycle: _SterilizationCycleRow) => cycle.status === 'completed'
+          (cycle: _SterilizationCycleRow) => cycle.status === 'clean'
         ).length;
         const failedCycles = (cycles as _SterilizationCycleRow[]).filter(
-          (cycle: _SterilizationCycleRow) => cycle.status === 'failed'
+          (cycle: _SterilizationCycleRow) => cycle.status === 'problem'
         ).length;
 
         // Calculate real load percentage based on actual cycle data

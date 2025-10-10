@@ -5,6 +5,10 @@ import {
   categoryOrganizationService,
   CategorySyncResult,
 } from '../services/categoryOrganizationService';
+import {
+  CategoryStatistics,
+  CategoryMetadata,
+} from '../services/types/categoryTypes';
 
 export interface CategoryOrganizationState {
   categorySync: CategorySyncResult | null;
@@ -12,7 +16,7 @@ export interface CategoryOrganizationState {
   error: string | null;
   selectedCategory: ContentCategory | null;
   showReviewMode: boolean;
-  categoryStatistics: Record<ContentCategory, number>;
+  categoryStatistics: CategoryStatistics;
 }
 
 export interface UseCategoryOrganizationReturn {
@@ -21,7 +25,7 @@ export interface UseCategoryOrganizationReturn {
   updateCategory: (newCategory: ContentCategory) => Promise<void>;
   toggleReviewMode: () => void;
   refreshStatistics: () => Promise<void>;
-  getCategoryMetadata: (category: ContentCategory) => Record<string, unknown>;
+  getCategoryMetadata: (category: ContentCategory) => CategoryMetadata;
   getValidCategories: () => ContentCategory[];
 }
 

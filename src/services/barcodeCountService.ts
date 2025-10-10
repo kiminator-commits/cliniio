@@ -33,7 +33,7 @@ export class BarcodeCountService {
         throw new Error(`Failed to get barcode count: ${error.message}`);
       }
 
-      return data?.count || 0;
+      return _data?.count || 0;
     } catch (error) {
       console.error('Error getting barcode count:', error);
       return 0;
@@ -146,7 +146,7 @@ export class BarcodeCountService {
         throw new Error(`Failed to get barcode counts: ${error.message}`);
       }
 
-      return (data || []).map((item) => ({
+      return (_data || []).map((item) => ({
         id: item.id,
         code: item.code,
         count: item.count,

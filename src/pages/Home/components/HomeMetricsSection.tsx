@@ -108,16 +108,14 @@ const HomeMetricsSection = React.memo(function HomeMetricsSection({
       </div>
 
       <Suspense fallback={<CardSkeleton />}>
-        <ErrorBoundary
-          fallback={
-            <div className="sr-only">Metrics section failed to load.</div>
-          }
-        >
+        <ErrorBoundary>
           <MetricsSection
             biData={undefined}
             ciData={undefined}
             performanceMetrics={performanceMetrics}
-            aiImpactMetrics={aiImpactMetrics}
+            aiImpactMetrics={
+              aiImpactMetrics as unknown as import('../../../services/aiMetricsService').AIImpactMetrics
+            }
           />
         </ErrorBoundary>
       </Suspense>

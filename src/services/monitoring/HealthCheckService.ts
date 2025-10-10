@@ -53,7 +53,7 @@ export class HealthCheckService {
     const checkResults: HealthCheckResult[] = [];
 
     // Run all registered checks
-    for (const [name, checkFn] of this.checks) {
+    for (const [name, checkFn] of Array.from(this.checks.entries())) {
       try {
         const result = await checkFn();
         checkResults.push(result);
@@ -261,7 +261,7 @@ export class HealthCheckService {
           message: `AI services operational (${errorRate.toFixed(1)}% error rate)`,
           duration,
           timestamp: new Date(),
-          metadata: metrics as Record<string, unknown>,
+          metadata: metrics as unknown as Record<string, unknown>,
         };
       } catch (error) {
         return {
@@ -408,13 +408,17 @@ export class HealthCheckService {
 
   async getSystemHealth(): Promise<SystemHealthReport> {
     const checks = await this.runAllChecks();
-    const overall = this.determineOverallStatus(checks);
-    const score = this.calculateHealthScore(checks);
+    const summary = this.calculateSummary(checks.checks);
+    const overall = this.determineOverallHealth(summary);
+    const score = this.calculateHealthScore(summary);
 
     return {
       overall,
       score,
-      checks,
+      checks: checks.checks,
+      summary,
+      timestamp: checks.timestamp,
+      uptime: checks.uptime,
     };
   }
 }

@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
+import { getEnvVar } from '../../lib/getEnv';
 
 type EventSeverity = 'info' | 'warning' | 'error' | 'critical';
 type EventType =
@@ -58,7 +59,10 @@ async function insertEvent(
 
     // If the table doesn't exist yet, fail silently in prod, log in dev.
     if (error) {
-      if (import.meta.env.DEV) {
+      const isDev =
+        getEnvVar('NODE_ENV') === 'development' ||
+        getEnvVar('MODE') === 'development';
+      if (isDev) {
         console.warn(
           '🟡 observabilityService: insert failed (likely missing table)',
           error.message
@@ -68,7 +72,10 @@ async function insertEvent(
     }
     return { success: true };
   } catch (err: unknown) {
-    if (import.meta.env.DEV) {
+    const isDev =
+      getEnvVar('NODE_ENV') === 'development' ||
+      getEnvVar('MODE') === 'development';
+    if (isDev) {
       console.warn(
         '🟡 observabilityService: unexpected error',
         err instanceof Error ? err.message : String(err)

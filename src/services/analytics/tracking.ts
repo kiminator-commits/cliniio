@@ -5,7 +5,7 @@ import {
   trackUserAction,
   trackPageView,
   trackFeatureUsage,
-} from '@/utils/monitoring';
+} from '../../utils/monitoring';
 
 export class AnalyticsTrackingService {
   /**
@@ -20,10 +20,10 @@ export class AnalyticsTrackingService {
     try {
       const event: AnalyticsEvent = {
         name,
-        properties,
+        properties: properties as Record<string, string | number | boolean>,
         userId,
         facilityId,
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(),
       };
 
       // Track to all enabled providers
@@ -279,7 +279,8 @@ export class AnalyticsTrackingService {
         window.mixpanel.identify(user.id);
         window.mixpanel.people.set({
           $email: user.email,
-          $name: user.full_name,
+          $name: (user as unknown as Record<string, unknown>)
+            .full_name as string,
           facilityId: user.facilityId,
           ...user.properties,
         });
@@ -297,11 +298,9 @@ export class AnalyticsTrackingService {
       if (typeof window !== 'undefined' && window.amplitude) {
         window.amplitude.getInstance().setUserId(user.id);
         window.amplitude.getInstance().setUserProperties({
-          email: user.email,
-          name: user.full_name,
-          facilityId: user.facilityId,
           ...user.properties,
-        });
+          facilityId: user.facilityId,
+        } as Record<string, unknown>);
       }
     } catch (error) {
       console.error('Error identifying user to Amplitude:', error);

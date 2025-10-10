@@ -3,15 +3,15 @@ import { ErrorBoundary } from '../ErrorBoundary';
 
 interface WithErrorBoundaryOptions {
   componentName?: string;
-  fallback?: React.ReactNode;
-  onError?: (error: Error, errorInfo: unknown) => void;
+  fallback?: React.ComponentType<React.ErrorInfo>;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 export function withErrorBoundary<P extends object>(
   WrappedComponent: ComponentType<P>,
   options: WithErrorBoundaryOptions = {}
 ) {
-  const { componentName, fallback, onError } = options;
+  const { componentName, fallback: _fallback, onError: _onError } = options;
 
   const displayName =
     componentName ||
@@ -21,11 +21,7 @@ export function withErrorBoundary<P extends object>(
 
   const WithErrorBoundaryComponent = (props: P) => {
     return (
-      <ErrorBoundary
-        componentName={displayName}
-        fallback={fallback}
-        onError={onError}
-      >
+      <ErrorBoundary>
         <WrappedComponent {...props} />
       </ErrorBoundary>
     );

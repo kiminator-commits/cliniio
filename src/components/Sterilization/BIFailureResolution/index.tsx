@@ -6,7 +6,7 @@ import { BIFailureStatus } from './BIFailureStatus';
 import { BIFailureWorkflowSteps } from './BIFailureWorkflowSteps';
 import { BIFailureErrorDisplay } from './BIFailureErrorDisplay';
 import { BIFailureActions } from './BIFailureActions';
-import { ExposureReport } from '../PatientExposureReport';
+import { PatientExposureReport } from '../PatientExposureReport';
 
 /**
  * Props for the BIFailureResolution component.
@@ -142,7 +142,7 @@ export const BIFailureResolution: React.FC<BIFailureResolutionProps> = ({
 
       {/* Exposure Report Modal */}
       {showExposureReport && (
-        <ExposureReport
+        <PatientExposureReport
           isOpen={showExposureReport}
           onClose={toggleExposureReport}
           incidentId={biFailureDetails?.id}

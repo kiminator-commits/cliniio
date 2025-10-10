@@ -84,7 +84,9 @@ export class SubscriptionManager {
       const now = new Date();
       const toRemove: string[] = [];
 
-      for (const [userId, subscription] of this.subscriptions.entries()) {
+      for (const [userId, subscription] of Array.from(
+        this.subscriptions.entries()
+      )) {
         const inactiveTime =
           now.getTime() - subscription.lastActivity.getTime();
 

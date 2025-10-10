@@ -39,7 +39,9 @@ const UserManagement: React.FC<UserManagementProps> = ({
   // Filter users based on search term and role filter
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ((user as { full_name?: string }).full_name || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
     return matchesSearch && matchesRole;
@@ -185,7 +187,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-xs font-medium text-blue-600">
-                      {user.full_name
+                      {((user as { full_name?: string }).full_name || 'Unknown')
                         .split(' ')
                         .map((n) => n[0])
                         .join('')}
@@ -194,7 +196,8 @@ const UserManagement: React.FC<UserManagementProps> = ({
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-medium text-gray-900">
-                        {user.full_name}
+                        {(user as { full_name?: string }).full_name ||
+                          'Unknown User'}
                       </span>
                       <span
                         className={`inline-flex px-1.5 py-0.5 rounded-full text-xs font-medium ${

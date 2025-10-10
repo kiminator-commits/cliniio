@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../../../lib/supabaseClient';
 import { BIFailureNotificationDataProvider } from '../../notification/data/BIFailureNotificationDataProvider';
 import { NotificationMessage, NotificationConfig } from './types';
 

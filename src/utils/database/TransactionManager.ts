@@ -19,12 +19,7 @@ export interface TransactionResult<T> {
 }
 
 // Define proper types for Supabase operations
-type SupabaseClientType = SupabaseClient<
-  Database,
-  'public',
-  'public',
-  Record<string, unknown>
->;
+type SupabaseClientType = SupabaseClient<Database>;
 type SupabaseError = {
   message: string;
   details?: string;

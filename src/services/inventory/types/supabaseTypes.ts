@@ -2,7 +2,7 @@
 // This file provides proper types for all Supabase inventory operations
 
 import { InventoryItem } from '../inventoryTypes';
-import { Json } from '@/types/database.types';
+import { Json } from '../../../types/database.types';
 
 // ============================================================================
 // SUPABASE RESPONSE TYPES

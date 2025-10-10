@@ -3,10 +3,10 @@
  * Handles all Supabase queries, inserts, updates, and deletes
  */
 
-import { InventoryCrudOperations } from '@/services/inventory/utils/inventoryCrudOperations';
-import { InventoryItem } from '@/types/inventoryTypes';
-import { ToolStatus } from '@/types/toolTypes';
-import { InventoryItemData } from '@/types/inventoryActionTypes';
+import { InventoryCrudOperations } from '../inventory/utils/inventoryCrudOperations';
+import { InventoryItem } from '../../types/inventoryTypes';
+import { ToolStatus } from '../../types/toolTypes';
+import { InventoryItemData } from '../../types/inventoryActionTypes';
 import {
   getSuppliersByFacility,
   getInventoryTransactionsByFacility,

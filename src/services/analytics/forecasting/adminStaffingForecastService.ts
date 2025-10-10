@@ -74,7 +74,7 @@ export class AdminStaffingForecastService {
         sterilizationData as _SterilizationCycleRow[]
       ).filter(
         (cycle: _SterilizationCycleRow) =>
-          cycle.status !== 'completed' && cycle.status !== 'failed'
+          cycle.status !== 'clean' && cycle.status !== 'problem'
       ).length;
 
       const currentWorkload = totalCycles;

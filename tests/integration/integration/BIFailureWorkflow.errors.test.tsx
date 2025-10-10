@@ -15,7 +15,31 @@ vi.mock('@/lib/supabase', () => {
   };
 });
 
-vi.mock('@/services/biFailureService');
+vi.mock('@/services/bi/failure/index', () => ({
+  BIFailureService: {
+    resolveIncident: vi.fn(),
+    createIncident: vi.fn(),
+    getActiveIncidents: vi.fn(),
+    generatePatientExposureReport: vi.fn(),
+    subscribeToBIFailureUpdates: vi.fn(),
+  },
+  // Export the service with the alias that tests expect
+  biFailureService: {
+    resolveIncident: vi.fn(),
+    createIncident: vi.fn(),
+    getActiveIncidents: vi.fn(),
+    generatePatientExposureReport: vi.fn(),
+    subscribeToBIFailureUpdates: vi.fn(),
+  },
+  // Export BIFailureError for tests
+  BIFailureError: class BIFailureError extends Error {
+    constructor(message: string, code: string) {
+      super(message);
+      this.name = 'BIFailureError';
+      (this as any).code = code;
+    }
+  },
+}));
 vi.mock('@/services/bi/failure/BIFailureIncidentService', () => ({
   BIFailureIncidentService: {
     resolveIncident: vi.fn(),
@@ -30,15 +54,15 @@ vi.mock('react-dom', async () => ({
 
 import React from 'react';
 import { vi } from 'vitest';
-import { BIFailureService, BIFailureError } from '@/services/biFailureService';
+import { biFailureService, BIFailureError } from '@/services/bi/failure/index';
 
 describe('BI Failure Workflow Errors Tests', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    // Ensure BIFailureService methods are mocked
-    vi.spyOn(BIFailureService, 'resolveIncident').mockResolvedValue(true);
-    vi.spyOn(BIFailureService, 'createIncident').mockResolvedValue({
+    // Ensure biFailureService methods are mocked
+    vi.spyOn(biFailureService, 'resolveIncident').mockResolvedValue(true);
+    vi.spyOn(biFailureService, 'createIncident').mockResolvedValue({
       id: 'incident-123',
       incident_number: 'BI-FAIL-20240115-001',
       facility_id: 'facility-456',
@@ -50,7 +74,7 @@ describe('BI Failure Workflow Errors Tests', () => {
       regulatory_notification_sent: false,
       status: 'active' as const,
     });
-    vi.spyOn(BIFailureService, 'getActiveIncidents').mockResolvedValue([]);
+    vi.spyOn(biFailureService, 'getActiveIncidents').mockResolvedValue([]);
   });
 
   describe('Error Recovery Scenarios', () => {
@@ -66,7 +90,7 @@ describe('BI Failure Workflow Errors Tests', () => {
       vi.clearAllMocks();
 
       // Mock the service to reject on first call, resolve on second
-      const mockCreateIncident = BIFailureService.createIncident as vi.Mock;
+      const mockCreateIncident = biFailureService.createIncident as vi.Mock;
       mockCreateIncident
         .mockRejectedValueOnce(networkError)
         .mockResolvedValueOnce({
@@ -77,7 +101,7 @@ describe('BI Failure Workflow Errors Tests', () => {
 
       // First attempt fails
       try {
-        await BIFailureService.createIncident({
+        await biFailureService.createIncident({
           facility_id: 'facility-123',
           affected_tools_count: 5,
           affected_batch_ids: ['BATCH-001'],
@@ -89,7 +113,7 @@ describe('BI Failure Workflow Errors Tests', () => {
       }
 
       // Second attempt succeeds
-      const result = await BIFailureService.createIncident({
+      const result = await biFailureService.createIncident({
         facility_id: 'facility-123',
         affected_tools_count: 5,
         affected_batch_ids: ['BATCH-001'],
@@ -110,12 +134,12 @@ describe('BI Failure Workflow Errors Tests', () => {
       vi.clearAllMocks();
 
       // Mock the service to reject with constraint error
-      vi.spyOn(BIFailureService, 'createIncident').mockRejectedValue(
+      vi.spyOn(biFailureService, 'createIncident').mockRejectedValue(
         constraintError
       );
 
       try {
-        await BIFailureService.createIncident({
+        await biFailureService.createIncident({
           facility_id: 'facility-123',
           affected_tools_count: 5,
           affected_batch_ids: ['BATCH-001'],
@@ -143,14 +167,14 @@ describe('BI Failure Workflow Errors Tests', () => {
         updated_at: '2024-01-15T10:30:00Z',
       };
 
-      vi.spyOn(BIFailureService, 'createIncident').mockResolvedValue(
+      vi.spyOn(biFailureService, 'createIncident').mockResolvedValue(
         mockIncident
       );
       // Note: identifyExposureWindowTools is not available in the main service
       // The exposure tracking is handled internally by the incident service
 
       // Incident should still be created even if exposure tracking fails
-      const result = await BIFailureService.createIncident({
+      const result = await biFailureService.createIncident({
         facility_id: 'facility-123',
         affected_tools_count: 5,
         affected_batch_ids: ['BATCH-001'],

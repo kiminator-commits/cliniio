@@ -12,8 +12,13 @@ import {
 import { IntelligenceSummary } from '../utils/intelligenceTypes';
 import { RiskAlert } from '../../../services/analytics';
 
+interface ExtendedIntelligenceSummary extends IntelligenceSummary {
+  risks?: Array<{ level: string; [key: string]: unknown }>;
+  actions?: Array<{ urgency: string; [key: string]: unknown }>;
+}
+
 interface OverviewTabProps {
-  summary: IntelligenceSummary | null;
+  summary: ExtendedIntelligenceSummary | null;
   actionableInsights?: RiskAlert[];
 }
 
@@ -22,11 +27,17 @@ export default function OverviewTab({ summary }: OverviewTabProps) {
   const data = summary;
 
   function hasHighRiskItems() {
-    return data?.risks?.some((risk) => risk.level === 'high');
+    return data?.risks?.some(
+      (risk: { level: string }) => risk.level === 'high'
+    );
   }
 
   function getUrgentActions() {
-    return data?.actions?.filter((action) => action.urgency === 'high') ?? [];
+    return (
+      data?.actions?.filter(
+        (action: { urgency: string }) => action.urgency === 'high'
+      ) ?? []
+    );
   }
 
   function getUrgencyColor(urgency: string) {

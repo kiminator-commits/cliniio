@@ -57,7 +57,7 @@ export class BIFailurePredictiveService {
       // Calculate overall confidence based on data quality and model performance
       const confidence = BIDataProcessingProvider.calculateConfidence(
         facilityId,
-        riskFactors,
+        riskFactors as unknown as Record<string, unknown>,
         trendAnalysis
       );
 

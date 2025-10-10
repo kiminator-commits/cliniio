@@ -28,6 +28,8 @@ export interface CleaningLog {
   scheduled_time: string;
   started_time?: string;
   completed_time?: string;
+  operator_id?: string;
+  notes?: string;
   quality_score?: number;
   compliance_score?: number;
   checklist_items: Record<string, unknown>[];
@@ -67,6 +69,9 @@ export class CleaningLogService {
             completed_time: cycle.completed_at,
             operator_id: cycle.operator_id,
             notes: cycle.notes || '',
+            checklist_items: [],
+            completed_items: [],
+            failed_items: [],
             created_at: cycle.created_at,
             updated_at: cycle.updated_at,
           };

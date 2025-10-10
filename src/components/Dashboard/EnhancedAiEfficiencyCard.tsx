@@ -27,7 +27,7 @@ export const EnhancedAiEfficiencyCard: React.FC<
       );
       setMetrics(aiImpactMetrics);
       setLoading(false);
-      return;
+      return undefined;
     }
 
     console.log(

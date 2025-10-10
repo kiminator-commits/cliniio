@@ -160,11 +160,13 @@ export class AISuggestionsService {
           content_id: item.content_id,
           recommendation_score: item.recommendation_score,
           recommendation_reason:
-            item.recommendation_reason || item.reasoning || '',
+            item.recommendation_reason ||
+            (item as { reasoning?: string }).reasoning ||
+            '',
           confidence_level: item.confidence_level || 0,
           user_context: item.user_context,
           content_context: item.content_context,
-          tags: item.data?.tags,
+          tags: (item as { data?: { tags?: string[] } }).data?.tags,
           is_displayed: item.is_displayed,
           is_clicked: item.is_clicked,
           is_completed: item.is_completed || false,

@@ -16,10 +16,19 @@ export const challengeService = {
       if (userError || !user)
         throw new Error('Unauthorized: no authenticated user.');
 
-      const facilityId = user.user_metadata?.facility_id;
-      if (!facilityId) throw new Error('Missing facility context.');
+      // Get user's facility_id and role from users table
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('facility_id, role')
+        .eq('id', user.id)
+        .single();
 
-      const userRole = user.user_metadata?.role || 'staff';
+      if (profileError || !userProfile?.facility_id) {
+        throw new Error('Missing facility context.');
+      }
+
+      const facilityId = userProfile.facility_id;
+      const userRole = userProfile.role || 'staff';
       const allowedRoles = ['admin', 'manager'];
 
       if (!allowedRoles.includes(userRole)) {
@@ -71,11 +80,19 @@ export const challengeService = {
         return [];
       }
 
-      const facilityId = user.user_metadata?.facility_id;
-      if (!facilityId) {
+      // Get user's facility_id from users table
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !userProfile?.facility_id) {
         console.warn('⚠️ Missing facility context, returning empty challenges');
         return [];
       }
+
+      const facilityId = userProfile.facility_id;
 
       const cacheKey = `challenges_and_completions:${facilityId}`;
       const cached =
@@ -94,7 +111,7 @@ export const challengeService = {
           .order('created_at', { ascending: false }),
 
         supabase
-          .from('challenge_completions')
+          .from('home_challenge_completions')
           .select('challenge_id, user_id, completed_at')
           .eq('facility_id', facilityId)
           .eq('user_id', user.id),
@@ -180,7 +197,7 @@ export const challengeService = {
 
       // Record challenge completion
       const { error: insertError } = await supabase
-        .from('challenge_completions')
+        .from('home_challenge_completions')
         .insert([
           {
             challenge_id: payload.challenge_id,

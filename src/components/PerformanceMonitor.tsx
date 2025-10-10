@@ -30,7 +30,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   useEffect(() => {
     // Only show in development
     if (process.env.NODE_ENV !== 'development') {
-      return;
+      return undefined;
     }
 
     // Analyze bottlenecks

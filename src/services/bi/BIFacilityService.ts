@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 import {
   Facility,
   Operator,
@@ -234,7 +234,7 @@ export class BIFacilityService {
       status: cycleData.status || 'pending',
       parameters: cycleData.cycle_parameters as Record<string, unknown>,
       results: cycleData.environmental_factors as Record<string, unknown>,
-      tools: cycleData.tools as Record<string, unknown>,
+      tools: cycleData.tools as unknown as Record<string, unknown>,
       notes: cycleData.notes,
     };
 
@@ -370,7 +370,7 @@ export class BIFacilityService {
     // Get count of cycles for today
     const { count, error } = await supabase
       .from('sterilization_cycles')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('facility_id', facilityId)
       .gte('start_time', today.toISOString().split('T')[0])
       .lt(
@@ -378,8 +378,7 @@ export class BIFacilityService {
         new Date(today.getTime() + 24 * 60 * 60 * 1000)
           .toISOString()
           .split('T')[0]
-      )
-      .count('exact');
+      );
 
     if (error) {
       throw new Error(`Failed to generate cycle number: ${error.message}`);

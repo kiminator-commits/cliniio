@@ -37,9 +37,11 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
   const quarantineData = useQuarantineData();
 
   // Extract batch IDs from affected cycles
-  const affectedBatchIds = quarantineData.affectedCycles
-    .map((cycle) => cycle.batchId)
-    .filter((batchId): batchId is string => Boolean(batchId));
+  const _affectedBatchIds = quarantineData.affectedCycles
+    ? quarantineData.affectedCycles
+        .map((cycle) => cycle.batchId)
+        .filter((batchId): batchId is string => Boolean(batchId))
+    : [];
 
   if (!biFailureDetails) {
     return (
@@ -91,7 +93,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
             <span className="text-xs font-medium text-red-700">Batches</span>
           </div>
           <div className="text-lg font-bold text-red-800">
-            {affectedBatchIds.length}
+            {biFailureDetails.affectedBatchIds.length}
           </div>
         </div>
         <div className="text-center">
@@ -100,7 +102,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
             <span className="text-xs font-medium text-red-700">Tools</span>
           </div>
           <div className="text-lg font-bold text-red-800">
-            {quarantineData.totalToolsAffected}
+            {biFailureDetails.affectedToolsCount}
           </div>
         </div>
 
@@ -117,6 +119,25 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
 
       {/* Detailed Information */}
       <div className="text-sm text-red-700 space-y-2">
+        <div className="flex items-start space-x-2">
+          <Icon path={mdiTools} size={0.8} className="text-red-500 mt-0.5" />
+          <div>
+            <strong>Affected Tools:</strong>{' '}
+            {biFailureDetails.affectedToolsCount} tools are currently
+            quarantined
+          </div>
+        </div>
+
+        <div className="flex items-start space-x-2">
+          <Icon path={mdiCalendar} size={0.8} className="text-red-500 mt-0.5" />
+          <div>
+            <strong>Failure Date:</strong>{' '}
+            {biFailureDetails.date
+              ? biFailureDetails.date.toLocaleDateString()
+              : 'Unknown date'}
+          </div>
+        </div>
+
         <div className="flex items-start space-x-2">
           <Icon path={mdiCalendar} size={0.8} className="text-red-500 mt-0.5" />
           <div>
@@ -136,11 +157,11 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
           <Icon path={mdiPackage} size={0.8} className="text-red-500 mt-0.5" />
           <div>
             <strong>Affected Batches:</strong>{' '}
-            {affectedBatchIds.length > 0 ? (
+            {biFailureDetails.affectedBatchIds.length > 0 ? (
               <span className="font-mono text-xs">
-                {affectedBatchIds.slice(0, 3).join(', ')}
-                {affectedBatchIds.length > 3 &&
-                  ` +${affectedBatchIds.length - 3} more`}
+                {biFailureDetails.affectedBatchIds.slice(0, 3).join(', ')}
+                {biFailureDetails.affectedBatchIds.length > 3 &&
+                  ` +${biFailureDetails.affectedBatchIds.length - 3} more`}
               </span>
             ) : (
               'No batch IDs available'
@@ -151,11 +172,20 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
         <div className="flex items-start space-x-2">
           <Icon path={mdiTools} size={0.8} className="text-red-500 mt-0.5" />
           <div>
+            <strong>Operator:</strong> {biFailureDetails.operator}
+          </div>
+        </div>
+
+        <div className="flex items-start space-x-2">
+          <Icon path={mdiTools} size={0.8} className="text-red-500 mt-0.5" />
+          <div>
             <strong>Tools by Category:</strong>{' '}
             <span className="text-xs">
-              {Object.entries(quarantineData.toolsByCategory)
-                .map(([category, count]) => `${category}: ${count}`)
-                .join(', ')}
+              {quarantineData.toolsByCategory
+                ? Object.entries(quarantineData.toolsByCategory)
+                    .map(([category, count]) => `${category}: ${count}`)
+                    .join(', ')
+                : 'No tools categorized'}
             </span>
           </div>
         </div>

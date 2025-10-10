@@ -1,6 +1,6 @@
 import React from 'react';
 import { vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../../utils/testUtils';
 import PhaseTimer from '../../../src/components/Sterilization/PhaseTimer';
 
 vi.mock('@/store/sterilizationStore', () => ({

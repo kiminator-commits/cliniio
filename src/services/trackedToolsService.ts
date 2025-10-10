@@ -1,4 +1,4 @@
-import { ToolStatus } from '@/types/toolTypes';
+import { ToolStatus } from '../types/toolTypes';
 
 export interface TrackedToolNotification {
   id: string;
@@ -107,8 +107,8 @@ class TrackedToolsService {
   ): void {
     // Check if tool became available
     if (
-      this.isCleanStatus(newStatus as unknown) &&
-      !this.isCleanStatus(oldStatus as unknown)
+      this.isCleanStatus(newStatus as ToolStatus) &&
+      !this.isCleanStatus(oldStatus as ToolStatus)
     ) {
       this.handleToolBecameAvailable(toolId);
     }

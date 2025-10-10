@@ -2,7 +2,8 @@ import { supabase } from '../lib/supabaseClient';
 import { useLoginStore } from '../stores/useLoginStore';
 import { SecureAuthService } from './secureAuthService';
 import { ToolService } from './tools/ToolService';
-import { ToolStatus } from '@/types/toolTypes';
+import { ToolStatus } from '../types/toolTypes';
+import { logBatchCreated, logToolPackaged } from '../utils/auditLogger';
 
 /**
  * Safe type conversion utilities to prevent data loss
@@ -246,7 +247,7 @@ export class PackagingService {
       }
 
       // Get current user's facility ID and user ID
-      const { FacilityService } = await import('@/services/facilityService');
+      const { FacilityService } = await import('./facilityService');
       const facilityId = await FacilityService.getCurrentFacilityId();
 
       // Get current user ID from auth
@@ -335,12 +336,12 @@ export class PackagingService {
       const authService = new SecureAuthService();
       const currentUser = await authService.getCurrentUser();
       const currentFacility = currentUser
-        ? { id: (currentUser as unknown).facility_id }
+        ? { id: (currentUser as Record<string, unknown>).facility_id }
         : null;
 
       // Create audit log entry
       await supabase.from('audit_logs').insert({
-        created_by: (currentUser as unknown)?.id || 'unknown',
+        created_by: (currentUser as Record<string, unknown>)?.id || 'unknown',
         facility_id: currentFacility?.id || 'unknown',
         module: 'sterilization',
         action: 'package_created',
@@ -510,4 +511,78 @@ export class PackagingService {
       throw error;
     }
   }
+}
+
+// ✅ Supabase persistence for Packaging Workflow (batch creation, linkage, and tool updates)
+export async function createPackage({
+  batchId,
+  operatorName,
+  facilityId,
+  toolBarcodes,
+  packageType,
+  packageSize,
+  notes,
+}: {
+  batchId: string;
+  operatorName: string;
+  facilityId: string;
+  toolBarcodes: string[];
+  packageType: string;
+  packageSize: string;
+  notes?: string;
+}) {
+  // ✅ Create new packaging batch in sterilization_batches
+  const { data: batchData, error: batchError } = await supabase
+    .from('sterilization_batches')
+    .insert({
+      batch_code: batchId,
+      operator_name: operatorName,
+      facility_id: facilityId,
+      package_type: packageType,
+      package_size: packageSize,
+      notes: notes || null,
+      status: 'packaged',
+      created_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (batchError) throw batchError;
+
+  // ✅ Link tools to this batch in batch_items table
+  const batchLinks = toolBarcodes.map((barcode) => ({
+    batch_id: batchData.id,
+    tool_barcode: barcode,
+    facility_id: facilityId,
+    linked_at: new Date().toISOString(),
+  }));
+
+  const { error: linkError } = await supabase
+    .from('batch_items')
+    .insert(batchLinks);
+
+  if (linkError) throw linkError;
+
+  // ✅ Update tool statuses to 'packaged'
+  const { error: statusError } = await supabase
+    .from('sterilization_tools')
+    .update({ status: 'packaged' })
+    .in('barcode', toolBarcodes)
+    .eq('facility_id', facilityId);
+
+  if (statusError) throw statusError;
+
+  // ✅ Integrated audit logging for Packaging Workflow — batch creation and tool packaging
+  await logBatchCreated(batchData.batch_code, operatorName, facilityId);
+
+  for (const barcode of toolBarcodes) {
+    await logToolPackaged(
+      barcode,
+      batchData.batch_code,
+      operatorName,
+      facilityId
+    );
+  }
+
+  return batchData;
 }

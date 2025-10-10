@@ -1,5 +1,5 @@
 // Re-export common types and utilities
-export type { Json, Tables, Inserts, Updates } from './common';
+export type { Tables, Inserts, Updates } from './common';
 export type {
   User,
   AuditLog,
@@ -69,34 +69,5 @@ import {
   KnowledgeHubFunctions,
 } from './knowledgeHub';
 
-// Combine all tables into the main Database interface
-export interface Database {
-  public: {
-    Tables: {
-      [key: string]: {
-        Row: Record<string, any>;
-        Insert: Record<string, any>;
-        Update: Record<string, any>;
-      };
-    };
-    Views: {
-      [key: string]: {
-        Row: Record<string, any>;
-        Insert: Record<string, any>;
-        Update: Record<string, any>;
-      };
-    };
-    Functions: {
-      [key: string]: {
-        Args: Record<string, any>;
-        Returns: any;
-      };
-    };
-    Enums: {
-      [key: string]: string;
-    };
-    CompositeTypes: {
-      [key: string]: Record<string, any>;
-    };
-  };
-}
+// Re-export the proper generated Database type
+export type { Database, Json } from './generated';

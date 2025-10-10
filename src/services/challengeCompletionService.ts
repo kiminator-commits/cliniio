@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 
 export const challengeCompletionService = {
-  async submitCompletion(challengeId: string, notes?: string) {
+  async submitCompletion(challengeId: string, _notes?: string) {
     try {
       const {
         data: { user },
@@ -10,8 +10,18 @@ export const challengeCompletionService = {
 
       if (userError || !user) throw new Error('Unauthorized user');
 
-      const facilityId = user.user_metadata?.facility_id;
-      if (!facilityId) throw new Error('Missing facility context');
+      // Get user's facility_id from users table
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('facility_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !userProfile?.facility_id) {
+        throw new Error('Missing facility context');
+      }
+
+      const facilityId = userProfile.facility_id;
 
       // Validate challenge ownership before submission
       const { data: challenge, error: challengeError } = await supabase
@@ -28,13 +38,12 @@ export const challengeCompletionService = {
       }
 
       const { error: insertError } = await supabase
-        .from('challenge_completions')
+        .from('home_challenge_completions')
         .insert([
           {
             challenge_id: challengeId,
             user_id: user.id,
             facility_id: facilityId,
-            notes: notes || null,
             completed_at: new Date().toISOString(),
           },
         ]);

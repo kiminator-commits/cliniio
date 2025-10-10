@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { vi } from 'vitest';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, act, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { UIProvider } from '@/contexts/UIContext';
 import { UserProvider } from '@/contexts/UserContext';
@@ -54,6 +54,9 @@ export * from '@testing-library/react';
 
 // Override render method
 export { customRender as render };
+
+// Explicitly export commonly used functions
+export { act, screen, fireEvent, waitFor };
 
 // Test data factories
 export const createMockUser = (overrides = {}) => ({

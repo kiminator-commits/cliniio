@@ -138,7 +138,7 @@ export class RealtimeOptimizer {
   }) {
     const _timestamp = new Date().toISOString();
     const _status =
-      _stats.activeChannels <= 2
+      stats.activeChannels <= 2
         ? '✅'
         : stats.activeChannels <= 3
           ? '⚠️'

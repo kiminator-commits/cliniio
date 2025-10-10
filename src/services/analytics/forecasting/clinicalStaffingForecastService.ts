@@ -76,7 +76,7 @@ export class ClinicalStaffingForecastService {
         sterilizationData as _SterilizationCycleRow[]
       ).filter(
         (cycle: _SterilizationCycleRow) =>
-          cycle.status !== 'completed' && cycle.status !== 'failed'
+          cycle.status !== 'clean' && cycle.status !== 'problem'
       ).length;
 
       const currentFTE = CLINICAL_STAFFING_CONFIG.DEFAULT_FTE; // This should come from actual staffing data

@@ -58,7 +58,7 @@ export const useScannerState = () => {
     }
   };
 
-  const handleScan = async (onClose: () => void) => {
+  const handleScan = async (barcode: string, onClose: () => void) => {
     if (!workflowType) return;
 
     setIsScanning(true);
@@ -67,20 +67,13 @@ export const useScannerState = () => {
 
     // Simulate scanning
     setTimeout(async (): Promise<void> => {
-      const demoBarcodes = [
-        'SCAL001',
-        'FORC001',
-        'RETR001',
-        'SCAL002',
-        'FORC002',
-      ];
-      const randomBarcode =
-        demoBarcodes[Math.floor(Math.random() * demoBarcodes.length)];
-
-      const tool = availableTools.find((t) => t.barcode === randomBarcode);
+      const tool = availableTools.find((t) => t.barcode === barcode);
 
       if (tool) {
-        addToolToCycle(tool.id);
+        // Only add tool to cycle for non-problem workflows
+        if (workflowType !== 'problem') {
+          addToolToCycle(tool.id);
+        }
         setScanResult('success');
         setScannedData(
           `Successfully processed ${tool.name} for ${workflowType} workflow`

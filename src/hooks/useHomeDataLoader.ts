@@ -103,12 +103,19 @@ export const useHomeDataLoader = (): HomeData => {
   const [data, setData] = useState<HomeData>({
     tasks: [],
     aiMetrics: null,
+    aiImpactMetrics: null,
     sterilizationMetrics: null,
     integrationMetrics: null,
     leaderboardData: {
-      users: [],
-      userRank: 1,
-      totalUsers: 0,
+      id: '',
+      user_id: '',
+      facility_id: '',
+      points: 0,
+      rank: 1,
+      user_name: '',
+      department: '',
+      created_at: '',
+      updated_at: '',
     },
     gamificationData: null,
     loading: true,
@@ -222,9 +229,15 @@ export const useHomeDataLoader = (): HomeData => {
         metrics?.integrationMetrics || FALLBACK_METRICS.integrationMetrics;
       // Leaderboard will load when modal opens - use fallback for now
       const leaderboard = {
-        users: [],
-        userRank: 1,
-        totalUsers: 0,
+        id: '',
+        user_id: '',
+        facility_id: '',
+        points: 0,
+        rank: 1,
+        user_name: '',
+        department: '',
+        created_at: '',
+        updated_at: '',
       };
 
       // Process gamification data with leaderboard-based level calculation
@@ -232,9 +245,25 @@ export const useHomeDataLoader = (): HomeData => {
         gamificationStats.status === 'fulfilled' && gamificationStats.value
           ? (() => {
               const stats = gamificationStats.value;
-              const leaderboard =
-                leaderboardData.status === 'fulfilled' && leaderboardData.values
-                  ? leaderboardData.values
+              const leaderboardResult =
+                (
+                  leaderboardData as {
+                    status?: string;
+                    values?: { userRank: number; totalUsers: number };
+                  }
+                ).status === 'fulfilled' &&
+                (
+                  leaderboardData as {
+                    status?: string;
+                    values?: { userRank: number; totalUsers: number };
+                  }
+                ).values
+                  ? (
+                      leaderboardData as {
+                        status?: string;
+                        values?: { userRank: number; totalUsers: number };
+                      }
+                    ).values
                   : { userRank: 1, totalUsers: 1 };
 
               // Validate and sanitize all values
@@ -242,8 +271,11 @@ export const useHomeDataLoader = (): HomeData => {
               const safeTotalPoints = Math.max(0, stats.totalPoints || 0);
 
               // Calculate level based on leaderboard rank (higher rank = higher level)
-              const safeUserRank = Math.max(1, leaderboard.userRank || 1);
-              const safeTotalUsers = Math.max(1, leaderboard.totalUsers || 1);
+              const safeUserRank = Math.max(1, leaderboardResult.userRank || 1);
+              const safeTotalUsers = Math.max(
+                1,
+                leaderboardResult.totalUsers || 1
+              );
 
               // Level calculation: Top 10% = Level 10+, Top 25% = Level 7+, Top 50% = Level 5+, etc.
               const rankPercentile = safeUserRank / safeTotalUsers;
@@ -318,12 +350,12 @@ export const useHomeDataLoader = (): HomeData => {
       setData({
         tasks: homeTasks,
         aiMetrics: ai as HomePerformanceMetrics,
-        sterilizationMetrics: sterilization as unknown as Record<
+        sterilizationMetrics: sterilization as Record<string, unknown>,
+        integrationMetrics: integration,
+        aiImpactMetrics: (metrics?.aiImpactMetrics || null) as Record<
           string,
           unknown
-        >,
-        integrationMetrics: integration,
-        aiImpactMetrics: metrics?.aiImpactMetrics || null, // Add AI impact metrics
+        > | null,
         leaderboardData: leaderboard,
         gamificationData: gamificationData,
         loading: false, // Show dashboard now with tile structure visible
@@ -364,9 +396,15 @@ export const useHomeDataLoader = (): HomeData => {
           >,
         aiImpactMetrics: null, // Add AI impact metrics fallback
         leaderboardData: {
-          users: [],
-          userRank: 1,
-          totalUsers: 0,
+          id: '',
+          user_id: '',
+          facility_id: '',
+          points: 0,
+          rank: 1,
+          user_name: '',
+          department: '',
+          created_at: '',
+          updated_at: '',
         },
         gamificationData: null,
         loading: false,

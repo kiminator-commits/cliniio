@@ -1,4 +1,4 @@
-import { ContentCategory } from '../../../pages/KnowledgeHub/types';
+import { ContentCategory } from '../../../../pages/KnowledgeHub/types';
 
 export interface CategoryMapping {
   libraryCategory: string;

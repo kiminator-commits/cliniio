@@ -47,7 +47,7 @@ export const createSoftDeletedItem = (item: InventoryItem): InventoryItem => {
     status: 'deleted',
     // Preserve original data for potential restoration
     data: {
-      ...item.data,
+      ...(item.data && typeof item.data === 'object' ? item.data : {}),
       deletedAt: new Date().toISOString(),
       originalStatus: item.status,
     },
@@ -66,7 +66,7 @@ export const createRestoredItem = (
     ...item,
     status: originalStatus || 'available',
     data: {
-      ...item.data,
+      ...(item.data && typeof item.data === 'object' ? item.data : {}),
       restoredAt: new Date().toISOString(),
     },
   };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormGroupProps } from '../AIAnalyticsSettings.types';
+import { FormGroupProps } from '../../AIAnalyticsSettings.types';
 
 const FormGroup: React.FC<FormGroupProps> = ({ title, children }) => {
   return (

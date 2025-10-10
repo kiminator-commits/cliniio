@@ -57,14 +57,17 @@ export class UserLearningProfileService {
 
       return {
         id: userData.id as string,
-        role: userData.role as string,
-        department: userData.department as string,
-        title: userData.position as string, // Use position instead of title
+        role: (userData as { role?: string }).role || 'user',
+        department:
+          (userData as { department?: string }).department || 'general',
+        title: (userData as { position?: string }).position || 'staff',
         specialization: '', // Default value since field doesn't exist
         yearsExperience: 0, // Default value since field doesn't exist
         skillLevel: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced', // Default value since field doesn't exist
         learningPreferences: this.getDefaultPreferences(), // Default value since field doesn't exist
-        lastUpdated: userData.updated_at as string,
+        lastUpdated:
+          (userData as { updated_at?: string }).updated_at ||
+          new Date().toISOString(),
       };
     } catch (error) {
       console.error('Error fetching user learning profile:', error);

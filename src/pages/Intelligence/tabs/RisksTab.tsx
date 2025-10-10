@@ -108,14 +108,7 @@ export default function RisksTab({ summary }: RisksTabProps) {
               {summary.auditRisk?.riskFactors &&
               summary.auditRisk.riskFactors.length > 0 ? (
                 summary.auditRisk.riskFactors.map(
-                  (
-                    riskFactor: {
-                      factor: string;
-                      severity: string;
-                      description?: string;
-                    },
-                    index: number
-                  ) => (
+                  (riskFactor, index: number) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"

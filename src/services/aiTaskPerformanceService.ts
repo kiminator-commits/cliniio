@@ -2,6 +2,8 @@ import {
   AITaskPerformance,
   PerformanceUpdate,
 } from '@/types/aiTaskPerformanceTypes';
+
+export type { PerformanceUpdate };
 import {
   transformTaskToPerformance,
   calculateGamificationStats,

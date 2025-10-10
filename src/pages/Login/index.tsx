@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { usePerformanceMonitoring } from '../../hooks/usePerformanceMonitoring';
 
 // Lazy load the main login form
 const LoginForm = lazy(() => import('./LoginForm'));

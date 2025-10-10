@@ -17,12 +17,6 @@ const TrustedDevicesManager: React.FC = () => {
   const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (currentUser) {
-      loadTrustedDevices();
-    }
-  }, [currentUser, loadTrustedDevices]);
-
   const loadTrustedDevices = useCallback(async () => {
     if (!currentUser) return;
 
@@ -40,6 +34,12 @@ const TrustedDevicesManager: React.FC = () => {
       setLoading(false);
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadTrustedDevices();
+    }
+  }, [currentUser, loadTrustedDevices]);
 
   const removeDevice = async (deviceId: string) => {
     try {

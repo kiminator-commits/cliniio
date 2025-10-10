@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToggleSwitchProps } from '../AIAnalyticsSettings.types';
+import { ToggleSwitchProps } from '../../AIAnalyticsSettings.types';
 
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   id,

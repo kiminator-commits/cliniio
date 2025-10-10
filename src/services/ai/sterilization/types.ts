@@ -53,6 +53,9 @@ export interface SterilizationAIInsight {
   data: Record<string, unknown>;
   created_at: string;
   facility_id: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  category: string;
+  timestamp: string;
 }
 
 export interface ToolConditionAssessment {

@@ -116,9 +116,9 @@ export class RoomScanService {
         department: roomData.department ?? undefined,
         floor: roomData.floor ?? undefined,
         building: roomData.building ?? undefined,
-        roomType: roomData.room_type ?? undefined,
-        capacity: roomData.capacity ?? undefined,
-        isActive: roomData.is_active,
+        roomType: (roomData as { room_type?: string }).room_type ?? undefined,
+        capacity: (roomData as { capacity?: number }).capacity ?? undefined,
+        isActive: (roomData as { is_active?: boolean }).is_active,
         createdAt: roomData.created_at,
         updatedAt: roomData.updated_at,
       };

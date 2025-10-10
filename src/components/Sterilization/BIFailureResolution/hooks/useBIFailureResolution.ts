@@ -270,7 +270,7 @@ export const useBIFailureResolution = ({
         if (sterilizationStore.addActivity) {
           sterilizationStore.addActivity({
             id: `bi-incident-resolved-${incidentData.id}`,
-            type: 'incident-resolution',
+            type: 'bi-failure',
             title: 'BI Failure Incident Resolved',
             time: new Date(),
             toolCount: biFailureDetails?.affectedToolsCount || 1,

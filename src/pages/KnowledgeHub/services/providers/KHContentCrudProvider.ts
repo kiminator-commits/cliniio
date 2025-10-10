@@ -1,6 +1,6 @@
 import { supabase } from '../../../../lib/supabase';
 import { ContentItem } from '../../types';
-import { ApiError, ErrorType, ErrorSeverity } from '../../../types/errors';
+import { ApiError, ErrorType, ErrorSeverity } from '../../types/errors';
 import {
   KHDataTransformationProvider,
   KnowledgeHubCourse,

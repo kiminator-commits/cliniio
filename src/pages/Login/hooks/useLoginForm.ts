@@ -18,7 +18,7 @@ export const useLoginForm = () => {
     setErrors,
     setLoading,
     setAuthToken,
-    _csrfToken,
+    csrfToken: _csrfToken,
     incrementFailedAttempts,
     resetFailedAttempts,
     isSecureMode,

@@ -140,12 +140,11 @@ export class BIFailureNotificationDataProvider {
         table_name: 'bi_failure_incidents',
         record_id: incidentId || null,
         action: 'notification_sent',
-        facility_id: '550e8400-e29b-41d4-a716-446655440000', // Default facility ID - should be passed as parameter
-        user_id: managerId,
         metadata: {
           notification_type: 'manager_alert',
           manager_id: managerId,
           severity: severity,
+          facility_id: '550e8400-e29b-41d4-a716-446655440000', // Default facility ID - should be passed as parameter
           timestamp: new Date().toISOString(),
         },
         created_at: new Date().toISOString(),

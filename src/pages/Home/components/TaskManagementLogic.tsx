@@ -47,11 +47,9 @@ export function useTaskManagementLogic({
       try {
         // For challenges, complete them in the database
         if (taskId && typeof points === 'number' && points > 0) {
-          const success = await challengeCompletionService.completeChallenge(
-            taskId,
-            points
-          );
-          if (!success) {
+          const result =
+            await challengeCompletionService.submitCompletion(taskId);
+          if (!result.success) {
             setTaskError('Failed to complete challenge in database');
             return;
           }

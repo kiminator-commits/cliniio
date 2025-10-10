@@ -207,7 +207,7 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
         id: Date.now(),
         name: newSectionName.trim(),
         description: DEFAULTS.NEW_SECTION_DESCRIPTION,
-        items: DEFAULTS.EMPTY_ITEMS_ARRAY,
+        items: [...DEFAULTS.EMPTY_ITEMS_ARRAY],
         order: pathwaySections.length + 1,
       };
       onPathwayChange([...pathwaySections, newSection], selectedPathwayItems);

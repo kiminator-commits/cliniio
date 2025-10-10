@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useCallback } from 'react';
+import React, { memo, useEffect, useCallback, useState } from 'react';
 import {
   useSterilizationStore,
   SterilizationPhase,
@@ -11,6 +11,8 @@ import { usePhaseTimerState } from './hooks/usePhaseTimerState';
 import PhaseCard from '../PhaseCard';
 import { PhaseTimerHeader } from './PhaseTimerHeader';
 import { PhaseTimerExpanded } from './PhaseTimerExpanded';
+import { DryingCIPopup } from '../workflows/DryingCIPopup';
+import { AutoclaveCIPopup } from '../workflows/AutoclaveCIPopup';
 
 /**
  * Props for the PhaseTimer component.
@@ -49,6 +51,22 @@ export default memo(function PhaseTimer({
     useSterilizationStore();
   const { overexposed } = useTimerStore();
 
+  // CI confirmation modal state
+  const [ciModalState, setCiModalState] = useState({
+    isOpen: false,
+    cycleId: '',
+    facilityId: '',
+    toolIds: [] as string[],
+  });
+
+  // CI verification modal state
+  const [ciVerificationModalState, setCiVerificationModalState] = useState({
+    isOpen: false,
+    cycleId: '',
+    facilityId: '',
+    toolIds: [] as string[],
+  });
+
   // Custom hook for state management
   const {
     isExpanded,
@@ -86,6 +104,51 @@ export default memo(function PhaseTimer({
     }
   }, [timer?.timeRemaining, timer?.isRunning, handleCompleteRef, timer]);
 
+  // CI confirmation modal handlers
+  const handleShowCIConfirmation = useCallback(
+    (
+      isOpen: boolean,
+      cycleId: string,
+      facilityId: string,
+      toolIds: string[]
+    ) => {
+      if (phase.name === 'airDry') {
+        setCiModalState({
+          isOpen,
+          cycleId,
+          facilityId,
+          toolIds,
+        });
+      } else if (phase.name === 'autoclave') {
+        setCiVerificationModalState({
+          isOpen,
+          cycleId,
+          facilityId,
+          toolIds,
+        });
+      }
+    },
+    [phase.name]
+  );
+
+  const handleCIConfirmationClose = useCallback(() => {
+    setCiModalState({
+      isOpen: false,
+      cycleId: '',
+      facilityId: '',
+      toolIds: [],
+    });
+  }, []);
+
+  const handleCIVerificationClose = useCallback(() => {
+    setCiVerificationModalState({
+      isOpen: false,
+      cycleId: '',
+      facilityId: '',
+      toolIds: [],
+    });
+  }, []);
+
   // Update the phase timer logic with actual timer values
   const {
     getStatusInfo,
@@ -100,6 +163,8 @@ export default memo(function PhaseTimer({
     handlePause,
     handleMoveToolsToNext,
     handleReset,
+    handleCIConfirmationComplete,
+    handleCIVerificationComplete,
   } = usePhaseTimerLogic({
     phase,
     elapsed,
@@ -112,6 +177,7 @@ export default memo(function PhaseTimer({
     resetPhase,
     resetTimer: () => resetTimer(phase.id), // Use timer store reset
     currentCycle,
+    onShowCIConfirmation: handleShowCIConfirmation,
   });
 
   // Store the handleComplete function in the ref
@@ -130,6 +196,16 @@ export default memo(function PhaseTimer({
     handlePause();
     handlePauseTimer(phase.id); // Pause timer store timer
   }, [handlePause, handlePauseTimer, phase.id]);
+
+  const handleCIModalComplete = useCallback(async () => {
+    await handleCIConfirmationComplete();
+    handleCIConfirmationClose();
+  }, [handleCIConfirmationComplete, handleCIConfirmationClose]);
+
+  const handleCIVerificationModalComplete = useCallback(async () => {
+    await handleCIVerificationComplete();
+    handleCIVerificationClose();
+  }, [handleCIVerificationComplete, handleCIVerificationClose]);
 
   // Safety check moved to after all hooks are called
   if (!validatePhaseDuration()) {
@@ -189,6 +265,26 @@ export default memo(function PhaseTimer({
           )}
         </div>
       </PhaseCard>
+
+      {/* CI Confirmation Modal */}
+      <DryingCIPopup
+        isOpen={ciModalState.isOpen}
+        onClose={handleCIConfirmationClose}
+        currentCycleId={ciModalState.cycleId}
+        facilityId={ciModalState.facilityId}
+        toolIds={ciModalState.toolIds}
+        onComplete={handleCIModalComplete}
+      />
+
+      {/* CI Verification Modal */}
+      <AutoclaveCIPopup
+        isOpen={ciVerificationModalState.isOpen}
+        onClose={handleCIVerificationClose}
+        currentCycleId={ciVerificationModalState.cycleId}
+        facilityId={ciVerificationModalState.facilityId}
+        toolIds={ciVerificationModalState.toolIds}
+        onComplete={handleCIVerificationModalComplete}
+      />
     </div>
   );
 });

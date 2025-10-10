@@ -12,15 +12,15 @@ type LogLevel = keyof typeof LOG_LEVELS;
 // Get log level from environment or default to INFO in production, DEBUG in development
 const getLogLevel = (): LogLevel => {
   // Check if we're in production
-  const isProduction = import.meta.env.PROD;
+  const isProduction = process.env.NODE_ENV === 'production';
   if (isProduction) {
     return 'INFO';
   }
 
-  // Handle Vite environment
+  // Handle environment variables
   let envLevel: LogLevel | undefined;
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    envLevel = import.meta.env.VITE_LOG_LEVEL as LogLevel;
+  if (typeof process !== 'undefined' && process?.env) {
+    envLevel = (process.env.VITE_LOG_LEVEL as LogLevel) || 'DEBUG';
   }
 
   if (envLevel && LOG_LEVELS[envLevel] !== undefined) {

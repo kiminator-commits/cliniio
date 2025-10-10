@@ -127,7 +127,8 @@ export class ErrorReportingService {
 
     // Log to console in development
     const isDevelopment = isBrowser
-      ? import.meta.env?.MODE === 'development'
+      ? import.meta.env?.MODE === 'development' ||
+        process.env.NODE_ENV === 'development'
       : process.env.NODE_ENV === 'development';
     if (isDevelopment) {
       console.error('Error reported:', errorReport);

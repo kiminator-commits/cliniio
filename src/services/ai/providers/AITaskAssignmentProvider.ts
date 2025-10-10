@@ -82,7 +82,7 @@ Configuration: ${JSON.stringify(analysisData.configuration, null, 2)}
 Facility Context: ${JSON.stringify(analysisData.facilityContext, null, 2)}
 
 Please provide a JSON response with task assignments that:
-1. Respects max tasks per user (${analysisData.configuration.maxTasksPerUser})
+1. Respects max tasks per user (${(analysisData.configuration as Record<string, unknown>).maxTasksPerUser})
 2. Prioritizes urgent and high priority tasks
 3. Matches user roles to task categories
 4. Balances workload across users

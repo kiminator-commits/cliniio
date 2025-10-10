@@ -208,7 +208,7 @@ export class RoomService {
 
       const { data, error } = await supabase
         .from('environmental_cleans_enhanced')
-        .insert(insertData as Record<string, unknown>[])
+        .insert(insertData as unknown as Record<string, unknown>[])
         .select()
         .single();
 

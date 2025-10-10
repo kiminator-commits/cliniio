@@ -9,7 +9,7 @@ interface ScannerInterfaceProps {
   isScanning: boolean;
   scanResult: 'success' | 'error' | null;
   scannedData: string;
-  onScan: () => void;
+  onScan: (barcode: string) => void;
   onBackToWorkflow: () => void;
 }
 
@@ -72,7 +72,19 @@ export const ScannerInterface: React.FC<ScannerInterfaceProps> = ({
 
             {/* Scan Button Overlay */}
             <button
-              onClick={onScan}
+              onClick={() => {
+                // Simulate scanning a barcode - in real implementation this would come from scanner
+                const mockBarcodes = [
+                  'SCAL001',
+                  'FORC001',
+                  'RETR001',
+                  'SCAL002',
+                  'FORC002',
+                ];
+                const randomBarcode =
+                  mockBarcodes[Math.floor(Math.random() * mockBarcodes.length)];
+                onScan(randomBarcode);
+              }}
               disabled={isScanning}
               className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 rounded-full transition-all duration-200 ${
                 isScanning

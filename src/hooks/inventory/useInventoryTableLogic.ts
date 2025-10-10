@@ -40,12 +40,34 @@ export const useInventoryTableLogic = ({
   // Helper function to get item ID
   const getItemId = useCallback((item: InventoryItem): string => {
     return (
-      (typeof item.data?.toolId === 'string' ? item.data.toolId : '') ||
-      (typeof item.data?.supplyId === 'string' ? item.data.supplyId : '') ||
-      (typeof item.data?.equipmentId === 'string'
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'toolId' in item.data &&
+      typeof item.data.toolId === 'string'
+        ? item.data.toolId
+        : '') ||
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'supplyId' in item.data &&
+      typeof item.data.supplyId === 'string'
+        ? item.data.supplyId
+        : '') ||
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'equipmentId' in item.data &&
+      typeof item.data.equipmentId === 'string'
         ? item.data.equipmentId
         : '') ||
-      (typeof item.data?.hardwareId === 'string' ? item.data.hardwareId : '') ||
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'hardwareId' in item.data &&
+      typeof item.data.hardwareId === 'string'
+        ? item.data.hardwareId
+        : '') ||
       item.id
     );
   }, []);
@@ -53,24 +75,52 @@ export const useInventoryTableLogic = ({
   // Helper function to get status/quantity/expiration/warranty
   const getItemStatus = useCallback((item: InventoryItem): string => {
     // For tools, return currentPhase (sterilization status) if available, otherwise p2Status or status
-    if (typeof item.data?.toolId === 'string') {
+    if (
+      item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'toolId' in item.data &&
+      typeof item.data.toolId === 'string'
+    ) {
       const status =
-        (typeof item.data?.currentPhase === 'string'
+        (item.data &&
+        typeof item.data === 'object' &&
+        item.data !== null &&
+        'currentPhase' in item.data &&
+        typeof item.data.currentPhase === 'string'
           ? item.data.currentPhase
           : '') ||
-        (typeof item.data?.p2Status === 'string' ? item.data.p2Status : '') ||
+        (item.data &&
+        typeof item.data === 'object' &&
+        item.data !== null &&
+        'p2Status' in item.data &&
+        typeof item.data.p2Status === 'string'
+          ? item.data.p2Status
+          : '') ||
         (typeof item.status === 'string' ? item.status : '') ||
         '';
 
       return status;
     }
     // For supplies, return quantity as string
-    if (typeof item.data?.supplyId === 'string')
+    if (
+      item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'supplyId' in item.data &&
+      typeof item.data.supplyId === 'string'
+    )
       return item.quantity?.toString() || '0';
     // For equipment and hardware, return status or warranty
     return (
       (typeof item.status === 'string' ? item.status : '') ||
-      (typeof item.data?.warranty === 'string' ? item.data.warranty : '') ||
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'warranty' in item.data &&
+      typeof item.data.warranty === 'string'
+        ? item.data.warranty
+        : '') ||
       ''
     );
   }, []);

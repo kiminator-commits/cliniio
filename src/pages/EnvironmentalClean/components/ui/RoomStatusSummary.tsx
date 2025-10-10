@@ -4,7 +4,7 @@ import { mdiMapMarker } from '@mdi/js';
 import { UI_CONSTANTS } from '../../constants';
 import { useListNavigation } from '../../utils/keyboardNavigation';
 import { useRoomStatus } from '../../context/RoomStatusContext';
-import { RoomStatusType } from './types/RoomStatusTypes';
+import { RoomStatusType } from '../../context/RoomStatusContext';
 import {
   useStatusCards,
   getRoomCountByStatus,
@@ -99,7 +99,7 @@ const RoomStatusSummary: React.FC = () => {
         onClose={() => setIsStatusModalOpen(false)}
         onUpdate={(statuses) => {
           if (selectedRoom) {
-            handleStatusUpdate(selectedRoom, statuses);
+            handleStatusUpdate(selectedRoom, statuses as RoomStatusType[]);
           }
         }}
         currentStatus={activeDrawer || 'Available'}

@@ -1,10 +1,10 @@
-import { supabase } from '@/lib/supabaseClient';
-import { isDevelopment } from '@/lib/getEnv';
+import { supabase } from '../lib/supabaseClient';
+import { isDevelopment } from '../lib/getEnv';
 import {
   QueryOptions,
   PaginatedResponse,
   DEFAULT_PAGE_SIZE,
-} from '@/types/QueryOptions';
+} from '../types/QueryOptions';
 import { distributedFacilityCache } from './cache/DistributedFacilityCache';
 
 export interface Facility {
@@ -75,7 +75,9 @@ export class FacilityService {
           }
           return devFacility.id;
         }
-        throw new Error('User not authenticated');
+        // In development, return null instead of throwing to allow graceful handling
+        console.warn('User not authenticated - returning null facility ID');
+        return null;
       }
 
       // Get user's facility from users table
@@ -271,7 +273,9 @@ export class FacilityService {
         if (isDevelopment()) {
           return '550e8400-e29b-41d4-a716-446655440001';
         }
-        throw new Error('User not authenticated');
+        // In production, return null instead of throwing to allow graceful handling
+        console.warn('User not authenticated - returning null user ID');
+        return null;
       }
 
       return user.id;

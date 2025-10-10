@@ -52,7 +52,12 @@ export class PerformanceMonitoringIntegration {
    * Get comprehensive performance status
    */
   getPerformanceStatus(): PerformanceStatus {
-    const health = (performanceMonitor as unknown).getSystemHealthSync();
+    const health = (
+      performanceMonitor as { getSystemHealthSync?: () => unknown }
+    ).getSystemHealthSync?.() || {
+      status: 'unknown',
+      checks: [],
+    };
     const alerts = performanceMonitor.getActiveAlerts();
     const alertStats = performanceAlertingService.getAlertStatistics();
     const insights = performanceMonitor.getPerformanceInsights();

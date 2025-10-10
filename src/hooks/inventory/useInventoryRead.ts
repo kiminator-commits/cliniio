@@ -34,9 +34,17 @@ export const useInventoryRead = () => {
           filteredItems = filteredItems.filter(
             (item) =>
               item.name?.toLowerCase().includes(searchLower) ||
-              (typeof item.data?.description === 'string' &&
+              (item.data &&
+                typeof item.data === 'object' &&
+                item.data !== null &&
+                'description' in item.data &&
+                typeof item.data.description === 'string' &&
                 item.data.description.toLowerCase().includes(searchLower)) ||
-              (typeof item.data?.sku === 'string' &&
+              (item.data &&
+                typeof item.data === 'object' &&
+                item.data !== null &&
+                'sku' in item.data &&
+                typeof item.data.sku === 'string' &&
                 item.data.sku.toLowerCase().includes(searchLower))
           );
         }
@@ -107,8 +115,8 @@ export const useInventoryRead = () => {
       return inventoryData.filter((item) => {
         const dateString =
           item.updated_at ||
-          (typeof item.data?.createdAt === 'string'
-            ? item.data.createdAt
+          (item.data && typeof item.data === 'object' && item.data !== null
+            ? ((item.data as Record<string, unknown>).createdAt as string)
             : null);
         const itemDate = dateString ? new Date(dateString) : new Date();
         return itemDate >= startDate && itemDate <= endDate;

@@ -77,9 +77,27 @@ export class FilterService {
           item.name,
           item.category,
           item.location,
-          item.data?.description,
-          item.data?.barcode,
-          item.data?.sku,
+          item.data &&
+          typeof item.data === 'object' &&
+          item.data !== null &&
+          'description' in item.data &&
+          typeof item.data.description === 'string'
+            ? item.data.description
+            : '',
+          item.data &&
+          typeof item.data === 'object' &&
+          item.data !== null &&
+          'barcode' in item.data &&
+          typeof item.data.barcode === 'string'
+            ? item.data.barcode
+            : '',
+          item.data &&
+          typeof item.data === 'object' &&
+          item.data !== null &&
+          'sku' in item.data &&
+          typeof item.data.sku === 'string'
+            ? item.data.sku
+            : '',
         ];
 
         return searchableFields.some((field) => {
@@ -111,7 +129,15 @@ export class FilterService {
           return true;
         }
         // Check if item is tracked (has tracking data)
-        return item.data?.tracked === true;
+        return (
+          (item.data &&
+          typeof item.data === 'object' &&
+          item.data !== null &&
+          'tracked' in item.data &&
+          typeof item.data.tracked === 'boolean'
+            ? item.data.tracked
+            : false) === true
+        );
       });
     }
 
@@ -151,7 +177,14 @@ export class FilterService {
     return filteredItems.map((item) => ({
       id: item.id || '',
       name: item.name || item.item || '',
-      barcode: item.data?.barcode || '',
+      barcode:
+        item.data &&
+        typeof item.data === 'object' &&
+        item.data !== null &&
+        'barcode' in item.data &&
+        typeof item.data.barcode === 'string'
+          ? item.data.barcode
+          : '',
       currentPhase: item.status || 'unknown',
       category: item.category || '',
     }));

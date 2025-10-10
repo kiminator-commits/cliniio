@@ -18,6 +18,11 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
 }) => {
   const expiryStatus = getExpiryStatus(item);
 
+  // Helper function to safely access data properties
+  const getDataProperty = (property: string) => {
+    return (item.data as Record<string, unknown>)?.[property];
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -53,31 +58,34 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
               <div className="flex items-center space-x-1">
                 <span className="font-medium">Quantity:</span>
                 <span>
-                  {item.quantity || 0} {String(item.data?.unit || 'units')}
+                  {item.quantity || 0}{' '}
+                  {String(getDataProperty('unit') || 'units')}
                 </span>
               </div>
             </div>
 
             <div className="space-y-1">
-              {item.data?.manufacturer ? (
+              {getDataProperty('manufacturer') ? (
                 <div className="flex items-center space-x-1">
                   <Icon path={mdiFactory} size={0.8} />
-                  <span>{String(item.data.manufacturer)}</span>
+                  <span>{String(getDataProperty('manufacturer'))}</span>
                 </div>
               ) : null}
-              {item.data?.supplier ? (
+              {getDataProperty('supplier') ? (
                 <div className="flex items-center space-x-1">
                   <Icon path={mdiTruck} size={0.8} />
-                  <span>{String(item.data.supplier)}</span>
+                  <span>{String(getDataProperty('supplier'))}</span>
                 </div>
               ) : null}
-              {item.data?.expiration || item.expiryDate ? (
+              {getDataProperty('expiration') || item.expiryDate ? (
                 <div className="flex items-center space-x-1">
                   <Icon path={mdiCalendar} size={0.8} />
                   <span>
                     Expires:{' '}
                     {formatDate(
-                      String(item.data?.expiration || item.expiryDate || '')
+                      String(
+                        getDataProperty('expiration') || item.expiryDate || ''
+                      )
                     )}
                   </span>
                 </div>

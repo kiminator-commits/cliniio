@@ -44,7 +44,7 @@ export class AIDailyTaskService {
       // 4. AI-powered task prioritization and assignment
       const taskAssignments = await assignTasksWithAI(
         operationalGaps,
-        facilityUsers,
+        facilityUsers as Record<string, unknown>,
         adminConfig
       );
 

@@ -197,7 +197,12 @@ export class SecurityMonitoringService {
     return this.metricsProvider.getSecurityDashboard(
       incidents,
       threatIndicators
-    ) as unknown;
+    ) as {
+      overview: SecurityMetrics;
+      trends: Record<string, unknown>;
+      alerts: unknown[];
+      recommendations: unknown[];
+    };
   }
 
   /**

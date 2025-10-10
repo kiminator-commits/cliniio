@@ -286,7 +286,7 @@ export class ContentBuilderModuleProvider {
     const characterCount = lesson.content.length;
     const readingTimeMinutes = Math.ceil(wordCount / 200); // Average reading speed: 200 words per minute
     const isEmpty = !lesson.title.trim() && !lesson.content.trim();
-    const isComplete = lesson.title.trim() && lesson.content.trim();
+    const isComplete = !!(lesson.title.trim() && lesson.content.trim());
 
     return {
       wordCount,

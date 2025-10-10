@@ -1,12 +1,26 @@
 import React from 'react';
 import { RoomStatusType } from '../../models';
-import { STATUS_BUTTON_OPTIONS } from '../../constants';
 import {
   useListNavigation,
   handleEnterKey,
   handleSpaceKey,
   getAriaLabel,
 } from '../../utils/keyboardNavigation';
+
+const STATUS_BUTTON_OPTIONS = [
+  { value: 'clean' as RoomStatusType, label: 'Clean', color: 'bg-green-500' },
+  { value: 'dirty' as RoomStatusType, label: 'Dirty', color: 'bg-red-500' },
+  {
+    value: 'biohazard' as RoomStatusType,
+    label: 'Biohazard',
+    color: 'bg-yellow-500',
+  },
+  {
+    value: 'available' as RoomStatusType,
+    label: 'Available',
+    color: 'bg-blue-500',
+  },
+];
 
 interface StatusButtonsProps {
   currentStatuses: string[];

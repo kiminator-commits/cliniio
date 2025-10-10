@@ -1,4 +1,4 @@
-import type { Database } from '@/types/database.types';
+import type { Database } from '../../types/database.types';
 
 export type InventoryItem =
   Database['public']['Tables']['inventory_items']['Row'];

@@ -1,10 +1,10 @@
 import { supabase } from '../lib/supabaseClient';
-import { Database } from '@/types/database.types';
+import { Database } from '../types/database.types';
 import { Json } from '../types/supabase';
 import { ToolService as CoreToolService } from './tools/ToolService';
 
 // Import Tool interface from main types to avoid conflicts
-import { Tool } from '@/types/toolTypes';
+import { Tool } from '../types/toolTypes';
 
 export interface ToolScanResult {
   success: boolean;
@@ -38,6 +38,7 @@ interface ToolRow {
     | 'quarantine';
   location?: string;
   sterilization_count: number;
+  is_p2_tool?: boolean;
   last_sterilized?: string;
   notes?: string;
   facility_id: string;
@@ -180,6 +181,7 @@ export class ToolService {
         cycleCount: toolData.sterilization_count || 0,
         lastSterilized: toolData.last_sterilized,
         notes: toolData.notes,
+        is_p2_tool: toolData.is_p2_tool,
       };
 
       return {
@@ -325,6 +327,7 @@ export class ToolService {
         cycleCount: updatedToolData.sterilization_count || 0,
         lastSterilized: updatedToolData.last_sterilized,
         notes: updatedToolData.notes,
+        is_p2_tool: updatedToolData.is_p2_tool,
       };
 
       return {
@@ -359,11 +362,11 @@ export class ToolService {
       return sortedTools.map((tool): Tool => {
         const toolData = tool as Record<string, unknown>;
         return {
-          id: toolData.id,
-          name: toolData.tool_name,
-          barcode: toolData.barcode,
-          category: toolData.category || 'general',
-          type: toolData.tool_type,
+          id: toolData.id as string,
+          name: toolData.tool_name as string,
+          barcode: toolData.barcode as string,
+          category: (toolData.category as string) || 'general',
+          type: toolData.tool_type as string,
           currentPhase: toolData.current_cycle_id ? 'complete' : 'available',
           status: toolData.status as
             | 'available'
@@ -371,10 +374,10 @@ export class ToolService {
             | 'retired'
             | 'in_cycle'
             | 'problem',
-          location: toolData.location,
-          cycleCount: toolData.sterilization_count || 0,
-          lastSterilized: toolData.last_sterilized,
-          notes: toolData.notes,
+          location: toolData.location as string,
+          cycleCount: (toolData.sterilization_count as number) || 0,
+          lastSterilized: toolData.last_sterilized as string,
+          notes: toolData.notes as string,
         };
       });
     } catch (error) {

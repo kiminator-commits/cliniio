@@ -62,7 +62,7 @@ const SterilizationScannerModal: React.FC<SterilizationScannerModalProps> =
                     scanResult={scanResult}
                     onClose={onClose}
                     onBackToWorkflow={handleBackToWorkflow}
-                    onScan={() => handleScan(onClose)}
+                    onScan={(barcode) => handleScan(barcode, onClose)}
                   />
                 )}
               </div>

@@ -119,7 +119,7 @@ export const QuizCreationForm: React.FC<QuizCreationFormProps> = ({
       // TODO: Create questions for the quiz // TRACK: Migrate to GitHub issue
       // This would require additional service methods
 
-      onQuizCreated?.(quiz as Quiz);
+      onQuizCreated?.(quiz as unknown as Quiz);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create quiz');
     } finally {

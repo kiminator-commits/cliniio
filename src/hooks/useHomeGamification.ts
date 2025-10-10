@@ -55,9 +55,23 @@ export const useHomeGamification = () => {
       let level: number;
       let rank: number;
 
-      if (cumulativeStats.enhancedLevel) {
-        level = cumulativeStats.enhancedLevel.coreLevel as number;
-        rank = cumulativeStats.enhancedLevel.rank as number;
+      if (
+        (
+          cumulativeStats as {
+            enhancedLevel?: { coreLevel: number; rank: number };
+          }
+        ).enhancedLevel
+      ) {
+        level = (
+          cumulativeStats as {
+            enhancedLevel?: { coreLevel: number; rank: number };
+          }
+        ).enhancedLevel!.coreLevel;
+        rank = (
+          cumulativeStats as {
+            enhancedLevel?: { coreLevel: number; rank: number };
+          }
+        ).enhancedLevel!.rank;
       } else {
         // Fallback to basic level calculation
         level = Math.max(1, Math.floor(cumulativeStats.totalPoints / 100) + 1);

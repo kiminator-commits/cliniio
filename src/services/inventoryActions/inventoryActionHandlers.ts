@@ -3,11 +3,11 @@
  * Handles state transitions, validations, workflows, and business rules
  */
 
-import { InventoryItem } from '@/types/inventoryTypes';
+import { InventoryItem } from '../../types/inventoryTypes';
 import {
   InventoryItemData,
   BulkOperationResult,
-} from '@/types/inventoryActionTypes';
+} from '../../types/inventoryActionTypes';
 
 // Simple analytics tracking function
 const trackAnalyticsEvent = (event: string, data: Record<string, unknown>) => {
@@ -35,7 +35,7 @@ type ImportResult = {
   errors: string[];
   data?: unknown[];
 };
-import { logEvent, trackUserAction } from '@/utils/monitoring';
+import { logEvent, trackUserAction } from '../../utils/monitoring';
 import {
   validateItemData,
   buildInventoryPayload,
@@ -230,7 +230,7 @@ export async function handleBulkImport(
 
     const importResult = await InventoryImportService.importItems(
       file,
-      options as Record<string, unknown>
+      options as ImportOptions
     );
 
     logEvent(
@@ -557,7 +557,7 @@ async function processBulkExport(
 ): Promise<BulkOperationResult> {
   try {
     const _exportResult = await InventoryExportService.exportItems(
-      itemIds as string[],
+      itemIds as InventoryItem[],
       exportOptions
     );
 

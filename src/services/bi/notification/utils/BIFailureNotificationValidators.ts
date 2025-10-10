@@ -58,7 +58,7 @@ export class BIFailureNotificationValidators {
     }
 
     BIFailureNotificationValidators.validateIncidentDetails(
-      request.incidentDetails as Record<string, unknown>
+      request.incidentDetails as unknown as Record<string, unknown>
     );
   }
 

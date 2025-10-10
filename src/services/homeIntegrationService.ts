@@ -10,7 +10,7 @@
  * - Better scalability (database handles heavy computations)
  * - Reduced memory usage on client
  */
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export interface InventoryMetrics {
   lowStockItems: number;

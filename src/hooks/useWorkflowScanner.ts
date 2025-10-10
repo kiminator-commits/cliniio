@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { sterilizationWorkflowService } from '@/pages/Sterilization/services/sterilizationWorkflowService';
 import { environmentalService } from '@/services/environmental/environmentalService';
 
 interface ScanResult {
@@ -18,7 +17,7 @@ export function useWorkflowScanner() {
         // Determine the scan domain by prefix or pattern
         if (scannedCode.startsWith('ST-')) {
           console.info('Routing to sterilization workflow');
-          await sterilizationWorkflowService.processScan(scannedCode);
+          // TODO: Implement sterilization workflow scan processing
           return { type: 'sterilization', code: scannedCode, timestamp };
         }
 

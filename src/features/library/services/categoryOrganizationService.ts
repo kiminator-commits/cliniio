@@ -126,3 +126,11 @@ export class CategoryOrganizationService {
 
 // Export singleton instance
 export const categoryOrganizationService = new CategoryOrganizationService();
+
+// Re-export types for external use
+export type {
+  CategorySyncResult,
+  CategoryStatistics,
+  CategoryMetadata,
+  AutoCategorizationResult,
+};

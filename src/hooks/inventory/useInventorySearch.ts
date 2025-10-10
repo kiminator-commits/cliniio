@@ -26,7 +26,11 @@ export const useInventorySearch = () => {
     return (
       item.last_updated ||
       item.updated_at ||
-      (typeof item.data?.createdAt === 'string'
+      (item.data &&
+      typeof item.data === 'object' &&
+      item.data !== null &&
+      'createdAt' in item.data &&
+      typeof item.data.createdAt === 'string'
         ? item.data.createdAt
         : new Date().toISOString())
     );
@@ -57,8 +61,20 @@ export const useInventorySearch = () => {
             item.name,
             item.category,
             item.location,
-            item.data?.description,
-            item.data?.barcode,
+            item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'description' in item.data &&
+            typeof item.data.description === 'string'
+              ? item.data.description
+              : null,
+            item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'barcode' in item.data &&
+            typeof item.data.barcode === 'string'
+              ? item.data.barcode
+              : null,
           ].filter(Boolean);
 
           return searchableFields.some((field) => {
@@ -148,8 +164,20 @@ export const useInventorySearch = () => {
           item.name,
           item.category,
           item.location,
-          item.data?.description,
-          item.data?.barcode,
+          item.data &&
+          typeof item.data === 'object' &&
+          item.data !== null &&
+          'description' in item.data &&
+          typeof item.data.description === 'string'
+            ? item.data.description
+            : null,
+          item.data &&
+          typeof item.data === 'object' &&
+          item.data !== null &&
+          'barcode' in item.data &&
+          typeof item.data.barcode === 'string'
+            ? item.data.barcode
+            : null,
         ].filter(Boolean);
 
         return searchableFields.some((field) => {
@@ -193,8 +221,28 @@ export const useInventorySearch = () => {
           { field: item.name, name: 'name' },
           { field: item.category, name: 'category' },
           { field: item.location, name: 'location' },
-          { field: item.data?.description, name: 'description' },
-          { field: item.data?.barcode, name: 'barcode' },
+          {
+            field:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'description' in item.data &&
+              typeof item.data.description === 'string'
+                ? item.data.description
+                : null,
+            name: 'description',
+          },
+          {
+            field:
+              item.data &&
+              typeof item.data === 'object' &&
+              item.data !== null &&
+              'barcode' in item.data &&
+              typeof item.data.barcode === 'string'
+                ? item.data.barcode
+                : null,
+            name: 'barcode',
+          },
         ].filter((f) => f.field);
 
         searchableFields.forEach(({ field, name }) => {

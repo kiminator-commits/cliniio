@@ -6,12 +6,18 @@ import {
   mdiIdentifier,
 } from '@mdi/js';
 import Icon from '@mdi/react';
+import { useComplianceSettingsStore } from '@/store/slices/complianceSettingsSlice';
+import { upsertCiConfirmation } from '@/services/sterilization/ciConfirmationService';
 
 interface CIConfirmationStepProps {
   onConfirm: (ciAdded: boolean, uniqueId: string) => void;
   onCancel: () => void;
   toolName?: string;
   batchMode?: boolean;
+  currentTool?: { id: string };
+  currentCycleId?: string;
+  currentFacilityId?: string;
+  currentUser?: { id: string };
 }
 
 export const CIConfirmationStep: React.FC<CIConfirmationStepProps> = ({
@@ -19,23 +25,41 @@ export const CIConfirmationStep: React.FC<CIConfirmationStepProps> = ({
   onCancel,
   toolName,
   batchMode = false,
+  currentTool,
+  currentCycleId,
+  currentFacilityId,
+  currentUser,
 }) => {
   const [ciAdded, setCiAdded] = useState(false);
   const [uniqueId, setUniqueId] = useState('');
   const [showError, setShowError] = useState(false);
 
-  const handleConfirm = () => {
-    if (!ciAdded) {
-      setShowError(true);
-      return;
-    }
+  const { requireCi: _requireCi, warnOnly: _warnOnly } =
+    useComplianceSettingsStore();
 
-    if (!uniqueId.trim()) {
-      setShowError(true);
-      return;
-    }
+  const handleConfirm = async () => {
+    try {
+      if (!ciAdded) {
+        setShowError(true);
+        return;
+      }
 
-    onConfirm(ciAdded, uniqueId.trim());
+      // 🔹 Persist CI confirmation to Supabase
+      await upsertCiConfirmation({
+        toolId: currentTool?.id,
+        cycleId: currentCycleId,
+        facilityId: currentFacilityId,
+        userId: currentUser?.id,
+        ciAdded: true,
+        notes: 'CI strip confirmed added before autoclave.',
+      });
+
+      console.info('✅ CI confirmation (added) persisted successfully.');
+      onConfirm(ciAdded, uniqueId.trim());
+    } catch (error) {
+      console.error('❌ Failed to persist CI confirmation:', error);
+      onConfirm(ciAdded, uniqueId.trim());
+    }
   };
 
   const handleCIToggle = () => {
@@ -189,3 +213,5 @@ export const CIConfirmationStep: React.FC<CIConfirmationStepProps> = ({
     </div>
   );
 };
+
+export default CIConfirmationStep;

@@ -25,10 +25,19 @@ import {
   createToolActionsSlice,
   ToolActionsState,
 } from './slices/toolActionsSlice';
+// ✅ Integrated packagingSessionSlice for Packaging Workflow support
 import {
   createPackagingSessionSlice,
-  PackagingSessionState,
+  PackagingSessionSlice,
 } from './slices/packagingSessionSlice';
+import {
+  createSterilizationSettingsSlice,
+  SterilizationSettingsState,
+} from './slices/sterilizationSettingsSlice';
+import {
+  createBIWorkflowSlice,
+  BIWorkflowState,
+} from './slices/biWorkflowSlice';
 
 // Consolidated store type with only the necessary slices
 type SterilizationStore = BiologicalIndicatorState &
@@ -41,7 +50,9 @@ type SterilizationStore = BiologicalIndicatorState &
   BatchState &
   ToolDataState &
   ToolActionsState &
-  PackagingSessionState;
+  PackagingSessionSlice &
+  SterilizationSettingsState &
+  BIWorkflowState;
 
 export const useSterilizationStore = create<SterilizationStore>()((...a) => ({
   ...createBiologicalIndicatorSlice(...a),
@@ -55,6 +66,8 @@ export const useSterilizationStore = create<SterilizationStore>()((...a) => ({
   ...createToolDataSlice(...a),
   ...createToolActionsSlice(...a),
   ...createPackagingSessionSlice(...a),
+  ...createSterilizationSettingsSlice(...a),
+  ...createBIWorkflowSlice(...a),
 }));
 
 // Re-export types for convenience

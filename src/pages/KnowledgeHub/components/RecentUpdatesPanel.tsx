@@ -33,7 +33,7 @@ export const RecentUpdatesPanel: React.FC = () => {
           10
         );
         // Performance optimization: Removed excessive logging
-        setRecentUpdates(updates);
+        setRecentUpdates(updates as RecentUpdate[]);
       } catch (err) {
         console.error(
           '❌ RecentUpdatesPanel: Error fetching recent updates:',

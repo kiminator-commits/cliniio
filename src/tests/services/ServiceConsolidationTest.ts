@@ -6,7 +6,6 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { UnifiedAIService } from '../../services/ai/UnifiedAIService';
 import { SecureAuthService } from '../../services/secureAuthService';
 import { KnowledgeHubService } from '../../pages/KnowledgeHub/services/knowledgeHubService';
-import { biFailureService } from '../../services/bi/failure';
 import { InventoryServiceFacade } from '../../services/inventory/InventoryServiceFacade';
 import { ServiceRegistry } from '../../services/ServiceRegistry';
 import { servicePerformanceMonitor } from '../../services/_core/ServicePerformanceMonitor';
@@ -133,12 +132,11 @@ describe('Service Consolidation Test Suite', () => {
       const startDate = new Date(
         Date.now() - 30 * 24 * 60 * 60 * 1000
       ).toISOString();
-      const endDate = new Date().toISOString();
+      const _endDate = new Date().toISOString();
 
       const analytics = await biFailureService.getAnalyticsSummary(
         facilityId,
-        startDate,
-        endDate
+        startDate
       );
 
       expect(analytics).toBeDefined();
@@ -148,13 +146,7 @@ describe('Service Consolidation Test Suite', () => {
     it('should send regulatory notifications', async () => {
       const result = await biFailureService.sendRegulatoryNotification(
         'test-incident',
-        'test-facility',
-        'low',
-        {
-          incidentNumber: 'TEST-001',
-          failureDate: new Date().toISOString(),
-          affectedToolsCount: 1,
-        }
+        'test-facility'
       );
 
       expect(result).toBeDefined();

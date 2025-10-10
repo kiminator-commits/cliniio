@@ -1,7 +1,6 @@
 import { supabase } from '../../../lib/supabaseClient';
 import { LearningAIModelProvider } from '../../learningAI/LearningAIModelProvider';
 import type { SkillGapAnalysisResult } from '../../../types/learningAITypes';
-import type { Json } from '../../../types/database.types';
 import type { SkillGapAnalysisRow } from '../../../types/learningAITypes';
 import {
   calculateProcessingTime,
@@ -50,12 +49,20 @@ export class KnowledgeGapService {
       const insertData: Partial<SkillGapAnalysisRow> = {
         facility_id: result.facility_id,
         user_id: result.user_id,
-        current_skills: result.current_skills as Json,
-        required_skills: result.required_skills as Json,
-        skill_gaps: result.skill_gaps as Json,
-        gap_priorities: result.gap_priorities as Json,
-        learning_recommendations: result.learning_recommendations as Json,
-        skill_development_plan: result.skill_development_plan as Json,
+        current_skills: result.current_skills as unknown as Record<
+          string,
+          number
+        >,
+        required_skills: result.required_skills as unknown as Record<
+          string,
+          number
+        >,
+        skill_gaps: result.skill_gaps as unknown as Record<string, number>,
+        gap_priorities: result.gap_priorities as unknown as string[],
+        learning_recommendations:
+          result.learning_recommendations as unknown as string[],
+        skill_development_plan:
+          result.skill_development_plan as unknown as string[],
         estimated_learning_time: result.estimated_learning_time,
         confidence_score: result.confidence_score,
         processing_time_ms: result.processing_time_ms,

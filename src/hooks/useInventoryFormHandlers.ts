@@ -36,7 +36,7 @@ export const useInventoryFormHandlers = ({
     }
 
     if (field === 'category') {
-      mergeFormData({ category: value });
+      mergeFormData({ category: value as string });
     } else {
       mergeFormData({ [field]: value });
     }

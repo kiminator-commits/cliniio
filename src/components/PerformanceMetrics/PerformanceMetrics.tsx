@@ -93,7 +93,7 @@ export const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({
                     workflowStreamlining: 0,
                   },
                   realTimeUpdates: {
-                    updated_at: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString(),
                     nextUpdate: '',
                     dataFreshness: 100,
                   },

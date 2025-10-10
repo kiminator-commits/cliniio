@@ -83,7 +83,9 @@ export class TableService {
 
       // Use safe fields instead of select('*')
       const safeFields = getSafeFields(tableName);
-      const safeQuery = (query as unknown).select(safeFields);
+      const safeQuery = (
+        query as { select: (fields: string) => unknown }
+      ).select(safeFields);
 
       // Apply facility filter if provided
       if (options?.facilityId) {

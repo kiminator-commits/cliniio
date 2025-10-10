@@ -49,6 +49,7 @@ export default function HomeLayout({ homeData }: HomeLayoutProps) {
             `to-${HOME_UI_CONSTANTS.COLORS.BG_GRADIENT.TO}`
           )}
           aria-label="Cliniio Home Dashboard"
+          data-testid="home-layout"
         >
           {/* Skip link for keyboard users */}
           <a
@@ -97,7 +98,13 @@ export default function HomeLayout({ homeData }: HomeLayoutProps) {
         </div>
 
         {/* Modals loaded directly to avoid lazy loading waterfalls */}
-        <HomeModals leaderboardData={homeData.leaderboardData} />
+        <HomeModals
+          leaderboardData={{
+            ...homeData.leaderboardData,
+            users: [],
+            userRank: 1,
+          }}
+        />
       </SharedLayout>
     </ErrorBoundary>
   );

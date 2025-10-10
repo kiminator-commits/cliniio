@@ -271,7 +271,7 @@ export class GamificationSkillProvider {
 
       const completedModules = learningProgressData?.length || 0;
       const totalTime =
-        learningProgressData?.reduce(
+        (learningProgressData as LearningProgressRow[])?.reduce(
           (sum: number, m: LearningProgressRow) => sum + m.time_spent_minutes,
           0
         ) || 0;
@@ -282,7 +282,7 @@ export class GamificationSkillProvider {
 
       const moduleScore = Math.min((completedModules / 20) * 40, 40);
       const certificationScore = Math.min((validCertifications / 5) * 30, 30);
-      const timeScore = Math.min((totalTime / 1000) * 20, 20); // 1000 minutes = 20 points
+      const timeScore = Math.min((Number(totalTime) / 1000) * 20, 20); // 1000 minutes = 20 points
       const recencyScore = validCertifications > 0 ? 10 : 0;
 
       const totalScore =
