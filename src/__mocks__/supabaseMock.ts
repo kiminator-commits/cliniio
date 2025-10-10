@@ -18,6 +18,7 @@ const mockSupabaseClient = {
     update: vi.fn().mockResolvedValue({ data: [], error: null }),
     delete: vi.fn().mockResolvedValue({ data: [], error: null }),
     eq: vi.fn().mockReturnThis(),
+    neq: vi.fn().mockReturnThis(),
     not: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockResolvedValue({ data: [], error: null }),

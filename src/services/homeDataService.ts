@@ -146,7 +146,16 @@ class HomeDataService {
         return this.cacheProvider.getCachedData()!;
       }
 
-      throw error;
+      // Return empty data as fallback when no cached data is available
+      logger.warn(
+        'HomeDataService: No cached data available, returning empty data'
+      );
+      return {
+        tasks: [],
+        availablePoints: 0,
+        completedTasksCount: 0,
+        totalTasksCount: 0,
+      };
     }
   }
 

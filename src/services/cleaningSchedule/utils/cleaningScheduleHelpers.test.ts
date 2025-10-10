@@ -1,8 +1,8 @@
 import { CleaningScheduleHelpers } from './cleaningScheduleHelpers';
 
 import { vi } from 'vitest';
-// Mock the supabase mock client
-vi.mock('../../../__mocks__/supabase/supabaseMockClient', () => ({
+// Mock the supabase client
+vi.mock('@/lib/supabaseClient', () => ({
   supabase: {
     from: vi.fn(),
   },
@@ -32,9 +32,7 @@ describe('CleaningScheduleHelpers', () => {
         },
       ];
 
-      const { supabase } = await import(
-        '../../../__mocks__/supabase/supabaseMockClient'
-      );
+      const { supabase } = await import('@/lib/supabaseClient');
       (supabase.from as vi.Mock).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({
@@ -55,9 +53,7 @@ describe('CleaningScheduleHelpers', () => {
     });
 
     it('should handle database errors', async () => {
-      const { supabase } = await import(
-        '../../../__mocks__/supabase/supabaseMockClient'
-      );
+      const { supabase } = await import('@/lib/supabaseClient');
       (supabase.from as vi.Mock).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({
@@ -73,9 +69,7 @@ describe('CleaningScheduleHelpers', () => {
     });
 
     it('should return empty array when no data', async () => {
-      const { supabase } = await import(
-        '../../../__mocks__/supabase/supabaseMockClient'
-      );
+      const { supabase } = await import('@/lib/supabaseClient');
       (supabase.from as vi.Mock).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({

@@ -192,8 +192,10 @@ export class SupabaseAuthService {
       }
 
       // CRITICAL: Wait for authentication to be fully established before database calls
-      const session = await supabase.auth.getSession();
-      if (!session.data.session) {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
         return {
           user: null,
           session: null,
