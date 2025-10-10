@@ -4,6 +4,9 @@ import { vi } from 'vitest';
 const mockSupabaseClient = {
   auth: {
     getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+    getSession: vi
+      .fn()
+      .mockResolvedValue({ data: { session: null }, error: null }),
     signInWithPassword: vi
       .fn()
       .mockResolvedValue({ data: { user: null }, error: null }),
@@ -15,6 +18,9 @@ const mockSupabaseClient = {
     update: vi.fn().mockResolvedValue({ data: [], error: null }),
     delete: vi.fn().mockResolvedValue({ data: [], error: null }),
     eq: vi.fn().mockReturnThis(),
+    not: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue({ data: [], error: null }),
     single: vi.fn().mockResolvedValue({ data: null, error: null }),
   }),
   channel: vi.fn().mockReturnValue({

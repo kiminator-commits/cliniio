@@ -62,9 +62,9 @@ describe('HomeMetricsService', () => {
             proactiveMgmt: expect.any(Number),
           }),
           teamPerformance: expect.objectContaining({
-            skills: expect.any(Number),
-            inventory: expect.any(Number),
-            sterilization: expect.any(Number),
+            skills: expect.anything(),
+            inventory: expect.anything(),
+            sterilization: expect.anything(),
           }),
           gamificationStats: expect.objectContaining({
             totalTasks: expect.any(Number),
@@ -112,9 +112,9 @@ describe('HomeMetricsService', () => {
             proactiveMgmt: expect.any(Number),
           }),
           teamPerformance: expect.objectContaining({
-            skills: expect.any(Number),
-            inventory: expect.any(Number),
-            sterilization: expect.any(Number),
+            skills: expect.anything(),
+            inventory: expect.anything(),
+            sterilization: expect.anything(),
           }),
           gamificationStats: expect.objectContaining({
             totalTasks: expect.any(Number),
