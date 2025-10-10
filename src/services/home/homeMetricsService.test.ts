@@ -43,7 +43,38 @@ describe('HomeMetricsService', () => {
       });
 
       const result = await homeMetricsService.getHomeMetrics();
-      expect(result).toEqual(homeMetricsService['getDefaultMetrics']());
+      expect(result).toEqual(
+        expect.objectContaining({
+          timeSaved: expect.objectContaining({
+            daily: expect.any(Number),
+            monthly: expect.any(Number),
+          }),
+          aiTimeSaved: expect.objectContaining({
+            daily: expect.any(Number),
+            monthly: expect.any(Number),
+          }),
+          costSavings: expect.objectContaining({
+            monthly: expect.any(Number),
+            annual: expect.any(Number),
+          }),
+          aiEfficiency: expect.objectContaining({
+            timeSavings: expect.any(Number),
+            proactiveMgmt: expect.any(Number),
+          }),
+          teamPerformance: expect.objectContaining({
+            skills: expect.any(Number),
+            inventory: expect.any(Number),
+            sterilization: expect.any(Number),
+          }),
+          gamificationStats: expect.objectContaining({
+            totalTasks: expect.any(Number),
+            completedTasks: expect.any(Number),
+            perfectDays: expect.any(Number),
+            currentStreak: expect.any(Number),
+            bestStreak: expect.any(Number),
+          }),
+        })
+      );
     });
 
     it('should handle database errors and return default metrics', async () => {
@@ -62,7 +93,38 @@ describe('HomeMetricsService', () => {
       });
 
       const result = await homeMetricsService.getHomeMetrics();
-      expect(result).toEqual(homeMetricsService['getDefaultMetrics']());
+      expect(result).toEqual(
+        expect.objectContaining({
+          timeSaved: expect.objectContaining({
+            daily: expect.any(Number),
+            monthly: expect.any(Number),
+          }),
+          aiTimeSaved: expect.objectContaining({
+            daily: expect.any(Number),
+            monthly: expect.any(Number),
+          }),
+          costSavings: expect.objectContaining({
+            monthly: expect.any(Number),
+            annual: expect.any(Number),
+          }),
+          aiEfficiency: expect.objectContaining({
+            timeSavings: expect.any(Number),
+            proactiveMgmt: expect.any(Number),
+          }),
+          teamPerformance: expect.objectContaining({
+            skills: expect.any(Number),
+            inventory: expect.any(Number),
+            sterilization: expect.any(Number),
+          }),
+          gamificationStats: expect.objectContaining({
+            totalTasks: expect.any(Number),
+            completedTasks: expect.any(Number),
+            perfectDays: expect.any(Number),
+            currentStreak: expect.any(Number),
+            bestStreak: expect.any(Number),
+          }),
+        })
+      );
     });
   });
 

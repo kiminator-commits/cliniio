@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import { PatientExposureReport } from '../../../src/components/Sterilization/PatientExposureReport';
 import { BIFailureService } from '../../../src/services/bi/failure/index';
+import { exportService } from '../../../src/services/bi/failure/exportService';
 
 // Mock the BIFailureService
 vi.mock('../../../src/services/bi/failure/index');
@@ -35,6 +36,13 @@ vi.mock('../../../src/store/sterilizationStore', () => ({
 vi.mock('react-dom', () => ({
   ...vi.importActual('react-dom'),
   createPortal: (node: React.ReactNode) => node,
+}));
+
+// Mock the export service
+vi.mock('../../../src/services/bi/failure/exportService', () => ({
+  exportService: {
+    exportExposureReport: vi.fn(),
+  },
 }));
 
 const mockExposureReport = {
@@ -188,17 +196,6 @@ describe('PatientExposureReport Interactions', () => {
     });
 
     it('should handle print button click', async () => {
-      const mockPrintWindow = {
-        document: {
-          write: vi.fn(),
-          close: vi.fn(),
-        },
-        onload: null as (() => void) | null,
-        print: vi.fn(),
-      };
-      const mockOpen = vi
-        .spyOn(window, 'open')
-        .mockReturnValue(mockPrintWindow as Window);
       const user = userEvent.setup();
 
       await act(async () => {
@@ -212,17 +209,7 @@ describe('PatientExposureReport Interactions', () => {
       const printButton = screen.getByText('Print Report');
       await user.click(printButton);
 
-      expect(mockOpen).toHaveBeenCalledWith('', '_blank');
-      expect(mockPrintWindow.document.write).toHaveBeenCalled();
-      expect(mockPrintWindow.document.close).toHaveBeenCalled();
-
-      // Simulate the onload event
-      if (mockPrintWindow.onload) {
-        mockPrintWindow.onload();
-      }
-
-      expect(mockPrintWindow.print).toHaveBeenCalled();
-      mockOpen.mockRestore();
+      expect(exportService.exportExposureReport).toHaveBeenCalledWith('pdf');
     });
   });
 });

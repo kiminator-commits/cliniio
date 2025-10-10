@@ -121,7 +121,7 @@ describe('ErrorBoundary', () => {
 
       // Should not log the error in test environment
       expect(consoleSpy).not.toHaveBeenCalledWith(
-        '[ErrorBoundary]',
+        expect.stringContaining('[ErrorBoundary]'),
         expect.any(Object)
       );
     });
@@ -138,7 +138,8 @@ describe('ErrorBoundary', () => {
       );
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[ErrorBoundary]',
+        '💥 Global Error Boundary caught:',
+        expect.any(Error),
         expect.any(Object)
       );
 
