@@ -121,11 +121,19 @@ class HomeMetricsService {
         throw new Error('User not authenticated');
       }
 
-      const { data: userProfile } = await supabase
+      const { data: userProfile, error: userError } = await supabase
         .from('users')
         .select('facility_id')
         .eq('id', user.id)
         .single();
+
+      if (userError) {
+        console.warn(
+          'Failed to fetch user profile, using default facility:',
+          userError
+        );
+        return this.getDefaultMetrics();
+      }
 
       const facilityId =
         userProfile?.facility_id || '550e8400-e29b-41d4-a716-446655440000';
