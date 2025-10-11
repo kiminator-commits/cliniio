@@ -1,6 +1,8 @@
 import React from 'react';
 import Icon from '@mdi/react';
-import { mdiStar } from '@mdi/js';
+import { mdiStar, mdiMerge } from '@mdi/js';
+import { useInventoryStore } from '@/store/useInventoryStore';
+import { useRoomStore } from '@/store/roomStore';
 
 interface ExpandedFiltersPanelProps {
   activeTab: string;
@@ -24,6 +26,27 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
   setSearchQuery,
   onToggleFavoritesFilter,
 }) => {
+  const { mergeMode, setMergeMode, selectedItems, clearSelectedItems } =
+    useInventoryStore();
+  const { getActiveRooms } = useRoomStore();
+  const rooms = getActiveRooms();
+
+  const handleMergeToggle = () => {
+    if (mergeMode) {
+      clearSelectedItems();
+      setMergeMode(false);
+    } else {
+      setMergeMode(true);
+    }
+  };
+
+  const handleMergeSelected = () => {
+    if (selectedItems.size < 2) {
+      alert('Please select at least 2 items to merge');
+      return;
+    }
+    console.log('Merging items:', Array.from(selectedItems));
+  };
   return (
     <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 flex flex-wrap gap-3">
       <div className="w-full">
@@ -44,18 +67,6 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
       </div>
       {activeTab === 'tools' && (
         <>
-          <div>
-            <label
-              htmlFor="item-select"
-              className="block text-xs font-semibold text-gray-600 mb-1"
-            >
-              Item
-            </label>
-            <select id="item-select" className="form-select">
-              <option value="">All</option>
-              <option value="Scalpel">Scalpel</option>
-            </select>
-          </div>
           <div>
             <label
               htmlFor="category-select"
@@ -87,8 +98,11 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
-              <option value="Storage Room">Storage Room</option>
-              <option value="Lab">Lab</option>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.name}>
+                  {room.name}
+                </option>
+              ))}
             </select>
           </div>
           {/* Favorites Filter - inline with location */}
@@ -114,23 +128,48 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               </button>
             </div>
           )}
+          {/* Merge Duplicates Filter - to the right of Favorites */}
+          <div>
+            <label
+              htmlFor="tools-merge-filter-btn"
+              className="block text-xs font-semibold text-gray-600 mb-1"
+            >
+              Actions
+            </label>
+            {!mergeMode ? (
+              <button
+                id="tools-merge-filter-btn"
+                onClick={handleMergeToggle}
+                className="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <Icon path={mdiMerge} size={0.8} />
+                <span className="text-sm">Merge Duplicates</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600">
+                  {selectedItems.size} selected
+                </span>
+                <button
+                  onClick={handleMergeSelected}
+                  disabled={selectedItems.size < 2}
+                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm disabled:bg-gray-300"
+                >
+                  Merge Selected
+                </button>
+                <button
+                  onClick={handleMergeToggle}
+                  className="px-3 py-1 bg-gray-500 text-white rounded text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         </>
       )}
       {activeTab === 'supplies' && (
         <>
-          <div>
-            <label
-              htmlFor="supply-item-select"
-              className="block text-xs font-semibold text-gray-600 mb-1"
-            >
-              Item
-            </label>
-            <select id="supply-item-select" className="form-select">
-              <option value="">All</option>
-              <option value="Gauze">Gauze</option>
-              <option value="Syringe">Syringe</option>
-            </select>
-          </div>
           <div>
             <label
               htmlFor="supply-category-select"
@@ -162,7 +201,11 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
-              <option value="Supply Room">Supply Room</option>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.name}>
+                  {room.name}
+                </option>
+              ))}
             </select>
           </div>
           {/* Favorites Filter - inline with location */}
@@ -194,19 +237,6 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
         <>
           <div>
             <label
-              htmlFor="equipment-item-select"
-              className="block text-xs font-semibold text-gray-600 mb-1"
-            >
-              Item
-            </label>
-            <select id="equipment-item-select" className="form-select">
-              <option value="">All</option>
-              <option value="Monitor">Monitor</option>
-              <option value="Defibrillator">Defibrillator</option>
-            </select>
-          </div>
-          <div>
-            <label
               htmlFor="equipment-category-select"
               className="block text-xs font-semibold text-gray-600 mb-1"
             >
@@ -236,8 +266,11 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
-              <option value="ICU">ICU</option>
-              <option value="ER">ER</option>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.name}>
+                  {room.name}
+                </option>
+              ))}
             </select>
           </div>
           {/* Favorites Filter - inline with location */}
@@ -269,19 +302,6 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
         <>
           <div>
             <label
-              htmlFor="hardware-item-select"
-              className="block text-xs font-semibold text-gray-600 mb-1"
-            >
-              Item
-            </label>
-            <select id="hardware-item-select" className="form-select">
-              <option value="">All</option>
-              <option value="Printer">Printer</option>
-              <option value="Desktop Computer">Desktop Computer</option>
-            </select>
-          </div>
-          <div>
-            <label
               htmlFor="hardware-category-select"
               className="block text-xs font-semibold text-gray-600 mb-1"
             >
@@ -311,8 +331,11 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
               onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option value="">All</option>
-              <option value="Admin Office">Admin Office</option>
-              <option value="Reception">Reception</option>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.name}>
+                  {room.name}
+                </option>
+              ))}
             </select>
           </div>
           {/* Favorites Filter - inline with location */}

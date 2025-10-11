@@ -7,6 +7,12 @@ export interface Room {
   department: string;
   floor: string;
   barcode?: string; // Add barcode field for scanning
+  gpsCoordinates?: {
+    latitude: number;
+    longitude: number;
+    accuracy?: number;
+    lastUpdated: string;
+  };
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

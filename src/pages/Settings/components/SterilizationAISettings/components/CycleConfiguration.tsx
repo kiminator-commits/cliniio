@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '@mdi/react';
 import { mdiChartBar } from '@mdi/js';
-import { SterilizationAISettings as SterilizationAISettingsType } from '../../../../services/ai/sterilization';
+import { SterilizationAISettings as SterilizationAISettingsType } from '../../../../../services/ai/sterilization/types';
 
 interface CycleConfigurationProps {
   settings: SterilizationAISettingsType;

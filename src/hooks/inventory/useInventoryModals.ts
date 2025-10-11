@@ -30,10 +30,11 @@ export const useInventoryModals = () => {
   const handleFormChange = useCallback(
     (field: string, value: string) => {
       console.log(`🔄 Form field changed: ${field} = "${value}"`);
-      modalState.setFormData({
-        ...modalState.formData,
-        [field]: value,
-      });
+      console.log('📝 Current form data before update:', modalState.formData);
+      console.log('🔍 Calling updateField with:', field, value);
+      // Use updateField to properly update individual fields
+      modalState.updateField(field as keyof InventoryFormData, value);
+      console.log('📝 Form data after update should be updated in store');
     },
     [modalState]
   );
@@ -279,6 +280,60 @@ export const useInventoryModals = () => {
     modalState.openAddModal();
   }, [modalState]);
 
+  // Handler for cloning an existing item
+  const handleCloneItem = useCallback(
+    (item: InventoryItem) => {
+      console.log('🔄 Cloning item:', item);
+
+      // Convert item to form data
+      const clonedFormData = convertItemToFormData(item);
+
+      // Clear unique identifiers to avoid conflicts
+      const cleanedFormData = {
+        ...clonedFormData,
+        id: '', // Clear unique ID
+        barcode: '', // Clear barcode
+        itemName: `${clonedFormData.itemName} (Copy)`, // Indicate it's a copy
+        createdAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log('📋 Cloned form data:', cleanedFormData);
+
+      // Set the cloned data and open add modal
+      modalState.setFormData(cleanedFormData);
+      modalState.setEditMode(false);
+      modalState.openAddModal();
+    },
+    [modalState]
+  );
+
+  // Handler for cloning current form data (from modal)
+  const handleCloneCurrentForm = useCallback(() => {
+    console.log('🔄 Cloning current form data');
+
+    // Get current form data and clear unique identifiers
+    const currentFormData = modalState.formData;
+    const clonedFormData = {
+      ...currentFormData,
+      id: '', // Clear unique ID
+      barcode: '', // Clear barcode
+      sku: '', // Clear SKU (if unique)
+      itemName: `${currentFormData.itemName} (Copy)`, // Indicate it's a copy
+      createdAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log('📋 Cloned form data:', clonedFormData);
+
+    // Close current modal and open new one with cloned data
+    modalState.closeAddModal();
+    modalState.setFormData(clonedFormData);
+    modalState.setEditMode(false);
+    modalState.setIsCloned(true); // Mark as cloned
+    modalState.openAddModal();
+  }, [modalState]);
+
   // Handler for opening track modal
   const handleOpenTrackModal = useCallback(() => {
     modalState.openTrackModal();
@@ -307,6 +362,8 @@ export const useInventoryModals = () => {
     handleDeleteItem,
     handleEditItem,
     handleAddItem,
+    handleCloneItem,
+    handleCloneCurrentForm,
     openAddModal: handleAddItem, // Alias for compatibility
 
     // Track modal handlers

@@ -3,6 +3,7 @@ import { useSterilizationStore } from '../../../../store/sterilizationStore';
 import { useFacility } from '../../../../contexts/FacilityContext';
 import { CYCLE_OPTIONS, CUSTOM_CYCLE_LIMITS } from './settings';
 import { trackCycleSettingsChange } from './settings';
+import { CycleSettings } from './settings/types';
 
 export const CycleManagement: React.FC = () => {
   const {
@@ -106,158 +107,164 @@ export const CycleManagement: React.FC = () => {
             Cycle Presets
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {Object.entries(cycleSettings).map(([key, cycle]) => (
-              <div key={key} className="border border-gray-200 rounded-md p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <h5 className="text-sm font-medium">{cycle.name}</h5>
-                  {key === 'custom' && allowCustomCycles && (
-                    <button
-                      onClick={() =>
-                        setEditingCycle(editingCycle === key ? null : key)
-                      }
-                      className="text-xs text-blue-600 hover:text-blue-800"
-                    >
-                      {editingCycle === key ? 'Save' : 'Edit'}
-                    </button>
-                  )}
-                </div>
-                <div className="text-xs text-gray-600 space-y-1">
-                  <p>Temperature: {cycle.temperature}°C</p>
-                  <p>Pressure: {cycle.pressure} PSI</p>
-                  <p>Sterilize Time: {cycle.sterilizeTime} min</p>
-                  <p>Dry Time: {cycle.dryTime} min</p>
-                  <p>Total Time: {cycle.totalTime} min</p>
-                </div>
+            {Object.entries(cycleSettings).map(([key, cycle]) => {
+              const cycleData = cycle as CycleSettings;
+              return (
+                <div
+                  key={key}
+                  className="border border-gray-200 rounded-md p-3"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className="text-sm font-medium">{cycleData.name}</h5>
+                    {key === 'custom' && allowCustomCycles && (
+                      <button
+                        onClick={() =>
+                          setEditingCycle(editingCycle === key ? null : key)
+                        }
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        {editingCycle === key ? 'Save' : 'Edit'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    <p>Temperature: {cycleData.temperature}°C</p>
+                    <p>Pressure: {cycleData.pressure} PSI</p>
+                    <p>Sterilize Time: {cycleData.sterilizeTime} min</p>
+                    <p>Dry Time: {cycleData.dryTime} min</p>
+                    <p>Total Time: {cycleData.totalTime} min</p>
+                  </div>
 
-                {/* Custom Cycle Editor */}
-                {key === 'custom' &&
-                  allowCustomCycles &&
-                  editingCycle === key && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label
-                            htmlFor="customTemperature"
-                            className="text-xs text-gray-500"
-                          >
-                            Temperature (°C)
-                          </label>
-                          <input
-                            id="customTemperature"
-                            type="number"
-                            value={cycle.temperature}
-                            onChange={(e) => {
-                              const facilityId = getCurrentFacilityId();
-                              if (facilityId) {
-                                trackCycleSettingsChange(
-                                  'custom',
-                                  { temperature: Number(e.target.value) },
-                                  facilityId
-                                );
-                              }
-                              updateCycleSettings('custom', {
-                                temperature: Number(e.target.value),
-                              });
-                            }}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                            min={CUSTOM_CYCLE_LIMITS.TEMPERATURE.min}
-                            max={CUSTOM_CYCLE_LIMITS.TEMPERATURE.max}
-                          />
+                  {/* Custom Cycle Editor */}
+                  {key === 'custom' &&
+                    allowCustomCycles &&
+                    editingCycle === key && (
+                      <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label
+                              htmlFor="customTemperature"
+                              className="text-xs text-gray-500"
+                            >
+                              Temperature (°C)
+                            </label>
+                            <input
+                              id="customTemperature"
+                              type="number"
+                              value={cycleData.temperature}
+                              onChange={(e) => {
+                                const facilityId = getCurrentFacilityId();
+                                if (facilityId) {
+                                  trackCycleSettingsChange(
+                                    'custom',
+                                    { temperature: Number(e.target.value) },
+                                    facilityId
+                                  );
+                                }
+                                updateCycleSettings('custom', {
+                                  temperature: Number(e.target.value),
+                                });
+                              }}
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              min={CUSTOM_CYCLE_LIMITS.TEMPERATURE.min}
+                              max={CUSTOM_CYCLE_LIMITS.TEMPERATURE.max}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="customPressure"
+                              className="text-xs text-gray-500"
+                            >
+                              Pressure (PSI)
+                            </label>
+                            <input
+                              id="customPressure"
+                              type="number"
+                              value={cycleData.pressure}
+                              onChange={(e) => {
+                                const facilityId = getCurrentFacilityId();
+                                if (facilityId) {
+                                  trackCycleSettingsChange(
+                                    'custom',
+                                    { pressure: Number(e.target.value) },
+                                    facilityId
+                                  );
+                                }
+                                updateCycleSettings('custom', {
+                                  pressure: Number(e.target.value),
+                                });
+                              }}
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              min={CUSTOM_CYCLE_LIMITS.PRESSURE.min}
+                              max={CUSTOM_CYCLE_LIMITS.PRESSURE.max}
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label
-                            htmlFor="customPressure"
-                            className="text-xs text-gray-500"
-                          >
-                            Pressure (PSI)
-                          </label>
-                          <input
-                            id="customPressure"
-                            type="number"
-                            value={cycle.pressure}
-                            onChange={(e) => {
-                              const facilityId = getCurrentFacilityId();
-                              if (facilityId) {
-                                trackCycleSettingsChange(
-                                  'custom',
-                                  { pressure: Number(e.target.value) },
-                                  facilityId
-                                );
-                              }
-                              updateCycleSettings('custom', {
-                                pressure: Number(e.target.value),
-                              });
-                            }}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                            min={CUSTOM_CYCLE_LIMITS.PRESSURE.min}
-                            max={CUSTOM_CYCLE_LIMITS.PRESSURE.max}
-                          />
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label
+                              htmlFor="customSterilizeTime"
+                              className="text-xs text-gray-500"
+                            >
+                              Sterilize (min)
+                            </label>
+                            <input
+                              id="customSterilizeTime"
+                              type="number"
+                              value={cycleData.sterilizeTime}
+                              onChange={(e) => {
+                                const facilityId = getCurrentFacilityId();
+                                if (facilityId) {
+                                  trackCycleSettingsChange(
+                                    'custom',
+                                    { sterilizeTime: Number(e.target.value) },
+                                    facilityId
+                                  );
+                                }
+                                updateCycleSettings('custom', {
+                                  sterilizeTime: Number(e.target.value),
+                                });
+                              }}
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              min={CUSTOM_CYCLE_LIMITS.STERILIZE_TIME.min}
+                              max={CUSTOM_CYCLE_LIMITS.STERILIZE_TIME.max}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="customDryTime"
+                              className="text-xs text-gray-500"
+                            >
+                              Dry (min)
+                            </label>
+                            <input
+                              id="customDryTime"
+                              type="number"
+                              value={cycleData.dryTime}
+                              onChange={(e) => {
+                                const facilityId = getCurrentFacilityId();
+                                if (facilityId) {
+                                  trackCycleSettingsChange(
+                                    'custom',
+                                    { dryTime: Number(e.target.value) },
+                                    facilityId
+                                  );
+                                }
+                                updateCycleSettings('custom', {
+                                  dryTime: Number(e.target.value),
+                                });
+                              }}
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              min={CUSTOM_CYCLE_LIMITS.DRY_TIME.min}
+                              max={CUSTOM_CYCLE_LIMITS.DRY_TIME.max}
+                            />
+                          </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label
-                            htmlFor="customSterilizeTime"
-                            className="text-xs text-gray-500"
-                          >
-                            Sterilize (min)
-                          </label>
-                          <input
-                            id="customSterilizeTime"
-                            type="number"
-                            value={cycle.sterilizeTime}
-                            onChange={(e) => {
-                              const facilityId = getCurrentFacilityId();
-                              if (facilityId) {
-                                trackCycleSettingsChange(
-                                  'custom',
-                                  { sterilizeTime: Number(e.target.value) },
-                                  facilityId
-                                );
-                              }
-                              updateCycleSettings('custom', {
-                                sterilizeTime: Number(e.target.value),
-                              });
-                            }}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                            min={CUSTOM_CYCLE_LIMITS.STERILIZE_TIME.min}
-                            max={CUSTOM_CYCLE_LIMITS.STERILIZE_TIME.max}
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="customDryTime"
-                            className="text-xs text-gray-500"
-                          >
-                            Dry (min)
-                          </label>
-                          <input
-                            id="customDryTime"
-                            type="number"
-                            value={cycle.dryTime}
-                            onChange={(e) => {
-                              const facilityId = getCurrentFacilityId();
-                              if (facilityId) {
-                                trackCycleSettingsChange(
-                                  'custom',
-                                  { dryTime: Number(e.target.value) },
-                                  facilityId
-                                );
-                              }
-                              updateCycleSettings('custom', {
-                                dryTime: Number(e.target.value),
-                              });
-                            }}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                            min={CUSTOM_CYCLE_LIMITS.DRY_TIME.min}
-                            max={CUSTOM_CYCLE_LIMITS.DRY_TIME.max}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-              </div>
-            ))}
+                    )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

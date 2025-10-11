@@ -23,6 +23,7 @@ const InventoryTables: React.FC<InventoryTablesProps> = React.memo(
     handleEditClick,
     handleDeleteItem,
     handleToggleFavorite,
+    onTrackToggle,
     showTrackedOnly = false,
     showFavoritesOnly = false,
     itemsPerPage,
@@ -56,7 +57,7 @@ const InventoryTables: React.FC<InventoryTablesProps> = React.memo(
       if (activeTab === 'supplies') {
         return ['Name', 'Category', 'Location', 'Quantity', 'Price'];
       } else if (activeTab === 'tools') {
-        return ['Name', 'Status', 'Quantity', 'Price'];
+        return ['Name', 'Status', 'Price'];
       }
 
       return baseColumns;
@@ -70,6 +71,7 @@ const InventoryTables: React.FC<InventoryTablesProps> = React.memo(
           onEdit={handleEditClick}
           onDelete={handleDeleteItem}
           onToggleFavorite={handleToggleFavorite}
+          onTrackToggle={onTrackToggle}
           showTrackedOnly={showTrackedOnly}
           showFavoritesOnly={showFavoritesOnly}
           itemsPerPage={itemsPerPage}

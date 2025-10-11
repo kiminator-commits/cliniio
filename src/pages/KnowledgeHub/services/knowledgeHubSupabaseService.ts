@@ -3,7 +3,10 @@ import { KnowledgeHubCourse } from './providers/KHDataTransformationProvider';
 import { KHContentFetchProvider } from './providers/KHContentFetchProvider';
 import { KHContentCrudProvider } from './providers/KHContentCrudProvider';
 import { KHSearchProvider } from './providers/KHSearchProvider';
-import { KHProgressProvider } from './providers/KHProgressProvider';
+import {
+  KHProgressProvider,
+  UserProgress,
+} from './providers/KHProgressProvider';
 
 // Re-export interfaces for backward compatibility
 export type { KnowledgeHubCourse };
@@ -98,7 +101,7 @@ export class KnowledgeHubSupabaseService {
   async getUserProgress(
     userId: string,
     contentId: string
-  ): Promise<Record<string, unknown> | null> {
+  ): Promise<UserProgress | null> {
     return this.progressProvider.getUserProgress(userId, contentId);
   }
 

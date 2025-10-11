@@ -32,6 +32,7 @@ import { transformFormDataForModal } from '@/utils/Inventory/formDataUtils';
 // Local component imports
 import InventoryModalsWrapper from './components/InventoryModalsWrapper';
 import ScanModalWrapper from './components/ScanModalWrapper';
+import DeleteConfirmationModal from '../../components/Inventory/modals/DeleteConfirmationModal';
 
 // Commented imports (for future use)
 // import { useInventoryContext } from '@/hooks/inventory/useInventoryContext';
@@ -81,7 +82,15 @@ const InventoryDashboard: React.FC = () => {
   const { getProgressInfo } = useScanModalManagement();
 
   // Get form data directly from inventory store
-  const { formData: storeFormData, activeTab } = useInventoryStore();
+  const {
+    formData: storeFormData,
+    activeTab,
+    showDeleteModal,
+    itemToDelete,
+    closeDeleteModal,
+    showTrackedOnly,
+    setShowTrackedOnly,
+  } = useInventoryStore();
 
   // Transform form data for modal - make it reactive to store changes
   const transformedFormData = useMemo(
@@ -97,6 +106,7 @@ const InventoryDashboard: React.FC = () => {
     handleToggleSection,
     handleFormChangeWrapper,
     handleEditItem,
+    handleCloneItem,
     isEditMode,
   } = useInventoryPageLogic();
 
@@ -126,11 +136,11 @@ const InventoryDashboard: React.FC = () => {
   ]);
 
   const contextValue: InventoryDashboardContextType = {
-    showTrackedOnly: false, // Default value
+    showTrackedOnly: showTrackedOnly,
     showFavoritesOnly: false, // Default value
     handleShowAddModal: () => {}, // Default empty function
     handleCloseAddModal,
-    handleToggleTrackedFilter: () => {}, // Default empty function
+    handleToggleTrackedFilter: () => setShowTrackedOnly(!showTrackedOnly),
     handleToggleFavoritesFilter: () => {}, // Default empty function
     onCategoryChange: (tab: string) =>
       setActiveTab(
@@ -170,6 +180,28 @@ const InventoryDashboard: React.FC = () => {
       );
     } catch (error) {
       console.error('Error in delete handler:', error);
+    }
+  };
+
+  // Handle archive confirmation
+  const handleArchiveConfirm = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      await InventoryActionService.handleArchiveItem(
+        itemToDelete.id,
+        () => {
+          console.log('Item archived successfully');
+          closeDeleteModal();
+          refreshData(); // Refresh the data after archiving
+        },
+        (error: string) => {
+          console.error('Failed to archive item:', error);
+          // You could add a toast notification here
+        }
+      );
+    } catch (error) {
+      console.error('Error in archive handler:', error);
     }
   };
 
@@ -231,6 +263,7 @@ const InventoryDashboard: React.FC = () => {
                   <InventoryTableSection
                     onEdit={handleEditItem}
                     onDelete={handleDeleteItem}
+                    onClone={handleCloneItem}
                     items={getCurrentItems}
                   />
                 </div>
@@ -246,6 +279,15 @@ const InventoryDashboard: React.FC = () => {
 
           {/* Scan Modal */}
           <ScanModalWrapper />
+
+          {/* Delete Confirmation Modal */}
+          <DeleteConfirmationModal
+            show={showDeleteModal}
+            onClose={closeDeleteModal}
+            onConfirm={handleArchiveConfirm}
+            item={itemToDelete}
+            activeTab={activeTab}
+          />
         </div>
       </ErrorBoundary>
     </InventoryDashboardContext.Provider>

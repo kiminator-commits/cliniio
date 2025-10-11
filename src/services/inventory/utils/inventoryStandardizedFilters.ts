@@ -41,7 +41,7 @@ export class InventoryStandardizedFilters {
     }
 
     // Validate status values
-    const validStatuses = ['active', 'inactive', 'maintenance', 'retired'];
+    const validStatuses = ['active', 'inactive', 'p2', 'n/a'];
     if (filters.status && !validStatuses.includes(filters.status)) {
       return false;
     }

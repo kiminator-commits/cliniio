@@ -3,7 +3,7 @@ import { FaUser, FaLock, FaExclamationTriangle } from 'react-icons/fa';
 import { LOGIN_LABELS } from '../../constants/loginConstants';
 import { rateLimiter } from '../../lib/rateLimiter';
 import { LoginFormData, FormErrors } from './types';
-import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
+import PasswordStrengthIndicator from './components/PasswordStrengthIndicator';
 
 interface Props {
   formData: LoginFormData;
@@ -114,11 +114,7 @@ const LoginFormFields: React.FC<Props> = ({
             onChange={handleChange('password')}
           />
         </div>
-        <PasswordStrengthIndicator
-          password={formData.password}
-          showSuggestions={true}
-          className="mt-2"
-        />
+        <PasswordStrengthIndicator password={formData.password} />
         {errors.password && (
           <p className="text-red-500 text-sm mt-2">{errors.password}</p>
         )}

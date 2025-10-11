@@ -107,6 +107,10 @@ export type Database = {
           category: string | null;
           reorder_level: number | null;
           status: string | null;
+          archived: boolean | null;
+          archived_at: string | null;
+          archived_by: string | null;
+          archive_reason: string | null;
         };
         Insert: {
           id?: string;
@@ -122,6 +126,10 @@ export type Database = {
           category?: string | null;
           reorder_level?: number | null;
           status?: string | null;
+          archived?: boolean | null;
+          archived_at?: string | null;
+          archived_by?: string | null;
+          archive_reason?: string | null;
         };
         Update: {
           id?: string;
@@ -137,6 +145,10 @@ export type Database = {
           category?: string | null;
           reorder_level?: number | null;
           status?: string | null;
+          archived?: boolean | null;
+          archived_at?: string | null;
+          archived_by?: string | null;
+          archive_reason?: string | null;
         };
       };
       sterilization_cycles: {

@@ -55,6 +55,7 @@ export const useCourseTableLogic = ({
       }, CourseTableService.getValidationErrorTimeout());
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [validationError, clearValidationError]);
 
   // Virtualized list data

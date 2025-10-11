@@ -60,6 +60,7 @@ export class InventoryCrudOperations {
 
       // Use typed adapter for type-safe operations
       const typedAdapter = await this.getTypedAdapter();
+
       const result = await typedAdapter.getAllItems({
         filters: filters as Record<string, unknown>,
         orderBy: {
@@ -202,6 +203,43 @@ export class InventoryCrudOperations {
       }
 
       InventoryErrorOperations.logSuccess(operation, `Deleted ${id}`);
+    } catch (error) {
+      InventoryErrorOperations.logFailure(operation, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Archive an inventory item (soft delete for audit compliance)
+   */
+  static async archiveItem(id: string, reason?: string): Promise<void> {
+    const operation = `Archiving inventory item: ${id}`;
+    InventoryErrorOperations.logStart(operation);
+
+    try {
+      // Get current user for audit trail
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Use typed adapter for type-safe operations
+      const typedAdapter = await this.getTypedAdapter();
+      const result = await typedAdapter.updateItem(id, {
+        archived: true,
+        archived_at: new Date().toISOString(),
+        archived_by: user.id,
+        archive_reason: reason || 'User requested deletion',
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to archive inventory item');
+      }
+
+      InventoryErrorOperations.logSuccess(operation, `Archived ${id}`);
     } catch (error) {
       InventoryErrorOperations.logFailure(operation, error);
       throw error;

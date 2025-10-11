@@ -15,6 +15,10 @@ export interface InventoryUIState {
   showAnalytics: boolean;
   showBulkActions: boolean;
 
+  // Merge functionality
+  mergeMode: boolean;
+  selectedItems: Set<string>;
+
   // Tracking state
   trackedItems: Set<string>;
   trackingData: Map<string, { doctor: string; timestamp: string }>;
@@ -38,6 +42,12 @@ export interface InventoryUIState {
   setTrackingData: (
     data: Map<string, { doctor: string; timestamp: string }>
   ) => void;
+
+  // Merge actions
+  setMergeMode: (enabled: boolean) => void;
+  toggleItemSelection: (itemId: string) => void;
+  clearSelectedItems: () => void;
+  selectAllItems: (itemIds: string[]) => void;
 }
 
 export const createInventoryUISlice: StateCreator<
@@ -62,6 +72,10 @@ export const createInventoryUISlice: StateCreator<
   showFiltersPanel: false,
   showAnalytics: true,
   showBulkActions: false,
+
+  // Merge functionality
+  mergeMode: false,
+  selectedItems: new Set(),
 
   // Tracking state
   trackedItems: new Set(),
@@ -110,4 +124,23 @@ export const createInventoryUISlice: StateCreator<
     }),
   setTrackedItems: (items) => set({ trackedItems: items }),
   setTrackingData: (data) => set({ trackingData: data }),
+
+  // Merge actions
+  setMergeMode: (enabled) =>
+    set({
+      mergeMode: enabled,
+      selectedItems: enabled ? new Set() : new Set(), // Clear selection when enabling/disabling
+    }),
+  toggleItemSelection: (itemId) =>
+    set((state) => {
+      const newSelectedItems = new Set(state.selectedItems);
+      if (newSelectedItems.has(itemId)) {
+        newSelectedItems.delete(itemId);
+      } else {
+        newSelectedItems.add(itemId);
+      }
+      return { selectedItems: newSelectedItems };
+    }),
+  clearSelectedItems: () => set({ selectedItems: new Set() }),
+  selectAllItems: (itemIds) => set({ selectedItems: new Set(itemIds) }),
 });

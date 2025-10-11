@@ -37,10 +37,10 @@ const ScannerPage: React.FC = () => {
     message: string;
   } | null>(null);
 
-  useScanModalLogic({
+  const { handleBarcodeScan } = useScanModalLogic({
     scanMode,
-    onScan: (itemId: string) => {
-      setScannedItems((prev) => [...prev, itemId]);
+    onScan: (barcode: string) => {
+      setScannedItems((prev) => [...prev, barcode]);
     },
   });
 
@@ -63,10 +63,13 @@ const ScannerPage: React.FC = () => {
         demoBarcodes[Math.floor(Math.random() * demoBarcodes.length)];
 
       try {
+        // Call the hook helper to trigger the workflow
+        handleBarcodeScan(randomBarcode);
+
+        // Preserve local UI updates
         if (scanMode === 'add') {
           // Add Inventory workflow
           if (!scannedItems.includes(randomBarcode)) {
-            setScannedItems((prev) => [...prev, randomBarcode]);
             setScanResult({
               type: 'success',
               message: `Item ${randomBarcode} scanned successfully! Ready to add to inventory.`,
@@ -112,10 +115,13 @@ const ScannerPage: React.FC = () => {
     setScanResult(null);
 
     try {
+      // Call the hook helper to trigger the workflow
+      handleBarcodeScan(barcodeId);
+
+      // Preserve local UI updates
       if (scanMode === 'add') {
         // Add Inventory workflow
         if (!scannedItems.includes(barcodeId)) {
-          setScannedItems((prev) => [...prev, barcodeId]);
           setScanResult({
             type: 'success',
             message: `Item ${barcodeId} scanned successfully! Ready to add to inventory.`,

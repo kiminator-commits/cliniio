@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import TableActions from './TableActions';
 import { InventoryItem } from '@/types/inventoryTypes';
 import styles from './TableStyles.module.css';
+import { useInventoryStore } from '@/store/useInventoryStore';
 
 interface TableRowProps {
   item: InventoryItem;
@@ -23,6 +24,17 @@ const TableRow: React.FC<TableRowProps> = React.memo(
     isTracked,
     activeTab,
   }) => {
+    const { mergeMode, selectedItems, toggleItemSelection } =
+      useInventoryStore();
+
+    const handleRowClick = () => {
+      if (mergeMode) {
+        toggleItemSelection(item.id);
+      }
+    };
+
+    const isSelected = selectedItems.has(item.id);
+
     const rowContent = useMemo(() => {
       const nameCell = (
         <td key="name" className={styles.tableCell}>
@@ -78,29 +90,71 @@ const TableRow: React.FC<TableRowProps> = React.memo(
           </td>
         );
       } else if (activeTab === 'tools') {
+        // Get general status (ACTIVE, INACTIVE, N/A)
+        const generalStatus = item.status || 'N/A';
+
+        // Get P2 Status from item data (currently unused but kept for future use)
+        // const p2Status = (item.data &&
+        //   typeof item.data === 'object' &&
+        //   'p2Status' in item.data &&
+        //   typeof item.data.p2Status === 'string')
+        //   ? item.data.p2Status
+        //   : item.p2Status;
+
+        // Check if this is a P2 tool
+        const isP2Tool =
+          item.data &&
+          typeof item.data === 'object' &&
+          'isP2Status' in item.data &&
+          typeof item.data.isP2Status === 'boolean'
+            ? item.data.isP2Status
+            : item.isP2Status || false;
+
         cells.push(
           <td key="status" className={styles.tableCell}>
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                item.status === 'active'
-                  ? 'bg-green-100 text-green-800'
-                  : item.status === 'inactive'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-yellow-100 text-yellow-800'
-              }`}
-            >
-              {item.status}
-            </span>
+            <div className="flex flex-col gap-1">
+              {/* General Status */}
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  generalStatus === 'active'
+                    ? 'bg-green-100 text-green-800'
+                    : generalStatus === 'inactive'
+                      ? 'bg-red-100 text-red-800'
+                      : generalStatus === 'p2'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {generalStatus.toUpperCase()}
+              </span>
+
+              {/* P2 Status indicator (only show if it's a P2 tool) */}
+              {isP2Tool && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  P2
+                </span>
+              )}
+            </div>
           </td>
         );
       }
 
-      cells.push(quantityCell, priceCell);
+      // Add quantity only for non-tools tabs (supplies, equipment, hardware)
+      if (activeTab !== 'tools') {
+        cells.push(quantityCell);
+      }
+
+      cells.push(priceCell);
       return cells;
     }, [item, activeTab]);
 
     return (
-      <tr className={styles.tableRow} tabIndex={0}>
+      <tr
+        className={`${styles.tableRow} ${isSelected ? styles.selectedRow : ''}`}
+        tabIndex={0}
+        onClick={handleRowClick}
+        style={{ cursor: mergeMode ? 'pointer' : 'default' }}
+      >
         {rowContent}
         <TableActions
           item={item}

@@ -6,7 +6,7 @@ import {
   convertToPDF,
   createDownloadUrl,
   generateFilename,
-} from '@/utils/exportUtils';
+} from '../../../../utils/exportUtils';
 import {
   BulkUpdateResult,
   BulkDeleteResult,

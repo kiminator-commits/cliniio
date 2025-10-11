@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Room } from '../../store/roomStore';
+import { useGeolocation } from '../../hooks/useGeolocation';
 import Icon from '@mdi/react';
-import { mdiPlus, mdiCheck, mdiClose, mdiBarcode } from '@mdi/js';
+import {
+  mdiPlus,
+  mdiCheck,
+  mdiClose,
+  mdiBarcode,
+  mdiMapMarkerRadius,
+  mdiMapMarker,
+} from '@mdi/js';
 import { getRandomRoomBarcode } from '../../utils/getRandomBarcode';
+import { formatGPSCoordinates, isValidGPS } from '../../utils/locationUtils';
 
 interface RoomFormProps {
   isOpen: boolean;
@@ -24,7 +33,15 @@ const RoomForm: React.FC<RoomFormProps> = ({
     department: '',
     floor: '',
     barcode: '',
+    gpsCoordinates: null as {
+      latitude: number;
+      longitude: number;
+      accuracy?: number;
+    } | null,
   });
+
+  const { getCurrentLocation, latitude, longitude, accuracy, isLoading } =
+    useGeolocation();
 
   const departments = [
     'Surgery',
@@ -42,6 +59,7 @@ const RoomForm: React.FC<RoomFormProps> = ({
         department: room.department || '',
         floor: room.floor || '',
         barcode: room.barcode || '',
+        gpsCoordinates: room.gpsCoordinates || null,
       });
     } else {
       setFormData({
@@ -49,9 +67,25 @@ const RoomForm: React.FC<RoomFormProps> = ({
         department: '',
         floor: '',
         barcode: '',
+        gpsCoordinates: null,
       });
     }
   }, [room, mode, isOpen]);
+
+  // Update GPS coordinates when geolocation changes
+  useEffect(() => {
+    if (latitude && longitude) {
+      setFormData((prev) => ({
+        ...prev,
+        gpsCoordinates: {
+          latitude,
+          longitude,
+          accuracy,
+          lastUpdated: new Date().toISOString(),
+        },
+      }));
+    }
+  }, [latitude, longitude, accuracy]);
 
   const handleSubmit = () => {
     if (formData.name && formData.department && formData.floor) {
@@ -156,6 +190,56 @@ const RoomForm: React.FC<RoomFormProps> = ({
             placeholder="e.g., 2nd Floor"
           />
         </div>
+      </div>
+
+      {/* GPS Coordinates Section */}
+      <div className="mt-4 p-3 border border-blue-200 rounded-lg bg-blue-50">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-blue-800 flex items-center">
+            <Icon path={mdiMapMarkerRadius} size={0.8} className="mr-1" />
+            GPS Coordinates (Optional)
+          </h4>
+          <button
+            type="button"
+            onClick={getCurrentLocation}
+            disabled={isLoading}
+            className="flex items-center px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            <Icon path={mdiMapMarkerRadius} size={0.6} className="mr-1" />
+            {isLoading ? 'Getting Location...' : 'Get Current Location'}
+          </button>
+        </div>
+
+        {formData.gpsCoordinates ? (
+          <div className="space-y-2">
+            <div className="text-sm text-blue-700">
+              <div className="font-medium">Current GPS Coordinates:</div>
+              <div className="font-mono text-xs">
+                {formatGPSCoordinates(formData.gpsCoordinates)}
+              </div>
+              {formData.gpsCoordinates.accuracy && (
+                <div className="text-xs text-blue-600">
+                  Accuracy: ±{Math.round(formData.gpsCoordinates.accuracy)}m
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, gpsCoordinates: null }))
+              }
+              className="text-xs text-red-600 hover:text-red-800"
+            >
+              Remove GPS Coordinates
+            </button>
+          </div>
+        ) : (
+          <div className="text-sm text-blue-600">
+            No GPS coordinates set. Click "Get Current Location" to capture the
+            room's GPS coordinates. This will enable smart location detection
+            for inventory items.
+          </div>
+        )}
       </div>
       <div className="flex gap-2 mt-3">
         <button

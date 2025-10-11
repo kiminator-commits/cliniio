@@ -150,7 +150,7 @@ export function useEnhancedProfileForm(
 
   // Auto-save functionality
   useEffect(() => {
-    if (!autoSave || !form.isModified || form.isSubmitting) return;
+    if (!autoSave || !form.isModified || form.isSubmitting) return undefined;
 
     const timer = setTimeout(() => {
       if (form.isValid) {

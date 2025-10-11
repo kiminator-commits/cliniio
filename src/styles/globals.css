@@ -42,6 +42,21 @@ a:focus,
   box-shadow: none !important;
 }
 
+/* Remove ALL focus rings from inventory table elements */
+.inventory-table button:focus,
+.inventory-table .actionButton:focus,
+.inventory-table .trackButton:focus,
+.inventory-table .editButton:focus,
+.inventory-table .deleteButton:focus,
+.inventory-table tr:focus,
+.inventory-table tr:focus-within,
+.inventory-table td:focus,
+.inventory-table th:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
 /* Hide scrollbar for all browsers */
 .hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */

@@ -2,6 +2,7 @@ import { supabase } from '../../../../lib/supabase';
 import { ContentItem } from '../../types';
 import { ApiError, ErrorType, ErrorSeverity } from '../../types/errors';
 import { KHDataTransformationProvider } from './KHDataTransformationProvider';
+import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export interface SearchFilters {
   category?: string;
@@ -298,7 +299,26 @@ export class KHSearchProvider {
   /**
    * Apply filters to query builder
    */
-  private applyFilters(queryBuilder: unknown, filters: SearchFilters): unknown {
+  private applyFilters(
+    queryBuilder: PostgrestFilterBuilder<
+      unknown,
+      unknown,
+      unknown,
+      unknown[],
+      string,
+      unknown,
+      'GET'
+    >,
+    filters: SearchFilters
+  ): PostgrestFilterBuilder<
+    unknown,
+    unknown,
+    unknown,
+    unknown[],
+    string,
+    unknown,
+    'GET'
+  > {
     if (filters.category) {
       queryBuilder = queryBuilder.eq(
         'content_type',
@@ -330,7 +350,26 @@ export class KHSearchProvider {
   /**
    * Apply options to query builder
    */
-  private applyOptions(queryBuilder: unknown, options: SearchOptions): unknown {
+  private applyOptions(
+    queryBuilder: PostgrestFilterBuilder<
+      unknown,
+      unknown,
+      unknown,
+      unknown[],
+      string,
+      unknown,
+      'GET'
+    >,
+    options: SearchOptions
+  ): PostgrestFilterBuilder<
+    unknown,
+    unknown,
+    unknown,
+    unknown[],
+    string,
+    unknown,
+    'GET'
+  > {
     if (options.limit) {
       queryBuilder = queryBuilder.limit(options.limit);
     }

@@ -3,7 +3,7 @@ import Icon from '@mdi/react';
 import { mdiDelete } from '@mdi/js';
 import { FixedSizeList as List } from 'react-window';
 import { ContentItem, ContentStatus } from '../../types';
-import { PermissionGuard } from '../../utils/permissions';
+import { PermissionGuard } from '../../utils/permissionComponents';
 
 interface TableColumn {
   key: string;

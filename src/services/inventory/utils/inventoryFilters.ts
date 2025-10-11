@@ -111,7 +111,7 @@ export class InventoryFilterManager {
   }
 
   static getDefaultStatuses(): string[] {
-    return ['active', 'inactive', 'maintenance', 'retired'];
+    return ['active', 'inactive', 'p2', 'n/a'];
   }
 
   static validateFilters(filters: InventoryFilters): {

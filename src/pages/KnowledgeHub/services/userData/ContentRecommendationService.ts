@@ -1,4 +1,4 @@
-import { supabase } from '../../../../lib/supabaseClient';
+import { supabase } from '../../../../lib/supabase';
 import { ContentItem, ContentCategory, ContentStatus } from '../../types';
 import { ContentRecommendation, UserProfile, ContentItemRow } from './types';
 

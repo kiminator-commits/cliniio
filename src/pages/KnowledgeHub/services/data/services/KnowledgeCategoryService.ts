@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabaseClient';
 import { KnowledgeCategory } from '../../types/knowledgeHubTypes';
 
 export class KnowledgeCategoryService {

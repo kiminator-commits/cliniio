@@ -40,6 +40,7 @@ export class ApiError extends Error {
   public readonly retryable: boolean;
   public readonly severity: ErrorSeverity;
   public readonly context?: Record<string, unknown>;
+  public readonly timestamp: Date;
 
   constructor(
     type: ErrorType,
@@ -58,6 +59,7 @@ export class ApiError extends Error {
     this.retryable = options.retryable ?? this.isRetryableByDefault(type);
     this.severity = options.severity ?? this.getSeverityByType(type);
     this.context = options.context;
+    this.timestamp = new Date();
   }
 
   private isRetryableByDefault(type: ErrorType): boolean {

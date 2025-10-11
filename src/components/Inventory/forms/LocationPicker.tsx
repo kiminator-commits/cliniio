@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGeolocation } from '../../../hooks/useGeolocation';
 import { useRoomStore } from '../../../store/roomStore';
+import { findClosestRoom, formatDistance } from '../../../utils/locationUtils';
 import Icon from '@mdi/react';
 import { mdiMapMarker, mdiMapMarkerRadius, mdiChevronDown } from '@mdi/js';
 
@@ -25,9 +26,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     useGeolocation();
   const { getActiveRooms } = useRoomStore();
   const rooms = getActiveRooms();
+  const [suggestedRoom, setSuggestedRoom] = useState<{
+    room: { name: string; id: string };
+    distance: number;
+  } | null>(null);
 
   const handleLocationTypeChange = (type: 'room' | 'gps' | 'manual') => {
     setLocationType(type);
+    setSuggestedRoom(null); // Clear suggestion when changing type
     if (type === 'gps') {
       getCurrentLocation();
     } else if (type === 'manual') {
@@ -42,8 +48,26 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
   const handleGPSLocation = () => {
     if (latitude && longitude) {
-      const gpsLocation = `GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-      onChange(gpsLocation);
+      // Check for closest room first
+      const closestRoom = findClosestRoom(
+        { latitude, longitude },
+        rooms,
+        50 // Within 50 meters
+      );
+
+      if (closestRoom) {
+        // Suggest the closest room
+        setSuggestedRoom({
+          room: closestRoom,
+          distance: closestRoom.distance || 0,
+        });
+        onChange(closestRoom.name);
+      } else {
+        // Use GPS coordinates if no room is close enough
+        const gpsLocation = `GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        onChange(gpsLocation);
+        setSuggestedRoom(null);
+      }
       setIsOpen(false);
     }
   };
@@ -162,7 +186,28 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               {isLoading ? 'Getting location...' : 'Get Current Location'}
             </button>
 
-            {/* Error display removed to prevent text from appearing on page */}
+            {/* Smart Room Suggestion */}
+            {suggestedRoom && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="text-sm text-blue-800">
+                  <div className="font-medium flex items-center">
+                    <Icon path={mdiMapMarker} size={0.8} className="mr-1" />
+                    Smart Room Detection
+                  </div>
+                  <div className="mt-1">
+                    Suggested:{' '}
+                    <span className="font-medium">
+                      {suggestedRoom.room.name}
+                    </span>
+                  </div>
+                  <div className="text-xs text-blue-600">
+                    Distance: {formatDistance(suggestedRoom.distance)} •
+                    Department: {suggestedRoom.room.department} • Floor:{' '}
+                    {suggestedRoom.room.floor}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {latitude && longitude && (
               <div className="space-y-2">
@@ -176,7 +221,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                   onClick={handleGPSLocation}
                   className="w-full px-3 py-2 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  Use This Location
+                  {suggestedRoom ? 'Use Suggested Room' : 'Use GPS Coordinates'}
                 </button>
               </div>
             )}

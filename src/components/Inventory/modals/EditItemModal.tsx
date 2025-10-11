@@ -8,7 +8,8 @@ interface Item {
   category: string;
   toolId: string;
   location: string;
-  p2Status: string;
+  status: string;
+  isP2Status: boolean;
 }
 
 interface EditItemModalProps {
@@ -29,20 +30,21 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
     category: '',
     toolId: '',
     location: '',
-    p2Status: '',
+    status: '',
+    isP2Status: false,
   });
 
   // Update form data when item changes
   useEffect(() => {
     if (item) {
-      const { name, category, location } = item;
+      const { name, category, location, status, isP2Status } = item;
       setFormData({
         name,
         category,
         toolId: (item as { data?: { toolId?: string } }).data?.toolId || '',
         location,
-        p2Status:
-          (item as { data?: { p2Status?: string } }).data?.p2Status || '',
+        status: status || '',
+        isP2Status: isP2Status || false,
       });
     }
   }, [item]);
@@ -68,7 +70,8 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
         category: formData.category,
         location: formData.location,
         toolId: formData.toolId,
-        p2Status: formData.p2Status,
+        status: formData.status,
+        isP2Status: formData.isP2Status,
       });
     }
   };
@@ -131,17 +134,35 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>P2 Status</Form.Label>
+            <Form.Label>Status</Form.Label>
             <Form.Select
-              name="p2Status"
-              value={formData.p2Status}
+              name="status"
+              value={formData.status}
               onChange={handleInputChange}
               required
             >
               <option value="">Select Status</option>
-              <option value="Available">Available</option>
-              <option value="In Use">In Use</option>
-              <option value="Maintenance">Maintenance</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="p2">P2</option>
+              <option value="n/a">N/A</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>P2 Tool</Form.Label>
+            <Form.Select
+              name="isP2Status"
+              value={formData.isP2Status.toString()}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  isP2Status: e.target.value === 'true',
+                }))
+              }
+              required
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
             </Form.Select>
           </Form.Group>
         </Modal.Body>

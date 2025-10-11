@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import TableRow from './TableRow';
 import TableHeader from './TableHeader';
 import TablePagination from './TablePagination';
 import VirtualizedInventoryTable from './VirtualizedInventoryTable';
 import { InventoryItem } from '@/types/inventoryTypes';
 import { useInventoryStore } from '@/store/useInventoryStore';
+import { useTrackedTools } from '@/hooks/inventory/useTrackedTools';
 import styles from './TableStyles.module.css';
 
 interface BaseInventoryTableProps {
@@ -13,6 +14,7 @@ interface BaseInventoryTableProps {
   onEdit: (item: InventoryItem) => void;
   onDelete?: (item: InventoryItem) => void;
   onToggleFavorite?: (itemId: string) => void;
+  onTrackToggle?: (item: InventoryItem) => void;
   showTrackedOnly?: boolean;
   showFavoritesOnly?: boolean;
   itemsPerPage?: number;
@@ -28,6 +30,7 @@ const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
     onEdit,
     onDelete,
     onToggleFavorite,
+    onTrackToggle,
     showTrackedOnly = false,
     showFavoritesOnly = false,
     itemsPerPage = 3,
@@ -35,11 +38,14 @@ const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
     onPageChange,
     activeTab,
   }) => {
-    // Use virtualization for large datasets (more than 50 items)
-    const shouldUseVirtualization = data.length > 50;
+    // Use virtualization for large datasets (more than 100 items)
+    const shouldUseVirtualization = data.length > 100;
 
     // Get favorites and tracking functions from store
-    const { favorites, trackedItems, toggleTrackedItem } = useInventoryStore();
+    const { favorites } = useInventoryStore();
+
+    // Get tracking functions from useTrackedTools hook
+    const { trackTool, untrackTool, isToolTracked } = useTrackedTools();
 
     // Memoize filtered and paginated data to prevent unnecessary re-renders
     const { totalPages, paginatedData } = useMemo(() => {
@@ -48,7 +54,7 @@ const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
       // Filter by tracked items if showTrackedOnly is true
       if (showTrackedOnly) {
         filtered = filtered.filter((item: InventoryItem) =>
-          trackedItems.has(item.id)
+          isToolTracked(item.id)
         );
       }
 
@@ -70,23 +76,40 @@ const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
       showTrackedOnly,
       showFavoritesOnly,
       favorites,
-      trackedItems,
+      isToolTracked,
       itemsPerPage,
       currentPage,
     ]);
 
     // Handle tracking toggle
-    const handleTrackToggle = (item: InventoryItem) => {
-      toggleTrackedItem(item.id, 'Current User'); // You can replace 'Current User' with actual user info
-    };
+    const handleTrackToggle = useCallback(
+      (item: InventoryItem) => {
+        const alreadyTracked = isToolTracked(item.id);
+        if (alreadyTracked) {
+          untrackTool(item.id);
+        } else {
+          // Default priority: medium
+          trackTool(item.id, 'medium');
+        }
+
+        // If external onTrackToggle is provided, call it (this can trigger filter toggle)
+        if (onTrackToggle) {
+          onTrackToggle(item);
+        }
+      },
+      [isToolTracked, untrackTool, trackTool, onTrackToggle]
+    );
 
     // Check if item is tracked
-    const isItemTracked = (itemId: string) => trackedItems.has(itemId);
+    const isItemTracked = useCallback(
+      (itemId: string) => isToolTracked(itemId),
+      [isToolTracked]
+    );
 
     // If using virtualization, render the virtualized table
     if (shouldUseVirtualization) {
       return (
-        <div className={styles.tableContainer}>
+        <div className={`${styles.tableContainer} inventory-table`}>
           <VirtualizedInventoryTable
             data={paginatedData}
             columns={columns}
@@ -112,7 +135,7 @@ const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
     }
 
     return (
-      <div className={styles.tableContainer}>
+      <div className={`${styles.tableContainer} inventory-table`}>
         <div className={styles.tableWrapper}>
           <table
             className={styles.table}

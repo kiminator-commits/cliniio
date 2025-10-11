@@ -16,7 +16,7 @@ export interface InventoryTables {
       name: string;
       category: string;
       location: string;
-      status: 'active' | 'inactive' | 'maintenance' | 'retired';
+      status: 'active' | 'inactive' | 'p2' | 'n/a';
       quantity: number;
       cost: number;
       updated_at: string;
@@ -28,7 +28,7 @@ export interface InventoryTables {
       name: string;
       category: string;
       location: string;
-      status?: 'active' | 'inactive' | 'maintenance' | 'retired';
+      status?: 'active' | 'inactive' | 'p2' | 'n/a';
       quantity: number;
       cost: number;
       updated_at?: string;
@@ -40,7 +40,7 @@ export interface InventoryTables {
       name?: string;
       category?: string;
       location?: string;
-      status?: 'active' | 'inactive' | 'maintenance' | 'retired';
+      status?: 'active' | 'inactive' | 'p2' | 'n/a';
       quantity?: number;
       cost?: number;
       updated_at?: string;

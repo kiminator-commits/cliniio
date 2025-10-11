@@ -27,6 +27,8 @@ export const useModalState = () => {
     // Form and edit mode states (from form slice)
     formData,
     setFormData,
+    mergeFormData,
+    updateField,
     isEditMode,
     setEditMode,
     expandedSections,
@@ -117,6 +119,8 @@ export const useModalState = () => {
 
     // Form state setters (for use in modal content)
     setFormData,
+    mergeFormData,
+    updateField,
     setExpandedSections,
   };
 };

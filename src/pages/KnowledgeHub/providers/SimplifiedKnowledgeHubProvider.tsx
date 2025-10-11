@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { ContentItem } from '../types';
 import { ProviderService } from '../services/providerService';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabaseClient';
 // import { getAllContentItems } from '../__mocks__/knowledgeHubApiService';
 
 // Function that fetches content from available tables

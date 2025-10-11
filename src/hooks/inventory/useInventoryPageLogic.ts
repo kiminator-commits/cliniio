@@ -4,6 +4,7 @@ import { useAddModalHandlers } from '@/hooks/useAddModalHandlers';
 import { useInventoryFormHandlers } from '@/hooks/useInventoryFormHandlers';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { useInventoryDataManager } from '@/hooks/inventory/useInventoryDataManager';
+import { useInventoryModals } from '@/hooks/inventory/useInventoryModals';
 import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 // import { InventoryServiceFacade } from '@/pages/Inventory/services/inventoryServiceFacade';
 import { InventoryActionService } from '@/pages/Inventory/services/inventoryActionService';
@@ -65,6 +66,9 @@ export const useInventoryPageLogic = () => {
 
   // Business logic - favorite toggle
   const { handleToggleFavorite } = useFavoriteToggle(favorites, setFavorites);
+
+  // Business logic - modal handlers
+  const { handleCloneItem } = useInventoryModals();
 
   // Business logic - modal handlers
   const { handleShowAddModal, handleCloseAddModal } = useAddModalHandlers({
@@ -238,6 +242,7 @@ export const useInventoryPageLogic = () => {
     handleShowAddModal,
     handleCloseAddModal,
     handleEditItem,
+    handleCloneItem,
     handleToggleTrackedFilter,
     handleToggleFavoritesFilter,
     onCategoryChange: memoizedCategoryChange,

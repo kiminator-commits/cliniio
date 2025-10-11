@@ -282,7 +282,7 @@ class KnowledgeHubApiService {
     // Clear specific cache entries instead of everything
     const keysToRemove: string[] = [];
 
-    for (const key of this.requestCache.keys()) {
+    for (const key of Array.from(this.requestCache.keys())) {
       // Always clear content-related caches
       if (key.includes('fetchContent') || key.includes('contentStats')) {
         keysToRemove.push(key);

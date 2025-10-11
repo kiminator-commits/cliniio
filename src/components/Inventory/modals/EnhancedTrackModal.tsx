@@ -215,7 +215,7 @@ export const EnhancedTrackModal: React.FC<EnhancedTrackModalProps> = ({
               placeholder="Search tools and supplies..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
             />
           </div>
           <div className="flex gap-2">
@@ -374,7 +374,7 @@ export const EnhancedTrackModal: React.FC<EnhancedTrackModalProps> = ({
                                     e.target.value as 'high' | 'medium' | 'low'
                                   )
                                 }
-                                className="px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="px-2 py-1 text-xs border rounded focus:outline-none"
                               >
                                 <option value="high">High</option>
                                 <option value="medium">Medium</option>

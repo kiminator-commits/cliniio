@@ -68,8 +68,45 @@ class TrackedToolsService {
       (item) => item.toolId === toolId && item.doctorName === doctorName
     );
     if (index >= 0) {
+      // Get the current queue before removing
+      const currentQueue = this.getToolTrackers(toolId);
+      const removedItem = this.priorityQueue[index];
+
       this.priorityQueue.splice(index, 1);
+
+      // Notify remaining subscribers about queue position changes
+      this.notifyQueuePositionChanges(
+        toolId,
+        currentQueue,
+        removedItem.doctorName
+      );
     }
+  }
+
+  /**
+   * Notify subscribers about queue position changes
+   */
+  private notifyQueuePositionChanges(
+    toolId: string,
+    oldQueue: TrackedToolPriority[],
+    removedDoctor: string
+  ): void {
+    const newQueue = this.getToolTrackers(toolId);
+
+    // Find doctors who moved up in the queue
+    oldQueue.forEach((oldTracker, oldIndex) => {
+      if (oldTracker.doctorName === removedDoctor) return; // Skip the removed doctor
+
+      const newIndex = newQueue.findIndex(
+        (t) => t.doctorName === oldTracker.doctorName
+      );
+      if (newIndex >= 0 && newIndex < oldIndex) {
+        // This doctor moved up in the queue
+        const toolName = `Tool ${toolId}`; // This should come from inventory data
+
+        // TODO: Add notification service back later
+      }
+    });
   }
 
   /**
@@ -105,12 +142,17 @@ class TrackedToolsService {
     oldStatus: string,
     newStatus: string
   ): void {
-    // Check if tool became available
-    if (
-      this.isCleanStatus(newStatus as ToolStatus) &&
-      !this.isCleanStatus(oldStatus as ToolStatus)
-    ) {
+    // Check if tool became available or complete
+    if (newStatus === 'available' || newStatus === 'complete') {
       this.handleToolBecameAvailable(toolId);
+    }
+
+    // Check if tool became unavailable
+    if (
+      oldStatus === 'available' &&
+      (newStatus === 'in_use' || newStatus === 'sterilizing')
+    ) {
+      this.handleToolBecameUnavailable(toolId);
     }
 
     // Notify subscribers
@@ -120,32 +162,78 @@ class TrackedToolsService {
   }
 
   /**
-   * Handle when a tool becomes available
+   * Handle when a tool becomes unavailable
    */
-  private handleToolBecameAvailable(toolId: string): void {
-    const trackers = this.getToolTrackers(toolId);
+  private handleToolBecameUnavailable(toolId: string): void {
+    const subscribers = this.getToolTrackers(toolId);
 
-    if (trackers.length === 0) {
+    if (subscribers.length === 0) {
       return; // No one is tracking this tool
     }
 
-    // Create notification for the highest priority tracker
-    const topTracker = trackers[0];
-    const notification: TrackedToolNotification = {
-      id: `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      toolId,
-      toolName: `Tool ${toolId}`, // We'll get the actual name from the hook
-      doctorName: topTracker.doctorName,
-      timestamp: new Date().toISOString(),
-      status: 'pending',
-      priority: topTracker.priority,
-      message: `Your tracked tool is now available! You have first priority to claim it.`,
-    };
+    // Notify all subscribers that the tool is no longer available
+    subscribers.forEach((subscriber, index) => {
+      const toolName = `Tool ${toolId}`; // This should come from inventory data
 
-    this.notifications.push(notification);
+      // TODO: Add notification service back later
+    });
+  }
 
-    // Update tracker status
-    topTracker.status = 'notified';
+  /**
+   * Handle when a tool becomes available
+   */
+  private handleToolBecameAvailable(toolId: string): void {
+    const subscribers = this.getToolTrackers(toolId);
+
+    if (subscribers.length === 0) {
+      return; // No one is tracking this tool
+    }
+
+    // Sort by priority (high > medium > low)
+    const priorityRank = { high: 3, medium: 2, low: 1 };
+    const sorted = [...subscribers].sort(
+      (a, b) => priorityRank[b.priority] - priorityRank[a.priority]
+    );
+    const topDoctor = sorted[0];
+
+    // Notify top priority subscriber
+    if (topDoctor && topDoctor.status === 'waiting') {
+      // Get tool name (we'll need to pass this from the hook)
+      const toolName = `Tool ${toolId}`; // This should come from inventory data
+
+      // TODO: Add notification service back later
+
+      // Update the internal notification for backward compatibility
+      const notification: TrackedToolNotification = {
+        id: `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        toolId,
+        toolName,
+        doctorName: topDoctor.doctorName,
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        priority: topDoctor.priority,
+        message: `Your tracked tool is now available! You have first priority to claim it.`,
+      };
+
+      this.notifications.push(notification);
+      topDoctor.status = 'notified';
+    }
+
+    // Preserve waiting doctors - update the priority queue with the modified status
+    const updatedSubscribers = sorted.map((sub) =>
+      sub.doctorName === topDoctor.doctorName ? topDoctor : sub
+    );
+
+    // Update the priority queue entries for this tool
+    updatedSubscribers.forEach((subscriber) => {
+      const index = this.priorityQueue.findIndex(
+        (item) =>
+          item.toolId === toolId && item.doctorName === subscriber.doctorName
+      );
+      if (index >= 0) {
+        this.priorityQueue[index] = subscriber;
+      }
+    });
   }
 
   /**

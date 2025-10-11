@@ -147,7 +147,7 @@ describe('LoginForm Integration', () => {
     expect(rememberMeCheckbox).toBeChecked();
   });
 
-  it('handles password strength indicator', async () => {
+  it('does not show password strength indicator', async () => {
     renderWithProviders(<LoginForm />);
 
     const user = userEvent.setup();
@@ -155,8 +155,8 @@ describe('LoginForm Integration', () => {
 
     await user.type(passwordInput, 'weak');
 
-    // Password strength indicator should be visible
-    expect(screen.getByText(/Password Strength/i)).toBeInTheDocument();
+    // Password strength indicator should NOT be visible
+    expect(screen.queryByText(/Password Strength/i)).not.toBeInTheDocument();
   });
 
   it('handles loading state', async () => {

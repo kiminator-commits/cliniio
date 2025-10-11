@@ -12,7 +12,7 @@ import { RealtimeManager } from '@/services/_core/realtimeManager';
 
 export interface InventoryFilters {
   category?: string;
-  status?: 'active' | 'inactive' | 'maintenance' | 'retired';
+  status?: 'active' | 'inactive' | 'p2' | 'n/a';
   location?: string;
   search?: string;
 }

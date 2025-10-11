@@ -115,7 +115,7 @@ class RateLimiter {
    */
   cleanup(): void {
     const now = Date.now();
-    for (const [email, entry] of this.attempts.entries()) {
+    for (const [email, entry] of Array.from(this.attempts.entries())) {
       // Remove entries older than 1 hour
       if (entry.lastAttempt < now - 60 * 60 * 1000) {
         this.attempts.delete(email);

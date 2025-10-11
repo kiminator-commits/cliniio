@@ -128,8 +128,8 @@ export class DuplicatePreventionService {
     const set1 = new Set(tags1.map((t) => t.toLowerCase()));
     const set2 = new Set(tags2.map((t) => t.toLowerCase()));
 
-    const intersection = new Set([...set1].filter((x) => set2.has(x)));
-    const union = new Set([...set1, ...set2]);
+    const intersection = new Set(Array.from(set1).filter((x) => set2.has(x)));
+    const union = new Set(Array.from(set1).concat(Array.from(set2)));
 
     return union.size > 0 ? intersection.size / union.size : 0;
   }

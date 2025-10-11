@@ -8,7 +8,8 @@ interface AddItemButtonProps {
     category: string;
     location: string;
     quantity: number;
-    p2Status: string;
+    status: string;
+    isP2Status: boolean;
   }) => void;
 }
 
@@ -19,7 +20,8 @@ const AddItemButton: React.FC<AddItemButtonProps> = ({ onAdd }) => {
     category: '',
     location: '',
     quantity: 0,
-    p2Status: '',
+    status: '',
+    isP2Status: false,
   });
 
   const handleClose = () => setShow(false);
@@ -108,17 +110,35 @@ const AddItemButton: React.FC<AddItemButtonProps> = ({ onAdd }) => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>P2 Status</Form.Label>
+              <Form.Label>Status</Form.Label>
               <Form.Select
-                name="p2Status"
-                value={formData.p2Status}
+                name="status"
+                value={formData.status}
                 onChange={handleChange}
                 required
               >
                 <option value="">Select Status</option>
-                <option value="available">Available</option>
-                <option value="in-use">In Use</option>
-                <option value="maintenance">Maintenance</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="p2">P2</option>
+                <option value="n/a">N/A</option>
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>P2 Tool</Form.Label>
+              <Form.Select
+                name="isP2Status"
+                value={formData.isP2Status.toString()}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    isP2Status: e.target.value === 'true',
+                  }))
+                }
+                required
+              >
+                <option value="false">No</option>
+                <option value="true">Yes</option>
               </Form.Select>
             </Form.Group>
           </Modal.Body>

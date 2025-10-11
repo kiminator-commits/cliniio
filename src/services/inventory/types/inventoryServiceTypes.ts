@@ -6,7 +6,7 @@ import { InventoryItem } from '../../../types/inventoryTypes';
 
 export interface InventoryFilters {
   category?: string;
-  status?: 'active' | 'inactive' | 'maintenance' | 'retired';
+  status?: 'active' | 'inactive' | 'p2' | 'n/a';
   location?: string;
   search?: string;
   minQuantity?: number;

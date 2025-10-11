@@ -31,6 +31,51 @@
   white-space: nowrap;
 }
 
+/* Name column - left aligned with more space */
+.tableHeaderCell:first-child,
+.tableCell:first-child {
+  text-align: left;
+  width: 40%;
+  min-width: 300px;
+}
+
+/* Other columns - right aligned */
+.tableHeaderCell:not(:first-child):not(:last-child),
+.tableCell:not(:first-child):not(:last-child) {
+  text-align: right;
+  width: 15%;
+  min-width: 100px;
+}
+
+/* Actions column - right aligned */
+.tableHeaderCell:last-child,
+.tableCell:last-child {
+  text-align: right;
+  width: 20%;
+  min-width: 200px;
+}
+
+/* Checkbox column - narrow width when visible, zero width when hidden */
+.tableCell.checkboxCell {
+  width: 50px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.tableCell.checkboxCell[style*="display: none"] {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: none;
+}
+
+.tableHeaderCell.checkboxCell[style*="display: none"] {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: none;
+}
+
 .tableRow {
   border-bottom: 1px solid #f3f4f6;
   transition: background-color 0.15s ease;
@@ -42,8 +87,12 @@
 
 .tableRow:focus-within {
   background-color: #eff6ff;
-  outline: 2px solid #3b82f6;
-  outline-offset: -2px;
+  outline: none;
+}
+
+.selectedRow {
+  background-color: #dbeafe !important;
+  border-left: 4px solid #3b82f6;
 }
 
 .tableCell {
@@ -94,8 +143,7 @@
 }
 
 .actionButton:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+  outline: none;
 }
 
 .actionButton:active {
@@ -150,6 +198,7 @@
   background: #6d28d9;
   border-color: #6d28d9;
 }
+
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -218,6 +267,5 @@
 
 .virtualizedRow:focus-within {
   background-color: #eff6ff;
-  outline: 2px solid #3b82f6;
-  outline-offset: -2px;
+  outline: none;
 }

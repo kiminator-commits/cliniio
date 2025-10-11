@@ -27,6 +27,7 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [autoHide, isVisible, autoHideDelay, onClose]);
 
   if (!isVisible) return null;

@@ -115,7 +115,7 @@ export function getDefaultFormData(): InventoryFormData {
     category: '',
     id: '',
     location: '',
-    status: 'Available',
+    status: 'active',
     quantity: 1,
     unitCost: 0,
     minimumQuantity: 0,

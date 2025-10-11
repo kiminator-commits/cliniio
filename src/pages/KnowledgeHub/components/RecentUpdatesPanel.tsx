@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '@mdi/react';
 import { mdiUpdate } from '@mdi/js';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabaseClient';
 import { KnowledgeHubService } from '../services/knowledgeHubService';
 import { RecentUpdate } from '../services/types/knowledgeHubTypes';
 
@@ -33,7 +33,7 @@ export const RecentUpdatesPanel: React.FC = () => {
           10
         );
         // Performance optimization: Removed excessive logging
-        setRecentUpdates(updates as RecentUpdate[]);
+        setRecentUpdates(updates as unknown as RecentUpdate[]);
       } catch (err) {
         console.error(
           '❌ RecentUpdatesPanel: Error fetching recent updates:',

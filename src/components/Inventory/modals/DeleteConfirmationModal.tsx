@@ -10,6 +10,7 @@ interface DeleteConfirmationModalProps {
   onConfirm: () => void;
   item: InventoryItem | null;
   isLoading?: boolean;
+  activeTab?: string;
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
@@ -18,6 +19,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   onConfirm,
   item,
   isLoading = false,
+  activeTab = 'tools',
 }) => {
   if (!item) return null;
 
@@ -33,8 +35,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     <BaseModal
       show={show}
       onClose={onClose}
-      title="Confirm Deletion"
-      size="sm"
+      title="Confirm Archive"
+      size="lg"
       footer={
         <div className="flex gap-3 justify-end">
           <button
@@ -52,12 +54,12 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
             {isLoading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Deleting...
+                Archiving...
               </>
             ) : (
               <>
                 <Icon path={mdiDelete} size={0.8} />
-                Delete
+                Archive
               </>
             )}
           </button>
@@ -72,11 +74,12 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Delete "{item.name}"?
+            Archive "{item.name}"?
           </h3>
           <p className="text-gray-600 mb-4">
-            This action cannot be undone. The item will be permanently removed
-            from the inventory.
+            This will archive the item from the active inventory. The item will
+            be hidden but preserved for audit purposes and compliance
+            requirements.
           </p>
           <div className="bg-gray-50 rounded-md p-3">
             <div className="text-sm text-gray-700">
@@ -92,7 +95,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                 <span className="font-medium">Location:</span>
                 <span>{item.location}</span>
               </div>
-              {item.quantity !== undefined && (
+              {activeTab !== 'tools' && item.quantity !== undefined && (
                 <div className="flex justify-between">
                   <span className="font-medium">Quantity:</span>
                   <span>{item.quantity}</span>

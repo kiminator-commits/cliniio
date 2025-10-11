@@ -20,10 +20,12 @@ interface ModalContentProps {
   onHide: () => void;
   formData: InventoryFormData;
   isEditMode: boolean;
+  isCloned?: boolean;
   expandedSections: ExpandedSections;
   toggleSection: (section: string) => void;
   handleFormChange: (field: string, value: string) => void;
   onSave?: () => void;
+  onClone?: () => void;
   progressInfo?: {
     current: number;
     total: number;
@@ -153,25 +155,32 @@ const FormSection: React.FC<{
       {expanded && (
         <div className="p-3 border-t border-gray-200">
           <div className="grid grid-cols-2 gap-3">
-            {section.fields.map((field) => (
-              <div key={field.name}>
-                <label
-                  htmlFor={`modal-${field.name}`}
-                  className="block text-xs font-medium text-gray-700 mb-1"
-                >
-                  {field.label}
-                </label>
-                <FormField
-                  field={field}
-                  value={
-                    (formData[
-                      field.name as keyof InventoryFormData
-                    ] as string) || ''
-                  }
-                  onChange={(value) => handleFormChange(field.name, value)}
-                />
-              </div>
-            ))}
+            {section.fields.map((field) => {
+              // Hide quantity field for tools category
+              if (field.name === 'quantity' && formData.category === 'tools') {
+                return null;
+              }
+
+              return (
+                <div key={field.name}>
+                  <label
+                    htmlFor={`modal-${field.name}`}
+                    className="block text-xs font-medium text-gray-700 mb-1"
+                  >
+                    {field.label}
+                  </label>
+                  <FormField
+                    field={field}
+                    value={
+                      (formData[
+                        field.name as keyof InventoryFormData
+                      ] as string) || ''
+                    }
+                    onChange={(value) => handleFormChange(field.name, value)}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -188,16 +197,22 @@ const ModalContent: React.FC<ModalContentProps> = ({
   onHide,
   formData,
   isEditMode,
+  isCloned = false,
   expandedSections,
   toggleSection,
   handleFormChange,
   onSave,
+  onClone,
   progressInfo,
   sections,
   children,
 }) => {
-  // Determine modal title based on edit mode
-  const modalTitle = isEditMode ? 'Edit Item' : modalConfig.title;
+  // Determine modal title based on edit mode and clone status
+  const modalTitle = isCloned
+    ? 'Cloned Edit Item'
+    : isEditMode
+      ? 'Edit Item'
+      : modalConfig.title;
 
   return (
     <Modal
@@ -221,6 +236,47 @@ const ModalContent: React.FC<ModalContentProps> = ({
           )}
         </Modal.Title>
       </Modal.Header>
+
+      {/* Database Safety Alert for Cloned Items */}
+      {isCloned && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-2">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-yellow-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Database Safety Alert:</strong> Please update the
+                following fields before saving:
+              </p>
+              <ul className="mt-2 text-sm text-yellow-700 list-disc list-inside">
+                <li>
+                  <strong>ID/Serial #</strong> - Must be unique
+                </li>
+                <li>
+                  <strong>Barcode</strong> - Must be unique
+                </li>
+                <li>
+                  <strong>SKU</strong> - Must be unique
+                </li>
+                <li>
+                  <strong>Item Name</strong> - Currently shows "(Copy)" suffix
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Modal.Body className="max-h-[70vh] overflow-y-auto">
         {progressInfo && (
@@ -252,7 +308,15 @@ const ModalContent: React.FC<ModalContentProps> = ({
             msOverflowStyle: 'none',
           }}
         >
-          <form>
+          <form
+            id="inventory-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (onSave) {
+                onSave();
+              }
+            }}
+          >
             {/* Render sections if provided */}
             {sections?.map((section) => (
               <FormSection
@@ -276,27 +340,29 @@ const ModalContent: React.FC<ModalContentProps> = ({
       </Modal.Body>
 
       <Modal.Footer className="pt-2">
-        <button
-          onClick={onHide}
-          className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
-        >
-          Cancel
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={onClone}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+          >
+            Clone
+          </button>
+          <button
+            onClick={onHide}
+            className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+          >
+            Cancel
+          </button>
+        </div>
         {onSave && (
           <button
-            onClick={onSave}
+            type="submit"
+            form="inventory-form"
             className="bg-[#4ECDC4] hover:bg-[#3db8b0] text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
           >
             {isEditMode ? 'Update Item' : 'Save Item'}
           </button>
         )}
-        {/* Show close button after successful save */}
-        <button
-          onClick={onHide}
-          className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 ml-2"
-        >
-          Close
-        </button>
       </Modal.Footer>
     </Modal>
   );

@@ -27,22 +27,29 @@ const InventoryModals: React.FC = () => {
     // Form and edit mode states
     formData,
     isEditMode,
+    isCloned,
     expandedSections,
 
     // Form handlers
     handleFormChange,
     toggleSection,
     handleSaveItem,
+    handleCloneCurrentForm,
   } = useInventoryModals();
 
   // Validate form data before saving
   const handleSave = () => {
-    const errors = validateFormData(formData);
+    console.log('🔍 Save button clicked!');
+    console.log('📝 Current form data:', formData);
+    console.log('🔍 Is edit mode:', isEditMode);
+    const errors = validateFormData(formData, isEditMode);
+    console.log('🔍 Validation errors:', errors);
     if (Object.keys(errors).length === 0) {
+      console.log('✅ Validation passed, calling handleSaveItem...');
       handleSaveItem();
     } else {
       // Handle validation errors - could show toast or error messages
-      console.error('Validation errors:', errors);
+      console.error('❌ Validation errors:', errors);
       // For now, just prevent save
       return;
     }
@@ -62,10 +69,12 @@ const InventoryModals: React.FC = () => {
         onHide={closeAddModal}
         formData={formData}
         isEditMode={isEditMode}
+        isCloned={isCloned}
         expandedSections={expandedSections}
         toggleSection={handleToggleSection}
         handleFormChange={handleFormChange}
         onSave={handleSave}
+        onClone={handleCloneCurrentForm}
         sections={ADD_EDIT_ITEM_SECTIONS}
       />
 

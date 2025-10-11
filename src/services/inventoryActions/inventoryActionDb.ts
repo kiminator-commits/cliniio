@@ -83,7 +83,7 @@ export async function getItemsByStatus(
 ): Promise<InventoryItem[]> {
   try {
     const response = await InventoryCrudOperations.getItems({
-      status: _status as 'active' | 'inactive' | 'maintenance' | 'retired',
+      status: _status as 'active' | 'inactive' | 'p2' | 'n/a',
     });
     return response.data || [];
   } catch (error) {

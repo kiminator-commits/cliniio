@@ -20,9 +20,9 @@ import { Message } from '../../../types/sterilizationAISettingsTypes';
 import { isValidApiKeyValue } from '../utils/sterilizationAISettingsUtils';
 import MasterAIToggle from './sterilization/MasterAIToggle';
 import CycleConfiguration from './sterilization/CycleConfiguration';
-import AIConfigurationPerformance from './components/AIConfigurationPerformance';
-import ApiKeysServices from './components/ApiKeysServices';
-import PrivacyDataSecurity from './components/PrivacyDataSecurity';
+import AIConfigurationPerformance from './SterilizationAISettings/components/AIConfigurationPerformance';
+import ApiKeysServices from './SterilizationAISettings/components/ApiKeysServices';
+import PrivacyDataSecurity from './SterilizationAISettings/components/PrivacyDataSecurity';
 
 const SterilizationAISettings: React.FC = () => {
   const { currentUser: user } = useUser();

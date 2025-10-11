@@ -5,6 +5,7 @@ export interface InventoryFormState {
   formData: InventoryFormData;
   isEditMode: boolean;
   isDirty: boolean;
+  isCloned: boolean;
 
   setFormData: (data: InventoryFormData) => void;
   mergeFormData: (data: Partial<InventoryFormData>) => void;
@@ -14,6 +15,7 @@ export interface InventoryFormState {
   ) => void;
   resetForm: () => void;
   setEditMode: (isEdit: boolean) => void;
+  setIsCloned: (isCloned: boolean) => void;
   markAsDirty: () => void;
   markAsClean: () => void;
 
@@ -51,6 +53,7 @@ export const createInventoryFormSlice: StateCreator<
   formData: getDefaultFormData(),
   isEditMode: false,
   isDirty: false,
+  isCloned: false,
 
   setFormData: (data: InventoryFormData) =>
     set({
@@ -77,9 +80,11 @@ export const createInventoryFormSlice: StateCreator<
       formData: getDefaultFormData(),
       isEditMode: false,
       isDirty: false,
+      isCloned: false,
     }),
 
   setEditMode: (isEdit) => set({ isEditMode: isEdit }),
+  setIsCloned: (isCloned) => set({ isCloned: isCloned }),
   markAsDirty: () => set({ isDirty: true }),
   markAsClean: () => set({ isDirty: false }),
 

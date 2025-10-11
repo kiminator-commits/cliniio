@@ -233,7 +233,18 @@ export const ADD_EDIT_ITEM_SECTIONS: SectionConfig[] = [
         options: [
           { value: 'active', label: 'Active' },
           { value: 'inactive', label: 'Inactive' },
-          { value: 'maintenance', label: 'Maintenance' },
+          { value: 'p2', label: 'P2' },
+          { value: 'n/a', label: 'N/A' },
+        ],
+      },
+      {
+        name: 'isP2Status',
+        label: 'P2 Tool',
+        type: 'select',
+        required: false,
+        options: [
+          { value: 'false', label: 'No' },
+          { value: 'true', label: 'Yes' },
         ],
       },
       {
@@ -292,12 +303,18 @@ export const getFieldConfig = (
  * Helper function to validate form data against field configurations
  */
 export const validateFormData = (
-  formData: InventoryFormData
+  formData: InventoryFormData,
+  isEditMode: boolean = false
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
 
   for (const section of ADD_EDIT_ITEM_SECTIONS) {
     for (const field of section.fields) {
+      // For new items, make id field optional
+      if (field.name === 'id' && !isEditMode) {
+        continue; // Skip validation for id field in add mode
+      }
+
       if (field.required && !formData[field.name as keyof InventoryFormData]) {
         errors[field.name] = `${field.label} is required`;
       }

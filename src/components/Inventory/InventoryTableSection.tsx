@@ -8,6 +8,7 @@ import TableErrorBoundary from './tables/TableErrorBoundary';
 import { useInventoryStore } from '@/store/useInventoryStore';
 import { useInventoryDataAccess } from '@/hooks/inventory/useInventoryDataAccess';
 import { InventoryItem } from '@/types/inventoryTypes';
+import { InventoryFilterManager } from '@/services/inventory/utils/inventoryFilters';
 // import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 
 // ⚠️ TRACKING FILTER LOGIC - DO NOT CHANGE:
@@ -19,11 +20,12 @@ import { InventoryItem } from '@/types/inventoryTypes';
 interface Props {
   onEdit: (item: InventoryItem) => void;
   onDelete: (item: InventoryItem) => void;
+  onClone?: (item: InventoryItem) => void;
   items: InventoryItem[];
 }
 
 const InventoryTableSection: React.FC<Props> = React.memo(
-  ({ onEdit, onDelete, items: _items }) => {
+  ({ onEdit, onDelete, onClone, items: _items }) => {
     // Get UI state and modal state from store
     const {
       activeTab,
@@ -120,37 +122,65 @@ const InventoryTableSection: React.FC<Props> = React.memo(
       ]
     );
 
-    // Memoize table props
-    const tableProps = React.useMemo(
-      () => ({
+    // Memoize table props with search filtering applied
+    const tableProps = React.useMemo(() => {
+      // Create filters object for InventoryFilterManager
+      const filters = {
+        search: searchQuery,
+        category: category,
+        location: location,
+      };
+
+      // Apply search and other filters to all data arrays
+      const filteredInventoryData = InventoryFilterManager.applyFilters(
+        inventoryData,
+        filters
+      );
+      const filteredSuppliesData = InventoryFilterManager.applyFilters(
+        suppliesData,
+        filters
+      );
+      const filteredEquipmentData = InventoryFilterManager.applyFilters(
+        equipmentData,
+        filters
+      );
+      const filteredOfficeHardwareData = InventoryFilterManager.applyFilters(
+        officeHardwareData,
+        filters
+      );
+
+      return {
         activeTab,
-        filteredData: inventoryData,
-        filteredSuppliesData: suppliesData,
-        filteredEquipmentData: equipmentData,
-        filteredOfficeHardwareData: officeHardwareData,
+        filteredData: filteredInventoryData,
+        filteredSuppliesData: filteredSuppliesData,
+        filteredEquipmentData: filteredEquipmentData,
+        filteredOfficeHardwareData: filteredOfficeHardwareData,
         handleEditClick: onEdit,
         handleDeleteItem: onDelete,
+        handleCloneItem: onClone,
         handleToggleFavorite: toggleFavorite,
         showTrackedOnly,
         showFavoritesOnly,
         itemsPerPage,
         favorites,
-      }),
-      [
-        activeTab,
-        inventoryData,
-        suppliesData,
-        equipmentData,
-        officeHardwareData,
-        onEdit,
-        onDelete,
-        toggleFavorite,
-        showTrackedOnly,
-        showFavoritesOnly,
-        itemsPerPage,
-        favorites,
-      ]
-    );
+      };
+    }, [
+      activeTab,
+      inventoryData,
+      suppliesData,
+      equipmentData,
+      officeHardwareData,
+      searchQuery,
+      category,
+      location,
+      onEdit,
+      onDelete,
+      toggleFavorite,
+      showTrackedOnly,
+      showFavoritesOnly,
+      itemsPerPage,
+      favorites,
+    ]);
 
     // Get the table title based on active tab
     const getTableTitle = () => {

@@ -291,7 +291,8 @@ export class ErrorHandlingService {
       maxRetries,
       baseDelay,
       backoffStrategy: 'linear',
-      retryCondition: (error) => this.isRetryableError(error as AppError),
+      retryCondition: (error) =>
+        this.isRetryableError(error as unknown as AppError),
     });
 
     if (!result.success) {

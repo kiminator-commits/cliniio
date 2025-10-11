@@ -11,10 +11,7 @@ declare global {
     [key: string]: unknown;
   }
 
-  // Extend Array to handle unknown types
-  interface Array<_T> {
-    [key: string]: unknown;
-  }
+  // Note: Removed Array interface override as it was breaking built-in Array methods
 }
 
 // ============================================================================

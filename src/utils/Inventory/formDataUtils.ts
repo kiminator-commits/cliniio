@@ -1,5 +1,6 @@
 import { getDefaultFormData } from '@/utils/inventoryHelpers';
 import { FormData, InventoryItem } from '@/types/inventoryTypes';
+import { InventoryFormData } from '@/types/inventory';
 
 export interface StoreFormData {
   item?: string;
@@ -56,7 +57,7 @@ export const resolveFormDataId = (storeFormData: StoreFormData): string => {
  */
 export const transformFormDataForModal = (
   storeFormData: Partial<InventoryItem> | FormData
-): TransformedFormData => {
+): InventoryFormData => {
   const defaultData = getDefaultFormData();
 
   // Handle both FormData and Partial<InventoryItem> types
@@ -95,47 +96,47 @@ export const transformFormDataForModal = (
     category: String(category || defaultData.category || ''),
     id: String(id || defaultData.id || ''),
     location: String(location || defaultData.location || ''),
-    purchaseDate: formatDateForInput(
-      String(
-        (storeFormData as Record<string, unknown>)?.createdAt ||
-          defaultData.createdAt
-      )
+    status: String(status || defaultData.status || ''),
+    quantity: Number(
+      (storeFormData as Record<string, unknown>)?.quantity ||
+        defaultData.quantity ||
+        1
     ),
-    vendor: String(
+    unitCost: Number(unitCost || defaultData.unitCost || 0),
+    minimumQuantity: Number(defaultData.minimumQuantity || 0),
+    maximumQuantity: Number(defaultData.maximumQuantity || 999),
+    supplier: String(
       (storeFormData as Record<string, unknown>)?.supplier ||
         defaultData.supplier ||
         ''
     ),
-    cost: String(unitCost || defaultData.unitCost || 0),
-    warranty: String(
-      (storeFormData as Record<string, unknown>)?.warranty || ''
+    barcode: String(
+      (storeFormData as Record<string, unknown>)?.barcode ||
+        defaultData.barcode ||
+        ''
     ),
-    maintenanceSchedule: String(
-      (storeFormData as Record<string, unknown>)?.maintenanceSchedule || ''
+    sku: String(
+      (storeFormData as Record<string, unknown>)?.sku || defaultData.sku || ''
     ),
-    lastServiced: formatDateForInput(
-      String(
-        (storeFormData as Record<string, unknown>)?.lastServiced ||
-          defaultData.updated_at
-      )
-    ),
-    nextDue: String((storeFormData as Record<string, unknown>)?.nextDue || ''),
-    serviceProvider: String(
-      (storeFormData as Record<string, unknown>)?.serviceProvider || ''
-    ),
-    assignedTo: String(
-      (storeFormData as Record<string, unknown>)?.assignedTo || ''
-    ),
-    status: String(status || defaultData.status || ''),
-    quantity: String(
-      (storeFormData as Record<string, unknown>)?.quantity ||
-        defaultData.quantity ||
-        1
+    description: String(
+      (storeFormData as Record<string, unknown>)?.description ||
+        defaultData.description ||
+        ''
     ),
     notes: String(
       (storeFormData as Record<string, unknown>)?.notes ||
         defaultData.notes ||
         ''
+    ),
+    updated_at: String(
+      (storeFormData as Record<string, unknown>)?.updated_at ||
+        defaultData.updated_at ||
+        new Date().toISOString()
+    ),
+    createdAt: String(
+      (storeFormData as Record<string, unknown>)?.createdAt ||
+        defaultData.createdAt ||
+        new Date().toISOString()
     ),
   };
 };

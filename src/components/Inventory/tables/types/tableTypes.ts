@@ -36,6 +36,7 @@ export interface InventoryTablesProps {
   handleEditClick: (item: InventoryItem) => void;
   handleDeleteItem: (item: InventoryItem) => void;
   handleToggleFavorite?: (itemId: string) => void;
+  onTrackToggle?: (item: InventoryItem) => void;
   showTrackedOnly?: boolean;
   showFavoritesOnly?: boolean;
   itemsPerPage?: number;

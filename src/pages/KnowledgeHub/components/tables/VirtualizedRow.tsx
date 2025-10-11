@@ -2,8 +2,8 @@ import React from 'react';
 import Icon from '@mdi/react';
 import { mdiDelete } from '@mdi/js';
 import { ContentItem, ContentStatus } from '../../types';
-import { PermissionGuard } from '../../utils/permissions';
-import { supabase } from '@/lib/supabase';
+import { PermissionGuard } from '../../utils/permissionComponents';
+import { supabase } from '@/lib/supabaseClient';
 
 interface VirtualizedRowProps {
   index: number;

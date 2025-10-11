@@ -1,6 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { InventoryItem } from '@/types/inventoryTypes';
 import { useInventoryStore } from '@/store/useInventoryStore';
+import { useTrackedTools } from '@/hooks/inventory/useTrackedTools';
 import tableStyles from './TableStyles.module.css';
 import actionStyles from './TableActions.module.css';
 import Icon from '@mdi/react';
@@ -29,6 +30,7 @@ const TableActions = forwardRef<TableActionsRef, TableActionsProps>(
       item,
       activeTab,
       onEdit,
+      onDelete,
       onToggleFavorite,
       onTrackToggle,
       isTracked = false,
@@ -36,7 +38,22 @@ const TableActions = forwardRef<TableActionsRef, TableActionsProps>(
     ref
   ) => {
     const { favorites, toggleFavorite, openDeleteModal } = useInventoryStore();
+    const { getToolTrackers } = useTrackedTools();
     const isFavorite = favorites.includes(item.id);
+
+    // Get queue information for this tool
+    const queueInfo = getToolTrackers(item.id);
+    const queueCount = queueInfo.length;
+    const isInQueue = queueInfo.some(
+      (tracker) => tracker.doctorName === 'Current Doctor'
+    ); // You'd get actual doctor name
+
+    // Find your position in the queue (this would need actual user identification)
+    const yourPosition = isInQueue
+      ? queueInfo.findIndex(
+          (tracker) => tracker.doctorName === 'Current Doctor'
+        ) + 1
+      : 0;
 
     // Handle edit action
     const handleEditItem = (item: InventoryItem) => {
@@ -97,7 +114,9 @@ const TableActions = forwardRef<TableActionsRef, TableActionsProps>(
       openDeleteModal(item);
     };
 
-    const trackingTooltip = isTracked ? 'Stop tracking' : 'Start tracking';
+    const trackingTooltip = isTracked
+      ? `Stop tracking (You are ${yourPosition}/${queueCount} in queue)`
+      : `Start tracking (${queueCount} in queue)`;
 
     return (
       <td className={tableStyles.tableCell}>
@@ -157,12 +176,17 @@ const TableActions = forwardRef<TableActionsRef, TableActionsProps>(
                 onKeyDown={(e) => handleActionKeyDown(e, 'track')}
                 className={`${tableStyles.actionButton} ${tableStyles.trackButton} ${
                   isTracked ? tableStyles.tracked : ''
-                }`}
+                } relative`}
                 aria-label={trackingTooltip}
                 aria-pressed={isTracked}
                 tabIndex={0}
               >
                 <Icon path={mdiEye} size={1.2} aria-hidden="true" />
+                {queueCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {queueCount}
+                  </span>
+                )}
               </button>
               <div className={actionStyles.tooltipContent}>
                 {trackingTooltip}

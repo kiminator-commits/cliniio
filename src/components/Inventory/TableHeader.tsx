@@ -12,8 +12,11 @@ const TableHeader: React.FC<TableHeaderProps> = React.memo(
       <thead className={styles.tableHeader}>
         <tr>
           {columns.map((col) => {
-            // Hide category column for tools tab
-            if (activeTab === 'tools' && col === 'category') {
+            // Hide category and quantity columns for tools tab
+            if (
+              activeTab === 'tools' &&
+              (col === 'category' || col === 'quantity')
+            ) {
               return null;
             }
             return (

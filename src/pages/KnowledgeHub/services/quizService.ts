@@ -272,7 +272,7 @@ export class QuizService {
         started_at: attemptRow.started_at,
         completed_at: attemptRow.completed_at,
         time_spent_seconds: 0,
-        answers: attemptRow.answers as QuizAnswer[],
+        answers: attemptRow.answers as unknown as QuizAnswer[],
       } as QuizAttempt;
     } catch (error) {
       console.error('Error in startQuizAttempt:', error);
