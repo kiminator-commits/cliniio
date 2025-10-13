@@ -4,7 +4,8 @@ import { SterilizationAISettings } from './types';
 import { getEnvVar } from '../../../lib/getEnv';
 import { logSettingsAudit } from '@/services/audit/AuditLogger';
 
-export type SterilizationAISettingsDB = Database['public']['Tables']['sterilization_ai_settings']['Row'];
+export type SterilizationAISettingsDB =
+  Database['public']['Tables']['sterilization_ai_settings']['Row'];
 
 export class SettingsManager {
   private facilityId: string;
@@ -64,7 +65,7 @@ export class SettingsManager {
           userId: 'system',
           module: 'sterilization',
           action: 'UPDATE',
-          details: settingsToSave
+          details: settingsToSave,
         });
       }
 
