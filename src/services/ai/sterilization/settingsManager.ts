@@ -1,6 +1,10 @@
 import { supabase } from '../../../lib/supabaseClient';
+import { Database } from '../../../types/supabase/generated';
 import { SterilizationAISettings } from './types';
 import { getEnvVar } from '../../../lib/getEnv';
+import { logSettingsAudit } from '@/services/audit/AuditLogger';
+
+export type SterilizationAISettingsDB = Database['public']['Tables']['sterilization_ai_settings']['Row'];
 
 export class SettingsManager {
   private facilityId: string;
@@ -14,9 +18,10 @@ export class SettingsManager {
   async loadSettings(): Promise<SterilizationAISettings | null> {
     try {
       const { data, error } = await supabase
-        .from('sterilization_ai_settings')
+        .from('ai_settings')
         .select('*')
         .eq('facility_id', this.facilityId)
+        .eq('module', 'sterilization')
         .single();
 
       if (error) {
@@ -24,8 +29,8 @@ export class SettingsManager {
         return null;
       }
 
-      this.settings = data as unknown as SterilizationAISettings;
-      return data as unknown as SterilizationAISettings;
+      this.settings = data.settings as SterilizationAISettings;
+      return data.settings as SterilizationAISettings;
     } catch (error) {
       console.error('Error loading AI settings:', error);
       return null;
@@ -38,18 +43,29 @@ export class SettingsManager {
   ): Promise<boolean> {
     try {
       const settingsToSave = {
-        ...settings,
         facility_id: this.facilityId,
+        module: 'sterilization',
+        settings: settings,
         updated_at: new Date().toISOString(),
       };
 
       const { error } = await supabase
-        .from('sterilization_ai_settings')
-        .upsert(settingsToSave, { onConflict: 'facility_id' });
+        .from('ai_settings')
+        .upsert(settingsToSave, { onConflict: 'facility_id,module' });
 
       if (error) {
         console.error('Error saving AI settings:', error);
         return false;
+      }
+
+      if (!error && settingsToSave) {
+        await logSettingsAudit({
+          facilityId: this.facilityId,
+          userId: 'system',
+          module: 'sterilization',
+          action: 'UPDATE',
+          details: settingsToSave
+        });
       }
 
       await this.loadSettings(); // Reload settings
