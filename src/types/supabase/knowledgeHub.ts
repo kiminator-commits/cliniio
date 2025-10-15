@@ -58,14 +58,14 @@ export type {
 
 // Knowledge Hub table definitions
 export interface KnowledgeHubTables {
-  knowledge_hub_courses: any;
-  knowledge_hub_user_progress: any;
-  knowledge_hub_assignments: any;
-  knowledge_hub_achievements: any;
-  knowledge_hub_user_achievements: any;
-  knowledge_hub_learning_paths: any;
-  knowledge_hub_certificates: any;
-  knowledge_hub_content: any;
+  knowledge_hub_courses: KnowledgeHubCourseTable;
+  knowledge_hub_user_progress: KnowledgeHubUserProgressTable;
+  knowledge_hub_assignments: KnowledgeHubAssignmentsTable;
+  knowledge_hub_achievements: KnowledgeHubAchievementsTable;
+  knowledge_hub_user_achievements: KnowledgeHubUserAchievementsTable;
+  knowledge_hub_learning_paths: KnowledgeHubLearningPathsTable;
+  knowledge_hub_certificates: KnowledgeHubCertificatesTable;
+  knowledge_hub_content: KnowledgeHubContentTable;
 }
 
 // Knowledge Hub views

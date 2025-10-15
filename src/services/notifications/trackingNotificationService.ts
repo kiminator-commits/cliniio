@@ -18,6 +18,7 @@ export interface TrackingNotification {
 
 class TrackingNotificationService {
   private notifications: TrackingNotification[] = [];
+  private notificationHistory: TrackingNotification[] = [];
   private listeners: ((notifications: TrackingNotification[]) => void)[] = [];
 
   // Add a notification
@@ -41,6 +42,20 @@ class TrackingNotificationService {
 
   // Remove a notification
   removeNotification(id: string) {
+    const notification = this.notifications.find((n) => n.id === id);
+    if (notification) {
+      // Move to history before removing
+      this.notificationHistory.push({
+        ...notification,
+        timestamp: new Date(), // Update timestamp when moved to history
+      });
+
+      // Keep only last 100 notifications in history
+      if (this.notificationHistory.length > 100) {
+        this.notificationHistory = this.notificationHistory.slice(-100);
+      }
+    }
+
     this.notifications = this.notifications.filter((n) => n.id !== id);
     this.notifyListeners();
   }
@@ -72,25 +87,37 @@ class TrackingNotificationService {
   notifyToolAvailable(
     toolId: string,
     toolName: string,
-    previousPosition?: number,
-    totalQueue?: number
+    position?: number,
+    totalQueue?: number,
+    priority?: 'high' | 'medium' | 'low'
   ) {
-    const message =
-      previousPosition && totalQueue
-        ? `${toolName} is now available! You were #${previousPosition} of ${totalQueue} in queue.`
-        : `${toolName} is now available!`;
+    let title = 'Tool Tracking Started';
+    let message = `You're now tracking ${toolName}`;
+
+    if (position && totalQueue) {
+      message = `You're tracking ${toolName}. Position: ${position} of ${totalQueue}`;
+
+      // Different titles based on priority
+      if (priority === 'high') {
+        title = '🔥 High Priority Tracking Started';
+        message = `HIGH PRIORITY: ${message}`;
+      } else if (priority === 'medium') {
+        title = '⚡ Medium Priority Tracking Started';
+      } else if (priority === 'low') {
+        title = '📋 Low Priority Tracking Started';
+      }
+    }
 
     this.addNotification({
       type: 'tool_available',
-      title: 'Tool Available!',
+      title,
       message,
       toolId,
       toolName,
       action: {
-        label: 'View Tool',
+        label: 'View Queue',
         onClick: () => {
-          // Navigate to tool or focus on it
-          console.log(`Navigate to tool ${toolId}`);
+          console.log(`View queue for tool ${toolId}`);
         },
       },
     });
@@ -161,6 +188,28 @@ class TrackingNotificationService {
   // Test method for development
   testNotification() {
     this.notifyToolAvailable('test-tool-123', 'Test Surgical Scissors', 2, 5);
+  }
+
+  // Get notification history
+  getNotificationHistory(): TrackingNotification[] {
+    return [...this.notificationHistory].reverse(); // Most recent first
+  }
+
+  // Clear notification history
+  clearNotificationHistory() {
+    this.notificationHistory = [];
+  }
+
+  // Get notifications by type
+  getNotificationsByType(
+    type: TrackingNotification['type']
+  ): TrackingNotification[] {
+    return this.notificationHistory.filter((n) => n.type === type);
+  }
+
+  // Get notifications for a specific tool
+  getNotificationsForTool(toolId: string): TrackingNotification[] {
+    return this.notificationHistory.filter((n) => n.toolId === toolId);
   }
 }
 

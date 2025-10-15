@@ -13,11 +13,15 @@ import { CardSkeleton, SearchSkeleton } from '../../components/ui/Skeleton';
 import { useLibraryContent } from './hooks/useLibraryContent';
 import { ContentItem } from './libraryTypes';
 import { supabase } from '../../lib/supabaseClient';
+import { useKnowledgeHubIntegration } from './hooks/useKnowledgeHubIntegration';
+import { useUser } from '@/contexts/UserContext';
 
 import { useLibraryRootState } from './hooks/useLibraryRootState';
 
 const LibraryRoot = () => {
   const navigate = useNavigate();
+  const { addToKnowledgeHub } = useKnowledgeHubIntegration();
+  const { currentUser } = useUser();
   const {
     searchQuery,
     setSearchQuery,
@@ -208,6 +212,10 @@ const LibraryRoot = () => {
 
       console.log('Successfully added to knowledge hub:', item.title);
 
+      // Add to Knowledge Hub integration
+      await addToKnowledgeHub(item, currentUser?.id);
+      console.log('✅ Added to Knowledge Hub:', item.title);
+
       // Add visual feedback
       const card = document.querySelector(`[data-item-id="${item.id}"]`);
       if (card) {
@@ -231,7 +239,7 @@ const LibraryRoot = () => {
     } catch (error) {
       console.error('Error adding to knowledge hub:', error);
     }
-  }, []);
+  }, [addToKnowledgeHub, currentUser?.id]);
 
   return (
     <LibraryErrorBoundary>

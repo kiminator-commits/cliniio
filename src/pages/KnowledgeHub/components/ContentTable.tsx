@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSimplifiedKnowledgeHub } from '../providers/SimplifiedKnowledgeHubProvider';
 import { useContentFiltering } from '../hooks/useContentFiltering';
 import { useUIRenderState } from '../hooks/useUIRenderState';
@@ -16,6 +17,7 @@ import { UnifiedSearchFilterBar } from './UnifiedSearchFilterBar';
 export const ContentTable: React.FC = React.memo(() => {
   // Error state for component-level errors
   const [componentError, setComponentError] = useState<Error | null>(null);
+  const navigate = useNavigate();
 
   // Global error handler
   const handleError = useCallback((error: Error) => {
@@ -90,6 +92,13 @@ export const ContentTable: React.FC = React.memo(() => {
     [setSelectedCategory]
   );
 
+  const handleStartContent = useCallback(
+    (contentId: string) => {
+      navigate(`/course/${contentId}`);
+    },
+    [navigate]
+  );
+
   // Performance optimization: Removed excessive logging
 
   // UI state management
@@ -115,27 +124,43 @@ export const ContentTable: React.FC = React.memo(() => {
 
     // Apply search filter
     if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          item.title.toLowerCase().includes(query) ||
-          (item.data?.description &&
-            item.data.description.toLowerCase().includes(query)) ||
-          (item.department && item.department.toLowerCase().includes(query))
-      );
+      const query = filters.searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((item) => {
+        // Create searchable text from multiple fields
+        const searchableText = [
+          item.title,
+          item.data?.description || '',
+          item.department || '',
+          item.data?.tags?.join(' ') || '',
+          item.domain || '',
+          item.contentType || '',
+        ]
+          .join(' ')
+          .toLowerCase();
+
+        // Check for exact match first
+        if (searchableText.includes(query)) {
+          return true;
+        }
+
+        // Check for word boundary matches (partial word matches)
+        const words = query.split(/\s+/);
+        return words.some((word) => {
+          if (word.length < 2) return false; // Skip very short words
+
+          // Check if any word in the searchable text starts with this word
+          const searchableWords = searchableText.split(/\s+/);
+          return searchableWords.some((searchableWord) =>
+            searchableWord.startsWith(word)
+          );
+        });
+      });
     }
 
     // Apply status filter
     if (filters.statusFilter !== 'all') {
       filtered = filtered.filter(
         (item) => item.status === filters.statusFilter
-      );
-    }
-
-    // Apply department filter
-    if (filters.departmentFilter !== 'all') {
-      filtered = filtered.filter(
-        (item) => item.department === filters.departmentFilter
       );
     }
 
@@ -249,6 +274,7 @@ export const ContentTable: React.FC = React.memo(() => {
           category={selectedCategory!}
           items={categoryItems}
           onStatusUpdate={updateContentStatus}
+          onStartContent={handleStartContent}
           CoursesTable={CoursesTable}
           LearningPathwaysTable={LearningPathwaysTable}
           ProceduresTable={ProceduresTable}
@@ -291,7 +317,6 @@ export const ContentTable: React.FC = React.memo(() => {
         selectedCategory={selectedCategory || 'all'}
         onCategoryChange={handleCategoryChange}
         statusOptions={statusOptions}
-        departmentOptions={departmentOptions}
         difficultyOptions={difficultyOptions}
         durationOptions={durationOptions}
       />

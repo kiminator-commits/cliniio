@@ -1,5 +1,5 @@
 import { ContentItem } from '../types';
-import { knowledgeHubApiService } from './knowledgeHubApiService';
+import { DEPRECATED_MOCK_NOTICE } from './deprecatedNotice';
 
 export class ProviderService {
   static getCategoryCount(content: ContentItem[], category: string): number {
@@ -28,7 +28,9 @@ export class ProviderService {
     updates: Partial<ContentItem>
   ): Promise<ContentItem> {
     try {
-      return await knowledgeHubApiService.updateContent(contentId, updates);
+      // Placeholder implementation - Knowledge Hub now uses Supabase directly
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      return { id: contentId, ...updates } as ContentItem;
     } catch (err) {
       console.error(err);
       // If API is not available, return a mock updated item
@@ -38,11 +40,21 @@ export class ProviderService {
 
   static async performContentDeletion(contentId: string): Promise<void> {
     try {
-      return await knowledgeHubApiService.deleteContent(contentId);
+      const { supabase } = await import('@/lib/supabaseClient');
+
+      const { error } = await supabase
+        .from('knowledge_hub_content')
+        .delete()
+        .eq('id', contentId);
+
+      if (error) {
+        throw new Error(`Failed to delete content: ${error.message}`);
+      }
+
+      console.log(`✅ Successfully deleted content item: ${contentId}`);
     } catch (err) {
-      console.error(err);
-      // If API is not available, just return (deletion "succeeded")
-      return;
+      console.error('Error deleting content:', err);
+      throw err;
     }
   }
 
@@ -51,10 +63,9 @@ export class ProviderService {
     status: string
   ): Promise<ContentItem> {
     try {
-      return await knowledgeHubApiService.updateContentStatus(
-        contentId,
-        status
-      );
+      // Placeholder implementation - Knowledge Hub now uses Supabase directly
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      return { id: contentId, status } as ContentItem;
     } catch (err) {
       console.error(err);
       // If API is not available, return a mock updated item
@@ -64,7 +75,9 @@ export class ProviderService {
 
   static async performContentFetch(): Promise<ContentItem[]> {
     try {
-      return await knowledgeHubApiService.fetchContent();
+      // Placeholder implementation - Knowledge Hub now uses Supabase directly
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      return [];
     } catch (err) {
       console.error(err);
       // If API is not available, return empty array

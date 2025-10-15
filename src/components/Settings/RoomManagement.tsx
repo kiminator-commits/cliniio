@@ -11,6 +11,7 @@ import RoomList from './RoomList';
 import RoomForm from './RoomForm';
 import StatusTypeManagement from './StatusTypeManagement';
 import StatusBundleManager from './StatusBundleManager';
+import StatusCreationForm from './StatusCreationForm';
 
 const RoomManagement: React.FC = () => {
   const { rooms, addRoom, updateRoom, deleteRoom } = useRoomStore();
@@ -21,6 +22,8 @@ const RoomManagement: React.FC = () => {
     deleteStatusType,
     publishStatusType,
     unpublishStatusType,
+    getStatusCountInfo,
+    canAddCustomStatus,
   } = useStatusTypesStore();
 
   // Get statuses from the store
@@ -30,7 +33,7 @@ const RoomManagement: React.FC = () => {
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showStatusManagement, setShowStatusManagement] = useState(false);
-  const [, setIsAddingStatus] = useState(false);
+  const [isAddingStatus, setIsAddingStatus] = useState(false);
 
   // Handler functions for the refactored components
   const handleAddRoom = (roomData: Partial<Room>) => {
@@ -82,6 +85,17 @@ const RoomManagement: React.FC = () => {
       publishStatusType(id);
     } else {
       unpublishStatusType(id);
+    }
+  };
+
+  const handleCreateStatus = async (statusData: Omit<StatusType, 'id'>) => {
+    try {
+      await addStatusType(statusData);
+      setIsAddingStatus(false);
+    } catch (error) {
+      console.error('Error creating status:', error);
+      // Error handling is done in the form component
+      throw error;
     }
   };
 
@@ -159,12 +173,30 @@ const RoomManagement: React.FC = () => {
       {showStatusManagement && (
         <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-purple-800">
-              Custom Status Types
-            </h3>
+            <div>
+              <h3 className="text-lg font-medium text-purple-800">
+                Custom Status Types
+              </h3>
+              <div className="text-sm text-purple-600 mt-1">
+                {(() => {
+                  const countInfo = getStatusCountInfo();
+                  return `${countInfo.custom}/${countInfo.maxCustom} custom statuses used (${countInfo.total}/8 total)`;
+                })()}
+              </div>
+            </div>
             <button
               onClick={() => setIsAddingStatus(true)}
-              className="flex items-center px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
+              disabled={!canAddCustomStatus()}
+              className={`flex items-center px-3 py-1 rounded-md transition-colors text-sm ${
+                canAddCustomStatus()
+                  ? 'bg-purple-600 text-white hover:bg-purple-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              title={
+                canAddCustomStatus()
+                  ? 'Add a new custom status'
+                  : 'Maximum of 4 custom statuses reached'
+              }
             >
               <Icon path={mdiPlus} size={0.8} className="mr-1" />
               Add Custom Status
@@ -185,6 +217,7 @@ const RoomManagement: React.FC = () => {
             onEditStatus={handleEditStatus}
             onDeleteStatus={handleDeleteStatus}
             onTogglePublishStatus={handleTogglePublishStatus}
+            statusCountInfo={getStatusCountInfo()}
           />
         </div>
       )}
@@ -207,6 +240,14 @@ const RoomManagement: React.FC = () => {
           onToggleActive={handleToggleActive}
         />
       )}
+
+      {/* Status Creation Form */}
+      <StatusCreationForm
+        isOpen={isAddingStatus}
+        onClose={() => setIsAddingStatus(false)}
+        onSave={handleCreateStatus}
+        existingStatuses={[...coreStatuses, ...customStatuses]}
+      />
     </div>
   );
 };

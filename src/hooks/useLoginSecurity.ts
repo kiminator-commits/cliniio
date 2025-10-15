@@ -95,7 +95,10 @@ export const useLoginSecurity = (
   // Initialize security on mount
   useEffect(() => {
     if (config.csrfEnabled) {
-      setCsrfToken(generateCSRFToken());
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setCsrfToken(generateCSRFToken());
+      }, 0);
     }
   }, [config.csrfEnabled, generateCSRFToken]);
 

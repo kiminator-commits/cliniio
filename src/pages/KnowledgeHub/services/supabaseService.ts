@@ -42,58 +42,67 @@ const safeRecordArray = (value: unknown): Record<string, unknown>[] => {
 
 // Fetch all content items from Supabase
 export async function getAllContentItems(): Promise<ContentItem[]> {
-  // Get current user for facility scoping
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  try {
+    // Get current user for facility scoping
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  let facilityId: string | null = null;
-  if (!authError && user) {
-    facilityId = user.user_metadata?.facility_id || null;
-  }
+    let facilityId: string | null = null;
+    if (!authError && user) {
+      facilityId = user.user_metadata?.facility_id || null;
+    }
 
-  const query = supabase.from('knowledge_hub_courses').select('*');
+    const query = supabase.from('courses').select('*');
 
-  // Only add facility scoping if facility_id is available
-  if (facilityId) {
-    query.eq('facility_id', facilityId); // Enforces tenant isolation
-  }
+    // Only add facility scoping if facility_id is available
+    if (facilityId) {
+      query.eq('facility_id', facilityId); // Enforces tenant isolation
+    }
 
-  const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order('created_at', {
+      ascending: false,
+    });
 
-  if (error) {
-    console.error('Error fetching content items:', error);
+    if (error) {
+      console.error('Error fetching content items:', error);
+      return [];
+    }
+
+    return (data || []).map((item: Record<string, unknown>) => ({
+      id: safeString(item.id),
+      title: safeString(item.title),
+      category: safeString(item.content_type) as ContentCategory,
+      status: safeString(item.status) as ContentStatus,
+      description: safeString(
+        (item as { data?: { description?: string } }).data?.description
+      ),
+      tags: safeStringArray(
+        (item as { data?: { tags?: string[] } }).data?.tags
+      ),
+      domain: safeString(item.domain),
+      contentType: safeString(item.content_type),
+      type: safeString(item.type),
+      createdAt: safeString(item.created_at),
+      lastUpdated: safeString(item.updated_at),
+      publishedAt: safeString(item.published_at) || undefined,
+      archivedAt: safeString(item.archived_at) || undefined,
+      estimatedDuration: safeNumber(item.estimated_duration) || undefined,
+      difficultyLevel: safeString(item.difficulty_level),
+      department: safeString(item.department) || undefined,
+      authorId: safeString(item.author_id) || undefined,
+      assignedBy: safeString(item.assigned_by) || undefined,
+      isRepeat: safeBoolean(item.is_repeat),
+      isActive: safeBoolean(item.is_active),
+      content: (item.content as Record<string, unknown>) || {},
+      media: safeRecordArray(item.media),
+      dueDate:
+        safeString(item.due_date) || new Date().toISOString().split('T')[0],
+      progress: safeNumber(item.progress),
+    }));
+  } catch (error) {
+    console.error('Error in getAllContentItems:', error);
     return [];
   }
-
-  return (data || []).map((item: Record<string, unknown>) => ({
-    id: safeString(item.id),
-    title: safeString(item.title),
-    category: safeString(item.category) as ContentCategory,
-    status: safeString(item.status) as ContentStatus,
-    description: safeString(
-      (item as { data?: { description?: string } }).data?.description
-    ),
-    tags: safeStringArray((item as { data?: { tags?: string[] } }).data?.tags),
-    domain: safeString(item.domain),
-    contentType: safeString(item.content_type),
-    type: safeString(item.type),
-    createdAt: safeString(item.created_at),
-    lastUpdated: safeString(item.updated_at),
-    publishedAt: safeString(item.published_at) || undefined,
-    archivedAt: safeString(item.archived_at) || undefined,
-    estimatedDuration: safeNumber(item.estimated_duration) || undefined,
-    difficultyLevel: safeString(item.difficulty_level),
-    department: safeString(item.department) || undefined,
-    authorId: safeString(item.author_id) || undefined,
-    assignedBy: safeString(item.assigned_by) || undefined,
-    isRepeat: safeBoolean(item.is_repeat),
-    isActive: safeBoolean(item.is_active),
-    content: (item.content as Record<string, unknown>) || {},
-    media: safeRecordArray(item.media),
-    dueDate:
-      safeString(item.due_date) || new Date().toISOString().split('T')[0],
-    progress: safeNumber(item.progress),
-  }));
 }

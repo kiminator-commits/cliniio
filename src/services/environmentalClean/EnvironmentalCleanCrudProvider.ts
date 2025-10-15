@@ -3,8 +3,8 @@ import { auditLogger } from '@/utils/auditLogger';
 import { insertSterilizationLog } from '@/services/auditLogService';
 import { usageTrackingService } from '@/services/usageTrackingService';
 import { createUserFriendlyError } from '../../pages/EnvironmentalClean/services/errors/EnvironmentalCleanServiceError';
-import { EnvironmentalCleanService } from '../../pages/EnvironmentalClean/services/EnvironmentalCleanService';
 import { EnvironmentalCleanBatchProvider } from './EnvironmentalCleanBatchProvider';
+import { supabase } from '@/lib/supabaseClient';
 
 /**
  * Provider for environmental cleaning CRUD operations with audit logging
@@ -15,7 +15,15 @@ export class EnvironmentalCleanCrudProvider {
    */
   static async fetchEnvironmentalCleans(): Promise<Room[]> {
     try {
-      const rooms = await EnvironmentalCleanService.fetchRooms();
+      // Direct database call instead of going through EnvironmentalCleanService
+      const { data: rooms, error } = await supabase
+        .from('rooms')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        throw createUserFriendlyError('Failed to fetch rooms', error);
+      }
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'fetch', { rooms });

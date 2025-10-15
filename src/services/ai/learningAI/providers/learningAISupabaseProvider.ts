@@ -1,18 +1,23 @@
-import { supabase } from '../../../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
+import { Database } from '@/types/supabase/generated';
 import type {
   LearningAISettings,
-  LearningAISettingsRow,
+  _LearningAISettingsRow,
   LearningProgressData,
   UserProfile,
   SupabaseError,
-} from '../../../../types/learningAITypes';
-import type { Json } from '../../../../types/database.types';
+} from '@/types/learningAITypes';
+import type { Json } from '@/types/database.types';
 import { SUPABASE_ERROR_CODES, QUERY_LIMITS } from '../learningAIConfig';
 import {
   getCurrentTimestamp,
-  transformSettingsData,
+  _transformSettingsData,
   transformUserProfileData,
 } from '../../../learningAI/learningAIUtils';
+import { logSettingsAudit } from '@/services/audit/AuditLogger';
+
+export type LearningAISettingsDB =
+  Database['public']['Tables']['learning_ai_settings']['Row'];
 
 /**
  * Load AI settings for the facility
@@ -22,9 +27,10 @@ export async function loadLearningAISettings(
 ): Promise<LearningAISettings | null> {
   try {
     const { data, error } = await supabase
-      .from('learning_ai_settings')
+      .from('ai_settings')
       .select('*')
       .eq('facility_id', facilityId)
+      .eq('module', 'learning')
       .single();
 
     if (error) {
@@ -33,18 +39,18 @@ export async function loadLearningAISettings(
         // No settings found, return null
         return null;
       }
-      throw error;
+      // Log the error but don't throw to prevent infinite loops
+      console.warn('Error loading learning AI settings:', error);
+      return null;
     }
 
     if (!data) {
       return null;
     }
 
-    const settingsData = data as unknown as LearningAISettingsRow;
-    return transformSettingsData(settingsData);
+    return data.settings as LearningAISettings;
   } catch (err) {
-    console.error(err);
-    console.error('Error loading learning AI settings');
+    console.warn('Error loading learning AI settings:', err);
     return null;
   }
 }
@@ -57,38 +63,30 @@ export async function saveLearningAISettings(
   settings: Partial<LearningAISettings>
 ): Promise<boolean> {
   try {
-    const upsertData: Partial<LearningAISettingsRow> = {
+    const upsertData = {
       facility_id: facilityId,
-      ai_enabled: settings.ai_enabled,
-      ai_version: settings.ai_version,
-      personalized_recommendations: settings.personalized_recommendations,
-      skill_gap_analysis: settings.skill_gap_analysis,
-      learning_path_optimization: settings.learning_path_optimization,
-      performance_prediction: settings.performance_prediction,
-      adaptive_difficulty: settings.adaptive_difficulty,
-      learning_analytics_enabled: settings.learning_analytics_enabled,
-      behavior_tracking: settings.behavior_tracking,
-      progress_prediction: settings.progress_prediction,
-      engagement_metrics: settings.engagement_metrics,
-      retention_analysis: settings.retention_analysis,
-      ai_confidence_threshold: settings.ai_confidence_threshold,
-      recommendation_limit: settings.recommendation_limit,
-      data_retention_days: settings.data_retention_days,
-      model_version: settings.model_version,
-      data_sharing_enabled: settings.data_sharing_enabled,
-      local_ai_processing_enabled: settings.local_ai_processing_enabled,
-      encrypted_data_transmission: settings.encrypted_data_transmission,
-      ai_model_training: settings.ai_model_training,
+      module: 'learning',
+      settings: settings,
       updated_at: getCurrentTimestamp(),
     };
 
     const { error } = await supabase
-      .from('learning_ai_settings')
-      .upsert(upsertData);
+      .from('ai_settings')
+      .upsert(upsertData, { onConflict: 'facility_id,module' });
 
     if (error) {
       console.error('Error saving learning AI settings:', error);
       return false;
+    }
+
+    if (!error && upsertData) {
+      await logSettingsAudit({
+        facilityId,
+        userId: 'system',
+        module: 'learning',
+        action: 'UPDATE',
+        details: upsertData,
+      });
     }
 
     return true;

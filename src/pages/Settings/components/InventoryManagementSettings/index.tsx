@@ -10,12 +10,14 @@ import {
   mdiCheckCircle,
   mdiChartBar,
   mdiTune,
+  mdiMapMarker,
 } from '@mdi/js';
 import GeneralTab from './GeneralTab';
 import StockTab from './StockTab';
 import CategoriesTab from './CategoriesTab';
 import ReportingTab from './ReportingTab';
 import AITab from './AITab';
+import LocationManagementPage from '../../LocationManagementPage';
 import { useInventorySettings } from './useInventorySettings';
 
 const InventoryManagementSettings: React.FC = () => {
@@ -43,6 +45,7 @@ const InventoryManagementSettings: React.FC = () => {
     { id: 'general', label: 'General Settings', icon: mdiCog },
     { id: 'stock', label: 'Stock Management', icon: mdiPackageVariant },
     { id: 'categories', label: 'Categories & Tags', icon: mdiTune },
+    { id: 'locations', label: 'Location Management', icon: mdiMapMarker },
     { id: 'reporting', label: 'Reporting & Analytics', icon: mdiChartBar },
     { id: 'ai', label: 'AI & Machine Learning', icon: mdiBrain },
   ];
@@ -75,6 +78,8 @@ const InventoryManagementSettings: React.FC = () => {
         return (
           <CategoriesTab settings={settings} onSettingsChange={setSettings} />
         );
+      case 'locations':
+        return <LocationManagementPage />;
       case 'reporting':
         return (
           <ReportingTab settings={settings} onSettingsChange={setSettings} />

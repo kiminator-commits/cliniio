@@ -54,8 +54,11 @@
     "test:e2e": "npx playwright install --with-deps && playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint --config .eslintrc.json src/ --ignore-pattern \"src/__mocks__/**\" --ignore-pattern \"**/*.test.*\" --ignore-pattern \"**/*.spec.*\"",
+    "lint:quick": "eslint --config .eslintrc.json src/lib/ src/components/ src/pages/ --max-warnings 0",
+    "lint:benchmark": "npx tsx scripts/lintBenchmark.ts",
     "prepare": "husky install",
+    "pre-commit": "lint-staged",
     "check:strict": "ts-node scripts/check-strict-mode.ts",
     "type-check": "echo 'TypeScript checking disabled temporarily'",
     "type-check:strict": "tsc --noEmit --project tsconfig.strict.json",
@@ -94,6 +97,7 @@
     "eslint": "^8.50.0",
     "eslint-config-next": "13.4.7",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^5.5.1",
     "eslint-plugin-react": "^7.37.5",
@@ -110,9 +114,12 @@
     "vite-bundle-analyzer": "^1.0.0",
     "vitest": "^3.2.4"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --fix"
+  },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint"
+      "pre-commit": "npx lint-staged"
     }
   }
 }

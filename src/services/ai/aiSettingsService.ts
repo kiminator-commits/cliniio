@@ -1,4 +1,5 @@
 // Context imports
+import { useMemo } from 'react';
 import { useFacility } from '../../contexts/FacilityContext';
 
 // Provider imports
@@ -79,5 +80,6 @@ export const useAISettings = () => {
     throw new Error('Facility ID not available');
   }
 
-  return new AISettingsService(facilityId);
+  // Memoize the service instance to prevent infinite loops
+  return useMemo(() => new AISettingsService(facilityId), [facilityId]);
 };

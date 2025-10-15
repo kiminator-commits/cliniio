@@ -1,4 +1,4 @@
-import { supabase } from '../../../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 // Define InventoryAISettings interface locally since the module doesn't exist
 export interface InventoryAISettings {

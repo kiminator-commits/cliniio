@@ -1,13 +1,13 @@
 // Knowledge Hub Progress and Assignment Types
-import { Json } from '../common';
+import { Json as _Json } from '../common';
 
-// Knowledge Hub progress and assignment types - using any for now since tables are not defined in generated types
-export type KnowledgeHubUserProgress = any;
-export type KnowledgeHubUserProgressInsert = any;
-export type KnowledgeHubUserProgressUpdate = any;
-export type KnowledgeHubAssignment = any;
-export type KnowledgeHubAssignmentInsert = any;
-export type KnowledgeHubAssignmentUpdate = any;
+// Knowledge Hub progress and assignment types - using proper types based on table definitions
+export type KnowledgeHubUserProgress = KnowledgeHubUserProgressTable['knowledge_hub_user_progress']['Row'];
+export type KnowledgeHubUserProgressInsert = KnowledgeHubUserProgressTable['knowledge_hub_user_progress']['Insert'];
+export type KnowledgeHubUserProgressUpdate = KnowledgeHubUserProgressTable['knowledge_hub_user_progress']['Update'];
+export type KnowledgeHubAssignment = KnowledgeHubAssignmentsTable['knowledge_hub_assignments']['Row'];
+export type KnowledgeHubAssignmentInsert = KnowledgeHubAssignmentsTable['knowledge_hub_assignments']['Insert'];
+export type KnowledgeHubAssignmentUpdate = KnowledgeHubAssignmentsTable['knowledge_hub_assignments']['Update'];
 
 // Knowledge Hub user progress table definition
 export interface KnowledgeHubUserProgressTable {

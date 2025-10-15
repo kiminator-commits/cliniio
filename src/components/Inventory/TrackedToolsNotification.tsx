@@ -32,7 +32,10 @@ export const TrackedToolsNotification: React.FC<
 
   // Update notifications when they change
   useEffect(() => {
-    setNotifications(pendingNotifications?.slice(0, maxNotifications) || []);
+    // Use setTimeout to avoid calling setState synchronously in effect
+    setTimeout(() => {
+      setNotifications(pendingNotifications?.slice(0, maxNotifications) || []);
+    }, 0);
   }, [pendingNotifications, maxNotifications]);
 
   // Clear expired notifications periodically

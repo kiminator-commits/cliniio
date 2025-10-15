@@ -22,7 +22,11 @@ export interface UseTrackedToolsReturn {
   };
 
   // Actions
-  trackTool: (toolId: string, priority?: 'high' | 'medium' | 'low') => void;
+  trackTool: (
+    toolId: string,
+    priority?: 'high' | 'medium' | 'low',
+    toolName?: string
+  ) => void;
   untrackTool: (toolId: string) => void;
   acknowledgeNotification: (notificationId: string) => void;
   clearExpiredNotifications: () => void;
@@ -86,16 +90,16 @@ export const useTrackedTools = (): UseTrackedToolsReturn => {
 
   // Track a tool with priority
   const trackTool = useCallback(
-    (toolId: string, priority: 'high' | 'medium' | 'low' = 'medium') => {
-      if (!currentUser) {
-        console.warn('No current user available for tracking');
-        return;
-      }
-
-      const doctorName = getCurrentDoctorName();
+    (
+      toolId: string,
+      priority: 'high' | 'medium' | 'low' = 'medium',
+      toolName?: string
+    ) => {
+      // Provide fallback for development/testing when no user is available
+      const doctorName = currentUser ? getCurrentDoctorName() : 'Test Doctor';
 
       // Add to tracked tools service
-      trackedToolsService.trackTool(toolId, doctorName, priority);
+      trackedToolsService.trackTool(toolId, doctorName, priority, toolName);
 
       // Update inventory store (for backward compatibility)
       toggleTrackedItem(toolId, doctorName);
@@ -116,7 +120,8 @@ export const useTrackedTools = (): UseTrackedToolsReturn => {
   // Untrack a tool
   const untrackTool = useCallback(
     (toolId: string) => {
-      const doctorName = getCurrentDoctorName();
+      // Provide fallback for development/testing when no user is available
+      const doctorName = currentUser ? getCurrentDoctorName() : 'Test Doctor';
 
       // Remove from tracked tools service
       trackedToolsService.untrackTool(toolId, doctorName);
@@ -129,6 +134,7 @@ export const useTrackedTools = (): UseTrackedToolsReturn => {
       updateTrackingStats();
     },
     [
+      currentUser,
       getCurrentDoctorName,
       toggleTrackedItem,
       updateTrackedTools,

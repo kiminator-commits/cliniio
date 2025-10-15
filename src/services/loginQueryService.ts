@@ -154,8 +154,11 @@ export const useRateLimit = () => {
       return;
     }
     if (lockedUntil && new Date() >= lockedUntil) {
-      setAttempts(0);
-      setLockedUntil(null);
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setAttempts(0);
+        setLockedUntil(null);
+      }, 0);
     }
   }, [lockedUntil]);
 

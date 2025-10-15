@@ -1,6 +1,6 @@
-import { supabase } from '../../../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { BIFailureComplianceReport } from './types';
-import { logger } from '../../../../utils/_core/logger';
+import { logger } from '@/utils/_core/logger';
 
 interface BIIncident {
   created_at: string;

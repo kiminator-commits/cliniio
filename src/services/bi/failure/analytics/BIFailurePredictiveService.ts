@@ -1,4 +1,4 @@
-import { logger } from '../../../../utils/_core/logger';
+import { logger } from '@/utils/_core/logger';
 import {
   BIRiskAnalysisProvider,
   RiskFactor,

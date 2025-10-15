@@ -7,9 +7,28 @@ import { EnvironmentalCleanChecklistProvider } from '../../../services/environme
 import { EnvironmentalCleanRoomProvider } from '../../../services/environmentalClean/EnvironmentalCleanRoomProvider';
 import { EnvironmentalCleanBatchProvider } from '../../../services/environmentalClean/EnvironmentalCleanBatchProvider';
 import { EnvironmentalCleanCrudProvider } from '../../../services/environmentalClean/EnvironmentalCleanCrudProvider';
+import { supabase } from '@/lib/supabaseClient';
 // import { createUserFriendlyError } from './errors/EnvironmentalCleanServiceError';
 
 export class EnvironmentalCleanService {
+  static supabase = supabase;
+
+  /**
+   * Add audit log entry to Supabase
+   */
+  static async addAuditLog(action: string, roomId: string, userId: string) {
+    try {
+      await supabase.from('environmental_clean_audit').insert({
+        action,
+        room_id: roomId,
+        user_id: userId,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error('Audit log failed:', err);
+    }
+  }
+
   /**
    * Fetch rooms from the environmental_cleans_enhanced table
    */

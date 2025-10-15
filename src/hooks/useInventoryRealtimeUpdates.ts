@@ -26,8 +26,12 @@ export function useInventoryRealtimeUpdates() {
       const unsubscribe = inventoryServiceFacade.subscribeToChanges();
 
       unsubscribeRef.current = unsubscribe;
-      setIsSubscribed(true);
       hasSubscribedRef.current = true;
+      
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setIsSubscribed(true);
+      }, 0);
 
       return () => {
         if (
@@ -45,7 +49,10 @@ export function useInventoryRealtimeUpdates() {
         '❌ Failed to set up real-time subscription in useInventoryRealtimeUpdates:',
         error
       );
-      setIsSubscribed(false);
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setIsSubscribed(false);
+      }, 0);
       hasSubscribedRef.current = false;
     }
   }, []); // Empty dependency array to prevent infinite loops

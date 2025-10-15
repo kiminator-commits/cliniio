@@ -8,10 +8,10 @@ import {
   mdiClose,
   mdiBarcode,
   mdiMapMarkerRadius,
-  mdiMapMarker,
+  mdiMapMarker as _mdiMapMarker,
 } from '@mdi/js';
 import { getRandomRoomBarcode } from '../../utils/getRandomBarcode';
-import { formatGPSCoordinates, isValidGPS } from '../../utils/locationUtils';
+import { formatGPSCoordinates, isValidGPS as _isValidGPS } from '../../utils/locationUtils';
 
 interface RoomFormProps {
   isOpen: boolean;
@@ -54,36 +54,45 @@ const RoomForm: React.FC<RoomFormProps> = ({
 
   useEffect(() => {
     if (room && mode === 'edit') {
-      setFormData({
-        name: room.name || '',
-        department: room.department || '',
-        floor: room.floor || '',
-        barcode: room.barcode || '',
-        gpsCoordinates: room.gpsCoordinates || null,
-      });
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setFormData({
+          name: room.name || '',
+          department: room.department || '',
+          floor: room.floor || '',
+          barcode: room.barcode || '',
+          gpsCoordinates: room.gpsCoordinates || null,
+        });
+      }, 0);
     } else {
-      setFormData({
-        name: '',
-        department: '',
-        floor: '',
-        barcode: '',
-        gpsCoordinates: null,
-      });
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setFormData({
+          name: '',
+          department: '',
+          floor: '',
+          barcode: '',
+          gpsCoordinates: null,
+        });
+      }, 0);
     }
   }, [room, mode, isOpen]);
 
   // Update GPS coordinates when geolocation changes
   useEffect(() => {
     if (latitude && longitude) {
-      setFormData((prev) => ({
-        ...prev,
-        gpsCoordinates: {
-          latitude,
-          longitude,
-          accuracy,
-          lastUpdated: new Date().toISOString(),
-        },
-      }));
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setFormData((prev) => ({
+          ...prev,
+          gpsCoordinates: {
+            latitude,
+            longitude,
+            accuracy,
+            lastUpdated: new Date().toISOString(),
+          },
+        }));
+      }, 0);
     }
   }, [latitude, longitude, accuracy]);
 

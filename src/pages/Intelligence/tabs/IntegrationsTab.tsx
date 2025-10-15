@@ -2,7 +2,7 @@ import React from 'react';
 import Icon from '@mdi/react';
 import { mdiLink, mdiSync, mdiInformation } from '@mdi/js';
 import { IntelligenceSummary } from '../utils/intelligenceTypes';
-import { IntegrationMetrics } from '../../../services/analytics';
+import { IntegrationMetrics } from '../../../services/analyticsService';
 
 interface IntegrationsTabProps {
   summary?: IntelligenceSummary | null;

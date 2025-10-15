@@ -3,9 +3,9 @@ import {
   useSterilizationStore,
   SterilizationPhase,
 } from '../../../store/sterilizationStore';
-import { sterilizationPhases } from '../../../config/workflowConfig';
-import { useTimerStore } from '../../../store/timerStore';
-import { useTimerControls } from '../../../hooks/useTimerControls';
+import { sterilizationPhases } from '@/config/workflowConfig';
+import { useTimerStore } from '@/store/timerStore';
+import { useTimerControls } from '@/hooks/useTimerControls';
 import { usePhaseTimerLogic } from '../hooks/usePhaseTimerLogic';
 import { usePhaseTimerState } from './hooks/usePhaseTimerState';
 import PhaseCard from '../PhaseCard';
@@ -181,7 +181,9 @@ export default memo(function PhaseTimer({
   });
 
   // Store the handleComplete function in the ref
-  handleCompleteRef.current = handleCompleteFromLogic;
+  useEffect(() => {
+    handleCompleteRef.current = handleCompleteFromLogic;
+  }, [handleCompleteFromLogic]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { handleStartTimer, handlePauseTimer } = useTimerControls();

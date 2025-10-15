@@ -1,8 +1,7 @@
-import { supabase } from '../../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { InventoryAnalyticsService } from './analytics';
 import { InventoryForecastingService } from './forecasting';
 import { InventoryAIProviderService } from './provider';
-import { InventoryActionService } from '../../../pages/Inventory/services/inventoryActionService';
 import type { DemandForecastingResult } from './types';
 import { NINETY_DAYS_MS, ONE_YEAR_MS } from './inventoryAIConfig';
 
@@ -102,10 +101,12 @@ export class ForecastingWorkflowService {
       const startTime = Date.now();
 
       // Get historical inventory data using centralized service
-      const { data: allTransactions, error: transactionsError } =
-        await InventoryActionService.getInventoryTransactionsByFacility(
-          this.facilityId
-        );
+      // Direct Supabase call instead of going through InventoryActionService
+      const { data: allTransactions, error: transactionsError } = await supabase
+        .from('inventory_transactions')
+        .select('*')
+        .eq('facility_id', this.facilityId)
+        .gte('created_at', new Date(Date.now() - ONE_YEAR_MS).toISOString());
 
       if (transactionsError) {
         console.error(
@@ -140,10 +141,12 @@ export class ForecastingWorkflowService {
       );
 
       // Get equipment maintenance history using centralized service
-      const { data: allMaintenance, error: maintenanceError } =
-        await InventoryActionService.getEquipmentMaintenanceByFacility(
-          this.facilityId
-        );
+      // Direct Supabase call instead of going through InventoryActionService
+      const { data: allMaintenance, error: maintenanceError } = await supabase
+        .from('equipment_maintenance')
+        .select('*')
+        .eq('facility_id', this.facilityId)
+        .gte('created_at', new Date(Date.now() - ONE_YEAR_MS).toISOString());
 
       if (maintenanceError) {
         console.error('Error getting equipment maintenance:', maintenanceError);
@@ -175,10 +178,12 @@ export class ForecastingWorkflowService {
       );
 
       // Get cost history using centralized service
-      const { data: allCosts, error: costsError } =
-        await InventoryActionService.getInventoryCostsByFacility(
-          this.facilityId
-        );
+      // Direct Supabase call instead of going through InventoryActionService
+      const { data: allCosts, error: costsError } = await supabase
+        .from('inventory_costs')
+        .select('*')
+        .eq('facility_id', this.facilityId)
+        .gte('created_at', new Date(Date.now() - ONE_YEAR_MS).toISOString());
 
       if (costsError) {
         console.error('Error getting inventory costs:', costsError);

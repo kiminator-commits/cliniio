@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ContentItem, ContentStatus } from '../../types';
+import { useSimplifiedKnowledgeHub } from '../../providers/SimplifiedKnowledgeHubProvider';
 
 import { TablePagination } from './TablePagination';
 import { TableRow } from './TableRow';
@@ -31,6 +32,8 @@ export const SimpleTable: React.FC<SimpleTableProps> = ({
   onDelete,
   onStartContent,
 }) => {
+  const { updateContentStatus, refetchContent } = useSimplifiedKnowledgeHub();
+
   // State management
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [startDates] = useState<Record<string, Date>>({});
@@ -81,8 +84,22 @@ export const SimpleTable: React.FC<SimpleTableProps> = ({
     setExpandedRows(newExpandedRows);
   };
 
-  const handleDelete = (id: string) => {
-    onDelete(id);
+  const _handleStatusUpdate = async (id: string, newStatus: string) => {
+    try {
+      await updateContentStatus(id, newStatus);
+      await refetchContent();
+    } catch (err) {
+      console.error('Failed to update item status:', err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      onDelete(id);
+      await refetchContent();
+    } catch (err) {
+      console.error('Failed to delete item:', err);
+    }
   };
 
   const handleStartContent = (id: string) => {

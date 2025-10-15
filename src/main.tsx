@@ -4,6 +4,16 @@ import App from './App';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/globals.css';
 import './styles/login.css';
+import { initializeConsoleControl } from './utils/consoleControl';
+import { logger } from './utils/_core/logger';
+
+// Initialize console control for easy logging management
+initializeConsoleControl();
+
+// Make logger available globally for console control
+if (typeof window !== 'undefined') {
+  (window as any).cliniioLogger = logger;
+}
 
 // Aggressively unregister all service workers to prevent issues
 if ('serviceWorker' in navigator) {

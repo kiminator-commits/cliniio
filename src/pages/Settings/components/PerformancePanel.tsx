@@ -3,8 +3,8 @@ import Icon from '@mdi/react';
 import { mdiBrain } from '@mdi/js';
 import { UnifiedAISettings } from '../../../services/ai/aiSettingsService';
 import { UI_TEXT } from './AIAnalyticsSettings.config';
-import FormGroup from './AIAnalyticsSettings/components/FormGroup';
-import ToggleSwitch from './AIAnalyticsSettings/components/ToggleSwitch';
+import FormGroup from './shared/FormGroup';
+import ToggleSwitch from './shared/ToggleSwitch';
 
 interface PerformancePanelProps {
   settings: UnifiedAISettings;

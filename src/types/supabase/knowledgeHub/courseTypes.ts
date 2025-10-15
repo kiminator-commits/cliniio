@@ -1,10 +1,10 @@
 // Knowledge Hub Course Types
 import { Json } from '../common';
 
-// Knowledge Hub course types - using any for now since tables are not defined in generated types
-export type KnowledgeHubCourse = any;
-export type KnowledgeHubCourseInsert = any;
-export type KnowledgeHubCourseUpdate = any;
+// Knowledge Hub course types - using proper types based on table definitions
+export type KnowledgeHubCourse = KnowledgeHubCourseTable['knowledge_hub_courses']['Row'];
+export type KnowledgeHubCourseInsert = KnowledgeHubCourseTable['knowledge_hub_courses']['Insert'];
+export type KnowledgeHubCourseUpdate = KnowledgeHubCourseTable['knowledge_hub_courses']['Update'];
 
 // Knowledge Hub course table definition
 export interface KnowledgeHubCourseTable {

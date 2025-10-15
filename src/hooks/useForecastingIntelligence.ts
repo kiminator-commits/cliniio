@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { ForecastingAnalyticsService } from '../services/analytics/forecastingAnalyticsService';
 import {
-  ForecastingAnalyticsService,
   AnalyticsFilters,
   IntelligenceSummary,
-} from '../services/analytics';
+} from '../types/forecastingAnalyticsTypes';
 
 // Simplified state interface
 export interface ForecastingIntelligenceState {

@@ -10,7 +10,7 @@ import {
   mdiRefresh,
 } from '@mdi/js';
 import { IntelligenceSummary } from '../utils/intelligenceTypes';
-import { RiskAlert } from '../../../services/analytics';
+import { RiskAlert } from '../../../services/analyticsService';
 
 interface ExtendedIntelligenceSummary extends IntelligenceSummary {
   risks?: Array<{ level: string; [key: string]: unknown }>;

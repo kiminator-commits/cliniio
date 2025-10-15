@@ -1,9 +1,44 @@
-import { Json, Tables, Inserts, Updates } from './common';
+import { Json, _Tables, _Inserts, _Updates } from './common';
 
-// Environmental Clean table types - using any for now since tables are not defined in generated types
-export type EnvironmentalClean = any;
-export type EnvironmentalCleanInsert = any;
-export type EnvironmentalCleanUpdate = any;
+// Environmental Clean table types - using proper types instead of any
+export type EnvironmentalClean = {
+  id: string;
+  room_id: string;
+  cleaner_id: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'verified';
+  scheduled_time: string;
+  completed_time: string | null;
+  checklist_items: Json;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EnvironmentalCleanInsert = {
+  id?: string;
+  room_id: string;
+  cleaner_id: string;
+  status?: 'pending' | 'in_progress' | 'completed' | 'verified';
+  scheduled_time: string;
+  completed_time?: string | null;
+  checklist_items?: Json;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type EnvironmentalCleanUpdate = {
+  id?: string;
+  room_id?: string;
+  cleaner_id?: string;
+  status?: 'pending' | 'in_progress' | 'completed' | 'verified';
+  scheduled_time?: string;
+  completed_time?: string | null;
+  checklist_items?: Json;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
 
 // Environmental Clean table definitions
 export interface EnvironmentalCleanTables {

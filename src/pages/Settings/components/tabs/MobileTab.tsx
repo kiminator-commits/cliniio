@@ -304,7 +304,10 @@ export const MobileTab: React.FC<MobileTabProps> = () => {
 
   // Load shortcuts on component mount
   useEffect(() => {
-    loadMobileShortcuts();
+    // Use setTimeout to avoid calling setState synchronously in effect
+    setTimeout(() => {
+      loadMobileShortcuts();
+    }, 0);
   }, []);
 
   // Save shortcuts whenever they change

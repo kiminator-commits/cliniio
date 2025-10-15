@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '@mdi/react';
 import { mdiCheck } from '@mdi/js';
-import { Checklist } from '../../../../store/checklistStore';
+import { Checklist } from '@/store/checklistStore';
 
 interface ActionButtonsProps {
   selectedChecklist: Checklist | null;

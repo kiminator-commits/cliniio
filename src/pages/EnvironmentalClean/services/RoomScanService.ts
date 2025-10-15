@@ -67,31 +67,22 @@ interface InventoryUsageRow {
 }
 
 export class RoomScanService {
-  static async scanRoomBarcode(barcode: string): Promise<ScanResult> {
+  /**
+   * Find room by barcode or ID and return the Supabase room record
+   */
+  private static async findSupabaseRoom(
+    identifier: string
+  ): Promise<Room | null> {
     try {
-      if (!barcode || barcode.trim() === '') {
-        return { success: false, message: 'Please enter a valid barcode' };
-      }
-
       const { data, error } = await supabase
         .from('rooms')
         .select('*')
-        .eq('barcode', barcode.trim())
+        .or(`barcode.eq.${identifier},id.eq.${identifier}`)
         .eq('is_active', true)
         .single();
 
-      if (error) {
-        if ((error as { code?: string }).code === 'PGRST116') {
-          return {
-            success: false,
-            message: `Room with barcode "${barcode}" not found in system`,
-          };
-        }
-        throw error;
-      }
-
-      if (!data) {
-        return { success: false, message: 'Room not found in system' };
+      if (error || !data) {
+        return null;
       }
 
       const roomData = data as {
@@ -109,7 +100,8 @@ export class RoomScanService {
         updated_at: string;
         facility_id: string;
       };
-      const room: Room = {
+
+      return {
         id: roomData.id,
         barcode: roomData.barcode,
         name: roomData.name,
@@ -122,6 +114,26 @@ export class RoomScanService {
         createdAt: roomData.created_at,
         updatedAt: roomData.updated_at,
       };
+    } catch (error) {
+      console.error('❌ Error finding Supabase room:', error);
+      return null;
+    }
+  }
+
+  static async scanRoomBarcode(barcode: string): Promise<ScanResult> {
+    try {
+      if (!barcode || barcode.trim() === '') {
+        return { success: false, message: 'Please enter a valid barcode' };
+      }
+
+      const room = await this.findSupabaseRoom(barcode.trim());
+
+      if (!room) {
+        return {
+          success: false,
+          message: `Room with barcode "${barcode}" not found in system`,
+        };
+      }
 
       auditLogger.log('environmental_clean', 'room_scanned', {
         roomId: room.id,
@@ -162,21 +174,11 @@ export class RoomScanService {
         return { success: false, message: `Invalid status: ${status}` };
       }
 
-      const { data: roomData, error: roomError } = await supabase
-        .from('rooms')
-        .select('name')
-        .eq('id', roomId)
-        .single();
+      const room = await this.findSupabaseRoom(roomId);
 
-      if (roomError || !roomData) {
+      if (!room) {
         return { success: false, message: 'Room not found in system' };
       }
-
-      const room = roomData as {
-        id: string;
-        name: string;
-        facility_id: string;
-      };
       const databaseStatus = this.mapStatusToDatabase(status);
 
       const updateData: Partial<EnvironmentalCleanRow> = {
@@ -252,21 +254,11 @@ export class RoomScanService {
     }>
   ): Promise<StatusUpdateResult> {
     try {
-      const { data: roomData, error: roomError } = await supabase
-        .from('rooms')
-        .select('name')
-        .eq('id', roomId)
-        .single();
+      const room = await this.findSupabaseRoom(roomId);
 
-      if (roomError || !roomData) {
+      if (!room) {
         return { success: false, message: 'Room not found in system' };
       }
-
-      const room = roomData as {
-        id: string;
-        name: string;
-        facility_id: string;
-      };
       const { data: updatedClean, error: updateError } = await supabase
         .from('environmental_cleans_enhanced')
         .update({

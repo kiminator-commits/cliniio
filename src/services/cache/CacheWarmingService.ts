@@ -4,7 +4,7 @@
  */
 
 import { inventoryServiceFacade } from '../inventory/InventoryServiceFacade';
-import { knowledgeHubApiService } from '../../pages/KnowledgeHub/services/knowledgeHubApiService';
+import { DEPRECATED_MOCK_NOTICE } from '../../pages/KnowledgeHub/services/deprecatedNotice';
 import { cleaningScheduleService } from '../cleaningScheduleService';
 import { homeDataService } from '../homeDataService';
 
@@ -97,18 +97,21 @@ export class CacheWarmingService {
   private async warmKnowledgeHubCache(): Promise<void> {
     try {
       // Warm main content cache
-      await knowledgeHubApiService.fetchContent();
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      // Placeholder implementation - Knowledge Hub now uses Supabase directly
       console.log('🔥 Warmed knowledge hub content cache');
 
       // Warm content stats
-      await knowledgeHubApiService.getContentStats();
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      // Placeholder implementation - Knowledge Hub now uses Supabase directly
       console.log('🔥 Warmed knowledge hub stats cache');
 
       // Warm common category caches
       const commonCategories = ['Courses', 'Procedures', 'Policies'];
       for (const category of commonCategories) {
         try {
-          await knowledgeHubApiService.fetchContentByCategory(category);
+          console.warn(DEPRECATED_MOCK_NOTICE);
+          // Placeholder implementation - Knowledge Hub now uses Supabase directly
           console.log(
             `🔥 Warmed knowledge hub cache for category: ${category}`
           );

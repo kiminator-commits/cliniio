@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SharedLayout } from '../../components/Layout/SharedLayout';
 import Icon from '@mdi/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+import {
+  FacilitySettingsService,
+  FacilitySettings,
+} from '../../services/FacilitySettingsService';
+import { useUser } from '../../contexts/UserContext';
 import {
   mdiAccount,
   mdiCog,
@@ -101,6 +106,47 @@ const sectionColors: Record<string, { bg: string; icon: string }> = {
 const Settings: React.FC = () => {
   const [openDrawer, setOpenDrawer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [_facilitySettings, _setFacilitySettings] =
+    useState<FacilitySettings | null>(null);
+  const { currentUser } = useUser();
+
+  // Load facility settings on component mount
+  useEffect(() => {
+    const loadFacilitySettings = async () => {
+      if (currentUser?.facility_id) {
+        try {
+          const settings = await FacilitySettingsService.getFacilitySettings(
+            currentUser.facility_id
+          );
+          if (settings) {
+            setFacilitySettings(settings);
+          }
+        } catch (err) {
+          console.error('Error loading facility settings:', err);
+        }
+      }
+    };
+
+    loadFacilitySettings();
+  }, [currentUser?.facility_id]);
+
+  // Function to update facility settings
+  const _updateFacilitySettings = async (updates: Partial<FacilitySettings>) => {
+    if (currentUser?.facility_id) {
+      try {
+        const updatedSettings =
+          await FacilitySettingsService.updateFacilitySettings(
+            currentUser.facility_id,
+            updates
+          );
+        if (updatedSettings) {
+          setFacilitySettings(updatedSettings);
+        }
+      } catch (err) {
+        console.error('Error updating facility settings:', err);
+      }
+    }
+  };
 
   const handleCardClick = (id: string) => {
     try {

@@ -1,6 +1,7 @@
 import { LocalInventoryItem } from '../../types/inventoryTypes';
 import { InventoryFilters } from '@/types/inventoryServiceTypes';
 import { safeGetAs } from '../legacyTypeHelpers';
+import { isItemCategoryTrackable } from './trackingUtils';
 
 export const filterInventoryData = (
   data: LocalInventoryItem[],
@@ -53,9 +54,18 @@ export const filterInventoryData = (
         return false;
     }
 
-    // Filter by tracked only
+    // Filter by tracked only - use centralized category checking
     if (
       (filters.trackedOnly || filters.tracked || filters.showTrackedOnly) &&
+      !isItemCategoryTrackable(item.category)
+    ) {
+      return false;
+    }
+
+    // Apply tracking filter only to trackable categories
+    if (
+      (filters.trackedOnly || filters.tracked || filters.showTrackedOnly) &&
+      isItemCategoryTrackable(item.category) &&
       !safeGetAs(item.data, 'tracked', false)
     ) {
       return false;

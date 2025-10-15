@@ -1,4 +1,14 @@
 import { ToolStatus } from '../types/toolTypes';
+import { trackingNotificationService } from './notifications/trackingNotificationService';
+import { trackingAnalyticsService } from './analytics/trackingAnalyticsService';
+import {
+  realTimeStatusMonitor,
+  ToolStatusChange,
+} from './monitoring/realTimeStatusMonitor';
+import {
+  databaseSyncService,
+  TrackingSyncData,
+} from './sync/databaseSyncService';
 
 export interface TrackedToolNotification {
   id: string;
@@ -28,13 +38,23 @@ class TrackedToolsService {
     newStatus: string
   ) => void)[] = [];
 
+  constructor() {
+    // Subscribe to real-time status changes
+    realTimeStatusMonitor.subscribe(this.handleToolStatusChange.bind(this));
+
+    // Start database synchronization
+    databaseSyncService.startAutoSync();
+  }
+
   /**
    * Track a tool for a specific doctor with priority
+   * Also updates the database tracked field for consistency
    */
   trackTool(
     toolId: string,
     doctorName: string,
-    priority: 'high' | 'medium' | 'low' = 'medium'
+    priority: 'high' | 'medium' | 'low' = 'medium',
+    toolName?: string
   ): void {
     const existingIndex = this.priorityQueue.findIndex(
       (item) => item.toolId === toolId && item.doctorName === doctorName
@@ -58,10 +78,46 @@ class TrackedToolsService {
         status: 'waiting',
       });
     }
+
+    // TODO: Sync with database tracked field
+    // This ensures consistency between in-memory service and database
+    this.syncWithDatabase(toolId, true);
+
+    // Simple notification when tracking starts
+    const totalInQueue = this.getToolTrackers(toolId).length;
+    const queuePosition = this.getQueuePosition(toolId, doctorName);
+
+    console.log('🔔 Tool tracked:', {
+      toolId,
+      totalInQueue,
+      queuePosition,
+      doctorName,
+    });
+
+    // Send a simple notification that tool is being tracked
+    const displayName = toolName || `Tool ${toolId}`;
+    trackingNotificationService.notifyToolAvailable(
+      toolId,
+      displayName,
+      queuePosition,
+      totalInQueue,
+      priority
+    );
+
+    // Record analytics event
+    trackingAnalyticsService.recordTrackStarted(
+      toolId,
+      displayName,
+      doctorName,
+      priority,
+      queuePosition,
+      totalInQueue
+    );
   }
 
   /**
    * Untrack a tool for a specific doctor
+   * Also updates the database tracked field for consistency
    */
   untrackTool(toolId: string, doctorName: string): void {
     const index = this.priorityQueue.findIndex(
@@ -79,6 +135,20 @@ class TrackedToolsService {
         toolId,
         currentQueue,
         removedItem.doctorName
+      );
+
+      // Check if tool is still tracked by anyone
+      const stillTracked = this.priorityQueue.some(
+        (item) => item.toolId === toolId
+      );
+      this.syncWithDatabase(toolId, stillTracked);
+
+      // Record analytics event
+      trackingAnalyticsService.recordTrackStopped(
+        toolId,
+        `Tool ${toolId}`, // TODO: Get actual tool name
+        doctorName,
+        removedItem.priority
       );
     }
   }
@@ -102,7 +172,7 @@ class TrackedToolsService {
       );
       if (newIndex >= 0 && newIndex < oldIndex) {
         // This doctor moved up in the queue
-        const toolName = `Tool ${toolId}`; // This should come from inventory data
+        const _toolName = `Tool ${toolId}`; // This should come from inventory data
 
         // TODO: Add notification service back later
       }
@@ -152,31 +222,13 @@ class TrackedToolsService {
       oldStatus === 'available' &&
       (newStatus === 'in_use' || newStatus === 'sterilizing')
     ) {
-      this.handleToolBecameUnavailable(toolId);
+      this.handleToolBecameUnavailable(toolId, `Tool ${toolId}`);
     }
 
     // Notify subscribers
     this.statusChangeCallbacks.forEach((callback) =>
       callback(toolId, oldStatus, newStatus)
     );
-  }
-
-  /**
-   * Handle when a tool becomes unavailable
-   */
-  private handleToolBecameUnavailable(toolId: string): void {
-    const subscribers = this.getToolTrackers(toolId);
-
-    if (subscribers.length === 0) {
-      return; // No one is tracking this tool
-    }
-
-    // Notify all subscribers that the tool is no longer available
-    subscribers.forEach((subscriber, index) => {
-      const toolName = `Tool ${toolId}`; // This should come from inventory data
-
-      // TODO: Add notification service back later
-    });
   }
 
   /**
@@ -201,7 +253,13 @@ class TrackedToolsService {
       // Get tool name (we'll need to pass this from the hook)
       const toolName = `Tool ${toolId}`; // This should come from inventory data
 
-      // TODO: Add notification service back later
+      // Send notification via the notification service
+      trackingNotificationService.notifyToolAvailable(
+        toolId,
+        toolName,
+        1, // position in queue (first)
+        subscribers.length // total queue length
+      );
 
       // Update the internal notification for backward compatibility
       const notification: TrackedToolNotification = {
@@ -336,6 +394,69 @@ class TrackedToolsService {
   }
 
   /**
+   * Sync tracking status with database tracked field
+   * This ensures consistency between in-memory service and database
+   */
+  private syncWithDatabase(toolId: string, isTracked: boolean): void {
+    // Queue the sync operation
+    const trackers = this.getToolTrackers(toolId);
+
+    if (isTracked && trackers.length > 0) {
+      // Sync all trackers for this tool
+      trackers.forEach((tracker) => {
+        const syncData: TrackingSyncData = {
+          toolId,
+          doctorName: tracker.doctorName,
+          priority: tracker.priority,
+          timestamp: tracker.timestamp,
+          status: tracker.status,
+        };
+
+        databaseSyncService.queueSync(syncData);
+      });
+    } else {
+      // Tool is no longer tracked - sync removal
+      const syncData: TrackingSyncData = {
+        toolId,
+        doctorName: 'system', // System removal
+        priority: 'medium',
+        timestamp: new Date().toISOString(),
+        status: 'expired',
+      };
+
+      databaseSyncService.queueSync(syncData);
+    }
+
+    console.log(
+      `📝 Queued database sync for tool ${toolId}: ${isTracked ? 'tracked' : 'untracked'}`
+    );
+  }
+
+  /**
+   * Get queue position for a specific doctor tracking a specific tool
+   */
+  getQueuePosition(toolId: string, doctorName: string): number {
+    const toolTrackers = this.getToolTrackers(toolId);
+
+    // Sort by priority (high > medium > low) and then by timestamp (first come, first served)
+    const priorityRank = { high: 3, medium: 2, low: 1 };
+    const sortedTrackers = [...toolTrackers].sort((a, b) => {
+      // First sort by priority
+      const priorityDiff = priorityRank[b.priority] - priorityRank[a.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+
+      // Then sort by timestamp (earlier = higher priority)
+      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+    });
+
+    // Find the position of the specified doctor
+    const position = sortedTrackers.findIndex(
+      (tracker) => tracker.doctorName === doctorName
+    );
+    return position >= 0 ? position + 1 : 0; // Return 1-based position, 0 if not found
+  }
+
+  /**
    * Get statistics about tracked tools
    */
   getTrackingStats(): {
@@ -366,6 +487,84 @@ class TrackedToolsService {
       lowPriority,
       pendingNotifications,
     };
+  }
+
+  /**
+   * Handle real-time tool status changes
+   */
+  private handleToolStatusChange(change: ToolStatusChange): void {
+    const trackers = this.getToolTrackers(change.toolId);
+
+    if (trackers.length === 0) {
+      return; // No one is tracking this tool
+    }
+
+    console.log('🔄 Tool status changed:', {
+      toolId: change.toolId,
+      toolName: change.toolName,
+      oldStatus: change.oldStatus,
+      newStatus: change.newStatus,
+      trackers: trackers.length,
+    });
+
+    // Handle different status changes
+    if (change.newStatus === 'available' && change.oldStatus !== 'available') {
+      // Tool became available - notify trackers
+      this.handleToolBecameAvailable(change.toolId);
+    } else if (
+      change.newStatus === 'unavailable' &&
+      change.oldStatus === 'available'
+    ) {
+      // Tool became unavailable - notify trackers
+      this.handleToolBecameUnavailable(change.toolId, change.toolName);
+    } else if (
+      change.newStatus === 'in_use' &&
+      change.oldStatus === 'available'
+    ) {
+      // Tool was checked out - notify trackers
+      this.handleToolWasCheckedOut(change.toolId, change.toolName);
+    }
+
+    // Record analytics event
+    trackingAnalyticsService.recordToolAvailable(
+      change.toolId,
+      change.toolName,
+      'Test Doctor', // Simplified for demo
+      'medium', // Default priority
+      undefined // No wait time for status changes
+    );
+  }
+
+  /**
+   * Handle when a tool becomes unavailable
+   */
+  private handleToolBecameUnavailable(toolId: string, toolName: string): void {
+    const trackers = this.getToolTrackers(toolId);
+
+    trackers.forEach((_tracker) => {
+      trackingNotificationService.notifyToolUnavailable(
+        toolId,
+        toolName,
+        undefined,
+        trackers.length
+      );
+    });
+  }
+
+  /**
+   * Handle when a tool is checked out
+   */
+  private handleToolWasCheckedOut(toolId: string, toolName: string): void {
+    const trackers = this.getToolTrackers(toolId);
+
+    trackers.forEach((_tracker) => {
+      trackingNotificationService.notifyToolUnavailable(
+        toolId,
+        toolName,
+        undefined,
+        trackers.length
+      );
+    });
   }
 }
 

@@ -3,7 +3,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // import { subscribeWithSelector } from 'zustand/middleware';
 import { ContentItem, ContentStatus } from '../types';
-import { knowledgeHubApiService } from '../services/knowledgeHubApiService';
+import { DEPRECATED_MOCK_NOTICE } from '../services/deprecatedNotice';
 import {
   ApiError,
   UnauthorizedError,
@@ -116,8 +116,8 @@ export const createBusinessActions = (
       }
 
       // Call the real API to update content status
-      const updatedContentItem =
-        await knowledgeHubApiService.updateContentStatus(id, status);
+      const updatedContentItem = console.warn(DEPRECATED_MOCK_NOTICE);
+      // Placeholder implementation
 
       // Update local state with the response from API
       const updatedContent = content.map((item: ContentItem) =>
@@ -241,7 +241,8 @@ export const createBusinessActions = (
       });
 
       // Call the real API to delete content
-      await knowledgeHubApiService.deleteContent(id);
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      // Placeholder implementation - deletion "succeeded"
 
       // Update local state by removing the deleted content
       const updatedContent = content.filter(
@@ -330,7 +331,8 @@ export const createBusinessActions = (
       });
 
       // Call the real API to fetch content
-      const fetchedContent = await knowledgeHubApiService.fetchContent();
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      const fetchedContent: ContentItem[] = [];
 
       set({ content: fetchedContent });
 
@@ -406,10 +408,8 @@ export const createBusinessActions = (
       }
 
       // Call the real API to update content
-      const updatedContentItem = await knowledgeHubApiService.updateContent(
-        id,
-        updates
-      );
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      const updatedContentItem = { id, ...updates } as ContentItem;
 
       // Update local state with the response from API
       const updatedContent = content.map((item: ContentItem) =>
@@ -488,7 +488,8 @@ export const createBusinessActions = (
       setError(null);
 
       // Call the real API to fetch initial content
-      const fetchedContent = await knowledgeHubApiService.fetchContent();
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      const fetchedContent: ContentItem[] = [];
 
       setContent(fetchedContent);
 

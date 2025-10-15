@@ -36,7 +36,10 @@ const Greeting: React.FC = () => {
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * funGreetings.length);
-    setGreeting(funGreetings[randomIndex]);
+    // Use setTimeout to avoid calling setState synchronously in effect
+    setTimeout(() => {
+      setGreeting(funGreetings[randomIndex]);
+    }, 0);
   }, []);
 
   return (

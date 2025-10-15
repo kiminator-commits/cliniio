@@ -101,7 +101,10 @@ const BiologicalIndicatorTest: React.FC<BiologicalIndicatorTestProps> = ({
   // Reset selection when modal opens
   useEffect(() => {
     if (isOpen) {
-      setSelectedResult(null);
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setSelectedResult(null);
+      }, 0);
     }
   }, [isOpen]);
 

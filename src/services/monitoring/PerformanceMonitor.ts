@@ -399,7 +399,7 @@ export class PerformanceMonitor {
     this.isMonitoring = true;
     this.monitoringInterval = setInterval(() => {
       this.capturePerformanceSnapshot();
-    }, 30000); // Capture snapshot every 30 seconds
+    }, 120000); // Capture snapshot every 2 minutes - reduced frequency
   }
 
   /**

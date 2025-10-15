@@ -1,10 +1,12 @@
 export interface SterilizationBatch {
   id: string;
+  facility_id: string;
   batchCode: string;
   createdAt: Date;
   createdBy: string;
   status: 'creating' | 'ready' | 'in_autoclave' | 'completed' | 'failed';
   tools: string[]; // Array of tool IDs
+  location_barcode?: string | null;
   packageInfo: {
     packageType: string;
     packageSize: string;

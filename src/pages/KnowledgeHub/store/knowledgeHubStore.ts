@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { getPermissionsForRole, UserRole } from '../utils/permissions';
-import { knowledgeHubApiService } from '../services/knowledgeHubApiService';
+import { DEPRECATED_MOCK_NOTICE } from '../services/deprecatedNotice';
 import { ContentItem } from '../types';
 import { KnowledgeHubError } from '../types/errors';
 import { KnowledgeHubStore, ALL_CATEGORIES } from './knowledgeHubTypes';
@@ -114,12 +114,17 @@ export const useKnowledgeHubStore = create<KnowledgeHubStore>()(
 
       // Rate limiting actions
       updateRateLimitStats: () => {
-        const stats = knowledgeHubApiService.getRateLimitStats();
+        console.warn(DEPRECATED_MOCK_NOTICE);
+        const stats = {
+          currentRequests: 0,
+          windowStart: Date.now(),
+          requestsInWindow: 0,
+        };
         set({ rateLimitStats: stats });
       },
 
       resetRateLimiter: () => {
-        knowledgeHubApiService.resetRateLimiter();
+        console.warn(DEPRECATED_MOCK_NOTICE);
         set({ rateLimitStats: null, isRateLimited: false });
       },
 

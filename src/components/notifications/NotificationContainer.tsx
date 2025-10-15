@@ -66,6 +66,14 @@ const ToastNotification: React.FC<{ notification: TrackingNotification }> = ({
   const getBgColor = () => {
     switch (notification.type) {
       case 'tool_available':
+        // Check if it's high priority based on title
+        if (notification.title.includes('🔥')) {
+          return 'bg-red-50 border-red-200';
+        } else if (notification.title.includes('⚡')) {
+          return 'bg-yellow-50 border-yellow-200';
+        } else if (notification.title.includes('📋')) {
+          return 'bg-gray-50 border-gray-200';
+        }
         return 'bg-green-50 border-green-200';
       case 'position_changed':
       case 'queue_update':
@@ -133,7 +141,7 @@ const NotificationContainer: React.FC = () => {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-sm">
+    <div className="fixed top-4 right-4 z-[9999] max-w-sm">
       {notifications.map((notification) => (
         <ToastNotification key={notification.id} notification={notification} />
       ))}

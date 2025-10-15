@@ -5,13 +5,22 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.tableContainer::-webkit-scrollbar {
+  display: none; /* WebKit */
 }
 
 .table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   background: white;
   font-size: 0.875rem;
+  table-layout: fixed;
 }
 
 .tableHeader {
@@ -35,24 +44,26 @@
 .tableHeaderCell:first-child,
 .tableCell:first-child {
   text-align: left;
-  width: 40%;
-  min-width: 300px;
+  width: 35%;
+  min-width: 200px;
 }
 
-/* Other columns - right aligned */
+/* Other columns - right aligned with left padding */
 .tableHeaderCell:not(:first-child):not(:last-child),
 .tableCell:not(:first-child):not(:last-child) {
   text-align: right;
-  width: 15%;
-  min-width: 100px;
+  width: 10%;
+  min-width: 60px;
+  padding-left: 8px;
 }
 
-/* Actions column - right aligned */
+/* Actions column - left aligned with left padding */
 .tableHeaderCell:last-child,
 .tableCell:last-child {
-  text-align: right;
-  width: 20%;
-  min-width: 200px;
+  text-align: left;
+  width: 25%;
+  min-width: 180px;
+  padding-left: 8px;
 }
 
 /* Checkbox column - narrow width when visible, zero width when hidden */
@@ -116,6 +127,7 @@
   align-items: center;
   justify-content: flex-start;
   flex-wrap: nowrap;
+  min-width: 150px;
 }
 
 .actionButton {
@@ -132,7 +144,7 @@
   cursor: pointer;
   transition: all 0.15s ease;
   text-decoration: none;
-  min-width: 60px;
+  min-width: 40px;
   height: 32px;
 }
 

@@ -2,6 +2,9 @@ import { useState, useCallback } from 'react';
 import { useSterilizationStore } from '@/store/sterilizationStore';
 import { Tool } from '@/types/sterilizationTypes';
 import { PackagingService } from '@/services/packagingService';
+import { validateLocationAssignment } from '@/services/ai/aiTriageService';
+import { supabase } from '@/lib/supabaseClient';
+import { useUser } from '@/contexts/UserContext';
 
 // ✅ Connected to packagingSessionSlice for real batching and session control
 
@@ -26,6 +29,8 @@ export const usePackagingWorkflow = (
     endPackagingSession,
   } = useSterilizationStore();
 
+  const { currentUser } = useUser();
+
   // Local state - must be called before any early returns
   const [operatorName, setOperatorName] = useState('');
   const [scannedBarcode, setScannedBarcode] = useState('');
@@ -42,6 +47,11 @@ export const usePackagingWorkflow = (
   const [showReceiptUpload, setShowReceiptUpload] = useState(false);
   const [availableTools, setAvailableTools] = useState<Tool[]>([]);
   const [scannedTools, setScannedTools] = useState<Tool[]>([]);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [locationCode, setLocationCode] = useState('');
+  const [locationStatus, setLocationStatus] = useState<
+    'valid' | 'unassigned' | 'invalid_location' | null
+  >(null);
 
   // Extract other store data with defaults to avoid destructuring errors
   const currentBatch =
@@ -182,18 +192,8 @@ export const usePackagingWorkflow = (
     setShowReceiptUpload(false);
   }, []);
 
-  // Handle finalize package
-  const handleFinalizePackage = useCallback(async () => {
-    if (scannedTools.length === 0) {
-      setScanMessage('No tools selected for packaging');
-      return;
-    }
-
-    if (!packageInfo.packageType) {
-      setScanMessage('Please select a package type');
-      return;
-    }
-
+  // Internal finalize package function (called after room assignment)
+  const handleFinalizePackageInternal = useCallback(async () => {
     try {
       setScanMessage('Creating package...');
 
@@ -231,6 +231,77 @@ export const usePackagingWorkflow = (
     loadToolsReadyForPackaging,
     onClose,
   ]);
+
+  // Handle room assignment
+  const handleAssignLocation = useCallback(async () => {
+    if (!locationCode) {
+      alert('Please scan a location barcode first.');
+      return;
+    }
+
+    // Validate location assignment
+    const locationSummary = {
+      batchId: currentSession?.currentBatchId || '',
+      toolsCount: scannedTools.length,
+      assignedLocation: locationCode,
+      technicianId: currentUser?.id,
+    };
+
+    const validationResult = await validateLocationAssignment(locationSummary);
+    setLocationStatus(validationResult.status);
+
+    if (validationResult.status === 'invalid_location') {
+      alert(
+        `⚠️ Location "${locationCode}" is not valid for this facility. Please check the location name.`
+      );
+      return;
+    }
+
+    try {
+      // Update sterilization batch with location
+      if (currentSession?.currentBatchId) {
+        await supabase
+          .from('sterilization_batches')
+          .update({ location_barcode: locationCode })
+          .eq('id', currentSession.currentBatchId);
+      }
+
+      // Update inventory items with location
+      await supabase
+        .from('inventory_items')
+        .update({ scanned_location: locationCode })
+        .in(
+          'id',
+          scannedTools.map((t) => t.id)
+        );
+
+      alert(`✅ Location ${locationCode} assigned successfully`);
+      setIsAssigning(false);
+      setLocationCode('');
+
+      // Continue with package finalization
+      await handleFinalizePackageInternal();
+    } catch (error) {
+      console.error('Error assigning location:', error);
+      alert('Error assigning location. Please try again.');
+    }
+  }, [locationCode, scannedTools, currentSession, currentUser, handleFinalizePackageInternal]);
+
+  // Handle finalize package (now triggers room assignment first)
+  const handleFinalizePackage = useCallback(async () => {
+    if (scannedTools.length === 0) {
+      setScanMessage('No tools selected for packaging');
+      return;
+    }
+
+    if (!packageInfo.packageType) {
+      setScanMessage('Please select a package type');
+      return;
+    }
+
+    // Start room assignment process
+    setIsAssigning(true);
+  }, [scannedTools, packageInfo]);
 
   // Handle end session
   const handleEndSession = useCallback(() => {
@@ -288,12 +359,17 @@ export const usePackagingWorkflow = (
     batchLoading,
     currentSession,
     availableTools,
+    isAssigning,
+    locationCode,
+    locationStatus,
 
     // Actions
     setOperatorName,
     setScannedBarcode,
     setPackageInfo,
     setShowPackageForm,
+    setLocationCode,
+    setIsAssigning,
     handleScan,
     simulateScan,
     handleNewAutoclaveLoad,
@@ -301,6 +377,7 @@ export const usePackagingWorkflow = (
     handleReceiptUploadSuccess,
     handleReceiptUploadCancel,
     handleFinalizePackage,
+    handleAssignLocation,
     handleEndSession,
     handleRemoveTool,
     handleStartSession,

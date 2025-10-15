@@ -161,12 +161,17 @@ const PackagingWorkflow: React.FC<PackagingWorkflowProps> = ({
     batchLoading,
     currentSession,
     availableTools,
+    isAssigning,
+    locationCode,
+    locationStatus,
 
     // Actions
     setOperatorName,
     setScannedBarcode,
     setPackageInfo,
     setShowPackageForm,
+    setLocationCode,
+    setIsAssigning,
     handleScan: _handleScan,
     simulateScan,
     handleNewAutoclaveLoad,
@@ -174,6 +179,7 @@ const PackagingWorkflow: React.FC<PackagingWorkflowProps> = ({
     handleReceiptUploadSuccess: _handleReceiptUploadSuccess,
     handleReceiptUploadCancel,
     handleFinalizePackage: _handleFinalizePackage,
+    handleAssignLocation,
     handleEndSession,
     handleRemoveTool,
     handleStartSession,
@@ -200,6 +206,58 @@ const PackagingWorkflow: React.FC<PackagingWorkflowProps> = ({
         onSuccess={handleReceiptUploadSuccessWithTracking}
         onCancel={handleReceiptUploadCancel}
       />
+    );
+  }
+
+  // Show room assignment modal if requested
+  if (isAssigning) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[99999] p-4">
+        <div className="bg-white rounded-xl overflow-hidden w-full max-w-md shadow-2xl">
+          <div className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Room Assignment
+            </h3>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label
+                  htmlFor="location"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Scan or enter location barcode:
+                </label>
+                <input
+                  id="location"
+                  type="text"
+                  value={locationCode}
+                  onChange={(e) => setLocationCode(e.target.value)}
+                  placeholder="e.g., ROOM-1-CUPBOARD-A"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsAssigning(false)}
+                  className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAssignLocation}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Assign Location
+                </button>
+              </div>
+              {locationStatus && (
+                <p className="text-sm text-gray-600">
+                  Location Status: {locationStatus}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 

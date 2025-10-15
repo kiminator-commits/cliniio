@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import Icon from '@mdi/react';
-import { mdiMagnify, mdiFilterVariant, mdiSort } from '@mdi/js';
+import { mdiMagnify, mdiFilterVariant as _mdiFilterVariant, mdiSort, mdiFilter } from '@mdi/js';
+import { Button } from 'react-bootstrap';
 
 interface FilterOptions {
   searchQuery: string;
@@ -17,7 +18,6 @@ interface UnifiedSearchFilterBarProps {
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
   statusOptions: string[];
-  departmentOptions: string[];
   difficultyOptions: string[];
   durationOptions: string[];
 }
@@ -27,7 +27,6 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
   selectedCategory,
   onCategoryChange,
   statusOptions,
-  departmentOptions,
   difficultyOptions,
   durationOptions,
 }) => {
@@ -104,9 +103,9 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+    <div className="mb-4">
       {/* Main Search and Category Row */}
-      <div className="flex flex-col lg:flex-row gap-4 mb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2 overflow-x-hidden">
         {/* Search Input */}
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -117,7 +116,7 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
             placeholder="Search all content..."
             value={filters.searchQuery}
             onChange={handleSearchChange}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] sm:text-sm"
+            className="form-control w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -126,7 +125,7 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
           <select
             value={selectedCategory}
             onChange={handleCategoryChange}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#4ECDC4] focus:border-[#4ECDC4] sm:text-sm"
+            className="form-select"
           >
             {categoryOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -137,52 +136,56 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
         </div>
 
         {/* Advanced Filters Toggle */}
-        <button
+        <Button
+          variant="outline-secondary"
+          className="font-medium px-4 py-2 rounded-md border border-gray-300 shadow-sm flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
           onClick={toggleAdvancedFilters}
-          className={`inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium transition-colors ${
-            showAdvancedFilters
-              ? 'bg-[#4ECDC4] text-white border-[#4ECDC4]'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          }`}
+          aria-expanded={showAdvancedFilters}
+          aria-controls="expanded-filters-panel"
+          aria-label={`${showAdvancedFilters ? 'Hide' : 'Show'} advanced filters`}
         >
-          <Icon path={mdiFilterVariant} size={1} className="mr-2" />
+          <Icon path={mdiFilter} size={1} className="mr-2" aria-hidden="true" />
           Filters
-        </button>
+        </Button>
 
         {/* Sort Toggle */}
-        <button
+        <Button
+          variant="outline-secondary"
+          className="font-medium px-4 py-2 rounded-md border border-gray-300 shadow-sm flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
           onClick={() =>
             handleFilterChange(
               'sortOrder',
               filters.sortOrder === 'asc' ? 'desc' : 'asc'
             )
           }
-          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition-colors"
         >
           <Icon path={mdiSort} size={1} className="mr-2" />
           {filters.sortOrder === 'asc' ? '↑' : '↓'}
-        </button>
+        </Button>
       </div>
 
       {/* Advanced Filters Section */}
       {showAdvancedFilters && (
-        <div className="border-t pt-4 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div
+          id="expanded-filters-panel"
+          className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 flex flex-wrap gap-3"
+        >
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
             {/* Status Filter */}
             <div className="sm:w-32">
               <label
                 htmlFor="status-filter"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-semibold text-gray-600 mb-1"
               >
                 Status
               </label>
               <select
                 id="status-filter"
+                className="form-select"
                 value={filters.statusFilter}
                 onChange={(e) =>
                   handleFilterChange('statusFilter', e.target.value)
                 }
-                className="block w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
               >
                 <option value="all">All Statuses</option>
                 {statusOptions.map((status) => (
@@ -193,46 +196,21 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
               </select>
             </div>
 
-            {/* Department Filter */}
-            <div className="sm:w-32">
-              <label
-                htmlFor="department-filter"
-                className="block text-xs font-medium text-gray-700 mb-1"
-              >
-                Department
-              </label>
-              <select
-                id="department-filter"
-                value={filters.departmentFilter}
-                onChange={(e) =>
-                  handleFilterChange('departmentFilter', e.target.value)
-                }
-                className="block w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
-              >
-                <option value="all">All Departments</option>
-                {departmentOptions.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {/* Difficulty Filter */}
             <div className="sm:w-32">
               <label
                 htmlFor="difficulty-filter"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-semibold text-gray-600 mb-1"
               >
                 Difficulty
               </label>
               <select
                 id="difficulty-filter"
+                className="form-select"
                 value={filters.difficultyFilter}
                 onChange={(e) =>
                   handleFilterChange('difficultyFilter', e.target.value)
                 }
-                className="block w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
               >
                 <option value="all">All Levels</option>
                 {difficultyOptions.map((level) => (
@@ -244,20 +222,20 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
             </div>
 
             {/* Duration Filter */}
-            <div className="sm:w-32">
+            <div className="sm:w-40">
               <label
                 htmlFor="duration-filter"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-semibold text-gray-600 mb-1"
               >
                 Duration
               </label>
               <select
                 id="duration-filter"
+                className="form-select"
                 value={filters.durationFilter}
                 onChange={(e) =>
                   handleFilterChange('durationFilter', e.target.value)
                 }
-                className="block w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
               >
                 <option value="all">Any Duration</option>
                 {durationOptions.map((duration) => (
@@ -272,15 +250,15 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
             <div className="sm:w-32">
               <label
                 htmlFor="sort-by-filter"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-semibold text-gray-600 mb-1"
               >
                 Sort By
               </label>
               <select
                 id="sort-by-filter"
+                className="form-select"
                 value={filters.sortBy}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="block w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -292,7 +270,7 @@ export const UnifiedSearchFilterBar: React.FC<UnifiedSearchFilterBarProps> = ({
           </div>
 
           {/* Clear Filters Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end w-full">
             <button
               onClick={clearAllFilters}
               className="inline-flex items-center px-3 py-1 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"

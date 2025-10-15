@@ -37,7 +37,7 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
   return (
     <div
-      className={`fixed bottom-6 right-6 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg max-w-md z-50`}
+      className={`fixed bottom-6 right-6 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg max-w-md z-[9999]`}
     >
       <div className="flex items-center space-x-3">
         <Icon path={icon} size={1.2} />

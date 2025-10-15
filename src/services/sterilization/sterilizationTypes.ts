@@ -1,22 +1,49 @@
-import type { Database } from '@/types/database.types';
+import { ToolStatus } from '@/types/toolTypes';
 
-export type SterilizationSession =
-  Database['public']['Tables']['sterilization_sessions']['Row'];
-export type InsertSterilizationSession =
-  Database['public']['Tables']['sterilization_sessions']['Insert'];
-export type UpdateSterilizationSession =
-  Database['public']['Tables']['sterilization_sessions']['Update'];
+export interface SterilizationPhase {
+  name: string;
+  duration: number;
+  temperature?: number;
+  pressure?: number;
+  order: number;
+  title: string;
+}
 
-export type SterilizationEvent =
-  Database['public']['Tables']['sterilization_events']['Row'];
-export type InsertSterilizationEvent =
-  Database['public']['Tables']['sterilization_events']['Insert'];
-export type UpdateSterilizationEvent =
-  Database['public']['Tables']['sterilization_events']['Update'];
+export interface SterilizationCycle {
+  id: string;
+  cycleId: string;
+  facilityId: string;
+  cycleType: string;
+  status: ToolStatus;
+  startTime: Date;
+  endTime?: Date;
+  temperatureCelsius?: number;
+  pressurePsi?: number;
+  cycleName?: string;
+  notes?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-export type SterilizationBatch =
-  Database['public']['Tables']['sterilization_batches']['Row'];
-export type InsertSterilizationBatch =
-  Database['public']['Tables']['sterilization_batches']['Insert'];
-export type UpdateSterilizationBatch =
-  Database['public']['Tables']['sterilization_batches']['Update'];
+export interface CreateCycleResult {
+  success: boolean;
+  message: string;
+  cycle?: SterilizationCycle;
+  error?: string;
+}
+
+export interface CycleCreationParams {
+  toolIds: string[];
+  cycleType: string;
+  facilityId: string;
+  userId: string;
+  userName: string;
+}
+
+export interface CycleCompletionParams {
+  cycleId: string;
+  autoclaveReceiptId?: string;
+  userId: string;
+  userName: string;
+}

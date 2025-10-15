@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { SterilizationBatch } from '../../types/sterilizationTypes';
-import { useSterilizationStore } from '../sterilizationStore';
+import { BatchCodeService } from '../shared/batchCodeService';
 
 export interface BatchState {
   // Batch state
@@ -151,12 +151,19 @@ export const createBatchSlice: StateCreator<BatchState, [], [], BatchState> = (
     set({ batchLoading: true });
 
     try {
-      // Generate batch code using the code generation slice
-      const batchCodeSlice = useSterilizationStore.getState();
-      const batchCode = await batchCodeSlice.generateBatchCode(
+      // Generate batch code using the shared service
+      const batchCodeResult = await BatchCodeService.generateBatchCode(
         currentBatch.createdBy,
         currentBatch.tools.length
       );
+
+      if (!batchCodeResult.success) {
+        throw new Error(
+          batchCodeResult.error || 'Failed to generate batch code'
+        );
+      }
+
+      const batchCode = batchCodeResult.batchCode;
 
       const updatedBatch: SterilizationBatch = {
         ...currentBatch,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFeedbackSubmission } from '../../../hooks/useFeedbackSubmission';
+import { useFeedbackSubmission } from '@/hooks/useFeedbackSubmission';
 
 interface FeedbackFormProps {
   onBack: () => void;

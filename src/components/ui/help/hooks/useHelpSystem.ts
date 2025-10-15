@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useHelpContext } from '../../../../hooks/useHelpContext';
+import { useHelpContext } from '@/hooks/useHelpContext';
 
 export const useHelpSystem = (onClose: () => void) => {
   const navigate = useNavigate();

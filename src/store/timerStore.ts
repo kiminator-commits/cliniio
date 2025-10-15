@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { validateLocationAssignment } from '@/services/ai/aiTriageService';
 
 export interface Timer {
   id: string;
@@ -28,6 +29,9 @@ interface TimerStore {
 
   // Overexposure actions
   setOverexposed: (overexposed: boolean) => void;
+
+  // Room assignment actions
+  triggerRoomAssignment: () => void;
 }
 
 export const useTimerStore = create<TimerStore>((set, get) => ({
@@ -119,6 +123,12 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
               overexposed:
                 (isBathPhase && overexposureTime > 0) || state.overexposed,
             }));
+
+            // Handle autoclave completion - trigger room assignment
+            if (id === 'autoclave' && timer.elapsedTime === timer.duration) {
+              // Only trigger once when timer first completes
+              get().triggerRoomAssignment();
+            }
           }
         }
       }
@@ -278,6 +288,15 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
               overexposed:
                 (isBathPhase && overexposureTime > 0) || state.overexposed,
             }));
+
+            // Handle autoclave completion - trigger room assignment
+            if (
+              id === 'autoclave' &&
+              currentTimer.elapsedTime === currentTimer.duration
+            ) {
+              // Only trigger once when timer first completes
+              get().triggerRoomAssignment();
+            }
           }
         }
       }
@@ -294,5 +313,111 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
 
   setOverexposed: (overexposed: boolean) => {
     set({ overexposed });
+  },
+
+  triggerRoomAssignment: () => {
+    // Show room assignment modal
+    const modal = document.createElement('div');
+    modal.className =
+      'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+      <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h2 class="text-lg font-semibold mb-4">Room Assignment Required</h2>
+        <p class="text-sm text-gray-600 mb-4">Autoclave cycle completed. Please scan the location barcode where these tools will be stored.</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Location Barcode</label>
+            <input 
+              id="locationBarcode" 
+              type="text" 
+              placeholder="Scan or enter location barcode" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="flex space-x-3">
+            <button 
+              id="assignLocation" 
+              class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Assign Location
+            </button>
+            <button 
+              id="skipLocation" 
+              class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const assignButton = modal.querySelector('#assignLocation');
+    const skipButton = modal.querySelector('#skipLocation');
+    const locationInput = modal.querySelector(
+      '#locationBarcode'
+    ) as HTMLInputElement;
+
+    const handleAssign = async () => {
+      const locationCode = locationInput.value.trim();
+      if (!locationCode) {
+        alert('Please enter a location barcode');
+        return;
+      }
+
+      try {
+        // Get current batch ID from localStorage or sterilization store
+        const currentBatchId = localStorage.getItem('currentBatchId');
+        if (!currentBatchId) {
+          alert('No active batch found');
+          return;
+        }
+
+        // Validate location assignment
+        const validationResult = await validateLocationAssignment({
+          batchId: currentBatchId,
+          toolsCount: 1, // This should be the actual count
+          assignedLocation: locationCode,
+        });
+
+        if (validationResult.status === 'invalid_location') {
+          alert(`Invalid location: ${validationResult.reasoning}`);
+          return;
+        }
+
+        // Update database with location
+        const { supabase } = await import('@/lib/supabaseClient');
+
+        // Update sterilization batch
+        await supabase
+          .from('sterilization_batches')
+          .update({ location_barcode: locationCode })
+          .eq('id', currentBatchId);
+
+        // Update inventory items
+        await supabase
+          .from('inventory_items')
+          .update({ scanned_location: locationCode })
+          .eq('batch_id', currentBatchId);
+
+        alert(`✅ Location ${locationCode} assigned successfully`);
+        document.body.removeChild(modal);
+      } catch (error) {
+        console.error('Error assigning location:', error);
+        alert('Error assigning location. Please try again.');
+      }
+    };
+
+    const handleSkip = () => {
+      document.body.removeChild(modal);
+    };
+
+    assignButton?.addEventListener('click', handleAssign);
+    skipButton?.addEventListener('click', handleSkip);
+
+    // Focus on input
+    setTimeout(() => locationInput?.focus(), 100);
   },
 }));

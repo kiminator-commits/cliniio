@@ -2,7 +2,7 @@ import React from 'react';
 import Icon from '@mdi/react';
 import { mdiRobot, mdiLightbulb, mdiClose } from '@mdi/js';
 import { categories } from '../data/categories';
-import { ChecklistFormData } from '../../../../types/checklistTypes';
+import { ChecklistFormData } from '@/types/checklistTypes';
 
 interface BasicDetailsProps {
   checklistFormData: ChecklistFormData;

@@ -65,6 +65,22 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+      <div className="w-full">
+        <label
+          htmlFor="location-search-input"
+          className="block text-xs font-semibold text-gray-600 mb-1"
+        >
+          Filter by Location
+        </label>
+        <input
+          id="location-search-input"
+          type="text"
+          placeholder="Filter by location..."
+          className="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={filters.location || ''}
+          onChange={(e) => setLocationFilter(e.target.value)}
+        />
+      </div>
       {activeTab === 'tools' && (
         <>
           <div>

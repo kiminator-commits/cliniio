@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import OfficeHoursSettings from './OfficeHoursSettings';
 import UserManagement from './UserManagement';
 import UserForm from './UserForm';
 import UserModals from './UserModals';
 import SecuritySessionsSettings from './SecuritySessionsSettings';
+import AuditDashboardPage from '../../Admin/AuditDashboardPage';
+import { Badge } from '../../../components/ui/badge';
+import { supabase } from '../../../lib/supabaseClient';
 // import BillingTierManager from './BillingTierManager';
 
 interface User {
@@ -21,7 +24,10 @@ const SystemAdministrationSettings: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'security'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'security' | 'audit'>(
+    'users'
+  );
+  const [flagCount, setFlagCount] = useState<number>(0);
 
   // Calculate billing tier information
   const getBillingTierInfo = () => {
@@ -58,6 +64,24 @@ const SystemAdministrationSettings: React.FC = () => {
   };
 
   const billingTierInfo = getBillingTierInfo();
+
+  // Fetch audit flag count
+  useEffect(() => {
+    async function fetchFlagCount() {
+      try {
+        const { count, error } = await supabase
+          .from('audit_flags')
+          .select('*', { count: 'exact', head: true })
+          .eq('resolved', false);
+        if (!error && typeof count === 'number') {
+          setFlagCount(count);
+        }
+      } catch (err) {
+        console.error('Failed to fetch audit flag count:', err);
+      }
+    }
+    fetchFlagCount();
+  }, []);
 
   // Handler functions for the refactored components
   const handleEditUser = (user: User) => {
@@ -121,6 +145,21 @@ const SystemAdministrationSettings: React.FC = () => {
             >
               Security & Sessions
             </button>
+            <button
+              onClick={() => setActiveTab('audit')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                activeTab === 'audit'
+                  ? 'border-[#4ECDC4] text-[#4ECDC4]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <span>Audit & Compliance</span>
+              {flagCount > 0 && (
+                <Badge variant="destructive" className="ml-2">
+                  ⚠️ {flagCount}
+                </Badge>
+              )}
+            </button>
           </nav>
         </div>
       </div>
@@ -147,6 +186,12 @@ const SystemAdministrationSettings: React.FC = () => {
       {activeTab === 'security' && (
         <div>
           <SecuritySessionsSettings />
+        </div>
+      )}
+
+      {activeTab === 'audit' && (
+        <div>
+          <AuditDashboardPage />
         </div>
       )}
 

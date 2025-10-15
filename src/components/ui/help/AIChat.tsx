@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { UnifiedAIService } from '../../../services/ai/UnifiedAIService';
-import { useAIGuardrails } from '../../../hooks/useAIGuardrails';
+import { UnifiedAIService } from '@/services/ai/UnifiedAIService';
+import { useAIGuardrails } from '@/hooks/useAIGuardrails';
 
 interface AIChatProps {
   currentContext: string;

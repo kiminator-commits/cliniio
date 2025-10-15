@@ -1,5 +1,5 @@
-import { logEvent, trackUserAction } from '../../../../utils/monitoring';
-import { trackEvent as trackAnalyticsEvent } from '../../../analytics';
+import { logEvent, trackUserAction } from '@/utils/monitoring';
+import { AnalyticsTrackingService } from '../../../shared/analyticsTrackingService';
 
 export interface AnalyticsEvent {
   eventType: string;
@@ -517,7 +517,7 @@ export class InventoryAnalyticsProvider {
     eventName: string,
     properties?: Record<string, unknown>
   ): void {
-    trackAnalyticsEvent(eventName, properties);
+    AnalyticsTrackingService.trackEvent(eventName, properties);
   }
 
   /**

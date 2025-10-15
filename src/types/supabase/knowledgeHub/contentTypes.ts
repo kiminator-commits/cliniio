@@ -1,10 +1,10 @@
 // Knowledge Hub Content Types
 import { Json } from '../common';
 
-// Knowledge Hub content types - using any for now since tables are not defined in generated types
-export type KnowledgeHubContent = any;
-export type KnowledgeHubContentInsert = any;
-export type KnowledgeHubContentUpdate = any;
+// Knowledge Hub content types - using proper types based on table definitions
+export type KnowledgeHubContent = KnowledgeHubContentTable['knowledge_hub_content']['Row'];
+export type KnowledgeHubContentInsert = KnowledgeHubContentTable['knowledge_hub_content']['Insert'];
+export type KnowledgeHubContentUpdate = KnowledgeHubContentTable['knowledge_hub_content']['Update'];
 
 // Knowledge Hub content table definition
 export interface KnowledgeHubContentTable {

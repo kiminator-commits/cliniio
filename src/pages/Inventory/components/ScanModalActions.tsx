@@ -5,7 +5,7 @@ import {
   convertBarcodeToFormData,
   convertFormDataToInventoryFormData,
 } from '@/utils/Inventory/barcodeUtils';
-import { InventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 
 interface ScanModalActionsProps {
   scanMode: 'add' | 'use' | null;

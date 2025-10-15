@@ -1,7 +1,7 @@
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { ContentItem } from '../libraryTypes';
-import { ContentStatus } from '../../../pages/KnowledgeHub/types';
-import { categoryOrganizationService } from './categoryOrganizationService';
+import { ContentStatus as _ContentStatus } from '@/pages/KnowledgeHub/types';
+import { categoryOrganizationService as _categoryOrganizationService } from './categoryOrganizationService';
 
 export interface KnowledgeHubIntegrationError extends Error {
   code: string;
@@ -113,39 +113,25 @@ export class KnowledgeHubIntegrationService {
     libraryItem: ContentItem,
     userId: string
   ): Promise<Record<string, unknown>> {
-    // Use the category organization service for intelligent categorization
-    const categorySync =
-      await categoryOrganizationService.syncCategoryToKnowledgeHub(libraryItem);
-    const mappedCategory = categorySync.mappedCategory;
+    const contentPayload = {
+      description: libraryItem.data?.description || null,
+      media: libraryItem.data?.media || null,
+      requirements: libraryItem.data?.requirements || [],
+      steps: libraryItem.data?.steps || [],
+    };
 
     return {
+      id: libraryItem.id || crypto.randomUUID(),
       title: libraryItem.title,
-      description: libraryItem.data?.description,
-      content_category: mappedCategory,
-      content_status: 'Not Started' as ContentStatus,
-      progress: 0,
-      due_date: null, // Will be set by user or system later
-      department: libraryItem.department || null,
+      content_type: libraryItem.category || 'generic',
+      content: contentPayload, // required JSON column
+      domain: libraryItem.domain || null,
+      tags: [libraryItem.category, libraryItem.level].filter(Boolean),
+      status: 'not_started',
       author_id: userId,
-      assigned_by: userId,
-      content_type: this.mapContentType(libraryItem.category),
-      domain: 'general',
-      tags: [libraryItem.category, libraryItem.level],
-      status: 'published',
-      media: {
-        duration: libraryItem.duration,
-        points: libraryItem.points,
-        level: libraryItem.level,
-        source: libraryItem.source || 'Library',
-        publishedDate: libraryItem.publishedDate,
-      },
-      steps: [],
-      requirements: [],
-      is_repeat: false,
-      score: null,
-      certificate_url: null,
-      completion_date: null,
-      archived_date: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      is_active: true,
     };
   }
 

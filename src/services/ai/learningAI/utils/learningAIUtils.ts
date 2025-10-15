@@ -2,8 +2,8 @@ import type {
   LearningAISettings,
   LearningAISettingsRow,
   UserProfile,
-} from '../../../../types/learningAITypes';
-import type { Json } from '../../../../types/database.types';
+} from '@/types/learningAITypes';
+import type { Json } from '@/types/database.types';
 import { DEFAULT_VALUES } from '../learningAIConfig';
 
 /**

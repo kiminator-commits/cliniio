@@ -145,6 +145,17 @@ const TableRow: React.FC<TableRowProps> = React.memo(
       }
 
       cells.push(priceCell);
+
+      // Add Location cell for all tabs
+      const locationCell = (
+        <td key="location" className={styles.tableCell}>
+          {item.scanned_location ?? (
+            <span className="text-gray-400">Unassigned</span>
+          )}
+        </td>
+      );
+      cells.push(locationCell);
+
       return cells;
     }, [item, activeTab]);
 

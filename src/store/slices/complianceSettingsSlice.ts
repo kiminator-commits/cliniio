@@ -1,6 +1,5 @@
 import { StateCreator } from 'zustand';
 import { supabase } from '../../lib/supabaseClient';
-import { useSterilizationStore } from '../sterilizationStore';
 
 export interface ComplianceSettingsState {
   enforceCi: boolean;
@@ -83,16 +82,3 @@ export const createComplianceSettingsSlice: StateCreator<
     }
   },
 });
-
-// Export the hook for use in components
-export const useComplianceSettingsStore = () => {
-  const store = useSterilizationStore();
-  return {
-    requireCi: store.enforceCi,
-    requireBi: store.enforceBi,
-    warnOnly: !store.enforceCi, // When CI is not required, show warnings
-    loading: store.loading,
-    fetchComplianceSettings: store.fetchComplianceSettings,
-    updateComplianceSettings: store.updateComplianceSettings,
-  };
-};

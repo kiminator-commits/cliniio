@@ -15,6 +15,7 @@ import {
 } from '@mdi/js';
 
 import { useStatusTypesStore } from '../../../store/statusTypesStore';
+import { CameraScanningService } from '@/services/cameraScanningService';
 
 export interface EnvironmentalCleanScanModalProps {
   show: boolean;
@@ -99,28 +100,23 @@ const EnvironmentalCleanScanModal: React.FC<
     }));
   }, [coreStatuses, publishedStatuses]);
 
-  const handleScan = () => {
+  const handleScan = async () => {
     setIsScanning(true);
     setScanResult(null);
 
-    // Simulate scanning
-    setTimeout(() => {
-      const demoRooms = [
-        'ROOM-001',
-        'ROOM-002',
-        'ROOM-003',
-        'ROOM-004',
-        'ROOM-005',
-      ];
-      const randomRoom =
-        demoRooms[Math.floor(Math.random() * demoRooms.length)];
-
-      setScanResult('success');
+    try {
+      // Use real camera scanning service
+      const barcode = await CameraScanningService.scanBarcode();
       if (onRoomScan) {
-        onRoomScan(randomRoom);
+        onRoomScan(barcode);
       }
+      setScanResult('success');
+    } catch (err) {
+      console.error('Scan failed:', err);
+      setScanResult('error');
+    } finally {
       setIsScanning(false);
-    }, 1000);
+    }
   };
 
   const handleLocalStatusSelect = (status: string) => {

@@ -79,7 +79,7 @@ export const transformFormDataForModal = (
   const status = (storeFormData as { status?: unknown }).status || '';
 
   // Helper function to format dates for HTML date inputs
-  const formatDateForInput = (dateString?: string | null): string => {
+  const _formatDateForInput = (dateString?: string | null): string => {
     if (!dateString) return '';
     try {
       const date = new Date(dateString);

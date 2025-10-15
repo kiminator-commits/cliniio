@@ -1,130 +1,111 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getAllContentItems } from '../services/supabaseService';
+import type { ContentItem } from '../types';
 import Icon from '@mdi/react';
-import { mdiUpdate } from '@mdi/js';
-import { supabase } from '@/lib/supabaseClient';
-import { KnowledgeHubService } from '../services/knowledgeHubService';
-import { RecentUpdate } from '../services/types/knowledgeHubTypes';
+import { mdiClockOutline, mdiRefresh } from '@mdi/js';
+
+interface RecentUpdate {
+  id: string;
+  title: string;
+  type: string;
+  updated_at: string;
+}
 
 export const RecentUpdatesPanel: React.FC = () => {
-  const [recentUpdates, setRecentUpdates] = useState<RecentUpdate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [updates, setUpdates] = useState<RecentUpdate[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchRecentUpdates = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Get current user
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          setRecentUpdates([]);
-          return;
-        }
-
-        // Fetch recent user activity
-        // Performance optimization: Removed excessive logging
-        const updates = await KnowledgeHubService.getRecentUserActivity(
-          user.id,
-          10
-        );
-        // Performance optimization: Removed excessive logging
-        setRecentUpdates(updates as unknown as RecentUpdate[]);
-      } catch (err) {
-        console.error(
-          '❌ RecentUpdatesPanel: Error fetching recent updates:',
-          err
-        );
-        setError('Failed to load recent updates');
-        setRecentUpdates([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRecentUpdates();
-  }, []);
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-    );
-
-    if (diffInHours < 1) {
-      return 'Just now';
-    } else if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays}d ago`;
+  const fetchUpdates = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Fetch the most recently updated items from Supabase
+      const items: ContentItem[] = await getAllContentItems();
+      const sorted = items
+        .filter((item) => item.lastUpdated)
+        .sort(
+          (a, b) =>
+            new Date(b.lastUpdated as string).getTime() -
+            new Date(a.lastUpdated as string).getTime()
+        )
+        .slice(0, 10)
+        .map((item) => ({
+          id: item.id,
+          title: item.title || 'Untitled',
+          type: item.category || 'Unknown',
+          updated_at: item.lastUpdated as string,
+        }));
+      setUpdates(sorted);
+    } catch (err: any) {
+      console.error('Failed to load recent updates:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchUpdates();
+  }, []);
+
   return (
-    <div
-      className="bg-white rounded-lg shadow p-4"
-      style={{ borderLeft: '4px solid rgba(78, 205, 196, 0.5)' }}
-    >
-      <h2 className="text-lg font-semibold text-[#5b5b5b] flex items-center mb-2">
-        <Icon path={mdiUpdate} size={1.1} color="#4ECDC4" className="mr-2" />
-        Recent Updates
-      </h2>
-      <div
-        className="overflow-y-auto scrollbar-hide"
-        style={{ maxHeight: '175px' }}
-      >
-        {isLoading ? (
-          <div className="text-center py-4 text-gray-500 text-sm">
-            Loading updates...
+    <div className="bg-white rounded-lg p-4 shadow-sm border">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+          <Icon
+            path={mdiClockOutline}
+            size={1.1}
+            color="#4ECDC4"
+            className="mr-2"
+          />
+          Recent Activity
+        </h3>
+        <button
+          onClick={fetchUpdates}
+          disabled={loading}
+          className="p-1 text-gray-500 hover:text-[#4ECDC4] transition-colors"
+          title="Refresh activity"
+        >
+          <Icon
+            path={mdiRefresh}
+            size={0.8}
+            className={loading ? 'animate-spin' : ''}
+          />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-2">
+        {loading ? (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#4ECDC4]"></div>
+            <span className="ml-2 text-sm text-gray-500">Loading...</span>
           </div>
         ) : error ? (
-          <div className="text-center py-4 text-red-500 text-sm">{error}</div>
-        ) : recentUpdates.length > 0 ? (
-          recentUpdates.map((update) => (
-            <div
-              key={update.id}
-              className="flex items-center py-1.5 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <div className="flex-1">
-                <p className="text-sm font-medium text-[#5b5b5b]">
-                  {update.title}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {formatTime(update.time)}
-                </p>
+          <div className="text-red-500 text-sm py-2 px-2 bg-red-50 rounded">
+            Error loading activity. Please try refreshing.
+          </div>
+        ) : updates.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-sm text-gray-500 mb-1">No recent activity</p>
+            <p className="text-xs text-gray-400">
+              Activity will appear here as you interact with content
+            </p>
+          </div>
+        ) : (
+          updates.map((update) => (
+            <div key={update.id} className="border-b pb-2 last:border-b-0">
+              <div className="font-medium text-sm text-gray-900">
+                {update.title}
               </div>
-              <span
-                className={`text-xs px-2 py-1 rounded-full ${
-                  update.type === 'new'
-                    ? 'bg-blue-100 text-blue-700'
-                    : update.type === 'completed'
-                      ? 'bg-green-100 text-green-700'
-                      : update.type === 'assigned'
-                        ? 'bg-purple-100 text-purple-700'
-                        : update.type === 'viewed'
-                          ? 'bg-orange-100 text-orange-700'
-                          : 'bg-gray-100 text-gray-700'
-                }`}
-              >
-                {update.type
-                  ? update.type.charAt(0).toUpperCase() + update.type.slice(1)
-                  : 'Unknown'}
-              </span>
+              <div className="text-xs text-gray-500">
+                {update.type} —{' '}
+                {new Date(update.updated_at).toLocaleDateString()}
+              </div>
             </div>
           ))
-        ) : (
-          <div className="text-center py-6 text-gray-500">
-            <div className="text-sm mb-2">No recent updates yet</div>
-            <div className="text-xs text-gray-400">
-              Start learning to see your progress here
-            </div>
-          </div>
         )}
       </div>
     </div>

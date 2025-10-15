@@ -1,6 +1,10 @@
 // Library imports
 import { supabase } from '../../../lib/supabaseClient';
+import { Database } from '../../../types/supabase/generated';
 import { UnifiedAISettings } from './AISettingsConfigProvider';
+import { logSettingsAudit } from '@/services/audit/AuditLogger';
+
+export type AISettings = Database['public']['Tables']['ai_settings']['Row'];
 
 export class AISettingsPersistenceProvider {
   private facilityId: string;
@@ -17,15 +21,26 @@ export class AISettingsPersistenceProvider {
       const { error } = await supabase.from('ai_settings').upsert(
         {
           facility_id: this.facilityId,
+          module: 'general',
           settings: settings,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: 'facility_id' }
+        { onConflict: 'facility_id,module' }
       );
 
       if (error) {
         console.error('Error saving to unified table:', error);
         return false;
+      }
+
+      if (!error && data) {
+        await logSettingsAudit({
+          facilityId: this.facilityId,
+          userId: 'system',
+          module: 'general',
+          action: 'UPDATE',
+          details: data[0] ?? {},
+        });
       }
 
       return true;
@@ -42,6 +57,7 @@ export class AISettingsPersistenceProvider {
         .from('ai_settings')
         .select('settings')
         .eq('facility_id', this.facilityId)
+        .eq('module', 'general')
         .single();
 
       if (error) {
@@ -66,7 +82,8 @@ export class AISettingsPersistenceProvider {
       const { error } = await supabase
         .from('ai_settings')
         .delete()
-        .eq('facility_id', this.facilityId);
+        .eq('facility_id', this.facilityId)
+        .eq('module', 'general');
 
       if (error) {
         console.error('Error deleting from unified table:', error);
@@ -87,6 +104,7 @@ export class AISettingsPersistenceProvider {
         .from('ai_settings')
         .select('facility_id')
         .eq('facility_id', this.facilityId)
+        .eq('module', 'general')
         .single();
 
       if (error) {
@@ -116,6 +134,7 @@ export class AISettingsPersistenceProvider {
         .from('ai_settings')
         .select('updated_at, ai_version, created_at')
         .eq('facility_id', this.facilityId)
+        .eq('module', 'general')
         .single();
 
       if (error) {
@@ -143,6 +162,7 @@ export class AISettingsPersistenceProvider {
     try {
       const { error } = await supabase.from('ai_settings_backup').insert({
         facility_id: this.facilityId,
+        module: 'general',
         settings: settings,
         backup_date: new Date().toISOString(),
         ai_version: settings.aiVersion,
@@ -169,6 +189,7 @@ export class AISettingsPersistenceProvider {
         .from('ai_settings_backup')
         .select('settings')
         .eq('facility_id', this.facilityId)
+        .eq('module', 'general')
         .order('backup_date', { ascending: false });
 
       if (backupDate) {
@@ -205,6 +226,7 @@ export class AISettingsPersistenceProvider {
         .from('ai_settings_backup')
         .select('backup_date, ai_version')
         .eq('facility_id', this.facilityId)
+        .eq('module', 'general')
         .order('backup_date', { ascending: false });
 
       if (error) {

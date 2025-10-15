@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@mdi/react';
 import { mdiTrophy, mdiClose } from '@mdi/js';
+import { supabase } from '@/lib/supabaseClient';
 
 export interface LeaderboardUser {
   id: string;
@@ -30,6 +31,37 @@ const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   loading = false,
   error = null,
 }) => {
+  const [category, setCategory] = useState<
+    'All' | 'Learning' | 'Cleaning' | 'Challenges'
+  >('All');
+  const [_leaderboard, _setLeaderboard] = useState<
+    { user_id: string; total_xp: number }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        let query = supabase
+          .from('user_gamification_stats')
+          .select('user_id, total_xp, category');
+
+        if (category !== 'All')
+          query = query.eq('category', category.toLowerCase());
+
+        const { data, error } = await query
+          .order('total_xp', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+        setLeaderboard(data || []);
+      } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [category]);
+
   // Provide default values to prevent undefined errors
   const safeData = {
     rank: gamificationData?.rank || 1,
@@ -88,6 +120,22 @@ const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 <div className="text-red-500 text-xs mt-1">{error}</div>
               </div>
             )}
+
+            <div className="flex gap-2 mb-4 justify-center">
+              {['All', 'Learning', 'Cleaning', 'Challenges'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat as 'All' | 'Learning' | 'Cleaning' | 'Challenges')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium border transition ${
+                    category === cat
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
 
             <div className="space-y-3">
               {loading && (

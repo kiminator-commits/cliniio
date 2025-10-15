@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { useInventoryModals } from '@/hooks/inventory/useInventoryModals';
 import {
   INVENTORY_MODAL_CONFIGS,
@@ -6,7 +6,10 @@ import {
 } from '@/config/modalConfig';
 import { validateFormData } from '@/config/modalConfig';
 import ModalContent from './ModalContent';
-import UploadBarcodeModal from './UploadBarcodeModal';
+
+// Lazy load large modals
+const UploadBarcodeModal = lazy(() => import('./UploadBarcodeModal'));
+const _EnhancedTrackModal = lazy(() => import('./EnhancedTrackModal'));
 
 /**
  * Refactored InventoryModals component that uses the new modal management system
@@ -79,10 +82,16 @@ const InventoryModals: React.FC = () => {
       />
 
       {/* Upload Barcode Modal */}
-      <UploadBarcodeModal
-        show={showUploadBarcodeModal}
-        onClose={closeUploadBarcodeModal}
-      />
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center p-4">Loading...</div>
+        }
+      >
+        <UploadBarcodeModal
+          show={showUploadBarcodeModal}
+          onClose={closeUploadBarcodeModal}
+        />
+      </Suspense>
 
       {/* Scan Modal - could be refactored to use ModalContent as well */}
       {showScanModal && (

@@ -9,92 +9,27 @@ import React, {
 import { ContentItem } from '../types';
 import { ProviderService } from '../services/providerService';
 import { supabase } from '@/lib/supabaseClient';
-// import { getAllContentItems } from '../__mocks__/knowledgeHubApiService';
 
 // Function that fetches content from available tables
 const getAllContentItems = async (): Promise<ContentItem[]> => {
-  // Performance optimization: Removed excessive logging
-
   try {
-    // Return sample content for now to fix the database relationship issue
-    const sampleContent: ContentItem[] = [
-      {
-        id: 'course-1',
-        title: 'Sterilization Fundamentals',
-        description:
-          'Learn the basics of sterilization processes and best practices',
-        category: 'Courses',
-        status: 'draft',
-        dueDate: new Date().toISOString().split('T')[0],
-        progress: 0,
-        department: 'central_sterile',
-        lastUpdated: undefined, // No start date since not started
-        difficultyLevel: 'Beginner',
-        estimatedDuration: 30,
-      },
-      {
-        id: 'course-2',
-        title: 'Advanced Sterilization Techniques',
-        description:
-          'Master advanced sterilization methods and troubleshooting',
-        category: 'Courses',
-        status: 'review',
-        dueDate: new Date().toISOString().split('T')[0],
-        progress: 45,
-        department: 'central_sterile',
-        lastUpdated: '2025-01-15T10:00:00Z', // Started on Jan 15
-        difficultyLevel: 'Advanced',
-        estimatedDuration: 60,
-      },
-      {
-        id: 'policy-1',
-        title: 'Infection Control Policy',
-        description:
-          'Comprehensive infection prevention and control guidelines',
-        category: 'Policies',
-        status: 'draft',
-        dueDate: new Date().toISOString().split('T')[0],
-        progress: 0,
-        department: 'clinical',
-        lastUpdated: undefined, // No start date since not started
-        difficultyLevel: 'Beginner',
-        estimatedDuration: 20,
-      },
-      {
-        id: 'procedure-1',
-        title: 'Steam Sterilization Procedure',
-        description: 'Step-by-step steam sterilization process',
-        category: 'Procedures',
-        status: 'published',
-        dueDate: new Date().toISOString().split('T')[0],
-        progress: 100,
-        department: 'central_sterile',
-        lastUpdated: '2025-01-10T14:30:00Z', // Started on Jan 10
-        difficultyLevel: 'Beginner',
-        estimatedDuration: 15,
-      },
-    ];
+    const { data, error } = await supabase
+      .from('knowledge_hub_content')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    // Performance optimization: Removed excessive logging
-    return sampleContent;
-  } catch (error) {
-    console.error('❌ getAllContentItems: Error:', error);
-    // Return minimal fallback content
-    return [
-      {
-        id: 'fallback-1',
-        title: 'Sample Course',
-        description: 'This is a sample course for demonstration',
-        category: 'Courses',
-        status: 'draft',
-        dueDate: new Date().toISOString().split('T')[0],
-        progress: 0,
-        department: 'general',
-        lastUpdated: new Date().toISOString(),
-        difficultyLevel: 'Beginner',
-        estimatedDuration: 15,
-      },
-    ];
+    if (error) {
+      console.error('❌ Failed to fetch Knowledge Hub content:', error.message);
+      return [];
+    }
+
+    console.log(
+      `✅ Loaded ${data?.length || 0} Knowledge Hub items from Supabase`
+    );
+    return data || [];
+  } catch (err) {
+    console.error('❌ Unexpected error fetching Knowledge Hub content:', err);
+    return [];
   }
 };
 

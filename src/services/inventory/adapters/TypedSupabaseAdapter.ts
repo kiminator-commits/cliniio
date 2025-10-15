@@ -69,7 +69,12 @@ export class TypedSupabaseAdapter {
       if (options?.filters) {
         Object.entries(options.filters).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            query.eq(key, value);
+            if (key === 'location') {
+              // Use ilike for location filtering to support partial matches
+              query.ilike('scanned_location', `%${value}%`);
+            } else {
+              query.eq(key, value);
+            }
           }
         });
       }
@@ -420,6 +425,8 @@ export class TypedSupabaseAdapter {
         expiration_date: row.expiration_date,
         unit_cost: row.unit_cost,
         category: row.category,
+        scanned_location: row.scanned_location,
+        ai_status: row.ai_status,
       };
 
       return {
@@ -452,6 +459,8 @@ export class TypedSupabaseAdapter {
       expiration_date: item.expiration_date,
       unit_cost: item.unit_cost,
       category: item.category,
+      scanned_location: item.scanned_location,
+      ai_status: item.ai_status,
     };
   }
 }

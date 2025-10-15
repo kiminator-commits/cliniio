@@ -21,9 +21,17 @@ import { SharedLayout } from '../../components/Layout/SharedLayout';
 import { RoomScanService, Room } from './services/RoomScanService';
 import { mdiBarcode, mdiArrowLeft } from '@mdi/js';
 import { RoomStatusType } from './types';
+import {
+  createStatusMappingConfig,
+  getStatusIcon,
+  getStatusBgColor,
+  getStatusTextColor,
+} from './components/ui/utils/statusMappingUtils';
+import { useStatusTypesStore } from '../../store/statusTypesStore';
 
 const ScannerPage: React.FC = () => {
   const navigate = useNavigate();
+  const { getAllStatusTypes } = useStatusTypesStore();
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(
     null
@@ -35,17 +43,23 @@ const ScannerPage: React.FC = () => {
   // Get available statuses from the service
   const availableStatuses = useMemo(() => {
     const statuses = RoomScanService.getAvailableStatuses();
+    const config = createStatusMappingConfig();
 
-    // Map to the format expected by the UI
+    // Map to the format expected by the UI using the same utilities as the main page
     return statuses.map((status) => ({
       id: status.id,
       name: status.name,
-      icon: status.icon || 'default-icon',
-      color: status.color || '#6b7280', // Default gray color
+      icon: getStatusIcon(status.icon || 'default', config.iconMap),
+      color: status.color || '#4b5563', // Default gray color matching main page
+      bgColor: getStatusBgColor(status.color || '#4b5563', config.bgColorMap),
+      textColor: getStatusTextColor(
+        status.color || '#4b5563',
+        config.textColorMap
+      ),
       description: status.description || '',
       isCore: status.isCore || false,
     }));
-  }, []);
+  }, [getAllStatusTypes]);
 
   const handleScan = async () => {
     setIsScanning(true);
@@ -217,106 +231,25 @@ const ScannerPage: React.FC = () => {
                       <button
                         key={status.id}
                         onClick={() => handleStatusSelect(status.id)}
-                        className={`w-full p-3 rounded-lg border-2 transition-all duration-200 text-left ${
-                          status.color === '#16a34a'
-                            ? 'border-green-200 hover:border-green-300 bg-green-50 hover:bg-green-100'
-                            : status.color === '#ca8a04'
-                              ? 'border-yellow-200 hover:border-yellow-300 bg-yellow-50 hover:bg-yellow-100'
-                              : status.color === '#dc2626'
-                                ? 'border-red-200 hover:border-red-300 bg-red-50 hover:bg-red-100'
-                                : status.color === '#9333ea'
-                                  ? 'border-purple-200 hover:border-purple-300 bg-purple-50 hover:bg-purple-100'
-                                  : status.color === '#4b5563'
-                                    ? 'border-gray-200 hover:border-gray-300 bg-gray-50 hover:bg-gray-100'
-                                    : status.color === '#b45309'
-                                      ? 'border-amber-200 hover:border-amber-300 bg-amber-50 hover:bg-amber-100'
-                                      : status.color === '#047857'
-                                        ? 'border-emerald-200 hover:border-emerald-300 bg-emerald-50 hover:bg-emerald-100'
-                                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 hover:bg-gray-100'
-                        }`}
+                        className="w-full p-3 rounded-lg border border-gray-200 shadow-sm transition-all duration-200 text-left hover:shadow-md hover:-translate-y-0.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]"
                       >
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`p-1.5 rounded-lg ${
-                              status.color === '#16a34a'
-                                ? 'bg-green-100'
-                                : status.color === '#ca8a04'
-                                  ? 'bg-yellow-100'
-                                  : status.color === '#dc2626'
-                                    ? 'bg-red-100'
-                                    : status.color === '#9333ea'
-                                      ? 'bg-purple-100'
-                                      : status.color === '#4b5563'
-                                        ? 'bg-gray-100'
-                                        : status.color === '#b45309'
-                                          ? 'bg-amber-100'
-                                          : status.color === '#047857'
-                                            ? 'bg-emerald-100'
-                                            : 'bg-gray-100'
-                            }`}
-                          >
+                        <div className="flex items-center gap-3">
+                          <div className={`${status.bgColor} rounded-full p-2`}>
                             <Icon
                               path={status.icon}
                               size={1}
-                              className={
-                                status.color === '#16a34a'
-                                  ? 'text-green-600'
-                                  : status.color === '#ca8a04'
-                                    ? 'text-yellow-600'
-                                    : status.color === '#dc2626'
-                                      ? 'text-red-600'
-                                      : status.color === '#9333ea'
-                                        ? 'text-purple-600'
-                                        : status.color === '#4b5563'
-                                          ? 'text-gray-600'
-                                          : status.color === '#b45309'
-                                            ? 'text-amber-600'
-                                            : status.color === '#047857'
-                                              ? 'text-emerald-600'
-                                              : 'text-gray-600'
-                              }
+                              color={status.color}
+                              aria-hidden="true"
                             />
                           </div>
-                          <div>
+                          <div className="flex-1">
                             <h4
-                              className={`font-semibold text-sm ${
-                                status.color === '#16a34a'
-                                  ? 'text-green-800'
-                                  : status.color === '#ca8a04'
-                                    ? 'text-yellow-800'
-                                    : status.color === '#dc2626'
-                                      ? 'text-red-800'
-                                      : status.color === '#9333ea'
-                                        ? 'text-purple-800'
-                                        : status.color === '#4b5563'
-                                          ? 'text-gray-800'
-                                          : status.color === '#b45309'
-                                            ? 'text-amber-800'
-                                            : status.color === '#047857'
-                                              ? 'text-emerald-800'
-                                              : 'text-gray-800'
-                              }`}
+                              className={`font-semibold text-sm ${status.textColor}`}
                             >
                               {status.name}
                             </h4>
                             <p
-                              className={`text-xs ${
-                                status.color === '#16a34a'
-                                  ? 'text-green-600'
-                                  : status.color === '#ca8a04'
-                                    ? 'text-yellow-600'
-                                    : status.color === '#dc2626'
-                                      ? 'text-red-600'
-                                      : status.color === '#9333ea'
-                                        ? 'text-purple-600'
-                                        : status.color === '#4b5563'
-                                          ? 'text-gray-600'
-                                          : status.color === '#b45309'
-                                            ? 'text-amber-600'
-                                            : status.color === '#047857'
-                                              ? 'text-emerald-600'
-                                              : 'text-gray-600'
-                              }`}
+                              className={`text-xs ${status.textColor} opacity-75`}
                             >
                               {status.description}
                             </p>

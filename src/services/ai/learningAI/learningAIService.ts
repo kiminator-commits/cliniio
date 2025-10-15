@@ -1,17 +1,15 @@
 import { LearningAIAnalyticsService } from './analytics';
-import {
-  RecommendationService,
-  KnowledgeGapService,
-  PathwayAnalysisService,
-  EvaluationService,
-} from './';
+import { RecommendationService } from './recommendationService';
+import { KnowledgeGapService } from './knowledgeGapService';
+import { PathwayAnalysisService } from './pathwayAnalysisService';
+import { EvaluationService } from './evaluationService';
 import {
   loadLearningAISettings,
   saveLearningAISettings,
   getLearningProgressData,
   getUserProfileData,
 } from './providers/learningAISupabaseProvider';
-import { validateFeatureEnabled } from '../../learningAI/learningAIUtils';
+import { isFeatureEnabled } from './learningAIUtils';
 import { DEFAULT_AI_SETTINGS } from './learningAIConfig';
 import type {
   LearningAISettings,
@@ -82,7 +80,7 @@ export class LearningAIService {
   ): Promise<PersonalizedRecommendationResult | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'personalized_recommendations')) {
+      if (!isFeatureEnabled(settings, 'personalized_recommendations')) {
         throw new Error('Personalized recommendations AI is not enabled');
       }
 
@@ -101,7 +99,7 @@ export class LearningAIService {
   ): Promise<SkillGapAnalysisResult | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'skill_gap_analysis')) {
+      if (!isFeatureEnabled(settings, 'skill_gap_analysis')) {
         throw new Error('Skill gap analysis AI is not enabled');
       }
 
@@ -119,7 +117,7 @@ export class LearningAIService {
   ): Promise<LearningPathOptimizationResult | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'learning_path_optimization')) {
+      if (!isFeatureEnabled(settings, 'learning_path_optimization')) {
         throw new Error('Learning path optimization AI is not enabled');
       }
 
@@ -137,7 +135,7 @@ export class LearningAIService {
   ): Promise<PerformancePredictionResult | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'performance_prediction')) {
+      if (!isFeatureEnabled(settings, 'performance_prediction')) {
         throw new Error('Performance prediction AI is not enabled');
       }
 
@@ -163,7 +161,7 @@ export class LearningAIService {
   } | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'adaptive_difficulty')) {
+      if (!isFeatureEnabled(settings, 'adaptive_difficulty')) {
         throw new Error('Adaptive difficulty AI is not enabled');
       }
 
@@ -187,7 +185,7 @@ export class LearningAIService {
   } | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'engagement_metrics')) {
+      if (!isFeatureEnabled(settings, 'engagement_metrics')) {
         throw new Error('Engagement analysis AI is not enabled');
       }
 
@@ -210,7 +208,7 @@ export class LearningAIService {
   } | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'retention_analysis')) {
+      if (!isFeatureEnabled(settings, 'retention_analysis')) {
         throw new Error('Retention prediction AI is not enabled');
       }
 
@@ -235,7 +233,7 @@ export class LearningAIService {
   } | null> {
     try {
       const settings = await this.loadSettings();
-      if (!validateFeatureEnabled(settings, 'learning_analytics_enabled')) {
+      if (!isFeatureEnabled(settings, 'learning_analytics_enabled')) {
         throw new Error('Learning analytics AI is not enabled');
       }
 

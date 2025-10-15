@@ -17,46 +17,50 @@ export const useBackgroundSync = ({
 
   // Auto-retry mechanism for non-critical errors
   const attemptBackgroundSync = useCallback(async () => {
-    try {
-      // Check if user is authenticated before attempting sync
-      const authToken = localStorage.getItem('authToken');
-      const currentUser = localStorage.getItem('currentUser');
+    const performSync = async () => {
+      try {
+        // Check if user is authenticated before attempting sync
+        const authToken = localStorage.getItem('authToken');
+        const currentUser = localStorage.getItem('currentUser');
 
-      if (!authToken || !currentUser) {
-        console.log('Background sync skipped: No authentication data');
-        return;
+        if (!authToken || !currentUser) {
+          console.log('Background sync skipped: No authentication data');
+          return;
+        }
+
+        // Simulate background sync operations (task refresh, metrics update)
+        // These are non-critical operations that can fail silently
+        console.log('Attempting background sync...');
+
+        // In a real implementation, this would be actual API calls
+        // For now, we'll simulate a successful sync operation
+
+        // Reset retry attempts on successful operation
+        retryAttemptsRef.current = 0;
+      } catch (error) {
+        console.warn('Background sync failed:', error);
+
+        // Increment retry attempts
+        retryAttemptsRef.current += 1;
+
+        // Only retry if we haven't exceeded max attempts
+        if (retryAttemptsRef.current < BACKGROUND_SYNC_CONFIG.maxRetries) {
+          console.log(
+            `Retrying background sync in ${BACKGROUND_SYNC_CONFIG.baseDelay}ms (attempt ${retryAttemptsRef.current}/${BACKGROUND_SYNC_CONFIG.maxRetries})`
+          );
+
+          retryTimeoutRef.current = setTimeout(() => {
+            performSync();
+          }, BACKGROUND_SYNC_CONFIG.baseDelay);
+        } else {
+          console.error('Background sync failed after all retry attempts');
+          // Only set error state if all retries fail
+          onError('Background sync failed after all retry attempts');
+        }
       }
+    };
 
-      // Simulate background sync operations (task refresh, metrics update)
-      // These are non-critical operations that can fail silently
-      console.log('Attempting background sync...');
-
-      // In a real implementation, this would be actual API calls
-      // For now, we'll simulate a successful sync operation
-
-      // Reset retry attempts on successful operation
-      retryAttemptsRef.current = 0;
-    } catch (error) {
-      console.warn('Background sync failed:', error);
-
-      // Increment retry attempts
-      retryAttemptsRef.current += 1;
-
-      // Only retry if we haven't exceeded max attempts
-      if (retryAttemptsRef.current < BACKGROUND_SYNC_CONFIG.maxRetries) {
-        console.log(
-          `Retrying background sync in ${BACKGROUND_SYNC_CONFIG.baseDelay}ms (attempt ${retryAttemptsRef.current}/${BACKGROUND_SYNC_CONFIG.maxRetries})`
-        );
-
-        retryTimeoutRef.current = setTimeout(() => {
-          attemptBackgroundSync();
-        }, BACKGROUND_SYNC_CONFIG.baseDelay);
-      } else {
-        console.error('Background sync failed after all retry attempts');
-        // Only set error state if all retries fail
-        onError('Background sync failed after all retry attempts');
-      }
-    }
+    await performSync();
   }, [onError]);
 
   useEffect(() => {

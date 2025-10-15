@@ -15,9 +15,11 @@ export const useLoginRateLimit = () => {
       return;
     }
     if (lockedUntil && Date.now() >= lockedUntil) {
-      // Unlock after time period
-      setAttempts(0);
-      setLockedUntil(null);
+      // Unlock after time period - use setTimeout to avoid synchronous setState
+      setTimeout(() => {
+        setAttempts(0);
+        setLockedUntil(null);
+      }, 0);
     }
   }, [lockedUntil]);
 

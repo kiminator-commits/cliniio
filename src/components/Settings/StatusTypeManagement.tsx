@@ -24,6 +24,12 @@ interface StatusTypeManagementProps {
   onEditStatus: (status: StatusType) => void;
   onDeleteStatus: (statusId: string) => void;
   onTogglePublishStatus: (statusId: string, isPublished: boolean) => void;
+  statusCountInfo?: {
+    total: number;
+    core: number;
+    custom: number;
+    maxCustom: number;
+  };
 }
 
 const StatusTypeManagement: React.FC<StatusTypeManagementProps> = ({
@@ -32,6 +38,7 @@ const StatusTypeManagement: React.FC<StatusTypeManagementProps> = ({
   onEditStatus,
   onDeleteStatus,
   onTogglePublishStatus,
+  statusCountInfo,
 }) => {
   return (
     <div className="mb-4">
@@ -69,25 +76,34 @@ const StatusTypeManagement: React.FC<StatusTypeManagementProps> = ({
         ))}
       </div>
 
-      <div className="mb-3 flex items-center">
-        <span className="text-sm font-medium text-gray-700">
-          Custom Status Types (Optional)
-        </span>
-        <div className="relative ml-2 tooltip-container">
-          <div className="w-4 h-4 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold cursor-help">
-            i
-          </div>
-          <div className="tooltip-content">
-            <div className="mb-1 font-medium">💡 Data Integrity Protection</div>
-            <div className="space-y-1">
-              <div>• Similar statuses (≥90% match) are blocked</div>
-              <div>• Very similar statuses (≥80% match) show warnings</div>
-              <div>• Smart suggestions help you choose better names</div>
-              <div>• All statuses start as drafts for testing</div>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center">
+          <span className="text-sm font-medium text-gray-700">
+            Custom Status Types (Optional)
+          </span>
+          <div className="relative ml-2 tooltip-container">
+            <div className="w-4 h-4 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold cursor-help">
+              i
             </div>
-            <div className="tooltip-arrow"></div>
+            <div className="tooltip-content">
+              <div className="mb-1 font-medium">
+                💡 Data Integrity Protection
+              </div>
+              <div className="space-y-1">
+                <div>• Similar statuses (≥90% match) are blocked</div>
+                <div>• Very similar statuses (≥80% match) show warnings</div>
+                <div>• Smart suggestions help you choose better names</div>
+                <div>• All statuses start as drafts for testing</div>
+              </div>
+              <div className="tooltip-arrow"></div>
+            </div>
           </div>
         </div>
+        {statusCountInfo && (
+          <div className="text-xs text-gray-500">
+            {statusCountInfo.custom}/{statusCountInfo.maxCustom} custom statuses
+          </div>
+        )}
       </div>
       <p className="text-xs text-gray-600 mb-3">
         Custom statuses start as drafts. Click the eye icon to publish them and

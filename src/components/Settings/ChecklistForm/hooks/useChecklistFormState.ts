@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Checklist } from '../../../../store/checklistStore';
-import { UnifiedAIService } from '../../../../services/ai/UnifiedAIService';
+import { Checklist } from '@/store/checklistStore';
+import { UnifiedAIService } from '@/services/ai/UnifiedAIService';
 import {
   ChecklistFormData,
   DEFAULT_CHECKLIST_FORM_DATA,

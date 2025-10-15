@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { knowledgeHubApiService } from '../../services/knowledgeHubApiService';
+import { DEPRECATED_MOCK_NOTICE } from '../../services/deprecatedNotice';
 
 // Rate limiting state interface
 export interface RateLimitState {
@@ -31,12 +31,17 @@ export const createRateLimitSlice: StateCreator<RateLimitSlice> = (set) => ({
 
   // Rate limiting actions
   updateRateLimitStats: () => {
-    const stats = knowledgeHubApiService.getRateLimitStats();
+    console.warn(DEPRECATED_MOCK_NOTICE);
+    const stats = {
+      currentRequests: 0,
+      windowStart: Date.now(),
+      requestsInWindow: 0,
+    };
     set({ rateLimitStats: stats });
   },
 
   resetRateLimiter: () => {
-    knowledgeHubApiService.resetRateLimiter();
+    console.warn(DEPRECATED_MOCK_NOTICE);
     set({ rateLimitStats: null, isRateLimited: false });
   },
 

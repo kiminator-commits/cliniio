@@ -59,14 +59,14 @@ export type {
 } from './knowledgeHub';
 
 // Import table definitions from each module
-import { Database as CommonDatabase } from './common';
-import { InventoryTables } from './inventory';
-import { SterilizationTables } from './sterilization';
-import { EnvironmentalCleanTables } from './environmentalClean';
+import { Database as _CommonDatabase } from './common';
+import { InventoryTables as _InventoryTables } from './inventory';
+import { SterilizationTables as _SterilizationTables } from './sterilization';
+import { EnvironmentalCleanTables as _EnvironmentalCleanTables } from './environmentalClean';
 import {
-  KnowledgeHubTables,
-  KnowledgeHubViews,
-  KnowledgeHubFunctions,
+  KnowledgeHubTables as _KnowledgeHubTables,
+  KnowledgeHubViews as _KnowledgeHubViews,
+  KnowledgeHubFunctions as _KnowledgeHubFunctions,
 } from './knowledgeHub';
 
 // Re-export the proper generated Database type

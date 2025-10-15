@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLoginStore } from '@/stores/useLoginStore';
 import { useUser } from '@/contexts/UserContext';
 import { SecureAuthService } from '@/services/secureAuthService';
-import { trackEvent } from '@/services/analytics';
+import { trackEvent } from '@/services/analyticsService';
 import { LOGIN_CONFIG, LOGIN_ERRORS } from '@/constants/loginConstants';
 import { deviceManager } from '@/services/deviceManager';
 

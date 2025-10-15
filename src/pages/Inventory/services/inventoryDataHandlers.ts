@@ -128,7 +128,8 @@ export class FilterService {
         if (item.category !== 'Tools' && item.category !== 'Supplies') {
           return true;
         }
-        // Check if item is tracked (has tracking data)
+        // Use consistent tracking check - prefer useTrackedTools service
+        // This will be updated to use the centralized tracking service
         return (
           (item.data &&
           typeof item.data === 'object' &&

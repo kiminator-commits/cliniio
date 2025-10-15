@@ -89,7 +89,10 @@ export const RealtimePerformanceCard: React.FC = () => {
   };
 
   useEffect(() => {
-    updateStats();
+    // Use setTimeout to avoid calling setState synchronously in effect
+    setTimeout(() => {
+      updateStats();
+    }, 0);
   }, []);
 
   if (!stats) return null;

@@ -1,12 +1,7 @@
 import { DistributedCache } from './DistributedCache';
-import { Facility } from '../facilityService';
+import { Facility, CachedFacility } from '../../types/facilityTypes';
 import { logger } from '../../utils/_core/logger';
 import { isDevelopment } from '../../lib/getEnv';
-
-export interface CachedFacility {
-  facility: Facility;
-  timestamp: number;
-}
 
 export class DistributedFacilityCache {
   private cache: DistributedCache;

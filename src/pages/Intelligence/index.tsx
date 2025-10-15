@@ -10,14 +10,14 @@ import InsightsTab from './tabs/InsightsTab';
 import IntegrationsTab from './tabs/IntegrationsTab';
 import { useForecastingIntelligence } from '../../hooks/useForecastingIntelligence';
 import { useFacility } from '../../contexts/FacilityContext';
+import { IntelligenceRecommendationService } from '../../services/analytics/intelligenceRecommendationService';
+import { IntelligenceIntegrationService } from '../../services/analytics/intelligenceIntegrationService';
 import {
-  IntelligenceRecommendationService,
-  IntelligenceIntegrationService,
   IntelligenceRecommendation,
   OptimizationTip,
   RiskAlert,
   IntegrationMetrics,
-} from '../../services/analytics';
+} from '../../types/intelligenceRecommendationTypes';
 
 export default function IntelligencePage() {
   const [activeTab, setActiveTab] = useState('overview');

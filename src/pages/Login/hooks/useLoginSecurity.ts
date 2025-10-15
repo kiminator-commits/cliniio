@@ -50,14 +50,6 @@ export const useLoginSecurity = () => {
     checkHttps();
   }, []);
 
-  // Debounced validation to prevent excessive security checks
-  const debouncedValidateInputs = useDebounce(
-    ((email: string, password: string) => {
-      return validateInputsInternal(email, password);
-    }) as (...args: unknown[]) => unknown,
-    SECURITY_CONSTANTS.VALIDATION.DEBOUNCE_MS
-  );
-
   const validateInputsInternal = (email: string, password: string) => {
     // Basic validation first
     const basicErrors: string[] = [];
@@ -129,6 +121,14 @@ export const useLoginSecurity = () => {
       errors: [],
     };
   };
+
+  // Debounced validation to prevent excessive security checks
+  const debouncedValidateInputs = useDebounce(
+    ((email: string, password: string) => {
+      return validateInputsInternal(email, password);
+    }) as (...args: unknown[]) => unknown,
+    SECURITY_CONSTANTS.VALIDATION.DEBOUNCE_MS
+  );
 
   const validateInputs = (email: string, password: string) => {
     // For immediate validation (e.g., form submission), use internal validation

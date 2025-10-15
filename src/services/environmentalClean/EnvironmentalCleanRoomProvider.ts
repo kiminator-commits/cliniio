@@ -28,7 +28,7 @@ export class EnvironmentalCleanRoomProvider {
         `
         )
         .eq('status', 'clean')
-        .neq('completed_time', null)
+        .not('completed_time', 'is', null)
         .order('completed_time', { ascending: false })
         .limit(limit);
 

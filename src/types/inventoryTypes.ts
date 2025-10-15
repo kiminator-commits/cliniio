@@ -6,6 +6,8 @@ import { ToolStatus } from './toolTypes';
 
 // Extend the base inventory item with legacy compatibility
 export interface InventoryItem extends BaseInventoryItem {
+  facility_id: string;
+  scanned_location?: string | null;
   // Legacy aliases for backward compatibility
   lastUpdated?: string | null;
   expiryDate?: string | null;

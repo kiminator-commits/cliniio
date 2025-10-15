@@ -1,13 +1,13 @@
 // Knowledge Hub Learning Path and Certificate Types
 import { Json } from '../common';
 
-// Knowledge Hub learning path and certificate types - using any for now since tables are not defined in generated types
-export type KnowledgeHubLearningPath = any;
-export type KnowledgeHubLearningPathInsert = any;
-export type KnowledgeHubLearningPathUpdate = any;
-export type KnowledgeHubCertificate = any;
-export type KnowledgeHubCertificateInsert = any;
-export type KnowledgeHubCertificateUpdate = any;
+// Knowledge Hub learning path and certificate types - using proper types based on table definitions
+export type KnowledgeHubLearningPath = KnowledgeHubLearningPathsTable['knowledge_hub_learning_paths']['Row'];
+export type KnowledgeHubLearningPathInsert = KnowledgeHubLearningPathsTable['knowledge_hub_learning_paths']['Insert'];
+export type KnowledgeHubLearningPathUpdate = KnowledgeHubLearningPathsTable['knowledge_hub_learning_paths']['Update'];
+export type KnowledgeHubCertificate = KnowledgeHubCertificatesTable['knowledge_hub_certificates']['Row'];
+export type KnowledgeHubCertificateInsert = KnowledgeHubCertificatesTable['knowledge_hub_certificates']['Insert'];
+export type KnowledgeHubCertificateUpdate = KnowledgeHubCertificatesTable['knowledge_hub_certificates']['Update'];
 
 // Knowledge Hub learning paths table definition
 export interface KnowledgeHubLearningPathsTable {

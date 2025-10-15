@@ -127,18 +127,22 @@ export class PerformanceAlertingProvider {
   }
 
   /**
-   * Log performance snapshot capture
+   * Log performance snapshot capture (reduced frequency)
    */
   logSnapshotCaptured(
     timestamp: Date,
     metricsCount: number,
     alertsCount: number
   ): void {
-    logger.debug('Performance snapshot captured', {
-      timestamp,
-      metricsCount,
-      alertsCount,
-    });
+    // Only log every 5th snapshot to reduce console noise
+    const shouldLog = Math.random() < 0.2; // 20% chance to log
+    if (shouldLog) {
+      logger.debug('Performance snapshot captured', {
+        timestamp,
+        metricsCount,
+        alertsCount,
+      });
+    }
   }
 
   /**

@@ -1,13 +1,13 @@
 // Knowledge Hub Achievement Types
 import { Json } from '../common';
 
-// Knowledge Hub achievement types - using any for now since tables are not defined in generated types
-export type KnowledgeHubAchievement = any;
-export type KnowledgeHubAchievementInsert = any;
-export type KnowledgeHubAchievementUpdate = any;
-export type KnowledgeHubUserAchievement = any;
-export type KnowledgeHubUserAchievementInsert = any;
-export type KnowledgeHubUserAchievementUpdate = any;
+// Knowledge Hub achievement types - using proper types based on table definitions
+export type KnowledgeHubAchievement = KnowledgeHubAchievementsTable['knowledge_hub_achievements']['Row'];
+export type KnowledgeHubAchievementInsert = KnowledgeHubAchievementsTable['knowledge_hub_achievements']['Insert'];
+export type KnowledgeHubAchievementUpdate = KnowledgeHubAchievementsTable['knowledge_hub_achievements']['Update'];
+export type KnowledgeHubUserAchievement = KnowledgeHubUserAchievementsTable['knowledge_hub_user_achievements']['Row'];
+export type KnowledgeHubUserAchievementInsert = KnowledgeHubUserAchievementsTable['knowledge_hub_user_achievements']['Insert'];
+export type KnowledgeHubUserAchievementUpdate = KnowledgeHubUserAchievementsTable['knowledge_hub_user_achievements']['Update'];
 
 // Knowledge Hub achievements table definition
 export interface KnowledgeHubAchievementsTable {

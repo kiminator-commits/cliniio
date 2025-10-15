@@ -265,7 +265,11 @@ export const trackError = AnalyticsService.trackError.bind(AnalyticsService);
 export const trackPerformance =
   AnalyticsService.trackPerformance.bind(AnalyticsService);
 
-// Export types for backward compatibility
-export * from './types';
+// Export specific types instead of export * to prevent circular dependencies
+export type {
+  AnalyticsConfig,
+  AnalyticsProvider,
+  AnalyticsProviderConfig,
+} from './types';
 
 export default AnalyticsService;

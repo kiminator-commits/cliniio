@@ -1,14 +1,14 @@
 import { useCallback } from 'react';
-import { SterilizationPhase } from '../../../store/sterilizationStore';
-import { SterilizationCycle } from '../../../store/slices/types/sterilizationCycleTypes';
+import { SterilizationPhase } from '@/store/sterilizationStore';
+import { SterilizationCycle } from '@/store/slices/types/sterilizationCycleTypes';
 import {
   PhaseTimerService,
   PhaseStatusInfo,
   PhaseProgressInfo,
 } from '../services/phaseTimerService';
 import { toast } from 'react-hot-toast';
-import { supabase } from '../../../lib/supabaseClient';
-import { useComplianceSettingsStore } from '../../../store/slices/complianceSettingsSlice';
+import { supabase } from '@/lib/supabaseClient';
+import { useComplianceSettingsStore } from '@/store/slices/complianceSettingsSlice';
 
 // Helper function to get current facility ID
 async function getCurrentFacilityId(): Promise<string> {

@@ -24,10 +24,13 @@ const ScanItemModal: React.FC<ScanItemModalProps> = ({
 
   useEffect(() => {
     if (show) {
-      setError(null);
-      setSuccess(null);
-      setScanMode(null);
-      setIsScanning(false);
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setError(null);
+        setSuccess(null);
+        setScanMode(null);
+        setIsScanning(false);
+      }, 0);
     }
   }, [show]);
 

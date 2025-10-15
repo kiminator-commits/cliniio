@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { SharedLayout } from '../../Layout/SharedLayout';
-import InventoryInsightsCard from '../analytics/InventoryInsightsCard';
-import CategoriesCard from '../analytics/CategoriesCard';
 import { TabType } from '../../../pages/Inventory/types';
 import { useCentralizedInventoryData } from '@/hooks/useCentralizedInventoryData';
 import { useUser } from '@/contexts/UserContext'; // Update import to use useUser
+
+// Lazy load analytics components
+const InventoryInsightsCard = lazy(
+  () => import('../analytics/InventoryInsightsCard')
+);
+const CategoriesCard = lazy(() => import('../analytics/CategoriesCard'));
 
 interface InventoryLayoutProps {
   children: React.ReactNode;
@@ -31,15 +35,31 @@ const InventoryLayout: React.FC<InventoryLayoutProps> = ({
         <div className="inventory-content">
           {/* Left Sidebar */}
           <div className="inventory-sidebar">
-            <InventoryInsightsCard
-              data={{
-                tools: inventoryData,
-                supplies: suppliesData,
-                equipment: equipmentData,
-                officeHardware: officeHardwareData,
-              }}
-            />
-            <CategoriesCard onCategoryChange={onCategoryChange} />
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center p-4">
+                  Loading analytics...
+                </div>
+              }
+            >
+              <InventoryInsightsCard
+                data={{
+                  tools: inventoryData,
+                  supplies: suppliesData,
+                  equipment: equipmentData,
+                  officeHardware: officeHardwareData,
+                }}
+              />
+            </Suspense>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center p-4">
+                  Loading categories...
+                </div>
+              }
+            >
+              <CategoriesCard onCategoryChange={onCategoryChange} />
+            </Suspense>
           </div>
 
           {/* Main Content Area */}

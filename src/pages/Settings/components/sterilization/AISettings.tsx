@@ -9,8 +9,8 @@ import {
   mdiChartBar,
   mdiTune,
 } from '@mdi/js';
-import { SterilizationAISettings } from '../../../../services/ai/sterilizationAIService';
-import { useFacility } from '../../../../contexts/FacilityContext';
+import { SterilizationAISettings } from '@/services/ai/sterilizationAIService';
+import { useFacility } from '@/contexts/FacilityContext';
 import {
   AI_FEATURE_CATEGORIES,
   AI_DATA_RETENTION_OPTIONS,
@@ -467,7 +467,7 @@ export const AISettings: React.FC = () => {
                   min={AI_CONFIDENCE_THRESHOLD_LIMITS.min}
                   max={AI_CONFIDENCE_THRESHOLD_LIMITS.max}
                   step={AI_CONFIDENCE_THRESHOLD_LIMITS.step}
-                  value={aiSettings.ai_confidence_threshold}
+                  value={aiSettings.ai_confidence_threshold || 0.8}
                   onChange={(e) => {
                     const facilityId = getCurrentFacilityId();
                     if (facilityId) {
@@ -503,7 +503,7 @@ export const AISettings: React.FC = () => {
                 </label>
                 <select
                   id="aiDataRetentionDays"
-                  value={aiSettings.ai_data_retention_days}
+                  value={aiSettings.ai_data_retention_days || 365}
                   onChange={(e) => {
                     const facilityId = getCurrentFacilityId();
                     if (facilityId) {

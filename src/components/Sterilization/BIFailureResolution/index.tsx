@@ -94,7 +94,6 @@ export const BIFailureResolution: React.FC<BIFailureResolutionProps> = ({
         }
       }}
     >
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
       <div
         className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto transform translate-y-16 scrollbar-hide"
         role="dialog"

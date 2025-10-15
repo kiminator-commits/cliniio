@@ -2,8 +2,8 @@ import { InventoryItem } from '../types';
 import { InventoryDataAdapter } from '../../adapters/InventoryDataAdapter';
 import { InventoryErrorHandler } from '../../InventoryErrorHandler';
 import { cacheInvalidationService } from '../../../cache/cacheInvalidationCompatibility';
-import { logEvent, trackUserAction } from '../../../../utils/monitoring';
-import { trackEvent as trackAnalyticsEvent } from '../../../analytics';
+import { logEvent, trackUserAction } from '@/utils/monitoring';
+import { AnalyticsTrackingService } from '../../../shared/analyticsTrackingService';
 
 export interface BulkOperationResult {
   success: boolean;
@@ -76,7 +76,7 @@ export class InventoryBulkOperationsProvider {
           errorCount,
         });
 
-        trackAnalyticsEvent('inventory_bulk_items_created', {
+        AnalyticsTrackingService.trackEvent('inventory_bulk_items_created', {
           totalItems: items.length,
           successCount,
           errorCount,
@@ -151,7 +151,7 @@ export class InventoryBulkOperationsProvider {
           errorCount,
         });
 
-        trackAnalyticsEvent('inventory_bulk_items_updated', {
+        AnalyticsTrackingService.trackEvent('inventory_bulk_items_updated', {
           totalItems: updates.length,
           successCount,
           errorCount,
@@ -216,7 +216,7 @@ export class InventoryBulkOperationsProvider {
           errorCount,
         });
 
-        trackAnalyticsEvent('inventory_bulk_items_deleted', {
+        AnalyticsTrackingService.trackEvent('inventory_bulk_items_deleted', {
           totalItems: ids.length,
           successCount,
           errorCount,
@@ -291,7 +291,7 @@ export class InventoryBulkOperationsProvider {
           reason,
         });
 
-        trackAnalyticsEvent('inventory_bulk_items_archived', {
+        AnalyticsTrackingService.trackEvent('inventory_bulk_items_archived', {
           totalItems: ids.length,
           successCount,
           errorCount,
@@ -362,7 +362,7 @@ export class InventoryBulkOperationsProvider {
           errorCount,
         });
 
-        trackAnalyticsEvent('inventory_bulk_items_restored', {
+        AnalyticsTrackingService.trackEvent('inventory_bulk_items_restored', {
           totalItems: ids.length,
           successCount,
           errorCount,
@@ -436,7 +436,7 @@ export class InventoryBulkOperationsProvider {
           newCategory,
         });
 
-        trackAnalyticsEvent('inventory_bulk_category_changed', {
+        AnalyticsTrackingService.trackEvent('inventory_bulk_category_changed', {
           totalItems: ids.length,
           successCount,
           errorCount,
@@ -511,7 +511,7 @@ export class InventoryBulkOperationsProvider {
           newLocation,
         });
 
-        trackAnalyticsEvent('inventory_bulk_location_changed', {
+        AnalyticsTrackingService.trackEvent('inventory_bulk_location_changed', {
           totalItems: ids.length,
           successCount,
           errorCount,

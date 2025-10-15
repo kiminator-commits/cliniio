@@ -51,7 +51,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
         <div className="absolute top-1 right-1">
           <Icon
             path={mdiLock}
-            size={0.4}
+            size={0.6}
             className="text-gray-300"
             title="Core status - always available"
           />

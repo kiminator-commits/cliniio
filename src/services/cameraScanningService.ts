@@ -176,6 +176,32 @@ export class CameraScanningService {
   }
 
   /**
+   * Simple barcode scanning method that returns a promise
+   */
+  static async scanBarcode(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Create a temporary video element
+      const video = document.createElement('video');
+      video.style.position = 'fixed';
+      video.style.top = '-1000px';
+      video.style.left = '-1000px';
+      document.body.appendChild(video);
+
+      this.startCameraScan(
+        video,
+        (result) => {
+          document.body.removeChild(video);
+          resolve(result.barcode);
+        },
+        (error) => {
+          document.body.removeChild(video);
+          reject(new Error(error));
+        }
+      );
+    });
+  }
+
+  /**
    * Check if camera is available
    */
   static async isCameraAvailable(): Promise<boolean> {

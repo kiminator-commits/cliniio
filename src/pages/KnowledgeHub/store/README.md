@@ -273,8 +273,8 @@ const MyComponent = () => {
 - **Auth Slice**: Independent
 - **Content Slice**: Independent
 - **Performance Slice**: Independent
-- **Rate Limit Slice**: Depends on `knowledgeHubApiService`
-- **Business Logic Slice**: Depends on `knowledgeHubApiService`, `LearningProgressService`, error types
+- **Rate Limit Slice**: Depends on `DEPRECATED_MOCK_NOTICE` (legacy)
+- **Business Logic Slice**: Depends on `DEPRECATED_MOCK_NOTICE`, `LearningProgressService`, error types
 
 ### Focused Store Dependencies
 
@@ -282,8 +282,8 @@ const MyComponent = () => {
 - **Auth Store**: Independent
 - **Content Store**: Independent
 - **Performance Store**: Independent
-- **Rate Limit Store**: Depends on `knowledgeHubApiService`
-- **Business Logic Store**: Depends on `knowledgeHubApiService`, `LearningProgressService`, error types
+- **Rate Limit Store**: Depends on `DEPRECATED_MOCK_NOTICE` (legacy)
+- **Business Logic Store**: Depends on `DEPRECATED_MOCK_NOTICE`, `LearningProgressService`, error types
 
 ## Error Handling
 

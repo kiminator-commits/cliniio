@@ -2,8 +2,8 @@ import { InventoryItem, LocalInventoryItem } from '../types';
 import { InventoryDataAdapter } from '../../adapters/InventoryDataAdapter';
 import { InventoryErrorHandler } from '../../InventoryErrorHandler';
 import { cacheInvalidationService } from '../../../cache/cacheInvalidationCompatibility';
-import { logEvent, trackUserAction } from '../../../../utils/monitoring';
-import { trackEvent as trackAnalyticsEvent } from '../../../analytics';
+import { logEvent, trackUserAction } from '@/utils/monitoring';
+import { AnalyticsTrackingService } from '../../../shared/analyticsTrackingService';
 
 export class InventoryItemCrudProvider {
   private adapter: InventoryDataAdapter;
@@ -82,7 +82,7 @@ export class InventoryItemCrudProvider {
           category: item.category,
         });
 
-        trackAnalyticsEvent('inventory_item_created', {
+        AnalyticsTrackingService.trackEvent('inventory_item_created', {
           itemId: result.id,
           itemName: item.name || item.item,
           category: item.category,
@@ -127,7 +127,7 @@ export class InventoryItemCrudProvider {
           updates: Object.keys(updates),
         });
 
-        trackAnalyticsEvent('inventory_item_updated', {
+        AnalyticsTrackingService.trackEvent('inventory_item_updated', {
           itemId: id,
           updates: Object.keys(updates),
           adapterType: this.adapterType,
@@ -166,7 +166,7 @@ export class InventoryItemCrudProvider {
 
         trackUserAction('delete_item', 'inventory', { itemId: id });
 
-        trackAnalyticsEvent('inventory_item_deleted', {
+        AnalyticsTrackingService.trackEvent('inventory_item_deleted', {
           itemId: id,
           adapterType: this.adapterType,
         });
@@ -208,7 +208,7 @@ export class InventoryItemCrudProvider {
           category: item.category,
         });
 
-        trackAnalyticsEvent('inventory_item_created', {
+        AnalyticsTrackingService.trackEvent('inventory_item_created', {
           itemId: item.id,
           itemName: item.name || item.item,
           category: item.category,
@@ -309,7 +309,7 @@ export class InventoryItemCrudProvider {
           newItemId: result.id,
         });
 
-        trackAnalyticsEvent('inventory_item_duplicated', {
+        AnalyticsTrackingService.trackEvent('inventory_item_duplicated', {
           originalItemId: id,
           newItemId: result.id,
           adapterType: this.adapterType,
@@ -356,7 +356,7 @@ export class InventoryItemCrudProvider {
           reason,
         });
 
-        trackAnalyticsEvent('inventory_item_archived', {
+        AnalyticsTrackingService.trackEvent('inventory_item_archived', {
           itemId: id,
           reason,
           adapterType: this.adapterType,
@@ -398,7 +398,7 @@ export class InventoryItemCrudProvider {
 
         trackUserAction('restore_item', 'inventory', { itemId: id });
 
-        trackAnalyticsEvent('inventory_item_restored', {
+        AnalyticsTrackingService.trackEvent('inventory_item_restored', {
           itemId: id,
           adapterType: this.adapterType,
         });

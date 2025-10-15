@@ -20,6 +20,11 @@ export interface StatusType {
 
 // Status types are now fetched from Supabase database
 
+// Constants for status limits
+const MAX_TOTAL_STATUSES = 8;
+const MAX_CUSTOM_STATUSES = 4;
+const _CORE_STATUS_COUNT = 4;
+
 interface StatusTypesState {
   statusTypes: StatusType[];
   isLoading: boolean;
@@ -39,6 +44,13 @@ interface StatusTypesState {
   getCategories: () => string[];
   fetchStatusTypes: () => Promise<void>;
   refreshStatusTypes: () => Promise<void>;
+  getStatusCountInfo: () => {
+    total: number;
+    core: number;
+    custom: number;
+    maxCustom: number;
+  };
+  canAddCustomStatus: () => boolean;
 }
 
 export const useStatusTypesStore = create<StatusTypesState>()(
@@ -152,10 +164,29 @@ export const useStatusTypesStore = create<StatusTypesState>()(
 
       addStatusType: async (status: Omit<StatusType, 'id'>) => {
         try {
+          const state = get();
+          const customStatuses = state.getCustomStatusTypes();
+
+          // Check if we can add more custom statuses
+          if (customStatuses.length >= MAX_CUSTOM_STATUSES) {
+            throw new Error(
+              `Maximum of ${MAX_CUSTOM_STATUSES} custom statuses allowed. You currently have ${customStatuses.length} custom statuses.`
+            );
+          }
+
+          // Check total status limit
+          if (state.statusTypes.length >= MAX_TOTAL_STATUSES) {
+            throw new Error(
+              `Maximum of ${MAX_TOTAL_STATUSES} total statuses allowed. You currently have ${state.statusTypes.length} statuses.`
+            );
+          }
+
           // Mock implementation since status_types table doesn't exist
           const newStatusType: StatusType = {
             id: Date.now().toString(), // Generate a simple ID
             ...status,
+            isCore: false, // Ensure custom statuses are not marked as core
+            isPublished: false, // New custom statuses start as unpublished
           };
 
           set((state) => ({
@@ -262,6 +293,28 @@ export const useStatusTypesStore = create<StatusTypesState>()(
         return Array.from(categories)
           .filter((cat): cat is string => cat !== undefined)
           .sort();
+      },
+
+      getStatusCountInfo: () => {
+        const state = get();
+        const coreStatuses = state.getCoreStatusTypes();
+        const customStatuses = state.getCustomStatusTypes();
+
+        return {
+          total: state.statusTypes.length,
+          core: coreStatuses.length,
+          custom: customStatuses.length,
+          maxCustom: MAX_CUSTOM_STATUSES,
+        };
+      },
+
+      canAddCustomStatus: () => {
+        const state = get();
+        const customStatuses = state.getCustomStatusTypes();
+        return (
+          customStatuses.length < MAX_CUSTOM_STATUSES &&
+          state.statusTypes.length < MAX_TOTAL_STATUSES
+        );
       },
     }),
     {

@@ -1,7 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { HOME_UI_CONSTANTS } from '../../../constants/homeUiConstants';
 import { Task } from '../../../store/homeStore';
+import { supabase } from '../../../lib/supabaseClient';
+import { Card } from '../../../components/ui/card';
+import Button from '../../../components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Import components directly instead of lazy loading to prevent container shifting
 import HomeTasksSection from './HomeTasksSection';
@@ -57,6 +62,29 @@ const HomeContentLayout: React.FC<HomeContentLayoutProps> = React.memo(
     integrationMetrics,
     aiImpactMetrics, // Add AI impact metrics parameter
   }) => {
+    // Compliance Alert state
+    const [flagCount, setFlagCount] = useState<number | null>(null);
+    const [loadingFlags, setLoadingFlags] = useState(true);
+
+    // Fetch audit flag count
+    useEffect(() => {
+      async function fetchFlagCount() {
+        try {
+          const { count, error } = await supabase
+            .from('audit_flags')
+            .select('*', { count: 'exact', head: true })
+            .eq('resolved', false);
+          if (!error && typeof count === 'number') {
+            setFlagCount(count);
+          }
+        } catch (e) {
+          console.error('Failed to fetch compliance flags:', e);
+        } finally {
+          setLoadingFlags(false);
+        }
+      }
+      fetchFlagCount();
+    }, []);
     // Memoize the layout classes to prevent recalculation on every render
     const layoutClasses = useMemo(
       () =>
@@ -77,6 +105,34 @@ const HomeContentLayout: React.FC<HomeContentLayoutProps> = React.memo(
       <div className={containerClass}>
         {/* Load all sections in parallel instead of sequentially */}
         <div className="space-y-6">
+          {/* Compliance Alert Card */}
+          <Card className="p-4 flex flex-col items-start justify-between bg-muted/40 border border-border shadow-sm">
+            <h2 className="text-lg font-semibold mb-1">Compliance Status</h2>
+
+            {loadingFlags ? (
+              <div className="flex items-center gap-2 text-muted">
+                <Loader2 className="w-4 h-4 animate-spin" /> Checking system
+                compliance…
+              </div>
+            ) : flagCount && flagCount > 0 ? (
+              <>
+                <p className="text-sm text-destructive">
+                  ⚠️ {flagCount} unresolved compliance{' '}
+                  {flagCount === 1 ? 'issue' : 'issues'} detected.
+                </p>
+                <Link to="/settings?section=system&tab=audit">
+                  <Button variant="destructive" size="sm" className="mt-2">
+                    Review in System Admin
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <p className="text-sm text-green-600">
+                ✅ All systems compliant.
+              </p>
+            )}
+          </Card>
+
           <HomeGamificationSection gamificationData={gamificationData} />
 
           <div className={layoutClasses}>

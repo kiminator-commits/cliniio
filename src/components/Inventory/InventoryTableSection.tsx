@@ -9,6 +9,7 @@ import { useInventoryStore } from '@/store/useInventoryStore';
 import { useInventoryDataAccess } from '@/hooks/inventory/useInventoryDataAccess';
 import { InventoryItem } from '@/types/inventoryTypes';
 import { InventoryFilterManager } from '@/services/inventory/utils/inventoryFilters';
+import { shouldShowTrackedFilter } from '@/utils/inventory/trackingUtils';
 // import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 
 // ⚠️ TRACKING FILTER LOGIC - DO NOT CHANGE:
@@ -75,8 +76,8 @@ const InventoryTableSection: React.FC<Props> = React.memo(
         setShowFilters,
         setSearchQuery,
         onToggleTrackedFilter: () => {
-          // Toggle tracked filter logic - only for tools and supplies
-          if (activeTab === 'tools' || activeTab === 'supplies') {
+          // Use centralized tracking logic
+          if (shouldShowTrackedFilter(activeTab)) {
             setShowTrackedOnly(!showTrackedOnly);
           }
         },
@@ -175,6 +176,7 @@ const InventoryTableSection: React.FC<Props> = React.memo(
       location,
       onEdit,
       onDelete,
+      onClone,
       toggleFavorite,
       showTrackedOnly,
       showFavoritesOnly,

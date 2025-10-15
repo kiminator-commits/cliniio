@@ -1,29 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { SharedLayout } from '@/components/Layout/SharedLayout';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import EnvironmentalCleanErrorFallback from './components/EnvironmentalCleanErrorFallback';
 import EnvironmentalCleanContent from './components/EnvironmentalCleanContent';
+import { WorkflowService } from '@/services/WorkflowService';
+import { useEffect, useState } from 'react';
 
-const EnvironmentalCleanPage: React.FC = () => {
-  const [currentSessionId] = useState<string | null>(null);
+export default function EnvironmentalCleanPage() {
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
-  // Start environmental cleaning workflow session on mount
   useEffect(() => {
-    // Temporarily disable workflow session creation to avoid RLS issues
-    console.log(
-      'ℹ️ Workflow session creation temporarily disabled to avoid RLS issues'
-    );
-
-    // Cleanup: end session on unmount
-    return () => {
-      if (currentSessionId) {
-        // Note: endSession method is currently commented out in WorkflowService
-        // TODO: Implement proper session cleanup when workflow_sessions table is restored
-        console.log('Session cleanup needed for:', currentSessionId);
+    const startSession = async () => {
+      try {
+        const session = await WorkflowService.startSession({
+          module: 'environmental_clean',
+        });
+        if (session?.id) {
+          setCurrentSessionId(session.id);
+        }
+      } catch (err) {
+        console.error('Failed to start workflow session:', err);
       }
     };
-  }, [currentSessionId]);
+    startSession();
+  }, []);
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -34,6 +35,4 @@ const EnvironmentalCleanPage: React.FC = () => {
       </SharedLayout>
     </ErrorBoundary>
   );
-};
-
-export default EnvironmentalCleanPage;
+}

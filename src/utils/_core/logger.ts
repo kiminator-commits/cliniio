@@ -9,7 +9,7 @@ const LOG_LEVELS = {
 
 type LogLevel = keyof typeof LOG_LEVELS;
 
-// Get log level from environment or default to INFO in production, DEBUG in development
+// Get log level from environment or default to INFO in production, WARN in development
 const getLogLevel = (): LogLevel => {
   // Check if we're in production
   const isProduction = process.env.NODE_ENV === 'production';
@@ -20,17 +20,17 @@ const getLogLevel = (): LogLevel => {
   // Handle environment variables
   let envLevel: LogLevel | undefined;
   if (typeof process !== 'undefined' && process?.env) {
-    envLevel = (process.env.VITE_LOG_LEVEL as LogLevel) || 'DEBUG';
+    envLevel = (process.env.VITE_LOG_LEVEL as LogLevel) || 'WARN';
   }
 
   if (envLevel && LOG_LEVELS[envLevel] !== undefined) {
     return envLevel;
   }
 
-  return 'DEBUG'; // Keep debug level to see all logs
+  return 'WARN'; // Reduced from DEBUG to WARN to minimize console noise
 };
 
-const currentLogLevel = getLogLevel();
+let currentLogLevel = getLogLevel();
 
 const shouldLog = (level: LogLevel): boolean => {
   return LOG_LEVELS[level] <= LOG_LEVELS[currentLogLevel];
@@ -94,6 +94,14 @@ export const logger = {
 
   // Get current log level
   getLevel: () => currentLogLevel,
+
+  // Set log level dynamically
+  setLevel: (level: LogLevel) => {
+    if (LOG_LEVELS[level] !== undefined) {
+      currentLogLevel = level;
+      console.log(`🔧 Logger level changed to: ${level}`);
+    }
+  },
 
   // Check if specific level is enabled
   isEnabled: (level: LogLevel) => shouldLog(level),

@@ -62,4 +62,7 @@ load-tests/results/
 checkpoint_*.sql
 how origin
 
+# Generated files
+src/types/supabase/generated.ts
+
 .vercel

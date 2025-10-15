@@ -16,6 +16,7 @@ import { FacilityProvider } from './contexts/FacilityContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import GlobalBIFailureBanner from './components/Sterilization/GlobalBIFailureBanner';
+import NotificationContainer from './components/notifications/NotificationContainer';
 
 // CRITICAL: Import realtime auto-optimizer to prevent database overload
 import './services/_core/realtimeCompatibility';
@@ -23,17 +24,24 @@ import './services/_core/realtimeCompatibility';
 // Direct imports for critical pages only
 import HomePage from './pages/Home';
 import SterilizationPage from './pages/Sterilization/Sterilization';
-import ScannerPage from './pages/Sterilization/ScannerPage';
 import InventoryPage from './pages/Inventory';
-import InventoryScannerPage from './pages/Inventory/ScannerPage';
 import EnvironmentalCleanPage from './pages/EnvironmentalClean/page';
-import EnvironmentalCleanScannerPage from './pages/EnvironmentalClean/ScannerPage';
 import KnowledgeHubPage from './pages/KnowledgeHub';
 import LibraryPage from './pages/library/page';
+
+// Lazy load scanner pages (large components)
+const ScannerPage = lazy(() => import('./pages/Sterilization/ScannerPage'));
+const InventoryScannerPage = lazy(
+  () => import('./pages/Inventory/ScannerPage')
+);
+const EnvironmentalCleanScannerPage = lazy(
+  () => import('./pages/EnvironmentalClean/ScannerPage')
+);
 
 // Lazy load non-critical pages
 const SettingsPage = lazy(() => import('./pages/Settings'));
 const ContentBuilderPage = lazy(() => import('./pages/ContentBuilder'));
+const CourseViewer = lazy(() => import('./pages/CourseViewer'));
 const LoginPage = lazy(() => import('./pages/Login'));
 const IntelligencePage = lazy(() => import('./pages/Intelligence'));
 const AuthCallback = lazy(() => import('./components/AuthCallback'));
@@ -231,7 +239,7 @@ function installPostgrestFetchGuard() {
       }
     } catch (err) {
       console.error(err);
-      // If anything goes wrong, fall through to native fetch untouched
+      throw err; // Re-throw the error to maintain proper error handling
     }
     return nativeFetch(input, init);
   };
@@ -245,22 +253,29 @@ function App() {
   // Initialize services and install guards once on client
   React.useEffect(() => {
     // Initialize inventory service facade
-    import('./services/inventory/InventoryServiceFacade').then(
-      ({ inventoryServiceFacade }) => {
-        inventoryServiceFacade.initialize().catch((error) => {
-          console.error(
-            'Failed to initialize inventory service facade:',
-            error
-          );
-        });
-      }
-    );
+    // import('./services/inventory/InventoryServiceFacade').then(
+    //   ({ inventoryServiceFacade }) => {
+    //     inventoryServiceFacade.initialize().catch((error) => {
+    //       console.error(
+    //         'Failed to initialize inventory service facade:',
+    //         error
+    //       );
+    //     });
+    //   }
+    // );
 
     // Initialize facility ID cache for fetch guard
     updateFacilityIdCache();
 
     // Install PostgREST runtime guard
     installPostgrestFetchGuard();
+
+    // Start real-time status monitoring
+    import('./services/monitoring/realTimeStatusMonitor').then(
+      ({ realTimeStatusMonitor }) => {
+        realTimeStatusMonitor.startMonitoring();
+      }
+    );
   }, []);
 
   return (
@@ -372,12 +387,21 @@ function App() {
                     }
                   />
                   <Route
+                    path="/course/:courseId"
+                    element={
+                      <ProtectedRoute>
+                        <CourseViewer />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/help/article/:slug"
                     element={<HelpArticlePage />}
                   />
                   <Route path="/" element={<Navigate to="/home" replace />} />
                 </Routes>
                 <GlobalBIFailureBanner />
+                <NotificationContainer />
               </NavigationProvider>
             </Router>
           </FacilityProvider>

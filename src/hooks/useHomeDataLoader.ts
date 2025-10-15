@@ -122,43 +122,6 @@ export const useHomeDataLoader = (): HomeData => {
     error: null,
   });
 
-  // Load AI PROCESS AND EFFICIENCY values in background without blocking the UI
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const loadBackgroundData = useCallback(async () => {
-    try {
-      // Load enhanced AI PROCESS AND EFFICIENCY data in background
-      // This will populate the TIME SAVED and COST SAVED values when ready
-      const enhancedData = await Promise.allSettled([
-        homeMetricsService.getHomeMetrics(), // Use working service
-        homeSterilizationIntegration.getSterilizationMetrics(), // Enhanced sterilization
-        homeIntegrationService.getAllMetrics(), // Enhanced integration
-      ]);
-
-      // Update the AI PROCESS AND EFFICIENCY tile values when ready (non-blocking)
-      setData((prev) => ({
-        ...prev,
-        aiMetrics:
-          enhancedData[0].status === 'fulfilled'
-            ? enhancedData[0].value
-            : prev.aiMetrics,
-        sterilizationMetrics:
-          enhancedData[1].status === 'fulfilled'
-            ? enhancedData[1].value
-            : prev.sterilizationMetrics,
-        integrationMetrics:
-          enhancedData[2].status === 'fulfilled'
-            ? enhancedData[2].value
-            : prev.integrationMetrics,
-      }));
-    } catch (error) {
-      console.warn(
-        'Background AI PROCESS AND EFFICIENCY loading failed, using basic data:',
-        error
-      );
-      // Don't show errors, just keep the basic data
-    }
-  }, []);
-
   const loadAllData = useCallback(async () => {
     try {
       setData((prev) => ({ ...prev, loading: true, error: null }));
@@ -416,7 +379,12 @@ export const useHomeDataLoader = (): HomeData => {
   // Load data when facility becomes available or when facility loading completes
   useEffect(() => {
     if (!facilityLoading) {
-      loadAllData();
+      // Use setTimeout to avoid calling setState synchronously in effect
+      const timeoutId = setTimeout(() => {
+        loadAllData();
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [facilityLoading, loadAllData]);
 

@@ -6,7 +6,7 @@ import {
   useAISettings,
   UnifiedAISettings,
 } from '../../../services/ai/aiSettingsService';
-import { useFacility } from '../../../contexts/FacilityContext';
+import { useFacility } from '@/contexts/FacilityContext';
 
 import { MessageState, ServiceStatus } from './AIAnalyticsSettings.types';
 import { UI_TEXT, TIMEOUTS } from './AIAnalyticsSettings.config';

@@ -226,9 +226,11 @@ export const useAnalyticsData = () => {
       !aiGenerationAttempted
     ) {
       // Attempt AI insights generation
-      generateAIInsights().catch((error) => {
-        console.warn('AI insights generation failed (non-blocking):', error);
-      });
+      setTimeout(() => {
+        generateAIInsights().catch((error) => {
+          console.warn('AI insights generation failed (non-blocking):', error);
+        });
+      }, 0);
     }
   }, [
     isLoading,

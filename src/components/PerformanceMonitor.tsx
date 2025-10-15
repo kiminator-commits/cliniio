@@ -56,18 +56,20 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
       detectedBottlenecks.push(`Mount: ${metrics.pageLoadTime.toFixed(2)}ms`);
     }
 
-    setBottlenecks(detectedBottlenecks);
+    // Use setTimeout to avoid calling setState synchronously in effect
+    setTimeout(() => {
+      setBottlenecks(detectedBottlenecks);
 
-    // Determine severity
-    let newSeverity: 'good' | 'warning' | 'critical' = 'good';
-    if (metrics.totalTime > 1000) {
-      newSeverity = 'critical';
-    } else if (metrics.totalTime > 500) {
-      newSeverity = 'warning';
-    }
-    setSeverity(newSeverity);
-
-    setIsVisible(detectedBottlenecks.length > 0 || metrics.totalTime > 500);
+      // Determine severity
+      let newSeverity: 'good' | 'warning' | 'critical' = 'good';
+      if (metrics.totalTime > 1000) {
+        newSeverity = 'critical';
+      } else if (metrics.totalTime > 500) {
+        newSeverity = 'warning';
+      }
+      setSeverity(newSeverity);
+      setIsVisible(detectedBottlenecks.length > 0 || metrics.totalTime > 500);
+    }, 0);
 
     // Auto-hide after 8 seconds
     const timer = setTimeout(() => {

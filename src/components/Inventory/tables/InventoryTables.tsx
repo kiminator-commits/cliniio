@@ -12,6 +12,7 @@
 import React, { useMemo } from 'react';
 import BaseInventoryTable from '../BaseInventoryTable';
 import { InventoryTablesProps } from './types/tableTypes';
+import { getColumnsForTab } from '@/utils/inventory/trackingUtils';
 
 const InventoryTables: React.FC<InventoryTablesProps> = React.memo(
   ({
@@ -50,17 +51,9 @@ const InventoryTables: React.FC<InventoryTablesProps> = React.memo(
       filteredOfficeHardwareData,
     ]);
 
-    // Define columns based on active tab
+    // Define columns based on active tab using centralized logic
     const columns = useMemo(() => {
-      const baseColumns = ['Name', 'Category', 'Quantity', 'Price'];
-
-      if (activeTab === 'supplies') {
-        return ['Name', 'Category', 'Location', 'Quantity', 'Price'];
-      } else if (activeTab === 'tools') {
-        return ['Name', 'Status', 'Price'];
-      }
-
-      return baseColumns;
+      return getColumnsForTab(activeTab);
     }, [activeTab]);
 
     return (

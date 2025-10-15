@@ -1,10 +1,1 @@
-#!/usr/bin/env sh
-
-# Run prettier to format files and fail if there are any formatting issues
-npx prettier --write --check "src/**/*.{ts,tsx}" "*.{ts,tsx}"
-
-# Run linting
-npm run lint
-
-# Add the formatted files back to staging
-git add .
+npx lint-staged

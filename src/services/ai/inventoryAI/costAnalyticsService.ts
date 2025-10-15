@@ -1,5 +1,4 @@
-import { supabase } from '../../../lib/supabaseClient';
-import { InventoryActionService } from '../../../pages/Inventory/services/inventoryActionService';
+import { supabase } from '@/lib/supabaseClient';
 import type {
   InventoryReportData,
   CostReportData,
@@ -110,7 +109,11 @@ export class CostAnalyticsService {
   // Private helper methods for report generation
   private async generateInventoryReport(): Promise<InventoryReportData> {
     // Implementation for inventory report generation using centralized service
-    const inventory = await InventoryActionService.getItems();
+    // Direct Supabase call instead of going through InventoryActionService
+    const { data: inventory, error: _inventoryError } = await supabase
+      .from('inventory_items')
+      .select('*')
+      .eq('facility_id', this.facilityId);
     const filteredInventory = inventory.filter(
       (item) => item.facility_id === this.facilityId
     );
@@ -125,8 +128,11 @@ export class CostAnalyticsService {
 
   private async generateCostReport(): Promise<CostReportData> {
     // Implementation for cost report generation using centralized service
-    const { data: costs, error: costsError } =
-      await InventoryActionService.getInventoryCostsByFacility(this.facilityId);
+    // Direct Supabase call instead of going through InventoryActionService
+    const { data: costs, error: costsError } = await supabase
+      .from('inventory_costs')
+      .select('*')
+      .eq('facility_id', this.facilityId);
 
     if (costsError) {
       console.error(
@@ -157,10 +163,11 @@ export class CostAnalyticsService {
 
   private async generateMaintenanceReport(): Promise<MaintenanceReportData> {
     // Implementation for maintenance report generation using centralized service
-    const { data: maintenance, error: maintenanceError } =
-      await InventoryActionService.getEquipmentMaintenanceByFacility(
-        this.facilityId
-      );
+    // Direct Supabase call instead of going through InventoryActionService
+    const { data: maintenance, error: maintenanceError } = await supabase
+      .from('equipment_maintenance')
+      .select('*')
+      .eq('facility_id', this.facilityId);
 
     if (maintenanceError) {
       console.error(

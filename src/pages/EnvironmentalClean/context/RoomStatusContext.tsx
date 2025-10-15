@@ -6,7 +6,7 @@ import React, {
   ReactNode,
   useEffect,
 } from 'react';
-import { useEnvironmentalCleanDataManager } from '../hooks/useEnvironmentalCleanDataManager';
+import { useEnvironmentalCleanStore } from '../store/environmentalCleanStore';
 import { EnvironmentalCleanService } from '../services/EnvironmentalCleanService';
 
 export type RoomStatusType =
@@ -65,10 +65,10 @@ interface RoomStatusProviderProps {
 export const RoomStatusProvider: React.FC<RoomStatusProviderProps> = ({
   children,
 }) => {
-  const { rooms: environmentalCleanRooms } = useEnvironmentalCleanDataManager();
+  const { rooms } = useEnvironmentalCleanStore();
 
-  // Initialize rooms from Environmental Clean data manager
-  const [rooms, setRooms] = useState<
+  // Initialize rooms from Environmental Clean store
+  const [contextRooms, setContextRooms] = useState<
     Array<{
       id: string;
       status: RoomStatusType;
@@ -80,17 +80,17 @@ export const RoomStatusProvider: React.FC<RoomStatusProviderProps> = ({
     RecentlyCleanedRoom[]
   >([]);
 
-  // Load rooms from Environmental Clean data manager when component mounts
+  // Update context rooms whenever store rooms change
   useEffect(() => {
-    const initialRooms = environmentalCleanRooms.map((room) => ({
+    const mappedRooms = rooms.map((room) => ({
       id: room.id,
       status: room.status as RoomStatusType, // Cast to RoomStatusType
       name: room.name,
       metadata: room.metadata,
     }));
 
-    setRooms(initialRooms);
-  }, [environmentalCleanRooms]);
+    setContextRooms(mappedRooms);
+  }, [rooms]);
 
   // Load recently cleaned rooms from service when component mounts
   useEffect(() => {
@@ -110,7 +110,7 @@ export const RoomStatusProvider: React.FC<RoomStatusProviderProps> = ({
 
   const updateRoomStatus = useCallback(
     (roomId: string, newStatus: RoomStatusType) => {
-      setRooms((prevRooms) =>
+      setContextRooms((prevRooms) =>
         prevRooms.map((room) =>
           room.id === roomId ? { ...room, status: newStatus } : room
         )
@@ -118,10 +118,8 @@ export const RoomStatusProvider: React.FC<RoomStatusProviderProps> = ({
 
       // If room is marked as Clean, add to recently cleaned list
       if (newStatus === 'Clean') {
-        // Find the actual room name from Environmental Clean data
-        const roomFromData = environmentalCleanRooms.find(
-          (room) => room.id === roomId
-        );
+        // Find the actual room name from store data
+        const roomFromData = rooms.find((room) => room.id === roomId);
         const roomName = roomFromData ? roomFromData.name : `Room ${roomId}`;
 
         const newCleanedRoom: RecentlyCleanedRoom = {
@@ -136,25 +134,25 @@ export const RoomStatusProvider: React.FC<RoomStatusProviderProps> = ({
         ]); // Keep only 10 most recent
       }
     },
-    [environmentalCleanRooms]
+    [rooms]
   );
 
   const getCleanRoomsCount = useCallback(() => {
-    return rooms.filter((room) => room.status === 'Clean').length;
-  }, [rooms]);
+    return contextRooms.filter((room) => room.status === 'Clean').length;
+  }, [contextRooms]);
 
   const getDirtyRoomsCount = useCallback(() => {
-    return rooms.filter((room) => room.status === 'Dirty').length;
-  }, [rooms]);
+    return contextRooms.filter((room) => room.status === 'Dirty').length;
+  }, [contextRooms]);
 
   const getEfficiency = useCallback(() => {
-    const totalRooms = rooms.length;
+    const totalRooms = contextRooms.length;
     const cleanRooms = getCleanRoomsCount();
     return totalRooms > 0 ? Math.round((cleanRooms / totalRooms) * 100) : 0;
-  }, [rooms, getCleanRoomsCount]);
+  }, [contextRooms, getCleanRoomsCount]);
 
   const value: RoomStatusContextType = {
-    rooms,
+    rooms: contextRooms,
     recentlyCleanedRooms,
     updateRoomStatus,
     getCleanRoomsCount,

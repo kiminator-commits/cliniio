@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '@mdi/react';
 import { mdiCalendar } from '@mdi/js';
-import { ChecklistFormData } from '../../../../types/checklistTypes';
+import { ChecklistFormData } from '@/types/checklistTypes';
 
 interface SchedulingConfigurationProps {
   checklistFormData: ChecklistFormData;

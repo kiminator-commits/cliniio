@@ -1,5 +1,5 @@
-import { supabase } from '../../../../../lib/supabaseClient';
-import { logger } from '../../../../../utils/_core/logger';
+import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/utils/_core/logger';
 
 export interface PredictiveRecommendation {
   id: string;

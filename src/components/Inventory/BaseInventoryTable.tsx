@@ -85,11 +85,12 @@ const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
     const handleTrackToggle = useCallback(
       (item: InventoryItem) => {
         const alreadyTracked = isToolTracked(item.id);
+
         if (alreadyTracked) {
           untrackTool(item.id);
         } else {
           // Default priority: medium
-          trackTool(item.id, 'medium');
+          trackTool(item.id, 'medium', item.name);
         }
 
         // If external onTrackToggle is provided, call it (this can trigger filter toggle)

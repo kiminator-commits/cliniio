@@ -1,6 +1,6 @@
 import { useInventoryStore } from '@/store/inventoryStore';
 import { logEvent, trackUserAction } from '@/utils/monitoring';
-import { trackEvent as trackAnalyticsEvent } from '@/services/analytics';
+import { trackEvent as trackAnalyticsEvent } from '@/services/analyticsService';
 
 /**
  * Pure control utility functions for inventory management

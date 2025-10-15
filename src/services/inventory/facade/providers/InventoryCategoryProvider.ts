@@ -1,8 +1,8 @@
 import { InventoryDataAdapter } from '../../adapters/InventoryDataAdapter';
 import { InventoryErrorHandler } from '../../InventoryErrorHandler';
 import { cacheInvalidationService } from '../../../cache/cacheInvalidationCompatibility';
-import { logEvent, trackUserAction } from '../../../../utils/monitoring';
-import { trackEvent as trackAnalyticsEvent } from '../../../analytics';
+import { logEvent, trackUserAction } from '@/utils/monitoring';
+import { AnalyticsTrackingService } from '../../../shared/analyticsTrackingService';
 
 export interface CategorizedItems {
   tools: Record<string, unknown>[];
@@ -162,7 +162,7 @@ export class InventoryCategoryProvider {
 
         trackUserAction('create_category', 'inventory', { category });
 
-        trackAnalyticsEvent('inventory_category_created', {
+        AnalyticsTrackingService.trackEvent('inventory_category_created', {
           category,
           adapterType: this.adapterType,
         });
@@ -203,7 +203,7 @@ export class InventoryCategoryProvider {
 
         trackUserAction('delete_category', 'inventory', { category });
 
-        trackAnalyticsEvent('inventory_category_deleted', {
+        AnalyticsTrackingService.trackEvent('inventory_category_deleted', {
           category,
           adapterType: this.adapterType,
         });
@@ -402,7 +402,7 @@ export class InventoryCategoryProvider {
           itemsUpdated: itemsToUpdate.length,
         });
 
-        trackAnalyticsEvent('inventory_category_merged', {
+        AnalyticsTrackingService.trackEvent('inventory_category_merged', {
           sourceCategory,
           targetCategory,
           itemsUpdated: itemsToUpdate.length,

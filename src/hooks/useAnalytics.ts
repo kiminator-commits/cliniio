@@ -6,7 +6,7 @@ import {
   InventoryAnalyticsData,
   EnvironmentalAnalyticsData,
   UserEngagementData,
-} from '../services/analytics';
+} from '../services/analyticsService';
 
 export interface AnalyticsData {
   sterilization: SterilizationAnalyticsData | null;

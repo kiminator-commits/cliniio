@@ -1,4 +1,4 @@
-import { supabase } from '../../../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { BIFailureErrorHandler } from '../BIFailureErrorHandler';
 import { BIFailureValidationService } from '../BIFailureValidationService';
 import { BIFailureTrendAnalysis } from './types';

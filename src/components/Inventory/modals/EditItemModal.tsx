@@ -38,14 +38,17 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
   useEffect(() => {
     if (item) {
       const { name, category, location, status, isP2Status } = item;
-      setFormData({
-        name,
-        category,
-        toolId: (item as { data?: { toolId?: string } }).data?.toolId || '',
-        location,
-        status: status || '',
-        isP2Status: isP2Status || false,
-      });
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setFormData({
+          name,
+          category,
+          toolId: (item as { data?: { toolId?: string } }).data?.toolId || '',
+          location,
+          status: status || '',
+          isP2Status: isP2Status || false,
+        });
+      }, 0);
     }
   }, [item]);
 

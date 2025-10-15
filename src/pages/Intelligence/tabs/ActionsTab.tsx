@@ -11,7 +11,7 @@ import { IntelligenceSummary } from '../utils/intelligenceTypes';
 import {
   IntelligenceRecommendation,
   OptimizationTip,
-} from '../../../services/analytics';
+} from '../../../services/analyticsService';
 
 interface ActionItem {
   id: string;

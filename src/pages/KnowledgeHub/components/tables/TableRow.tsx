@@ -229,64 +229,131 @@ export const TableRow: React.FC<TableRowProps> = ({
 
         {/* Expanded content */}
         {isExpanded && (
-          <tr className="bg-gray-50">
-            <td colSpan={5} className="px-4 py-3">
-              <div className="space-y-3">
+          <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-[#4ECDC4]">
+            <td colSpan={5} className="px-4 py-4">
+              <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
                 {/* Description */}
                 {item?.description && (
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">
-                      Description
-                    </h4>
-                    <p className="text-sm text-gray-600">
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon
+                        path={mdiChevronDown}
+                        size={0.8}
+                        className="text-[#4ECDC4]"
+                      />
+                      <h4 className="font-semibold text-gray-900">
+                        Description
+                      </h4>
+                    </div>
+                    <p className="text-sm text-gray-700 leading-relaxed">
                       {item.data?.description}
                     </p>
                   </div>
                 )}
 
-                {/* Additional details */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Category */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Category</h4>
-                    <p className="text-sm text-gray-600">
-                      {item?.category || 'No category'}
+                {/* Course Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {/* Difficulty Level */}
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          item.difficultyLevel === 'advanced'
+                            ? 'bg-red-500'
+                            : item.difficultyLevel === 'intermediate'
+                              ? 'bg-yellow-500'
+                              : 'bg-green-500'
+                        }`}
+                      ></div>
+                      <h4 className="font-semibold text-gray-900 text-sm">
+                        Difficulty
+                      </h4>
+                    </div>
+                    <p className="text-xs text-gray-600 capitalize">
+                      {item.difficultyLevel || 'Beginner'}
+                    </p>
+                  </div>
+
+                  {/* Duration */}
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Icon
+                        path={mdiCalendar}
+                        size={0.7}
+                        className="text-[#4ECDC4]"
+                      />
+                      <h4 className="font-semibold text-gray-900 text-sm">
+                        Duration
+                      </h4>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {item.estimatedDuration
+                        ? `${item.estimatedDuration} minutes`
+                        : 'Not specified'}
                     </p>
                   </div>
 
                   {/* Due Date */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Due Date</h4>
-                    <div className="flex items-center gap-1">
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
                       <Icon
                         path={mdiCalendar}
-                        size={0.6}
-                        className="text-gray-400"
+                        size={0.7}
+                        className="text-[#4ECDC4]"
                       />
-                      <span
-                        className={`text-sm ${dueDateDisplay?.color || 'text-gray-600'}`}
-                      >
-                        {dueDateDisplay?.text || 'No due date'}
-                      </span>
+                      <h4 className="font-semibold text-gray-900 text-sm">
+                        Due Date
+                      </h4>
+                    </div>
+                    <span
+                      className={`text-xs ${dueDateDisplay?.color || 'text-gray-600'}`}
+                    >
+                      {dueDateDisplay?.text || 'No due date'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                {item?.data?.tags && item.data.tags.length > 0 && (
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                      Tags
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {item.data.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 text-xs bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 rounded-full border border-blue-200 font-medium"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
                     </div>
                   </div>
+                )}
 
-                  {/* Tags */}
-                  {item?.data?.tags && item.data.tags.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-1">Tags</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {item.data.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                {/* Progress Bar */}
+                <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 text-sm">
+                      Progress
+                    </h4>
+                    <span className="text-xs font-medium text-gray-600">
+                      {progressDisplay?.text || '0%'}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className={`h-2 rounded-full transition-all duration-500 ease-out ${
+                        (progressDisplay?.percentage || 0) === 0
+                          ? 'bg-gray-400'
+                          : (progressDisplay?.percentage || 0) === 100
+                            ? 'bg-gradient-to-r from-green-500 to-green-600'
+                            : 'bg-gradient-to-r from-[#4ECDC4] to-[#3DB8B0]'
+                      }`}
+                      style={{ width: `${progressDisplay?.percentage || 0}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             </td>

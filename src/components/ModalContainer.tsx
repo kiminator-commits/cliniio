@@ -55,8 +55,11 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
   useEffect(() => {
     if (isLeaderboardOpen && leaderboardTopUsers.length === 0) {
       // Only load if modal is open and we don't have data yet
-      setIsLoadingLeaderboard(true);
-      setLeaderboardErrorState(null);
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => {
+        setIsLoadingLeaderboard(true);
+        setLeaderboardErrorState(null);
+      }, 0);
 
       leaderboardService
         .fetchLeaderboardData()

@@ -13,7 +13,7 @@ export default defineConfig({
   },
   server: {
     port: 3001,
-    strictPort: true,
+    strictPort: false,
     watch: {
       ignored: [
         '**/node_modules/**',

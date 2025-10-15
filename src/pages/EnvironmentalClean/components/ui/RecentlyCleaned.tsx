@@ -8,9 +8,11 @@ import {
   mdiRefresh,
 } from '@mdi/js';
 import { useRoomStatus } from '../../context/RoomStatusContext';
+import { useEnvironmentalCleanDataManager } from '../../hooks/useEnvironmentalCleanDataManager';
 
 const RecentlyCleaned: React.FC = () => {
   const { recentlyCleanedRooms } = useRoomStatus();
+  const { refreshData } = useEnvironmentalCleanDataManager();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isLoading = false;
   const error = null;
@@ -21,9 +23,12 @@ const RecentlyCleaned: React.FC = () => {
     }
   };
 
-  const handleRefresh = () => {
-    // Refresh functionality would be implemented here
-    console.log('Refreshing recently cleaned rooms...');
+  const handleRefresh = async () => {
+    try {
+      await refreshData();
+    } catch (err) {
+      console.error('Error refreshing cleaned rooms:', err);
+    }
   };
 
   return (

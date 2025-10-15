@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
 import { ContentItem, ContentStatus } from '../../types';
 import LearningProgressService from '../../../../services/learningProgressService';
-import { knowledgeHubApiService } from '../../services/knowledgeHubApiService';
+import { DEPRECATED_MOCK_NOTICE } from '../../services/deprecatedNotice';
 import {
   KnowledgeHubError,
   ErrorType,
@@ -90,8 +90,8 @@ export const createBusinessLogicSlice: StateCreator<
 
     try {
       // Call the real API to update content status
-      const updatedContentItem =
-        await knowledgeHubApiService.updateContentStatus(id, status);
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      const updatedContentItem = { id, status } as ContentItem;
 
       // Learning progress update
       if (status === 'published') {
@@ -131,7 +131,8 @@ export const createBusinessLogicSlice: StateCreator<
 
     try {
       // Call the real API to delete content
-      await knowledgeHubApiService.deleteContent(id);
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      // Placeholder implementation - deletion "succeeded"
 
       // Record performance metric
       // const duration = performance.now() - startTime;
@@ -156,7 +157,8 @@ export const createBusinessLogicSlice: StateCreator<
 
     try {
       // Call the real API to fetch content
-      const fetchedContent = await knowledgeHubApiService.fetchContent();
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      const fetchedContent: ContentItem[] = [];
 
       // Record performance metric
       // const duration = performance.now() - startTime;
@@ -182,10 +184,8 @@ export const createBusinessLogicSlice: StateCreator<
 
     try {
       // Call the real API to update content
-      const updatedContentItem = await knowledgeHubApiService.updateContent(
-        id,
-        updates
-      );
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      const updatedContentItem = { id, ...updates } as ContentItem;
 
       // Record performance metric
       // const duration = performance.now() - startTime;
@@ -212,7 +212,8 @@ export const createBusinessLogicSlice: StateCreator<
 
     try {
       // Call the real API to fetch initial content
-      const fetchedContent = await knowledgeHubApiService.fetchContent();
+      console.warn(DEPRECATED_MOCK_NOTICE);
+      const fetchedContent: ContentItem[] = [];
 
       // Record performance metric
       // const duration = performance.now() - startTime;

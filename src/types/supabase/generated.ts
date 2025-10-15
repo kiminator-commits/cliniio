@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -7,6 +7,31 @@
   | Json[];
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       activity_feed: {
@@ -5049,13 +5074,274 @@ export type Database = {
         };
         Relationships: [];
       };
+      facility_settings: {
+        Row: {
+          id: string;
+          facility_id: string;
+          packaging_settings: Json | null;
+          sterilization_defaults: Json | null;
+          ai_preferences: Json | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          facility_id: string;
+          packaging_settings?: Json | null;
+          sterilization_defaults?: Json | null;
+          ai_preferences?: Json | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          facility_id?: string;
+          packaging_settings?: Json | null;
+          sterilization_defaults?: Json | null;
+          ai_preferences?: Json | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      ai_settings: {
+        Row: {
+          id: string;
+          facility_id: string;
+          ai_enabled: boolean | null;
+          ai_confidence_threshold: number | null;
+          ai_data_retention_days: number | null;
+          ai_language: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          facility_id: string;
+          ai_enabled?: boolean | null;
+          ai_confidence_threshold?: number | null;
+          ai_data_retention_days?: number | null;
+          ai_language?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          facility_id?: string;
+          ai_enabled?: boolean | null;
+          ai_confidence_threshold?: number | null;
+          ai_data_retention_days?: number | null;
+          ai_language?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      sterilization_ai_settings: {
+        Row: {
+          id: string;
+          facility_id: string;
+          ai_enabled: boolean | null;
+          ai_version: string | null;
+          computer_vision_enabled: boolean | null;
+          tool_condition_assessment: boolean | null;
+          barcode_quality_detection: boolean | null;
+          tool_type_recognition: boolean | null;
+          cleaning_validation: boolean | null;
+          predictive_analytics_enabled: boolean | null;
+          cycle_optimization: boolean | null;
+          failure_prediction: boolean | null;
+          efficiency_optimization: boolean | null;
+          resource_planning: boolean | null;
+          smart_workflow_enabled: boolean | null;
+          intelligent_workflow_selection: boolean | null;
+          automated_problem_detection: boolean | null;
+          smart_phase_transitions: boolean | null;
+          batch_optimization: boolean | null;
+          quality_assurance_enabled: boolean | null;
+          biological_indicator_analysis: boolean | null;
+          compliance_monitoring: boolean | null;
+          audit_trail_enhancement: boolean | null;
+          risk_assessment: boolean | null;
+          scanner_intelligence_enabled: boolean | null;
+          multi_format_barcode_support: boolean | null;
+          tool_history_integration: boolean | null;
+          smart_validation: boolean | null;
+          error_prevention: boolean | null;
+          real_time_monitoring_enabled: boolean | null;
+          anomaly_detection: boolean | null;
+          predictive_maintenance: boolean | null;
+          quality_drift_detection: boolean | null;
+          smart_notifications: boolean | null;
+          ai_confidence_threshold: number | null;
+          ai_data_retention_days: number | null;
+          real_time_processing_enabled: boolean | null;
+          batch_processing_enabled: boolean | null;
+          openai_api_key_encrypted: string | null;
+          google_vision_api_key_encrypted: string | null;
+          azure_computer_vision_key_encrypted: string | null;
+          data_sharing_enabled: boolean | null;
+          local_ai_processing_enabled: boolean | null;
+          encrypted_data_transmission: boolean | null;
+          ai_model_training: boolean | null;
+          auto_optimization_enabled: boolean | null;
+          performance_monitoring: boolean | null;
+          resource_optimization: boolean | null;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          facility_id: string;
+          ai_enabled?: boolean | null;
+          ai_version?: string | null;
+          computer_vision_enabled?: boolean | null;
+          tool_condition_assessment?: boolean | null;
+          barcode_quality_detection?: boolean | null;
+          tool_type_recognition?: boolean | null;
+          cleaning_validation?: boolean | null;
+          predictive_analytics_enabled?: boolean | null;
+          cycle_optimization?: boolean | null;
+          failure_prediction?: boolean | null;
+          efficiency_optimization?: boolean | null;
+          resource_planning?: boolean | null;
+          smart_workflow_enabled?: boolean | null;
+          intelligent_workflow_selection?: boolean | null;
+          automated_problem_detection?: boolean | null;
+          smart_phase_transitions?: boolean | null;
+          batch_optimization?: boolean | null;
+          quality_assurance_enabled?: boolean | null;
+          biological_indicator_analysis?: boolean | null;
+          compliance_monitoring?: boolean | null;
+          audit_trail_enhancement?: boolean | null;
+          risk_assessment?: boolean | null;
+          scanner_intelligence_enabled?: boolean | null;
+          multi_format_barcode_support?: boolean | null;
+          tool_history_integration?: boolean | null;
+          smart_validation?: boolean | null;
+          error_prevention?: boolean | null;
+          real_time_monitoring_enabled?: boolean | null;
+          anomaly_detection?: boolean | null;
+          predictive_maintenance?: boolean | null;
+          quality_drift_detection?: boolean | null;
+          smart_notifications?: boolean | null;
+          ai_confidence_threshold?: number | null;
+          ai_data_retention_days?: number | null;
+          real_time_processing_enabled?: boolean | null;
+          batch_processing_enabled?: boolean | null;
+          openai_api_key_encrypted?: string | null;
+          google_vision_api_key_encrypted?: string | null;
+          azure_computer_vision_key_encrypted?: string | null;
+          data_sharing_enabled?: boolean | null;
+          local_ai_processing_enabled?: boolean | null;
+          encrypted_data_transmission?: boolean | null;
+          ai_model_training?: boolean | null;
+          auto_optimization_enabled?: boolean | null;
+          performance_monitoring?: boolean | null;
+          resource_optimization?: boolean | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          facility_id?: string;
+          ai_enabled?: boolean | null;
+          ai_version?: string | null;
+          computer_vision_enabled?: boolean | null;
+          tool_condition_assessment?: boolean | null;
+          barcode_quality_detection?: boolean | null;
+          tool_type_recognition?: boolean | null;
+          cleaning_validation?: boolean | null;
+          predictive_analytics_enabled?: boolean | null;
+          cycle_optimization?: boolean | null;
+          failure_prediction?: boolean | null;
+          efficiency_optimization?: boolean | null;
+          resource_planning?: boolean | null;
+          smart_workflow_enabled?: boolean | null;
+          intelligent_workflow_selection?: boolean | null;
+          automated_problem_detection?: boolean | null;
+          smart_phase_transitions?: boolean | null;
+          batch_optimization?: boolean | null;
+          quality_assurance_enabled?: boolean | null;
+          biological_indicator_analysis?: boolean | null;
+          compliance_monitoring?: boolean | null;
+          audit_trail_enhancement?: boolean | null;
+          risk_assessment?: boolean | null;
+          scanner_intelligence_enabled?: boolean | null;
+          multi_format_barcode_support?: boolean | null;
+          tool_history_integration?: boolean | null;
+          smart_validation?: boolean | null;
+          error_prevention?: boolean | null;
+          real_time_monitoring_enabled?: boolean | null;
+          anomaly_detection?: boolean | null;
+          predictive_maintenance?: boolean | null;
+          quality_drift_detection?: boolean | null;
+          smart_notifications?: boolean | null;
+          ai_confidence_threshold?: number | null;
+          ai_data_retention_days?: number | null;
+          real_time_processing_enabled?: boolean | null;
+          batch_processing_enabled?: boolean | null;
+          openai_api_key_encrypted?: string | null;
+          google_vision_api_key_encrypted?: string | null;
+          azure_computer_vision_key_encrypted?: string | null;
+          data_sharing_enabled?: boolean | null;
+          local_ai_processing_enabled?: boolean | null;
+          encrypted_data_transmission?: boolean | null;
+          ai_model_training?: boolean | null;
+          auto_optimization_enabled?: boolean | null;
+          performance_monitoring?: boolean | null;
+          resource_optimization?: boolean | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      learning_ai_settings: {
+        Row: {
+          id: string;
+          facility_id: string;
+          ai_enabled: boolean | null;
+          ai_confidence_threshold: number | null;
+          ai_recommend_lessons: boolean | null;
+          ai_adaptive_learning: boolean | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          facility_id: string;
+          ai_enabled?: boolean | null;
+          ai_confidence_threshold?: number | null;
+          ai_recommend_lessons?: boolean | null;
+          ai_adaptive_learning?: boolean | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          facility_id?: string;
+          ai_enabled?: boolean | null;
+          ai_confidence_threshold?: number | null;
+          ai_recommend_lessons?: boolean | null;
+          ai_adaptive_learning?: boolean | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
       seed_daily_operations_tasks: {
-        Args: {};
+        Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
     };
@@ -5189,6 +5475,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       tool_status: ['dirty', 'clean', 'problem', 'new_barcode', 'active'],

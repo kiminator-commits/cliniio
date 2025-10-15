@@ -226,6 +226,13 @@ export const useEnvironmentalCleanStore = create<
       );
       setRooms(updatedRooms);
 
+      // Add audit log
+      await EnvironmentalCleanService.addAuditLog(
+        'status_update',
+        roomId,
+        'system'
+      );
+
       console.log('✅ Updated room status:', roomId, status);
     } catch (error) {
       const errorMessage =
@@ -256,6 +263,13 @@ export const useEnvironmentalCleanStore = create<
       );
       setRooms(updatedRooms);
 
+      // Add audit log
+      await EnvironmentalCleanService.addAuditLog(
+        'complete_cleaning',
+        roomId,
+        'system'
+      );
+
       console.log('✅ Completed room cleaning:', roomId);
     } catch (error) {
       const errorMessage =
@@ -278,7 +292,7 @@ export const useEnvironmentalCleanStore = create<
         };
       }
 
-      // Scan barcode using service (now optimized and synchronous)
+      // Scan barcode using service (now properly awaited)
       const result = await EnvironmentalCleanService.scanRoomBarcode(barcode);
 
       if (result.success && result.room) {
@@ -289,6 +303,13 @@ export const useEnvironmentalCleanStore = create<
         if (!existingRoom) {
           setRooms([...rooms, result.room!]);
         }
+
+        // Add audit log
+        await EnvironmentalCleanService.addAuditLog(
+          'room_scan',
+          result.room.id,
+          'system'
+        );
       }
 
       return result;
