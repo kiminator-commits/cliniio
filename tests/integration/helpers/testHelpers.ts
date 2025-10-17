@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, expect } from 'vitest';
 import { createEnhancedMockSupabaseClient } from '../mocks/supabaseMockFactory';
 import { testInventoryItem, testLargeDataset } from '../fixtures/testData';
 

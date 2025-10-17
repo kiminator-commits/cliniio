@@ -111,7 +111,7 @@ export const BIFailureResolution: React.FC<BIFailureResolutionProps> = ({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Current Status */}
-          <BIFailureStatus biFailureDetails={biFailureDetails} />
+          <BIFailureStatus biFailureDetails={biFailureDetails as any} />
 
           {/* Workflow Steps */}
           <BIFailureWorkflowSteps

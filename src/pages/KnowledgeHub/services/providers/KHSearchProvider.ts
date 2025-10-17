@@ -2,7 +2,7 @@ import { supabase } from '../../../../lib/supabase';
 import { ContentItem } from '../../types';
 import { ApiError, ErrorType, ErrorSeverity } from '../../types/errors';
 import { KHDataTransformationProvider } from './KHDataTransformationProvider';
-import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
+import type { PostgrestFilterBuilder as _PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export interface SearchFilters {
   category?: string;
@@ -28,6 +28,14 @@ export interface SearchResult {
   options: SearchOptions;
 }
 
+interface QueryBuilder {
+  eq(column: string, value: string): QueryBuilder;
+  ilike(column: string, pattern: string): QueryBuilder;
+  order(column: string, options?: { ascending?: boolean }): QueryBuilder;
+  range(from: number, to: number): QueryBuilder;
+  [key: string]: unknown;
+}
+
 export class KHSearchProvider {
   private tableName = 'knowledge_hub_courses';
 
@@ -40,7 +48,7 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder = supabase
+      let queryBuilder: any = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
         .eq('is_active', true);
@@ -54,12 +62,12 @@ export class KHSearchProvider {
 
       // Add filters
       if (filters) {
-        queryBuilder = this.applyFilters(queryBuilder, filters);
+        queryBuilder = this.applyFilters(queryBuilder as any, filters);
       }
 
       // Apply options
       if (options) {
-        queryBuilder = this.applyOptions(queryBuilder, options);
+        queryBuilder = this.applyOptions(queryBuilder as any, options);
       } else {
         // Default ordering
         queryBuilder = queryBuilder.order('created_at', { ascending: false });
@@ -96,7 +104,7 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder = supabase
+      let queryBuilder: any = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
         .eq('is_active', true);
@@ -108,7 +116,7 @@ export class KHSearchProvider {
 
       // Apply options
       if (options) {
-        queryBuilder = this.applyOptions(queryBuilder, options);
+        queryBuilder = this.applyOptions(queryBuilder as any, options);
       } else {
         queryBuilder = queryBuilder.order('created_at', { ascending: false });
       }
@@ -145,7 +153,7 @@ export class KHSearchProvider {
     options?: SearchOptions;
   }): Promise<SearchResult> {
     try {
-      let queryBuilder = supabase
+      let queryBuilder: any = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
         .eq('is_active', true);
@@ -160,12 +168,12 @@ export class KHSearchProvider {
 
       // Add filters
       if (criteria.filters) {
-        queryBuilder = this.applyFilters(queryBuilder, criteria.filters);
+        queryBuilder = this.applyFilters(queryBuilder as any, criteria.filters);
       }
 
       // Apply options
       if (criteria.options) {
-        queryBuilder = this.applyOptions(queryBuilder, criteria.options);
+        queryBuilder = this.applyOptions(queryBuilder as any, criteria.options);
       } else {
         queryBuilder = queryBuilder.order('created_at', { ascending: false });
       }
@@ -300,25 +308,9 @@ export class KHSearchProvider {
    * Apply filters to query builder
    */
   private applyFilters(
-    queryBuilder: PostgrestFilterBuilder<
-      unknown,
-      unknown,
-      unknown,
-      unknown[],
-      string,
-      unknown,
-      'GET'
-    >,
+    queryBuilder: QueryBuilder,
     filters: SearchFilters
-  ): PostgrestFilterBuilder<
-    unknown,
-    unknown,
-    unknown,
-    unknown[],
-    string,
-    unknown,
-    'GET'
-  > {
+  ): QueryBuilder {
     if (filters.category) {
       queryBuilder = queryBuilder.eq(
         'content_type',
@@ -341,7 +333,7 @@ export class KHSearchProvider {
       );
     }
     if (filters.tags && filters.tags.length > 0) {
-      queryBuilder = queryBuilder.overlaps('tags', filters.tags);
+      queryBuilder = (queryBuilder as any).overlaps('tags', filters.tags);
     }
 
     return queryBuilder;
@@ -351,36 +343,20 @@ export class KHSearchProvider {
    * Apply options to query builder
    */
   private applyOptions(
-    queryBuilder: PostgrestFilterBuilder<
-      unknown,
-      unknown,
-      unknown,
-      unknown[],
-      string,
-      unknown,
-      'GET'
-    >,
+    queryBuilder: QueryBuilder,
     options: SearchOptions
-  ): PostgrestFilterBuilder<
-    unknown,
-    unknown,
-    unknown,
-    unknown[],
-    string,
-    unknown,
-    'GET'
-  > {
+  ): QueryBuilder {
     if (options.limit) {
-      queryBuilder = queryBuilder.limit(options.limit);
+      queryBuilder = (queryBuilder as any).limit(options.limit);
     }
     if (options.offset) {
-      queryBuilder = queryBuilder.range(
+      queryBuilder = (queryBuilder as any).range(
         options.offset,
         options.offset + (options.limit || 10) - 1
       );
     }
     if (options.sortBy) {
-      queryBuilder = queryBuilder.order(options.sortBy, {
+      queryBuilder = (queryBuilder as any).order(options.sortBy, {
         ascending: options.sortOrder === 'asc',
       });
     }

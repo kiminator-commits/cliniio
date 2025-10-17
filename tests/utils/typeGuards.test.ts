@@ -4,6 +4,7 @@ import {
   isGamificationData,
 } from '../../src/utils/typeGuards';
 import { Task } from '../../src/store/homeStore';
+import { describe, test, expect, it } from 'vitest';
 
 describe('typeGuards', () => {
   describe('isTask', () => {

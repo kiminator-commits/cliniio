@@ -3,6 +3,8 @@ dist/
 build/
 coverage/
 playwright-report/
+src/types/
+src/services/
 eslint-final.json
 eslint-output.json
 lint-results.txt

@@ -69,7 +69,7 @@ export const SimpleTable: React.FC<SimpleTableProps> = ({
     setCurrentPage(page);
   };
 
-  const handlePageSizeChange = (newPageSize: number) => {
+  const _handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
     setCurrentPage(1); // Reset to first page when page size changes
   };
@@ -163,7 +163,6 @@ export const SimpleTable: React.FC<SimpleTableProps> = ({
       <TablePagination
         pagination={pagination}
         onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
       />
     </div>
   );

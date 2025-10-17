@@ -117,7 +117,7 @@ export class AuthMigrationUtilities {
     } catch (error) {
       return {
         success: false,
-        errors: [error.message],
+        errors: [(error as Error).message],
         warnings: [],
       };
     }

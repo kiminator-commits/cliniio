@@ -1,21 +1,9 @@
 import { supabase } from '@/lib/supabaseClient';
-
-// Define InventoryAISettings interface locally since the module doesn't exist
-export interface InventoryAISettings {
-  id?: string;
-  facility_id: string;
-  auto_reorder_enabled: boolean;
-  low_stock_threshold: number;
-  prediction_accuracy_threshold: number;
-  ai_model_version: string;
-  last_training_date?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import { InventoryAISettings } from '../types';
 
 // Default AI settings
-const DEFAULT_AI_SETTINGS: Partial<InventoryAISettings> = {
-  auto_reorder_enabled: true,
+const DEFAULT_AI_SETTINGS: any = {
+  // auto_reorder_enabled: true,
   low_stock_threshold: 10,
   prediction_accuracy_threshold: 0.85,
   ai_model_version: '1.0.0',
@@ -46,11 +34,50 @@ export class InventorySupabaseProvider {
 
       // Return default settings for now since the table doesn't exist
       return {
+        id: 'default',
         facility_id: this.facilityId,
-        auto_reorder_enabled: true,
-        low_stock_threshold: 10,
-        prediction_accuracy_threshold: 0.85,
-        ai_model_version: '1.0.0',
+        ai_enabled: true,
+        ai_version: '1.0.0',
+        computer_vision_enabled: true,
+        barcode_scanning_enabled: true,
+        image_recognition_enabled: true,
+        quality_assessment_enabled: true,
+        damage_detection_enabled: true,
+        inventory_counting_enabled: true,
+        predictive_analytics_enabled: true,
+        demand_forecasting_enabled: true,
+        maintenance_prediction_enabled: true,
+        cost_optimization_enabled: true,
+        seasonal_analysis_enabled: true,
+        cycle_optimization_enabled: true,
+        smart_categorization_enabled: true,
+        auto_classification_enabled: true,
+        smart_form_filling_enabled: true,
+        intelligent_workflow_enabled: true,
+        quality_assurance_enabled: true,
+        compliance_monitoring_enabled: true,
+        audit_trail_enhancement_enabled: true,
+        risk_assessment_enabled: true,
+        scanner_intelligence_enabled: true,
+        multi_format_barcode_support: true,
+        smart_validation_enabled: true,
+        error_prevention_enabled: true,
+        real_time_monitoring_enabled: true,
+        anomaly_detection_enabled: true,
+        ai_confidence_threshold: 0.85,
+        ai_data_retention_days: 30,
+        ai_model_training: false,
+        predictive_maintenance_enabled: true,
+        smart_notifications_enabled: true,
+        real_time_processing_enabled: true,
+        data_sharing_enabled: false,
+        local_ai_processing_enabled: true,
+        encrypted_data_transmission: true,
+        auto_optimization_enabled: true,
+        performance_monitoring: true,
+        resource_optimization: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
     } catch (error) {
       console.error('Error loading AI settings:', error);

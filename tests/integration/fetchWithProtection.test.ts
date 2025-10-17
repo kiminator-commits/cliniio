@@ -1,11 +1,11 @@
 import { fetchWithProtection } from '@/utils/fetchWithProtection';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, type Mock } from 'vitest';
 global.fetch = vi.fn();
 
 describe('fetchWithProtection', () => {
   beforeEach(() => {
-    global.fetch = vi.fn(() => Promise.reject(new Error('fail'))) as vi.Mock;
+    global.fetch = vi.fn(() => Promise.reject(new Error('fail'))) as Mock;
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 

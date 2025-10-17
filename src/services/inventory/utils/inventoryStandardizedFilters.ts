@@ -2,7 +2,7 @@ import {
   InventoryFilters,
   InventoryQueryOptions,
 } from '../types/inventoryServiceTypes';
-import { InventoryItem } from '@/types/inventoryTypes';
+import { InventoryItem } from '../../../types/inventoryTypes';
 
 // Define proper types for Supabase query builder
 interface SupabaseQueryBuilder {
@@ -266,15 +266,24 @@ export class InventoryStandardizedFilters {
           (item.name && item.name.toLowerCase().includes(searchLower)) ||
           (item.category &&
             item.category.toLowerCase().includes(searchLower)) ||
-          (item.data?.description &&
-            typeof item.data.description === 'string' &&
-            item.data.description.toLowerCase().includes(searchLower)) ||
-          (item.data?.barcode &&
-            typeof item.data.barcode === 'string' &&
-            item.data.barcode.toLowerCase().includes(searchLower)) ||
-          (item.data?.serialNumber &&
-            typeof item.data.serialNumber === 'string' &&
-            item.data.serialNumber.toLowerCase().includes(searchLower));
+          (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'description' in item.data &&
+            typeof (item.data as Record<string, unknown>).description === 'string' &&
+            ((item.data as Record<string, unknown>).description as string).toLowerCase().includes(searchLower)) ||
+          (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'barcode' in item.data &&
+            typeof (item.data as Record<string, unknown>).barcode === 'string' &&
+            ((item.data as Record<string, unknown>).barcode as string).toLowerCase().includes(searchLower)) ||
+          (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'serialNumber' in item.data &&
+            typeof (item.data as Record<string, unknown>).serialNumber === 'string' &&
+            ((item.data as Record<string, unknown>).serialNumber as string).toLowerCase().includes(searchLower));
 
         if (!matchesSearch) {
           return false;
@@ -312,25 +321,31 @@ export class InventoryStandardizedFilters {
       }
 
       // Boolean filters
-      if (
-        filters.isActive !== undefined &&
-        item.data?.isActive !== filters.isActive
-      ) {
-        return false;
+      if (filters.isActive !== undefined) {
+        const isActive = item.data && typeof item.data === 'object' && item.data !== null && 'isActive' in item.data 
+          ? (item.data as Record<string, unknown>).isActive 
+          : undefined;
+        if (isActive !== filters.isActive) {
+          return false;
+        }
       }
 
-      if (
-        filters.tracked !== undefined &&
-        item.data?.tracked !== filters.tracked
-      ) {
-        return false;
+      if (filters.tracked !== undefined) {
+        const tracked = item.data && typeof item.data === 'object' && item.data !== null && 'tracked' in item.data 
+          ? (item.data as Record<string, unknown>).tracked 
+          : undefined;
+        if (tracked !== filters.tracked) {
+          return false;
+        }
       }
 
-      if (
-        filters.favorite !== undefined &&
-        item.data?.favorite !== filters.favorite
-      ) {
-        return false;
+      if (filters.favorite !== undefined) {
+        const favorite = item.data && typeof item.data === 'object' && item.data !== null && 'favorite' in item.data 
+          ? (item.data as Record<string, unknown>).favorite 
+          : undefined;
+        if (favorite !== filters.favorite) {
+          return false;
+        }
       }
 
       return true;
@@ -408,7 +423,7 @@ export class InventoryStandardizedFilters {
    * Build filter from status
    */
   static buildFilterFromStatus(
-    status: 'active' | 'inactive' | 'maintenance' | 'retired'
+    status: 'active' | 'inactive' | 'p2' | 'n/a'
   ): InventoryFilters {
     return {
       status,
@@ -456,7 +471,7 @@ export class InventoryStandardizedFilters {
       .map((item) => item[field])
       .filter((value) => value !== undefined && value !== null && value !== '');
 
-    return [...new Set(values)].map((v: unknown) => String(v));
+    return Array.from(new Set(values)).map((v: unknown) => String(v));
   }
 
   /**

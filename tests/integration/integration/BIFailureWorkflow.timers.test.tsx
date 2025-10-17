@@ -1,8 +1,9 @@
 // MOCKS MUST BE AT THE TOP - BEFORE ANY IMPORTS
+import { vi, describe, test, expect, type Mock } from 'vitest';
 vi.mock('@/lib/supabase', () => {
   const mockChannel: {
-    on: vi.Mock;
-    subscribe: vi.Mock;
+    on: Mock;
+    subscribe: Mock;
   } = {
     on: vi.fn(() => mockChannel),
     subscribe: vi.fn(() => mockChannel),

@@ -106,11 +106,11 @@ export function getNestedProperty(
   obj: Record<string, unknown>,
   path: string
 ): unknown {
-  return path.split('.').reduce((current, key) => {
-    return current && typeof current === 'object'
+  return path.split('.').reduce((current: unknown, key: string) => {
+    return current && typeof current === 'object' && current !== null
       ? (current as Record<string, unknown>)[key]
       : undefined;
-  }, obj);
+  }, obj as unknown);
 }
 
 /**

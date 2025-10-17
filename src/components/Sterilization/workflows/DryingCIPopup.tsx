@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-hot-toast';
 import { batchCiConfirmation } from '@/services/sterilization/ciConfirmationService';
-import { useComplianceSettingsStore } from '@/store/slices/complianceSettingsSlice';
+import { useComplianceSettingsStore } from '@/store/hooks/useComplianceSettingsStore';
 import { useUser } from '@/contexts/UserContext';
 
 interface DryingCIPopupProps {

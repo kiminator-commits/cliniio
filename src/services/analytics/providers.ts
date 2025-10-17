@@ -97,7 +97,7 @@ export class AnalyticsProviderService {
           // Initialize gtag
           window.dataLayer = window.dataLayer || [];
           window.gtag = function (...args: unknown[]) {
-            window.dataLayer?.push(args as unknown[]);
+            window.dataLayer?.push(args as any);
           };
           (
             window as { gtag: (command: string, ...args: unknown[]) => void }

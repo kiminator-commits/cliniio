@@ -5,7 +5,7 @@ vi.mock('../../src/services/auditLogService', () => ({
 
 import { insertSterilizationLog } from '../../src/services/auditLogService';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, it } from 'vitest';
 describe('insertSterilizationLog', () => {
   it('should insert sterilization log without error', async () => {
     const event = {

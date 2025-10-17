@@ -55,17 +55,9 @@ export class EvaluationService {
         content_id: result.content_id,
         predicted_performance: result.predicted_performance,
         confidence_score: result.confidence_score,
-        performance_factors: result.risk_factors as unknown as Record<
-          string,
-          number
-        >,
         improvement_suggestions:
           result.improvement_suggestions as unknown as string[],
         predicted_completion_time: result.predicted_completion_time,
-        difficulty_assessment:
-          result.study_recommendations as unknown as Record<string, string>,
-        prerequisite_requirements: {} as Json, // Not available in this interface
-        alternative_approaches: {} as Json, // Not available in this interface
         processing_time_ms: result.processing_time_ms,
         created_at: result.created_at,
       };

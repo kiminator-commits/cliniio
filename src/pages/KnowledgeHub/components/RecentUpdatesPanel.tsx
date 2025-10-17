@@ -37,9 +37,9 @@ export const RecentUpdatesPanel: React.FC = () => {
           updated_at: item.lastUpdated as string,
         }));
       setUpdates(sorted);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load recent updates:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }

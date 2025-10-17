@@ -236,7 +236,7 @@ export class StreamingExportService {
       value !== null &&
       (value as Date) instanceof Date
     ) {
-      return value.toISOString().split('T')[0];
+      return (value as Date).toISOString().split('T')[0];
     }
 
     return String(value);

@@ -2,6 +2,14 @@ import React, { useMemo } from 'react';
 import Icon from '@mdi/react';
 import { mdiTools } from '@mdi/js';
 import { useSterilizationStore } from '../../../store/sterilizationStore';
+import { Tool } from '@/types/toolTypes';
+
+interface SterilizationTool {
+  id: string;
+  name: string;
+  barcode?: string;
+  [key: string]: unknown;
+}
 
 export const ToolsSection: React.FC = () => {
   const currentCycle = useSterilizationStore((state) => state.currentCycle);
@@ -15,7 +23,7 @@ export const ToolsSection: React.FC = () => {
 
   // Map tool IDs to actual tool objects
   const cycleTools = toolsInCycle
-    .map((toolId: string) => availableTools.find((tool) => tool.id === toolId))
+    .map((toolId: string) => availableTools.find((tool: Tool) => tool.id === toolId))
     .filter((tool): tool is NonNullable<typeof tool> => tool !== undefined); // Remove any undefined tools
 
   return (
@@ -33,7 +41,7 @@ export const ToolsSection: React.FC = () => {
       </div>
       <div className="flex flex-wrap gap-2">
         {cycleTools.length > 0 ? (
-          cycleTools.map((tool) => (
+          cycleTools.map((tool: Tool) => (
             <span
               key={tool.id}
               className="px-2 py-1 bg-white text-xs text-gray-600 rounded border"

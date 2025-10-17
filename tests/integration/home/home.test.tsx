@@ -1,5 +1,5 @@
 import React, { act } from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from '../../../src/pages/Home';

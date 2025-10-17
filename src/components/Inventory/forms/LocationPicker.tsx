@@ -201,9 +201,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                     </span>
                   </div>
                   <div className="text-xs text-blue-600">
-                    Distance: {formatDistance(suggestedRoom.distance)} •
-                    Department: {suggestedRoom.room.department} • Floor:{' '}
-                    {suggestedRoom.room.floor}
+                    Distance: {formatDistance(suggestedRoom.distance)}
                   </div>
                 </div>
               </div>

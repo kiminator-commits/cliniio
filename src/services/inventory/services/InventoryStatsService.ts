@@ -3,9 +3,9 @@
  * Extracted from InventoryServiceFacade for better maintainability
  */
 
-import { _LocalInventoryItem } from '../../types/inventoryTypes';
-import { InventoryRepository } from './facade/repository';
-import { InventoryAdapterManager } from './facade/adapters';
+import { InventoryItem } from '../types/supabaseTypes';
+import { InventoryRepository } from '../facade/repository';
+import { InventoryAdapterManager } from '../facade/adapters';
 import { AnalyticsTrackingService } from '../../shared/analyticsTrackingService';
 import { performanceMonitor } from '../../monitoring/PerformanceMonitor';
 
@@ -43,8 +43,8 @@ export class InventoryStatsService {
         locationsCount: new Set(items.map((item) => item.location)).size,
         lowStockItems: items.filter((item) => (item.quantity || 0) < 10).length,
         expiredItems: items.filter((item) => {
-          if (!item.expirationDate) return false;
-          return new Date(item.expirationDate) < new Date();
+          if (!item.expiration_date) return false;
+          return new Date(item.expiration_date) < new Date();
         }).length,
         lastUpdated: new Date(),
       };
@@ -53,7 +53,7 @@ export class InventoryStatsService {
       performanceMonitor.recordResponseTime(
         'inventory_stats_calculate',
         duration,
-        { totalItems: stats.totalItems }
+        { totalItems: stats.totalItems as any }
       );
 
       return stats;
@@ -70,7 +70,7 @@ export class InventoryStatsService {
     const startTime = performance.now();
 
     try {
-      const result = await this.repository.getItemHistory();
+      const result = await (this.repository as any).getItemHistory();
 
       const duration = performance.now() - startTime;
       performanceMonitor.recordResponseTime(
@@ -93,7 +93,7 @@ export class InventoryStatsService {
     const startTime = performance.now();
 
     try {
-      await this.repository.refreshData();
+      await (this.repository as any).refreshData();
 
       const duration = performance.now() - startTime;
       performanceMonitor.recordResponseTime('inventory_refresh', duration, {});

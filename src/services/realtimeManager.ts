@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 // RealtimeSubscription is not exported from @supabase/supabase-js in current version
 
 class RealtimeManager {
@@ -27,7 +28,7 @@ class RealtimeManager {
       typeof subscription === 'object' &&
       'unsubscribe' in subscription
     ) {
-      supabase.removeChannel(subscription as { unsubscribe: () => void });
+      supabase.removeChannel(subscription as unknown as RealtimeChannel);
     }
     this.subscriptions = this.subscriptions.filter((s) => s !== subscription);
   }
@@ -35,7 +36,7 @@ class RealtimeManager {
   static forceCleanup() {
     this.subscriptions.forEach((sub) => {
       if (sub && typeof sub === 'object' && 'unsubscribe' in sub) {
-        supabase.removeChannel(sub as { unsubscribe: () => void });
+        supabase.removeChannel(sub as unknown as RealtimeChannel);
       }
     });
     this.subscriptions = [];

@@ -23,7 +23,7 @@ export default function LocationManagementPage() {
   async function loadData() {
     setLoading(true);
     try {
-      const data = await fetchLocations(facilityId);
+      const data = await fetchLocations(_facilityId);
       setLocations(data);
     } catch (_e) {
       console.error('Failed to fetch locations', _e);
@@ -37,10 +37,10 @@ export default function LocationManagementPage() {
     setCreating(true);
     try {
       await createLocation(
-        facilityId,
+        _facilityId,
         name,
         barcode,
-        parentId ?? undefined,
+        _parentId ?? undefined,
         capacity ?? undefined
       );
       await loadData();

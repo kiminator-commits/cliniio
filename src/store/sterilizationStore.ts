@@ -36,8 +36,10 @@ import {
 } from './slices/sterilizationSettingsSlice';
 import {
   createBIWorkflowSlice,
-  BIWorkflowState,
 } from './slices/biWorkflowSlice';
+import {
+  BIWorkflowState,
+} from './slices/types/biWorkflowTypes';
 
 // Consolidated store type with only the necessary slices
 type SterilizationStore = BiologicalIndicatorState &

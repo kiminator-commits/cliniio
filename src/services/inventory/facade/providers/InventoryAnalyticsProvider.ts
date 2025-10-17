@@ -52,7 +52,7 @@ export class InventoryAnalyticsProvider {
       itemName,
       category,
     });
-    this.trackAnalyticsEvent('inventory_item_created', event.properties);
+    this.trackAnalyticsEvent('inventory_item_created', event.properties as any);
   }
 
   /**
@@ -81,7 +81,7 @@ export class InventoryAnalyticsProvider {
       itemId,
       updates,
     });
-    this.trackAnalyticsEvent('inventory_item_updated', event.properties);
+    this.trackAnalyticsEvent('inventory_item_updated', event.properties as any);
   }
 
   /**
@@ -106,7 +106,7 @@ export class InventoryAnalyticsProvider {
       event.properties
     );
     this.trackUserAction('delete_item', 'inventory', { itemId });
-    this.trackAnalyticsEvent('inventory_item_deleted', event.properties);
+    this.trackAnalyticsEvent('inventory_item_deleted', event.properties as any);
   }
 
   /**
@@ -132,7 +132,7 @@ export class InventoryAnalyticsProvider {
       event.properties
     );
     this.trackUserAction('create_category', 'inventory', { category });
-    this.trackAnalyticsEvent('inventory_category_created', event.properties);
+    this.trackAnalyticsEvent('inventory_category_created', event.properties as any);
   }
 
   /**
@@ -158,7 +158,7 @@ export class InventoryAnalyticsProvider {
       event.properties
     );
     this.trackUserAction('delete_category', 'inventory', { category });
-    this.trackAnalyticsEvent('inventory_category_deleted', event.properties);
+    this.trackAnalyticsEvent('inventory_category_deleted', event.properties as any);
   }
 
   /**
@@ -198,7 +198,7 @@ export class InventoryAnalyticsProvider {
       errorCount,
       ...additionalProperties,
     });
-    this.trackAnalyticsEvent(`inventory_bulk_${operation}`, event.properties);
+    this.trackAnalyticsEvent(`inventory_bulk_${operation}`, event.properties as any);
   }
 
   /**
@@ -235,7 +235,7 @@ export class InventoryAnalyticsProvider {
       resultCount,
       filters,
     });
-    this.trackAnalyticsEvent('inventory_search', event.properties);
+    this.trackAnalyticsEvent('inventory_search', event.properties as any);
   }
 
   /**
@@ -265,7 +265,7 @@ export class InventoryAnalyticsProvider {
       filters,
       resultCount,
     });
-    this.trackAnalyticsEvent('inventory_filter', event.properties);
+    this.trackAnalyticsEvent('inventory_filter', event.properties as any);
   }
 
   /**
@@ -294,7 +294,7 @@ export class InventoryAnalyticsProvider {
       originalItemId,
       newItemId,
     });
-    this.trackAnalyticsEvent('inventory_item_duplicated', event.properties);
+    this.trackAnalyticsEvent('inventory_item_duplicated', event.properties as any);
   }
 
   /**
@@ -323,7 +323,7 @@ export class InventoryAnalyticsProvider {
       itemId,
       reason,
     });
-    this.trackAnalyticsEvent('inventory_item_archived', event.properties);
+    this.trackAnalyticsEvent('inventory_item_archived', event.properties as any);
   }
 
   /**
@@ -348,7 +348,7 @@ export class InventoryAnalyticsProvider {
       event.properties
     );
     this.trackUserAction('restore_item', 'inventory', { itemId });
-    this.trackAnalyticsEvent('inventory_item_restored', event.properties);
+    this.trackAnalyticsEvent('inventory_item_restored', event.properties as any);
   }
 
   /**
@@ -384,7 +384,7 @@ export class InventoryAnalyticsProvider {
       targetCategory,
       itemsUpdated,
     });
-    this.trackAnalyticsEvent('inventory_category_merged', event.properties);
+    this.trackAnalyticsEvent('inventory_category_merged', event.properties as any);
   }
 
   /**
@@ -409,7 +409,7 @@ export class InventoryAnalyticsProvider {
       event.properties
     );
     this.trackUserAction('initialize_adapter', 'inventory', { adapterType });
-    this.trackAnalyticsEvent('inventory_adapter_initialized', event.properties);
+    this.trackAnalyticsEvent('inventory_adapter_initialized', event.properties as any);
   }
 
   /**
@@ -446,7 +446,7 @@ export class InventoryAnalyticsProvider {
       errorMessage: error.message,
       ...context,
     });
-    this.trackAnalyticsEvent('inventory_error', event.properties);
+    this.trackAnalyticsEvent('inventory_error', event.properties as any);
   }
 
   /**
@@ -483,7 +483,7 @@ export class InventoryAnalyticsProvider {
       duration,
       itemCount,
     });
-    this.trackAnalyticsEvent('inventory_performance', event.properties);
+    this.trackAnalyticsEvent('inventory_performance', event.properties as any);
   }
 
   /**
@@ -515,9 +515,9 @@ export class InventoryAnalyticsProvider {
    */
   private trackAnalyticsEvent(
     eventName: string,
-    properties?: Record<string, unknown>
+    properties?: any
   ): void {
-    AnalyticsTrackingService.trackEvent(eventName, properties);
+    AnalyticsTrackingService.trackEvent(eventName, properties as any);
   }
 
   /**
@@ -529,7 +529,7 @@ export class InventoryAnalyticsProvider {
     action: string,
     label?: string,
     value?: number,
-    properties?: Record<string, unknown>
+    properties?: any
   ): AnalyticsEvent {
     return {
       eventType,
@@ -540,7 +540,7 @@ export class InventoryAnalyticsProvider {
       properties: {
         ...properties,
         adapterType: this.adapterType,
-      },
+      } as any,
     };
   }
 
@@ -555,7 +555,7 @@ export class InventoryAnalyticsProvider {
       'info',
       event.properties
     );
-    this.trackUserAction(event.action, event.category, event.properties);
-    this.trackAnalyticsEvent(event.eventType, event.properties);
+    this.trackUserAction(event.action, event.category, event.properties as any);
+    this.trackAnalyticsEvent(event.eventType, event.properties as any);
   }
 }

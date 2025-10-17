@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import TaskSummaryCard from '../../../src/components/EnvironmentalCleaning/TaskSummaryCard';
 import { TaskSummary } from '../../../src/pages/EnvironmentalClean/models';
+import { describe, test, expect } from 'vitest';
 
 describe('TaskSummaryCard', () => {
   const mockTasks: TaskSummary = {

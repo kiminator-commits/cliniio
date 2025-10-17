@@ -277,74 +277,26 @@ export function createMockClientWithResponses(responses: {
   // Override auth responses if provided
   if (responses.auth) {
     if (responses.auth.getUser) {
-      (
-        mockClient.auth.getUser as {
-          mockResolvedValue: (
-            value: () => Promise<{
-              data: { user: unknown } | null;
-              error: unknown;
-            }>
-          ) => void;
-        }
-      ).mockResolvedValue(responses.auth.getUser);
+      (mockClient.auth.getUser as any).mockResolvedValue(responses.auth.getUser);
     }
     if (responses.auth.getSession) {
-      (
-        mockClient.auth.getSession as {
-          mockResolvedValue: (
-            value: () => Promise<{
-              data: { session: unknown } | null;
-              error: unknown;
-            }>
-          ) => void;
-        }
-      ).mockResolvedValue(responses.auth.getSession);
+      (mockClient.auth.getSession as any).mockResolvedValue(responses.auth.getSession);
     }
     if (responses.auth.signIn) {
-      (
-        mockClient.auth.signIn as {
-          mockResolvedValue: (
-            value: (credentials: {
-              email: string;
-              password: string;
-            }) => Promise<{ data: unknown; error: unknown }>
-          ) => void;
-        }
-      ).mockResolvedValue(responses.auth.signIn);
+      (mockClient.auth.signIn as any).mockResolvedValue(responses.auth.signIn);
     }
     if (responses.auth.signUp) {
-      (
-        mockClient.auth.signUp as {
-          mockResolvedValue: (
-            value: (credentials: {
-              email: string;
-              password: string;
-            }) => Promise<{ data: unknown; error: unknown }>
-          ) => void;
-        }
-      ).mockResolvedValue(responses.auth.signUp);
+      (mockClient.auth.signUp as any).mockResolvedValue(responses.auth.signUp);
     }
     if (responses.auth.signOut) {
-      (
-        mockClient.auth.signOut as {
-          mockResolvedValue: (value: () => Promise<{ error: unknown }>) => void;
-        }
-      ).mockResolvedValue(responses.auth.signOut);
+      (mockClient.auth.signOut as any).mockResolvedValue(responses.auth.signOut);
     }
   }
 
   // Override database responses if provided
   if (responses.database) {
     const originalFrom = mockClient.from;
-    (
-      mockClient.from as {
-        mockImplementation: (
-          fn: <T extends keyof Database['public']['Tables']>(
-            table: T
-          ) => MockTableBuilder
-        ) => void;
-      }
-    ).mockImplementation(
+    (mockClient.from as any).mockImplementation(
       <T extends keyof Database['public']['Tables']>(table: T) => {
         const tableBuilder = originalFrom(table as string) as MockTableBuilder;
 

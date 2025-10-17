@@ -6,7 +6,7 @@ export function useInventoryUpload(facilityId: string) {
   const [error, setError] = useState<string | null>(null);
 
   async function handleInventoryUpload(file: File) {
-    if (!file || !facilityId) return;
+    if (!file || !facilityId) return undefined;
 
     try {
       setUploading(true);

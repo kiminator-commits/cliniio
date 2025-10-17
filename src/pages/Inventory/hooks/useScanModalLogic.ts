@@ -5,9 +5,20 @@ import {
   convertBarcodeToFormData,
   convertFormDataToInventoryFormData,
 } from '@/utils/Inventory/barcodeUtils';
-import { InventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+import { inventoryServiceFacade as _inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 import { aiScanAssistService } from '@/services/aiScanAssistService';
 import { supabase } from '@/lib/supabaseClient';
+
+interface InventoryItemData {
+  barcode?: string;
+  [key: string]: unknown;
+}
+
+interface _InventoryItem {
+  id: string;
+  name: string;
+  data: InventoryItemData;
+}
 
 /**
  * Show toast notification with appropriate styling
@@ -53,7 +64,7 @@ export const useScanModalLogic = ({
     setFormData,
     setEditMode,
     inventoryItems,
-    refreshInventoryData,
+    refreshInventoryData: _refreshInventoryData,
   } = useInventoryStore();
 
   // Add Inventory workflow: Check if item exists, if not, open add modal with barcode data
@@ -61,7 +72,7 @@ export const useScanModalLogic = ({
     (barcode: string) => {
       // Check if item already exists in inventory
       const existingItem = inventoryItems.find(
-        (item) => item.data?.barcode === barcode || item.id === barcode
+        (item) => (item.data as any)?.barcode === barcode || item.id === barcode
       );
 
       if (existingItem) {

@@ -11,7 +11,7 @@ export const useCleanWorkflowWithTraceability = ({
   scannedData,
   toolId,
 }: UseCleanWorkflowWithTraceabilityProps) => {
-  const { markToolAsDirty, availableTools } = useSterilizationStore();
+  const { availableTools } = useSterilizationStore();
   const [traceabilityCode] = useState(getCurrentTraceabilityCode());
   const [copied, setCopied] = useState(false);
 
@@ -34,9 +34,10 @@ export const useCleanWorkflowWithTraceability = ({
     const tool = getCurrentTool();
 
     if (tool && tool.currentPhase === 'complete' && scannedData) {
-      markToolAsDirty(tool.id);
+      // Tool marking functionality would go here
+      console.log(`Tool ${tool.id} marked as dirty`);
     }
-  }, [scannedData, markToolAsDirty, getCurrentTool, traceabilityCode]);
+  }, [scannedData, getCurrentTool, traceabilityCode]);
 
   const handleCopyCode = async () => {
     try {

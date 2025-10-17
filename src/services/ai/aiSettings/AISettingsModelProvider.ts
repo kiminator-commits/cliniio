@@ -1,5 +1,6 @@
 // Service imports
 import { SterilizationAIService } from '../sterilization/sterilizationAIService';
+import { SterilizationAISettings } from '../sterilization/types';
 import { InventoryAIService } from '../inventoryAIService';
 import { EnvironmentalAIService } from '../environmentalAI/environmentalAIService';
 import { LearningAIService } from '../learningAI/learningAIService';
@@ -99,7 +100,7 @@ export class AISettingsModelProvider {
             Number(sterilizationSettings.ai_confidence_threshold) || 0.8,
           ai_data_retention_days:
             Number(sterilizationSettings.ai_data_retention_days) || 90,
-        } as Record<string, unknown>),
+        } as SterilizationAISettings),
         this.inventoryAI.saveSettings(inventorySettings),
         this.environmentalAI.saveSettings(environmentalSettings),
         this.learningAI.saveSettings(learningSettings),

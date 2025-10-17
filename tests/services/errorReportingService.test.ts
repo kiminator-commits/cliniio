@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, afterEach, it, type Mock } from 'vitest';
 import {
   ErrorReportingService,
   reportError,
@@ -211,7 +211,7 @@ describe('ErrorReportingService', () => {
 
   describe('Sentry Provider', () => {
     beforeEach(() => {
-      (global.fetch as vi.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
         status: 200,
       });
@@ -263,7 +263,7 @@ describe('ErrorReportingService', () => {
 
   describe('LogRocket Provider', () => {
     beforeEach(() => {
-      (global.fetch as vi.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
         status: 200,
       });
@@ -315,7 +315,7 @@ describe('ErrorReportingService', () => {
 
   describe('Bugsnag Provider', () => {
     beforeEach(() => {
-      (global.fetch as vi.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
         status: 200,
       });
@@ -395,7 +395,7 @@ describe('ErrorReportingService', () => {
 
   describe('API Call Handling', () => {
     it('handles API call timeout', async () => {
-      (global.fetch as vi.Mock).mockImplementation(() =>
+      (global.fetch as Mock).mockImplementation(() =>
         Promise.reject(new Error('Timeout'))
       );
 
@@ -416,7 +416,7 @@ describe('ErrorReportingService', () => {
     });
 
     it('handles API call failure and retries', async () => {
-      (global.fetch as vi.Mock).mockRejectedValue(new Error('Network error'));
+      (global.fetch as Mock).mockRejectedValue(new Error('Network error'));
 
       ErrorReportingService.initialize({
         provider: 'sentry',

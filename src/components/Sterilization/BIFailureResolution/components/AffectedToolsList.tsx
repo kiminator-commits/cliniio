@@ -110,7 +110,7 @@ export const AffectedToolsList: React.FC<AffectedToolsListProps> = ({
         <div className="bg-white rounded-lg p-3 border border-gray-200 max-h-32 overflow-hidden">
           <div className="max-h-32 overflow-y-auto bi-modal-scrollbar-hide pr-2">
             <div className="grid grid-cols-1 gap-2 text-xs">
-              {affectedTools.slice(0, 6).map((tool, index) => {
+              {affectedTools.slice(0, 6).map((tool: Tool, index: number) => {
                 const toolDetails = getToolDetails(tool.id);
                 const batchInfo = batchInfoMap.get(tool.id);
 

@@ -30,7 +30,6 @@ const InventoryModals: React.FC = () => {
     // Form and edit mode states
     formData,
     isEditMode,
-    isCloned,
     expandedSections,
 
     // Form handlers
@@ -72,7 +71,6 @@ const InventoryModals: React.FC = () => {
         onHide={closeAddModal}
         formData={formData}
         isEditMode={isEditMode}
-        isCloned={isCloned}
         expandedSections={expandedSections}
         toggleSection={handleToggleSection}
         handleFormChange={handleFormChange}

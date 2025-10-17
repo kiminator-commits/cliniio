@@ -8,7 +8,7 @@ import { ChecklistTab } from './components/ChecklistTab';
 import { SDSTab } from './components/SDSTab';
 import { ChecklistModal } from './components/ChecklistModal';
 import { SDSModal } from './components/SDSModal';
-import { Checklist } from './types/cleaningChecklists';
+import { Checklist, ActiveTab, SDSSheet } from './types/cleaningChecklists';
 
 const CleaningChecklists: React.FC = () => {
   const { getPublishedChecklistsByCategory } = useChecklistStore();
@@ -97,7 +97,7 @@ const CleaningChecklists: React.FC = () => {
       className="p-6 bg-white rounded-lg shadow"
       style={{ borderLeft: '4px solid rgba(78, 205, 196, 0.5)' }}
     >
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabNavigation activeTab={activeTab} onTabChange={(tab: string) => setActiveTab(tab as ActiveTab)} />
 
       {activeTab === 'checklists' && (
         <ChecklistTab
@@ -120,10 +120,10 @@ const CleaningChecklists: React.FC = () => {
           searchQuery={searchQuery}
           sdsCategory={sdsCategory}
           filteredSDSSheets={filteredSDSSheets}
-          onTabChange={setActiveTab}
+          onTabChange={(tab: string) => setActiveTab(tab as ActiveTab)}
           onSearchQueryChange={setSearchQuery}
           onSdsCategoryChange={setSdsCategory}
-          onSDSSelect={setSelectedSDS}
+          onSDSSelect={(sds: any) => setSelectedSDS(sds)}
         />
       )}
 

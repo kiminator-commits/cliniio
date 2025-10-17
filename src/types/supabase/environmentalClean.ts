@@ -1,4 +1,4 @@
-import { Json, _Tables, _Inserts, _Updates } from './common';
+import { Json, Tables, Inserts, Updates } from './common';
 
 // Environmental Clean table types - using proper types instead of any
 export type EnvironmentalClean = {

@@ -126,7 +126,7 @@ export class AICostCalculationService {
   private async getFacilityCosts(): Promise<FacilityCosts> {
     try {
       const { FacilityService } = await import('../services/facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       const { data: facility } = await supabase
         .from('facilities')
@@ -196,7 +196,7 @@ export class AICostCalculationService {
     try {
       // Get current facility ID
       const { FacilityService } = await import('../services/facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       // Get historical error data
       const { data: errors } = await supabase
@@ -260,7 +260,7 @@ export class AICostCalculationService {
     try {
       // Get current facility ID
       const { FacilityService } = await import('../services/facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       // Get inventory and sterilization data
       const { data: inventory } = await supabase

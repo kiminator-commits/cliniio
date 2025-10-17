@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { AuthResponse } from '@supabase/supabase-js';
+import { AuthResponse, User, Session, AuthError } from '@supabase/supabase-js';
 
 // Mock environment variables for testing
 export const mockEnv = {
@@ -47,7 +47,7 @@ export const createMockAuthResponse = (
 ): AuthResponse => ({
   user: user as User | null, // Type assertion to match AuthResponse interface
   session: session as Session | null, // Type assertion to match AuthResponse interface
-  error,
+  error: error as AuthError | null, // Type assertion to match AuthResponse interface
 });
 
 export const createMockDatabaseResponse = (
@@ -185,9 +185,9 @@ export const generateMockInventoryItem = (
   updated_at: '2024-01-01T00:00:00Z',
   data: {
     // Runtime-only fields go here
-    ...((overrides as Record<string, unknown>).data ?? {}),
+    ...(overrides && typeof overrides === 'object' && 'data' in overrides ? (overrides.data as Record<string, unknown>) ?? {} : {}),
   },
-  ...overrides,
+  ...(overrides && typeof overrides === 'object' ? overrides : {}),
 });
 
 export const generateMockInventoryDataset = (

@@ -1,6 +1,6 @@
 import { act } from 'react';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 const mockStore = {
   inventoryItems: [],
   filters: {},

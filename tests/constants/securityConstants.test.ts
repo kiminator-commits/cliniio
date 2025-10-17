@@ -1,4 +1,5 @@
 import { FROZEN_SECURITY_CONSTANTS } from '@/constants/securityConstants';
+import { describe, test, expect } from 'vitest';
 
 describe('Security Constants', () => {
   test('should have all required rate limit constants', () => {

@@ -86,14 +86,7 @@ const InventoryManagementSettings: React.FC = () => {
         );
       case 'ai':
         return (
-          <AITab
-            aiSettings={aiSettings}
-            onAISettingChange={handleAISettingChange}
-            onAISettingsSave={handleAISettingsSave}
-            onAISettingsReset={handleAISettingsReset}
-            isLoading={isLoading}
-            aiMessage={aiMessage}
-          />
+          <AITab />
         );
       default:
         return null;

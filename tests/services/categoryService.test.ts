@@ -1,6 +1,6 @@
 import { categoryService } from '../../src/services/categoryService';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, it } from 'vitest';
 // Mock the service directly since Supabase is not configured
 vi.mock('../../src/services/categoryService', () => ({
   categoryService: {

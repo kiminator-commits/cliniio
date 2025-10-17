@@ -1,5 +1,5 @@
 import { LocalInventoryItem } from '@/types/inventoryTypes';
-import { InventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 import { auditLogger } from '@/utils/auditLogger';
 import { inventoryErrorService } from './inventoryErrorService';
 import { useInventoryStore } from '@/store/inventoryStore';
@@ -66,7 +66,7 @@ export const handleAddItem = async (
   refreshInventoryData: () => Promise<void>
 ): Promise<void> => {
   try {
-    await InventoryServiceFacade.createItem(item);
+    await inventoryServiceFacade.createItem(item);
     await refreshInventoryData();
     auditLogger.log('inventory', 'add', {
       itemId: item.id,
@@ -88,7 +88,7 @@ export const handleUpdateItem = async (
   refreshInventoryData: () => Promise<void>
 ): Promise<void> => {
   try {
-    await InventoryServiceFacade.updateItem(id, updates);
+    await inventoryServiceFacade.updateItem(id, updates);
     await refreshInventoryData();
     auditLogger.log('inventory', 'update', { itemId: id, updates });
   } catch (error) {
@@ -106,7 +106,7 @@ export const handleDeleteItem = async (
   refreshInventoryData: () => Promise<void>
 ): Promise<void> => {
   try {
-    await InventoryServiceFacade.deleteItem(id);
+    await inventoryServiceFacade.deleteItem(id);
     await refreshInventoryData();
     auditLogger.log('inventory', 'delete', { itemId: id });
   } catch (error) {
@@ -210,7 +210,7 @@ export const handleBulkExport = async (itemIds?: string[]): Promise<void> => {
 
     // Get items for export
     const items = await Promise.all(
-      itemIds.map((id) => InventoryServiceFacade.getItemById(id))
+      itemIds.map((id) => inventoryServiceFacade.getItemById(id))
     );
 
     const validItems = items.filter((item) => item !== null);
@@ -222,7 +222,7 @@ export const handleBulkExport = async (itemIds?: string[]): Promise<void> => {
     // Use the existing export service
     const { InventoryExportService } = await import('./inventoryExportService');
     const exportResult = await InventoryExportService.exportItems(
-      validItems as LocalInventoryItem[],
+      validItems as unknown as LocalInventoryItem[],
       {
         format: 'csv',
         includeHeaders: true,
@@ -269,16 +269,16 @@ export const handleExportData = async (
 ): Promise<void> => {
   try {
     // Get all inventory data
-    const allItems = await InventoryServiceFacade.getAllItems();
+    const allItems = await inventoryServiceFacade.getAllItems();
 
-    if ((allItems as LocalInventoryItem[]).length === 0) {
+    if ((allItems as unknown as LocalInventoryItem[]).length === 0) {
       throw new Error('No data available for export');
     }
 
     // Use the existing export service
     const { InventoryExportService } = await import('./inventoryExportService');
     const exportResult = await InventoryExportService.exportItems(
-      allItems as LocalInventoryItem[],
+      allItems as unknown as LocalInventoryItem[],
       {
         format,
         includeHeaders: true,
@@ -304,7 +304,7 @@ export const handleExportData = async (
 
     auditLogger.log('inventory', 'export_data', {
       format,
-      itemCount: (allItems as LocalInventoryItem[]).length,
+      itemCount: (allItems as unknown as LocalInventoryItem[]).length,
       fileName: exportResult.fileName,
     });
   } catch (error) {
@@ -341,7 +341,7 @@ export const handleImportData = async (
 
     // Import valid items
     const importPromises = validItems.map((item) =>
-      InventoryServiceFacade.createItem(item).catch((error) => ({
+      inventoryServiceFacade.createItem(item).catch((error) => ({
         item,
         error: error instanceof Error ? error.message : 'Unknown error',
       }))

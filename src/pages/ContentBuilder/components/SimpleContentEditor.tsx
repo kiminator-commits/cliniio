@@ -364,7 +364,7 @@ const SimpleContentEditor: React.FC<SimpleContentEditorProps> = ({
       {activeTab === 'pathway' && (
         <LearningPathwayBuilder
           contentType={contentType}
-          onPathwayChange={handlePathwayChange}
+          onPathwayChange={handlePathwayChange as (pathway: unknown) => void}
           pathwaySections={pathwaySections}
           selectedPathwayItems={selectedPathwayItems}
         />

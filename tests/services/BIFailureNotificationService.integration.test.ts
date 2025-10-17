@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { BIFailureNotificationService } from '../../src/services/bi/failure/BIFailureNotificationService';
 import { BIFailureErrorHandler as _BIFailureErrorHandler } from '../../src/services/bi/failure/BIFailureErrorHandler';
 import { BIFailureValidationService as _BIFailureValidationService } from '../../src/services/bi/failure/BIFailureValidationService';
@@ -94,7 +94,7 @@ describe('BIFailureNotificationService Integration Tests', () => {
         in: vi.fn().mockResolvedValue({ data: mockStaff, error: null }),
       };
 
-      (supabase.from as vi.Mock).mockImplementation((table) => {
+      (supabase.from as Mock).mockImplementation((table) => {
         if (table === 'facility_staff') {
           return mockQuery;
         }
@@ -126,7 +126,7 @@ describe('BIFailureNotificationService Integration Tests', () => {
         }),
       };
 
-      (supabase.from as vi.Mock).mockImplementation((table) => {
+      (supabase.from as Mock).mockImplementation((table) => {
         if (table === 'facility_staff') {
           return mockQuery;
         }
@@ -158,7 +158,7 @@ describe('BIFailureNotificationService Integration Tests', () => {
         }),
       });
 
-      (supabase.from as vi.Mock).mockImplementation(() => ({
+      (supabase.from as Mock).mockImplementation(() => ({
         select: mockSelect,
       }));
 
@@ -180,7 +180,7 @@ describe('BIFailureNotificationService Integration Tests', () => {
         }),
       });
 
-      (supabase.from as vi.Mock).mockImplementation(() => ({
+      (supabase.from as Mock).mockImplementation(() => ({
         update: mockUpdate,
       }));
 

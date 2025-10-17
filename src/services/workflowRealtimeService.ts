@@ -65,7 +65,7 @@ export class WorkflowRealtimeService {
       console.warn(
         '⚠️ Supabase not configured, skipping workflow tools subscription'
       );
-      return;
+      return null;
     }
 
     try {
@@ -95,7 +95,7 @@ export class WorkflowRealtimeService {
       console.warn(
         '⚠️ Supabase not configured, skipping all workflows subscription'
       );
-      return;
+      return null;
     }
 
     try {

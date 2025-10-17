@@ -6,7 +6,7 @@ import { UnifiedAIService } from '../ai/UnifiedAIService';
 import { SecureAuthService } from '../secureAuthService';
 import { KnowledgeHubService } from '../../pages/KnowledgeHub/services/knowledgeHubService';
 import { BIFailureService } from '../bi/failure';
-import { InventoryServiceFacade } from '../inventory/InventoryServiceFacade';
+import { inventoryServiceFacade } from '../inventory/InventoryServiceFacade';
 import { ServiceRegistry } from '../ServiceRegistry';
 import { servicePerformanceMonitor } from './ServicePerformanceMonitor';
 
@@ -234,8 +234,7 @@ export class ServiceValidationTest {
       // Test analytics summary
       const analytics = await BIFailureService.getAnalyticsSummary(
         facilityId,
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
-        new Date().toISOString()
+        '30d'
       );
 
       this.results.push({
@@ -263,7 +262,7 @@ export class ServiceValidationTest {
     try {
       // Test inventory service facade
       const inventoryData =
-        await InventoryServiceFacade.fetchAllInventoryData();
+        await inventoryServiceFacade.fetchAllInventoryData();
 
       const responseTime = Date.now() - startTime;
 

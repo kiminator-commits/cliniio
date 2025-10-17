@@ -66,9 +66,9 @@ export class CleaningLogService {
             cleaning_type: 'sterilization',
             scheduled_time: cycle.start_time,
             started_time: cycle.start_time,
-            completed_time: cycle.completed_at,
+            completed_time: cycle.end_time,
             operator_id: cycle.operator_id,
-            notes: cycle.notes || '',
+            notes: '', // Notes not available in cycle object
             checklist_items: [],
             completed_items: [],
             failed_items: [],

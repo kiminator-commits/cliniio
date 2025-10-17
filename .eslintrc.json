@@ -17,7 +17,8 @@
       "jsx": true
     },
     "ecmaVersion": "latest",
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": false
   },
   "plugins": ["react", "@typescript-eslint", "react-hooks", "import"],
   "rules": {

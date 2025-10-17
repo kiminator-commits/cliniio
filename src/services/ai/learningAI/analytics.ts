@@ -96,7 +96,7 @@ export class LearningAIAnalyticsService {
             description: `${item.recommended_content.length} content items recommended for user ${item.user_id}`,
             confidence: item.confidence_score || 0,
             recommendations: item.recommendation_reasoning || [],
-            data: item,
+            data: item as unknown as Record<string, unknown>,
             created_at: item.created_at,
             facility_id: this.facilityId,
             priority: this.getPriorityFromConfidence(item.confidence_score),
@@ -123,7 +123,7 @@ export class LearningAIAnalyticsService {
             description: `${skillGaps.length} skill gaps identified for user ${item.user_id}`,
             confidence: item.confidence_score || 0,
             recommendations: item.learning_recommendations || [],
-            data: item,
+            data: item as unknown as Record<string, unknown>,
             created_at: item.created_at,
             facility_id: this.facilityId,
             priority: this.getPriorityFromGapCount(skillGaps.length),
@@ -149,7 +149,7 @@ export class LearningAIAnalyticsService {
             description: `Path efficiency score: ${(item.path_efficiency_score * 100).toFixed(1)}% for user ${item.user_id}`,
             confidence: item.confidence_score || 0,
             recommendations: item.optimization_factors || [],
-            data: item,
+            data: item as unknown as Record<string, unknown>,
             created_at: item.created_at,
             facility_id: this.facilityId,
             priority: this.getPriorityFromEfficiency(
@@ -177,7 +177,7 @@ export class LearningAIAnalyticsService {
             description: `Predicted performance: ${(item.predicted_performance * 100).toFixed(1)}% for content ${item.user_id}`,
             confidence: item.confidence_score || 0,
             recommendations: item.performance_factors || [],
-            data: item,
+            data: item as unknown as Record<string, unknown>,
             created_at: item.created_at,
             facility_id: this.facilityId,
             priority: this.getPriorityFromPerformance(
@@ -215,7 +215,7 @@ export class LearningAIAnalyticsService {
           progress_percentage: item.completion_rate,
           time_spent: item.session_duration,
           score: item.satisfaction_score,
-          engagement_score: this.calculateEngagementScore(item),
+          engagement_score: this.calculateEngagementScore(item as unknown as Record<string, unknown>),
         }));
       }
 

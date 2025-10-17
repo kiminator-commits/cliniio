@@ -206,7 +206,7 @@ export class AIRequestBatcher {
         const result = this.getResult(requestId);
         if (result) {
           if (result.success) {
-            resolve(result.data);
+            resolve(result.data as T);
           } else {
             reject(new Error(result.error));
           }

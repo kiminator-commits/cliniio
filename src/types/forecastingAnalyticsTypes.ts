@@ -1,6 +1,16 @@
 import type { Json } from './database.types';
 import { ToolStatus } from './toolTypes';
 
+// Analytics filters interface
+export interface AnalyticsFilters {
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+  facilityId?: string;
+  category?: string;
+}
+
 // Database row interfaces
 export interface _SterilizationCycleRow {
   id: string;

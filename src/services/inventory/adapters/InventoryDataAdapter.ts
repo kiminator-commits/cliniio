@@ -1,5 +1,5 @@
-import { InventoryItem } from '../../../types/inventoryTypes';
-import { InventoryResponse } from '../InventoryServiceFacade';
+import { InventoryItem } from '../types/supabaseTypes';
+import { InventoryResponse } from '../types/inventoryServiceTypes';
 
 export interface DataSourceConfig {
   type: 'static' | 'api' | 'localStorage' | 'indexedDB' | 'supabase';

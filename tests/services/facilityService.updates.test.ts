@@ -1,5 +1,5 @@
 import { FacilityService, Facility } from '@/services/facilityService';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, afterEach, it, fail, type Mock } from 'vitest';
 import { supabase } from '@/lib/supabaseClient';
 import { isDevelopment } from '@/lib/getEnv';
 import { distributedFacilityCache } from '@/services/cache/DistributedFacilityCache';

@@ -1,5 +1,5 @@
-import { SterilizationAISettings as SterilizationAISettingsType } from '../../../services/ai/sterilization/types';
-import { Message } from '../../../types/sterilizationAISettingsTypes';
+import { SterilizationAISettings as SterilizationAISettingsType } from '../../../../services/ai/sterilization/types';
+import { Message } from '../../../../types/sterilizationAISettingsTypes';
 
 export interface SterilizationAISettingsProps {
   settings: SterilizationAISettingsType;

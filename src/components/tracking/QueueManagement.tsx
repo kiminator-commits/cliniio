@@ -23,7 +23,6 @@ export const QueueManagement: React.FC<QueueManagementProps> = ({
   const {
     trackedTools,
     getToolTrackers,
-    getQueuePosition: _getQueuePosition,
     untrackTool,
     isToolTracked: _isToolTracked,
   } = useTrackedTools();

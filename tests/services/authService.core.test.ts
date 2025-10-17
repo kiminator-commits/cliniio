@@ -5,7 +5,7 @@ import {
   logout,
 } from '@/services/authService';
 import { createDevSession } from '@/config/devAuthConfig';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, afterEach, it, type Mock } from 'vitest';
 import { isDevelopment } from '@/lib/getEnv';
 import { supabase } from '@/lib/supabaseClient';
 import { UserSessionService } from '@/services/userSessionService';
@@ -62,14 +62,14 @@ vi.mock('@/services/userSessionService', () => ({
   },
 }));
 
-const mockCreateDevSession = createDevSession as vi.MockedFunction<
+const mockCreateDevSession = createDevSession as Mock<
   typeof createDevSession
 >;
-const mockIsDevelopment = isDevelopment as vi.MockedFunction<
+const mockIsDevelopment = isDevelopment as Mock<
   typeof isDevelopment
 >;
-const mockSupabase = supabase as vi.Mocked<typeof supabase>;
-const mockUserSessionService = UserSessionService as vi.Mocked<
+const mockSupabase = supabase as Mock<typeof supabase>;
+const mockUserSessionService = UserSessionService as Mock<
   typeof UserSessionService
 >;
 

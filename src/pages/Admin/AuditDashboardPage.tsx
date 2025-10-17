@@ -73,7 +73,7 @@ export default function AuditDashboardPage() {
                             f.severity === 'high'
                               ? 'destructive'
                               : f.severity === 'medium'
-                                ? 'warning'
+                                ? 'secondary'
                                 : 'default'
                           }
                         >

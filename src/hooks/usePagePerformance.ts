@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useCallback } from 'react';
+import { useLayoutEffect, useRef, useCallback, useEffect } from 'react';
 import { logger } from '../utils/_core/logger';
 import { performanceMonitor } from '../services/monitoring/PerformanceMonitor';
 
@@ -27,12 +27,17 @@ export const usePagePerformance = ({
   trackAuthentication = true,
   onMetricsComplete,
 }: UsePagePerformanceOptions) => {
-  const mountStartTime = useRef<number>(performance.now());
+  const mountStartTime = useRef<number>();
   const mountTime = useRef<number>();
   const dataLoadTime = useRef<number>();
   const navigationTime = useRef<number>();
   const authenticationTime = useRef<number>();
   const dataFetchTime = useRef<number>();
+
+  // Initialize mount start time in effect to avoid calling impure function during render
+  useEffect(() => {
+    mountStartTime.current = performance.now();
+  }, []);
 
   // Defer logging to avoid blocking renders
   const deferredLog = useCallback(

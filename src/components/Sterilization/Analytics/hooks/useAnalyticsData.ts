@@ -154,7 +154,7 @@ export const useAnalyticsData = () => {
       biTestResultsLength: biTestResults?.length || 0,
       biTestResults:
         biTestResults?.length > 0
-          ? biTestResults.slice(0, 3).map((t) => ({
+          ? biTestResults.slice(0, 3).map((t: BITestResult) => ({
               status: t.status,
               date: t.date,
               passed: t.passed,
@@ -227,7 +227,7 @@ export const useAnalyticsData = () => {
     ) {
       // Attempt AI insights generation
       setTimeout(() => {
-        generateAIInsights().catch((error) => {
+        generateAIInsights().catch((error: Error) => {
           console.warn('AI insights generation failed (non-blocking):', error);
         });
       }, 0);

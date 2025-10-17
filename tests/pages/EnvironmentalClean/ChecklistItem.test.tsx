@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ChecklistItem from '@/pages/EnvironmentalClean/components/ui/ChecklistItem';
 import { CleaningChecklistItem } from '@/pages/EnvironmentalClean/models';
+import { describe, test, expect } from 'vitest';
 
 describe('ChecklistItem', () => {
   const task: CleaningChecklistItem = {

@@ -61,11 +61,11 @@ export class InventorySearchFilterProvider {
             item.category?.toLowerCase().includes(query.toLowerCase())
         );
 
-        return { data: searchResults, error: null };
+        return { data: searchResults as any, error: null };
       }
     );
 
-    return result;
+      return result as any;
   }
 
   /**
@@ -95,7 +95,7 @@ export class InventorySearchFilterProvider {
 
         if (filters.location) {
           filteredItems = filteredItems.filter(
-            (item) => item.location === filters.location
+            (item) => (item as any).location === filters.location
           );
         }
 
@@ -125,7 +125,7 @@ export class InventorySearchFilterProvider {
 
         if (filters.dateRange) {
           filteredItems = filteredItems.filter((item) => {
-            const itemDate = new Date(item.lastUpdated || item.created_at);
+            const itemDate = new Date((item as any).lastUpdated || item.created_at);
             return (
               itemDate >= filters.dateRange!.start &&
               itemDate <= filters.dateRange!.end
@@ -141,11 +141,11 @@ export class InventorySearchFilterProvider {
           });
         }
 
-        return { data: filteredItems, error: null };
+        return { data: filteredItems as any, error: null };
       }
     );
 
-    return result;
+      return result as any;
   }
 
   /**
@@ -177,7 +177,7 @@ export class InventorySearchFilterProvider {
 
         if (filters.location) {
           filteredItems = filteredItems.filter(
-            (item) => item.location === filters.location
+            (item) => (item as any).location === filters.location
           );
         }
 
@@ -208,7 +208,7 @@ export class InventorySearchFilterProvider {
 
         if (filters.dateRange) {
           filteredItems = filteredItems.filter((item) => {
-            const itemDate = new Date(item.lastUpdated || item.created_at);
+            const itemDate = new Date((item as any).lastUpdated || item.created_at);
             return (
               itemDate >= filters.dateRange!.start &&
               itemDate <= filters.dateRange!.end
@@ -234,10 +234,10 @@ export class InventorySearchFilterProvider {
         // Apply sorting
         if (options.sortBy) {
           filteredItems = this.sortItems(
-            filteredItems,
+            filteredItems as any,
             options.sortBy,
             options.sortOrder || 'asc'
-          );
+          ) as any;
         }
 
         // Apply pagination
@@ -260,7 +260,7 @@ export class InventorySearchFilterProvider {
       }
     );
 
-    return result;
+      return result as any;
   }
 
   /**
@@ -293,10 +293,10 @@ export class InventorySearchFilterProvider {
 
         if (options.sortBy) {
           resultItems = this.sortItems(
-            resultItems,
+            resultItems as any,
             options.sortBy,
             options.sortOrder || 'asc'
-          );
+          ) as any;
         }
 
         const total = resultItems.length;
@@ -318,7 +318,7 @@ export class InventorySearchFilterProvider {
       }
     );
 
-    return result;
+      return result as any;
   }
 
   /**
@@ -356,10 +356,10 @@ export class InventorySearchFilterProvider {
 
           // Add location suggestions
           if (
-            item.location &&
-            item.location.toLowerCase().includes(searchTerm)
+            (item as any).location &&
+            (item as any).location.toLowerCase().includes(searchTerm)
           ) {
-            suggestions.add(item.location);
+            suggestions.add((item as any).location);
           }
 
           // Add description suggestions
@@ -393,13 +393,13 @@ export class InventorySearchFilterProvider {
       async () => {
         const allItems = await this.adapter.fetchInventoryItems();
         const locations = Array.from(
-          new Set(allItems.map((item) => item.location).filter(Boolean))
+          new Set(allItems.map((item) => (item as any).location).filter(Boolean))
         ) as string[];
         return locations;
       }
     );
 
-    return { data: result, error: null };
+    return { data: result as any, error: null };
   }
 
   /**
@@ -432,8 +432,8 @@ export class InventorySearchFilterProvider {
           bValue = b.quantity || 0;
           break;
         case 'lastUpdated':
-          aValue = new Date(a.lastUpdated || a.created_at);
-          bValue = new Date(b.lastUpdated || b.created_at);
+          aValue = new Date((a as any).lastUpdated || a.created_at);
+          bValue = new Date((b as any).lastUpdated || b.created_at);
           break;
         default:
           aValue = a.name || '';

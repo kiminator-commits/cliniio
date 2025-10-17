@@ -22,7 +22,7 @@ interface PhaseTimerHeaderProps {
     isRunning?: boolean;
     timeRemaining?: number;
     elapsedTime?: number;
-  } | null;
+  } | undefined;
 }
 
 /**

@@ -1,6 +1,6 @@
 import { homeMetricsService } from '../../../src/services/home/homeMetricsService';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 // Mock the AI task performance service
 vi.mock('../../../src/services/aiTaskPerformanceService', () => ({
   getTimeSavingsAggregates: vi.fn().mockResolvedValue({

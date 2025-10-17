@@ -73,7 +73,7 @@ export class InventoryCrudOperations {
         throw new Error(result.error || 'Failed to fetch inventory items');
       }
 
-      const transformedData = result.data as InventoryItem[];
+      const transformedData = result.data as unknown as InventoryItem[];
 
       InventoryErrorOperations.logSuccess(
         operation,
@@ -107,7 +107,7 @@ export class InventoryCrudOperations {
         throw new Error(result.error || 'Failed to fetch inventory item');
       }
 
-      const item = result.data as InventoryItem;
+      const item = result.data as unknown as InventoryItem;
 
       InventoryErrorOperations.logSuccess(operation, item.name || 'Unknown');
       return item;
@@ -149,7 +149,7 @@ export class InventoryCrudOperations {
         operation,
         result.data.name || 'Unknown'
       );
-      return result.data as InventoryItem;
+      return result.data as unknown as InventoryItem;
     } catch (error) {
       InventoryErrorOperations.logFailure(operation, error);
       throw error;
@@ -180,7 +180,7 @@ export class InventoryCrudOperations {
         throw new Error(result.error || 'Failed to update inventory item');
       }
 
-      return result.data as InventoryItem;
+      return result.data as unknown as InventoryItem;
     } catch (error) {
       console.error('❌ Failed to update item in Supabase:', error);
       throw error;

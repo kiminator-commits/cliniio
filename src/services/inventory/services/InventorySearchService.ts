@@ -3,16 +3,12 @@
  * Extracted from InventoryServiceFacade for better maintainability
  */
 
-import { LocalInventoryItem } from '../../types/inventoryTypes';
+import { InventoryItem } from '../types/supabaseTypes';
 import {
   InventoryResponse,
-  _SearchOptions,
-  FilterOptions,
-  PaginationOptions,
-  SortOptions,
-} from '../../types/inventoryServiceTypes';
-import { InventoryRepository } from './facade/repository';
-import { InventoryAdapterManager } from './facade/adapters';
+} from '../types/inventoryServiceTypes';
+import { InventoryRepository } from '../facade/repository';
+import { InventoryAdapterManager } from '../facade/adapters';
 import { AnalyticsTrackingService } from '../../shared/analyticsTrackingService';
 import { performanceMonitor } from '../../monitoring/PerformanceMonitor';
 
@@ -22,7 +18,7 @@ export class InventorySearchService {
     private adapterManager: InventoryAdapterManager
   ) {}
 
-  async searchItems(query: string): Promise<InventoryResponse> {
+  async searchItems(query: string, options?: any): Promise<InventoryResponse> {
     const startTime = performance.now();
 
     try {
@@ -38,7 +34,7 @@ export class InventorySearchService {
       const duration = performance.now() - startTime;
       performanceMonitor.recordResponseTime('inventory_search', duration, {
         query,
-        resultCount: result.data?.length || 0,
+        resultCount: String(result.data?.length || 0),
       });
 
       return result;
@@ -53,14 +49,14 @@ export class InventorySearchService {
   }
 
   async getFilteredItems(
-    filters: FilterOptions,
-    pagination?: PaginationOptions,
-    sort?: SortOptions
+    filters: any,
+    pagination?: any,
+    sort?: any
   ): Promise<InventoryResponse> {
     const startTime = performance.now();
 
     try {
-      const result = await this.repository.getFilteredItems(
+      const result = await (this.repository as any).getFilteredItems(
         filters,
         pagination,
         sort
@@ -75,7 +71,7 @@ export class InventorySearchService {
 
       const duration = performance.now() - startTime;
       performanceMonitor.recordResponseTime('inventory_filter', duration, {
-        filterCount: Object.keys(filters).length,
+        filterCount: Object.keys(filters).length.toString(),
       });
 
       return result;
@@ -89,11 +85,11 @@ export class InventorySearchService {
     }
   }
 
-  async fetchInventoryItems(): Promise<LocalInventoryItem[]> {
+  async fetchInventoryItems(): Promise<any[]> {
     return await this.repository.fetchInventoryItems();
   }
 
-  async getAllItems(): Promise<LocalInventoryItem[]> {
+  async getAllItems(): Promise<any[]> {
     return await this.repository.getAllItems();
   }
 
@@ -101,7 +97,7 @@ export class InventorySearchService {
     const startTime = performance.now();
 
     try {
-      const result = await this.repository.refreshData();
+      const result = await (this.repository as any).refreshData();
 
       // Track analytics
       await AnalyticsTrackingService.trackEvent('inventory_refresh', {

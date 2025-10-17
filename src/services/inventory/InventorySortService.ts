@@ -5,7 +5,7 @@ import {
   EquipmentItem,
   OfficeHardwareItem,
   getItemStatus,
-} from '@/types/inventoryTypes';
+} from '../../types/inventoryTypes';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -409,14 +409,17 @@ export class InventorySortServiceImpl implements InventorySortService {
     if ('lastUpdated' in item && item.lastUpdated) {
       return new Date(item.lastUpdated as string);
     }
-    if ('updatedAt' in item && item.data?.updatedAt) {
-      return new Date(item.data.updatedAt as string);
-    }
-    if ('expiration' in item && item.data?.expiration) {
-      return new Date(item.data.expiration as string);
-    }
-    if ('lastServiced' in item && item.data?.lastServiced) {
-      return new Date(item.data.lastServiced as string);
+    if (item.data && typeof item.data === 'object' && item.data !== null) {
+      const data = item.data as Record<string, unknown>;
+      if ('updatedAt' in data && typeof data.updatedAt === 'string') {
+        return new Date(data.updatedAt);
+      }
+      if ('expiration' in data && typeof data.expiration === 'string') {
+        return new Date(data.expiration);
+      }
+      if ('lastServiced' in data && typeof data.lastServiced === 'string') {
+        return new Date(data.lastServiced);
+      }
     }
     return null;
   }
@@ -429,10 +432,16 @@ export class InventorySortServiceImpl implements InventorySortService {
   }
 
   private isItemTracked(item: LocalInventoryItem): boolean {
-    return 'tracked' in item ? Boolean(item.data?.tracked) : false;
+    if (item.data && typeof item.data === 'object' && item.data !== null && 'tracked' in item.data) {
+      return Boolean((item.data as Record<string, unknown>).tracked);
+    }
+    return false;
   }
 
   private isItemFavorite(item: LocalInventoryItem): boolean {
-    return 'favorite' in item ? Boolean(item.data?.favorite) : false;
+    if (item.data && typeof item.data === 'object' && item.data !== null && 'favorite' in item.data) {
+      return Boolean((item.data as Record<string, unknown>).favorite);
+    }
+    return false;
   }
 }

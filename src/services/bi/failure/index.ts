@@ -49,7 +49,7 @@ export const useBIStore = create<BIState>((set, get) => ({
       .__bi_channel__;
     if (channel) {
       console.info('🛑 Unsubscribing from realtime BI updates');
-      supabase.removeChannel(channel as { unsubscribe: () => void });
+      supabase.removeChannel(channel as any);
       (window as unknown as Record<string, unknown>).__bi_channel__ = null;
     }
   },

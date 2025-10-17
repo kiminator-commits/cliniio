@@ -1,4 +1,5 @@
-import { validateInput, isNotEmpty, isSafeText } from '@/utils/validation';
+import { validateInput, isNotEmpty, isSafeText } from '../../src/utils/validation';
+import { describe, test, expect, it } from 'vitest';
 
 describe('validateInput', () => {
   it('returns error for empty input', () => {

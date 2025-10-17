@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { useBackgroundSync } from '../../src/hooks/useBackgroundSync';
 
 // Mock console methods

@@ -95,7 +95,7 @@ export const useHomeTasksManager = (): UseHomeTasksManagerReturn => {
 
     try {
       // Get facility ID first, then load tasks in parallel
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
       const allDailyTasks =
         await aiDailyTaskService.getFacilityDailyTasks(facilityId);
 

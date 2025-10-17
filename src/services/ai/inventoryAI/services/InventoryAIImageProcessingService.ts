@@ -18,20 +18,15 @@ export class InventoryAIImageProcessingService {
     // For now, return mock data
     return {
       confidence: 0.85,
-      detectedItems: [
-        {
-          name: 'Surgical Scissors',
-          confidence: 0.92,
-          boundingBox: { x: 100, y: 100, width: 50, height: 30 },
-        },
-        {
-          name: 'Forceps',
-          confidence: 0.88,
-          boundingBox: { x: 200, y: 150, width: 40, height: 25 },
-        },
-      ],
-      qualityAssessment: 'Good',
-      conditionRating: 'Excellent',
+      damage_detected: false,
+      damage_types: [],
+      objects: ['Surgical Scissors', 'Forceps'],
+      confidence_scores: [0.92, 0.88],
+      classification: 'medical_instruments',
+      category: 'surgical_tools',
+      quality: 'Good',
+      condition: 'Excellent',
+      damage_description: null,
       recommendations: [
         'Items appear to be in good condition',
         'No visible damage detected',
@@ -46,15 +41,15 @@ export class InventoryAIImageProcessingService {
     // This would integrate with barcode analysis AI
     return {
       confidence: 0.95,
-      detectedItems: [
-        {
-          name: 'Barcode Item',
-          confidence: 0.95,
-          boundingBox: { x: 0, y: 0, width: 100, height: 50 },
-        },
-      ],
-      qualityAssessment: 'Excellent',
-      conditionRating: 'Good',
+      damage_detected: false,
+      damage_types: [],
+      objects: ['Barcode Item'],
+      confidence_scores: [0.95],
+      classification: 'barcode_item',
+      category: 'scannable_item',
+      quality: 'Excellent',
+      condition: 'Good',
+      damage_description: null,
       recommendations: ['Barcode successfully read'],
     };
   }

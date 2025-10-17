@@ -19,16 +19,47 @@ export const useLoginSecurity = () => {
   // Generate CSRF token on mount - only once
   useEffect(() => {
     // Check if we already have a stored token
-    const existingToken = csrfProtection.getStoredToken();
-    if (existingToken) {
-      setCsrfToken(existingToken);
-    } else {
-      // Generate new token only if none exists
-      const token = csrfProtection.generateToken();
-      setCsrfToken(token);
-      csrfProtection.storeToken(token);
-    }
+    const initializeToken = () => {
+      const existingToken = csrfProtection.getStoredToken();
+      if (existingToken) {
+        setCsrfToken(existingToken);
+      } else {
+        // Generate new token only if none exists
+        const token = csrfProtection.generateToken();
+        setCsrfToken(token);
+        csrfProtection.storeToken(token);
+      }
+    };
+    
+    // Use setTimeout to avoid calling setState synchronously in effect
+    const timeoutId = setTimeout(initializeToken, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
+
+  const logSecurityEvent = (eventType: string, details: unknown) => {
+    // Only log to console in development, never in production
+    if (isDevelopment()) {
+      console.warn(`[SECURITY] ${eventType}:`, details);
+    }
+
+    // Log to audit service (no sensitive data in production)
+    const sanitizedDetails = isDevelopment()
+      ? details
+      : {
+          event_type: eventType,
+          timestamp: new Date().toISOString(),
+          // Remove sensitive information in production
+          has_details:
+            Object.keys(details as Record<string, unknown>).length > 0,
+        };
+
+    logAuditEvent({
+      event: 'security_event',
+      timestamp: new Date().toISOString(),
+      metadata: sanitizedDetails as Record<string, unknown>,
+    });
+  };
 
   // Check HTTPS enforcement
   useEffect(() => {
@@ -179,30 +210,6 @@ export const useLoginSecurity = () => {
   const clearCsrfToken = () => {
     csrfProtection.clearToken();
     setCsrfToken('');
-  };
-
-  const logSecurityEvent = (eventType: string, details: unknown) => {
-    // Only log to console in development, never in production
-    if (isDevelopment()) {
-      console.warn(`[SECURITY] ${eventType}:`, details);
-    }
-
-    // Log to audit service (no sensitive data in production)
-    const sanitizedDetails = isDevelopment()
-      ? details
-      : {
-          event_type: eventType,
-          timestamp: new Date().toISOString(),
-          // Remove sensitive information in production
-          has_details:
-            Object.keys(details as Record<string, unknown>).length > 0,
-        };
-
-    logAuditEvent({
-      event: 'security_event',
-      timestamp: new Date().toISOString(),
-      metadata: sanitizedDetails as Record<string, unknown>,
-    });
   };
 
   const getSecurityStatus = useMemo(() => {

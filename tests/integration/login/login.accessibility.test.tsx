@@ -2,6 +2,7 @@ import { screen, act } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { renderWithProviders } from '../../utils/renderWithProviders';
 import LoginPage from '@/pages/Login';
+import { describe, test, expect, it } from 'vitest';
 
 // Extend expect with jest-axe matchers
 expect.extend(toHaveNoViolations);

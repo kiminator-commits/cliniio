@@ -1,8 +1,8 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../../../lib/supabase';
 import {
   BasicInfoForm,
-  _PreferencesForm,
-  _MobileShortcuts,
+  PreferencesForm as _PreferencesForm,
+  MobileShortcuts as _MobileShortcuts,
   PasswordChangeData,
 } from './types';
 

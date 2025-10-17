@@ -1,11 +1,22 @@
-import React from 'react';
+import * as React from 'react';
 import { getScanModeDisplayText } from '../services/scanInventoryModalService';
-import { useInventoryStore } from '@/store/useInventoryStore';
+import { useInventoryStore } from '../../../store/useInventoryStore';
 import {
   convertBarcodeToFormData,
   convertFormDataToInventoryFormData,
-} from '@/utils/Inventory/barcodeUtils';
-import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+} from '../../../utils/Inventory/barcodeUtils';
+import { inventoryServiceFacade } from '../../../services/inventory';
+
+interface InventoryItemData {
+  barcode?: string;
+  [key: string]: unknown;
+}
+
+interface _InventoryItem {
+  id: string;
+  name: string;
+  data: InventoryItemData;
+}
 
 interface ScanModalActionsProps {
   scanMode: 'add' | 'use' | null;
@@ -35,7 +46,15 @@ const ScanModalActions: React.FC<ScanModalActionsProps> = ({
       // Add Inventory workflow: Open add modal with first scanned item
       const barcode = scannedItems[0];
       const existingItem = inventoryItems.find(
-        (item) => item.data?.barcode === barcode || item.id === barcode
+        (item) => {
+          const hasBarcode = item.data && 
+            typeof item.data === 'object' && 
+            item.data !== null && 
+            'barcode' in item.data && 
+            typeof (item.data as Record<string, unknown>).barcode === 'string' &&
+            (item.data as Record<string, unknown>).barcode === barcode;
+          return hasBarcode || item.id === barcode;
+        }
       );
 
       if (existingItem) {
@@ -55,12 +74,12 @@ const ScanModalActions: React.FC<ScanModalActionsProps> = ({
       // Use Inventory workflow: Remove scanned items
       const removalPromises = scannedItems.map(async (barcode) => {
         const itemToRemove = inventoryItems.find(
-          (item) => item.data?.barcode === barcode || item.id === barcode
+          (item) => (item.data as any)?.barcode === barcode || item.id === barcode
         );
 
         if (itemToRemove) {
           try {
-            await InventoryServiceFacade.deleteItem(itemToRemove.id);
+            await inventoryServiceFacade.deleteItem(itemToRemove.id);
             console.log(
               'Successfully removed item from inventory:',
               itemToRemove.name

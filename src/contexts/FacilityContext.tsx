@@ -49,7 +49,7 @@ export const FacilityProvider: React.FC<{ children: ReactNode }> = ({
         throw new Error('No facility ID available - user not authenticated');
       }
 
-      const facility = await FacilityService.getFacilityById(facilityId);
+      const facility = await FacilityService.getFacility(facilityId);
 
       setCurrentFacility(facility);
       localStorage.setItem('currentFacility', JSON.stringify(facility));

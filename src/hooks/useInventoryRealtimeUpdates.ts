@@ -15,7 +15,7 @@ export function useInventoryRealtimeUpdates() {
   useEffect(() => {
     // Prevent multiple subscriptions
     if (hasSubscribedRef.current) {
-      return;
+      return undefined;
     }
 
     try {
@@ -23,7 +23,10 @@ export function useInventoryRealtimeUpdates() {
         '🔔 Setting up real-time inventory subscription via useInventoryRealtimeUpdates'
       );
 
-      const unsubscribe = inventoryServiceFacade.subscribeToChanges();
+      const unsubscribe = inventoryServiceFacade.subscribeToChanges(() => {
+        // Callback for when changes occur
+        console.log('Inventory changes detected');
+      });
 
       unsubscribeRef.current = unsubscribe;
       hasSubscribedRef.current = true;
@@ -54,6 +57,7 @@ export function useInventoryRealtimeUpdates() {
         setIsSubscribed(false);
       }, 0);
       hasSubscribedRef.current = false;
+      return undefined;
     }
   }, []); // Empty dependency array to prevent infinite loops
 

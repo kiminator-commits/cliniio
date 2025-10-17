@@ -5,12 +5,20 @@ import { supabase } from '@/lib/supabaseClient';
 import { Card } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 
+interface InventoryItem {
+  id: string;
+  name: string;
+  batch_id: string | null;
+  scanned_location: string | null;
+  created_at: string;
+}
+
 /**
  * Simple dashboard listing sterilized tools with no location assigned.
  * Enables staff to correct traceability gaps quickly.
  */
 export default function UnassignedItemsDashboard() {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function loadData() {
@@ -26,7 +34,12 @@ export default function UnassignedItemsDashboard() {
   }
 
   useEffect(() => {
-    loadData();
+    // Use setTimeout to avoid calling setState synchronously in effect
+    const timeoutId = setTimeout(() => {
+      loadData();
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   return (

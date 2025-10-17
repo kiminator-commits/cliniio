@@ -72,7 +72,7 @@ export const usePerformanceMonitor = ({
 
   // Log final metrics on unmount
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) return undefined;
 
     const currentMetrics = { ...metrics.current };
 
@@ -91,6 +91,6 @@ export const usePerformanceMonitor = ({
   return {
     startRender,
     endRender,
-    metrics: metrics.current,
+    getMetrics: () => metrics.current,
   };
 };

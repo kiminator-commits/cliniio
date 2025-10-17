@@ -89,11 +89,11 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     };
   }
 
-  async fetchInventoryItems(): Promise<InventoryItem[]> {
+  async fetchInventoryItems(): Promise<any[]> {
     this.validateInitialization();
 
     const data = this.getInventoryDataFromStorage();
-    const allItems: InventoryItem[] = [];
+    const allItems: any[] = [];
 
     allItems.push(...data.tools);
     allItems.push(...data.supplies);
@@ -110,7 +110,7 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
     return categories ? JSON.parse(categories) : this.getDefaultCategories();
   }
 
-  async addInventoryItem(item: InventoryItem): Promise<InventoryItem> {
+  async addInventoryItem(item: any): Promise<any> {
     this.validateInitialization();
 
     const data = this.getInventoryDataFromStorage();
@@ -141,8 +141,8 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
 
   async updateInventoryItem(
     id: string,
-    item: Partial<InventoryItem>
-  ): Promise<InventoryItem> {
+    item: Partial<any>
+  ): Promise<any> {
     this.validateInitialization();
 
     const data = this.getInventoryDataFromStorage();
@@ -307,21 +307,24 @@ export class LocalStorageAdapter extends BaseInventoryDataAdapter {
   }
 
   private getItemId(item: InventoryItem): string {
-    return (
-      (item.data?.toolId && typeof item.data.toolId === 'string'
-        ? item.data.toolId
-        : '') ||
-      (item.data?.supplyId && typeof item.data.supplyId === 'string'
-        ? item.data.supplyId
-        : '') ||
-      (item.data?.equipmentId && typeof item.data.equipmentId === 'string'
-        ? item.data.equipmentId
-        : '') ||
-      (item.data?.hardwareId && typeof item.data.hardwareId === 'string'
-        ? item.data.hardwareId
-        : '') ||
-      item.id
-    );
+    if (item.data && typeof item.data === 'object' && item.data !== null) {
+      const data = item.data as Record<string, unknown>;
+      
+      if (data.toolId && typeof data.toolId === 'string') {
+        return data.toolId;
+      }
+      if (data.supplyId && typeof data.supplyId === 'string') {
+        return data.supplyId;
+      }
+      if (data.equipmentId && typeof data.equipmentId === 'string') {
+        return data.equipmentId;
+      }
+      if (data.hardwareId && typeof data.hardwareId === 'string') {
+        return data.hardwareId;
+      }
+    }
+    
+    return item.id || this.generateId();
   }
 
   private getDefaultCategories(): string[] {

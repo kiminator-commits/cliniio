@@ -33,33 +33,34 @@ export class ImportProcessor {
           switch (options.duplicateHandling) {
             case 'skip':
               skippedCount++;
-              warnings.push(`Skipped duplicate item: ${item.itemName}`);
+              warnings.push(`Skipped duplicate item: ${item.name}`);
               continue;
-            case 'update':
+            case 'update': {
               // Update existing item
               const updatedItem = { ...duplicate, ...item };
-              await InventoryServiceFacade.updateItem(
+              await inventoryServiceFacade.updateItem(
                 updatedItem.id,
                 updatedItem
               );
               importedCount++;
               break;
+            }
             case 'create':
             default:
               // Create new item (ignore duplicate)
-              await InventoryServiceFacade.createItem(item);
+              await inventoryServiceFacade.createItem(item);
               importedCount++;
               break;
           }
         } else {
           // Create new item
-          await InventoryServiceFacade.createItem(item);
+          await inventoryServiceFacade.createItem(item);
           importedCount++;
         }
       } catch (error) {
         failedCount++;
         errors.push(
-          `Failed to import ${item.itemName}: ${error instanceof Error ? error.message : 'Unknown error'}`
+          `Failed to import ${item.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       }
     }

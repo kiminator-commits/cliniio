@@ -4,11 +4,11 @@ import { SharedLayout } from '@/components/Layout/SharedLayout';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import EnvironmentalCleanErrorFallback from './components/EnvironmentalCleanErrorFallback';
 import EnvironmentalCleanContent from './components/EnvironmentalCleanContent';
-import { WorkflowService } from '@/services/WorkflowService';
+import { WorkflowService } from '@/services/workflowService';
 import { useEffect, useState } from 'react';
 
 export default function EnvironmentalCleanPage() {
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [_currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     const startSession = async () => {

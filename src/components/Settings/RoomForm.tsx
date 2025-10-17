@@ -88,7 +88,7 @@ const RoomForm: React.FC<RoomFormProps> = ({
           gpsCoordinates: {
             latitude,
             longitude,
-            accuracy,
+            accuracy: accuracy || 0,
             lastUpdated: new Date().toISOString(),
           },
         }));
@@ -98,7 +98,14 @@ const RoomForm: React.FC<RoomFormProps> = ({
 
   const handleSubmit = () => {
     if (formData.name && formData.department && formData.floor) {
-      onSave(formData);
+      const roomData: Partial<Room> = {
+        ...formData,
+        gpsCoordinates: formData.gpsCoordinates ? {
+          ...formData.gpsCoordinates,
+          lastUpdated: new Date().toISOString(),
+        } : undefined,
+      };
+      onSave(roomData);
       onClose();
     }
   };

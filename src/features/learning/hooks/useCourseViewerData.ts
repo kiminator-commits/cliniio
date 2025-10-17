@@ -1,6 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
 import { CourseService } from '../services/CourseService';
 
+interface KnowledgeHubLesson {
+  id: string;
+  title: string;
+  content: string;
+  estimated_duration?: number;
+}
+
+interface KnowledgeHubModule {
+  id: string;
+  title: string;
+  knowledge_hub_lessons?: KnowledgeHubLesson[];
+}
+
+interface _CourseData {
+  id: string;
+  title: string;
+  description: string;
+  knowledge_hub_modules?: KnowledgeHubModule[];
+  estimated_duration?: number;
+  tags?: string[];
+}
+
 export function useCourseViewerData(courseId: string, userId: string) {
   const [course, setCourse] = useState<{
     id: string;
@@ -38,7 +60,28 @@ export function useCourseViewerData(courseId: string, userId: string) {
     setError(null);
     try {
       const data = await CourseService.getCourse(courseId);
-      setCourse(data);
+      
+      // Transform the data to match the expected course structure
+      const transformedCourse = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        lessons: data.knowledge_hub_modules?.map((module: KnowledgeHubModule) => ({
+          id: module.id,
+          title: module.title,
+          content: module.knowledge_hub_lessons?.map((lesson: KnowledgeHubLesson) => lesson.content).join(' ') || '',
+          duration: module.knowledge_hub_lessons?.reduce((total, lesson) => total + (lesson.estimated_duration || 0), 0) || 0,
+          isCompleted: false,
+        })) || [],
+        totalDuration: data.estimated_duration || 0,
+        difficulty: 'beginner' as const,
+        category: data.tags?.[0] || 'General',
+        instructor: 'System',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      setCourse(transformedCourse);
       if (userId) {
         const userProgress = await CourseService.getUserProgress(
           userId,

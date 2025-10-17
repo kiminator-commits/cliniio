@@ -397,7 +397,7 @@ export class AIGapScannerProvider {
           itemId: item.id,
           itemName: item.name,
           currentQuantity: item.quantity,
-          minQuantity: item.data?.min_quantity,
+          minQuantity: (item.data as any)?.min_quantity,
         },
       });
     });

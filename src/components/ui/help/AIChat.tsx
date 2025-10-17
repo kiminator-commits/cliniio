@@ -20,7 +20,7 @@ export const AIChat: React.FC<AIChatProps> = ({ currentContext, onBack }) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { checkQuestionRelevance, getRedirectMessage } = useAIGuardrails();
+  const { checkQuestionRelevance } = useAIGuardrails();
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -31,13 +31,10 @@ export const AIChat: React.FC<AIChatProps> = ({ currentContext, onBack }) => {
     setIsLoading(true);
 
     // AI Guardrails - Check if question is relevant to current context
-    const isRelevantQuestion = checkQuestionRelevance(
-      userMessage,
-      currentContext
-    );
+    const isRelevantQuestion = checkQuestionRelevance();
 
     if (!isRelevantQuestion) {
-      const redirectMessage = getRedirectMessage(currentContext, userMessage);
+      const redirectMessage = 'This question seems unrelated to the current context. Please ask about sterilization, inventory, or facility management.';
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: redirectMessage },

@@ -110,7 +110,7 @@ export class AIMetricsService {
 
     // Get current facility ID
     const { FacilityService } = await import('../services/facilityService');
-    const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+    const facilityId = await FacilityService.getCurrentFacilityId();
 
     // Get AI task performance data
     const { data: aiTasks } = await supabase
@@ -349,7 +349,7 @@ export class AIMetricsService {
     try {
       // Get current facility ID
       const { FacilityService } = await import('../services/facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       // Get sterilization cycle data
       const { data: cycles } = await supabase
@@ -393,7 +393,7 @@ export class AIMetricsService {
     try {
       // Get current facility ID
       const { FacilityService } = await import('../services/facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       // Get task completion data
       const { data: tasks } = await supabase

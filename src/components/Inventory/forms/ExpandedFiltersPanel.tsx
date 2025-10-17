@@ -41,7 +41,7 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
   };
 
   const handleMergeSelected = () => {
-    if (selectedItems.size < 2) {
+    if (selectedItems.length < 2) {
       alert('Please select at least 2 items to merge');
       return;
     }
@@ -164,11 +164,11 @@ const ExpandedFiltersPanel: React.FC<ExpandedFiltersPanelProps> = ({
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-600">
-                  {selectedItems.size} selected
+                  {selectedItems.length} selected
                 </span>
                 <button
                   onClick={handleMergeSelected}
-                  disabled={selectedItems.size < 2}
+                  disabled={selectedItems.length < 2}
                   className="px-3 py-1 bg-blue-500 text-white rounded text-sm disabled:bg-gray-300"
                 >
                   Merge Selected

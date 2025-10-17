@@ -51,23 +51,29 @@ const LessonEditModal: React.FC<LessonEditModalProps> = ({
 
   useEffect(() => {
     if (lesson) {
-      setLessonData(lesson);
-      // Initialize sections from lesson content if it exists
-      if (lesson.content && typeof lesson.content === 'object') {
-        setSections(lesson.content as ContentSection[]);
-      } else {
-        // Create default text section if no content
-        setSections([
-          {
-            id: `section-${Date.now()}`,
-            type: 'text',
-            content: lesson.content || '',
-            title: 'Introduction',
-            order: 0,
-          },
-        ]);
-      }
+      // Use setTimeout to avoid calling setState synchronously in effect
+      const timeoutId = setTimeout(() => {
+        setLessonData(lesson);
+        // Initialize sections from lesson content if it exists
+        if (lesson.content && typeof lesson.content === 'object') {
+          setSections(lesson.content as ContentSection[]);
+        } else {
+          // Create default text section if no content
+          setSections([
+            {
+              id: `section-${Date.now()}`,
+              type: 'text',
+              content: lesson.content || '',
+              title: 'Introduction',
+              order: 0,
+            },
+          ]);
+        }
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
     }
+    return undefined;
   }, [lesson]);
 
   const addSection = () => {

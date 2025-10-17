@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import {
   render as _render,
   screen as _screen,

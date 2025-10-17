@@ -8,6 +8,7 @@ import {
   expectAdminPermissions,
   mockUser,
 } from '../__mocks__/knowledgeHubMocks';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('Store Initialization', () => {
   beforeEach(() => {

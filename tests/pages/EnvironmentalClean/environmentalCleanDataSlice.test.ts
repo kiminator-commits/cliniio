@@ -5,6 +5,7 @@ import {
   testAnalytics,
   testChecklists,
 } from './__mocks__/environmentalCleanTestData';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('environmentalCleanStore data functionality', () => {
   beforeEach(() => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -210,7 +210,7 @@ describe('CoursesTable Interactions', () => {
     await screen.findByText('Course 1');
 
     // Check that pagination is working
-    expect(screen.getByText('Showing 1 to 10 of 25 items')).toBeInTheDocument();
+    expect(screen.getByText('Page 1 of 3')).toBeInTheDocument();
   });
 
   it('handles empty state', async () => {

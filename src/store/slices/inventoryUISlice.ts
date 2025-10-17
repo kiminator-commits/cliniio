@@ -17,7 +17,7 @@ export interface InventoryUIState {
 
   // Merge functionality
   mergeMode: boolean;
-  selectedItems: Set<string>;
+  selectedItems: string[];
 
   // Tracking state
   trackedItems: Set<string>;
@@ -75,7 +75,7 @@ export const createInventoryUISlice: StateCreator<
 
   // Merge functionality
   mergeMode: false,
-  selectedItems: new Set(),
+  selectedItems: [],
 
   // Tracking state
   trackedItems: new Set(),
@@ -129,18 +129,19 @@ export const createInventoryUISlice: StateCreator<
   setMergeMode: (enabled) =>
     set({
       mergeMode: enabled,
-      selectedItems: enabled ? new Set() : new Set(), // Clear selection when enabling/disabling
+      selectedItems: enabled ? [] : [], // Clear selection when enabling/disabling
     }),
   toggleItemSelection: (itemId) =>
     set((state) => {
-      const newSelectedItems = new Set(state.selectedItems);
-      if (newSelectedItems.has(itemId)) {
-        newSelectedItems.delete(itemId);
+      const newSelectedItems = [...state.selectedItems];
+      const index = newSelectedItems.indexOf(itemId);
+      if (index > -1) {
+        newSelectedItems.splice(index, 1);
       } else {
-        newSelectedItems.add(itemId);
+        newSelectedItems.push(itemId);
       }
       return { selectedItems: newSelectedItems };
     }),
-  clearSelectedItems: () => set({ selectedItems: new Set() }),
-  selectAllItems: (itemIds) => set({ selectedItems: new Set(itemIds) }),
+  clearSelectedItems: () => set({ selectedItems: [] }),
+  selectAllItems: (itemIds) => set({ selectedItems: [...itemIds] }),
 });

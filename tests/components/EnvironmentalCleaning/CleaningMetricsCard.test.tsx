@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import CleaningMetricsCard from '../../../src/components/EnvironmentalCleaning/CleaningMetricsCard';
 import { CleaningMetrics } from '../../../src/pages/EnvironmentalClean/models';
+import { describe, test, expect } from 'vitest';
 
 describe('CleaningMetricsCard', () => {
   const mockMetrics: CleaningMetrics = {

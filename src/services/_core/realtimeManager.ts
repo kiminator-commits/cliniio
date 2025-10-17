@@ -11,11 +11,7 @@ class RealtimeManager {
     const event = options?.event || '*';
     const subscription = supabase
       .channel(channel)
-      .on(
-        'postgres_changes' as const,
-        { event, schema: 'public' },
-        callback as (payload: unknown) => void
-      )
+      .on('postgres_changes', { event: '*', schema: 'public' }, callback)
       .subscribe();
 
     this.subscriptions.push(subscription);

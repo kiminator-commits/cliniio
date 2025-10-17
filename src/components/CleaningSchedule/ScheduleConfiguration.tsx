@@ -62,40 +62,6 @@ const ScheduleConfiguration: React.FC<ScheduleConfigurationProps> = ({
     { value: 'custom', label: 'Custom' },
   ];
 
-  const loadConfigurations = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // For now, we'll create default configs since the database tables might not exist yet
-      const defaultConfigs = cleaningTypes.map((type) => ({
-        id: `config-${type.value}`,
-        type: type.value,
-        frequency: getDefaultFrequency(type.value),
-        autoGenerate: true,
-        enabled: true,
-        defaultPoints: getDefaultPoints(type.value),
-        defaultDuration: getDefaultDuration(type.value),
-        defaultPriority: getDefaultPriority(type.value),
-        triggerConditions: getDefaultTriggerConditions(type.value),
-        assignedRoles: ['cleaning_staff', 'maintenance'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
-
-      setConfigs(defaultConfigs);
-    } catch (err) {
-      console.error('Failed to load configurations:', err);
-      setError('Failed to load schedule configurations');
-    } finally {
-      setLoading(false);
-    }
-  }, [cleaningTypes]);
-
-  useEffect(() => {
-    loadConfigurations();
-  }, [loadConfigurations]);
-
   const getDefaultFrequency = (type: CleaningType): CleaningFrequency => {
     switch (type) {
       case 'setup_take_down':
@@ -222,6 +188,40 @@ const ScheduleConfiguration: React.FC<ScheduleConfigurationProps> = ({
         return [];
     }
   };
+
+  const loadConfigurations = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // For now, we'll create default configs since the database tables might not exist yet
+      const defaultConfigs = cleaningTypes.map((type) => ({
+        id: `config-${type.value}`,
+        type: type.value,
+        frequency: getDefaultFrequency(type.value),
+        autoGenerate: true,
+        enabled: true,
+        defaultPoints: getDefaultPoints(type.value),
+        defaultDuration: getDefaultDuration(type.value),
+        defaultPriority: getDefaultPriority(type.value),
+        triggerConditions: getDefaultTriggerConditions(type.value),
+        assignedRoles: ['cleaning_staff', 'maintenance'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
+
+      setConfigs(defaultConfigs);
+    } catch (err) {
+      console.error('Failed to load configurations:', err);
+      setError('Failed to load schedule configurations');
+    } finally {
+      setLoading(false);
+    }
+  }, [cleaningTypes]);
+
+  useEffect(() => {
+    loadConfigurations();
+  }, [loadConfigurations]);
 
   const updateConfig = (
     configId: string,

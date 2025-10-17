@@ -6,12 +6,14 @@ interface CameraCaptureProps {
   isMobile: boolean;
   hasCamera: boolean;
   onPhotoCapture: (file: File, previewUrl: string) => void;
+  onCancel?: () => void;
 }
 
 const CameraCapture: React.FC<CameraCaptureProps> = ({
   isMobile,
   hasCamera,
   onPhotoCapture,
+  onCancel: _onCancel,
 }) => {
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);

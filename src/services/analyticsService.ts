@@ -1,6 +1,8 @@
 // Simple analytics service to prevent circular dependency issues
 // This replaces the complex analytics system with a minimal implementation
 
+import { IntegrationMetrics as AnalyticsIntegrationMetrics } from '../pages/Intelligence/utils/intelligenceTypes';
+
 // Simple tracking function
 export const trackEvent = async (
   eventName: string,
@@ -80,6 +82,11 @@ export interface IntelligenceRecommendation {
   description: string;
   priority: 'low' | 'medium' | 'high';
   impact: 'low' | 'medium' | 'high';
+  timeline?: string;
+  confidence?: number;
+  category?: string;
+  costSavings?: number;
+  actionItems?: string[];
 }
 
 export interface OptimizationTip {
@@ -88,6 +95,11 @@ export interface OptimizationTip {
   title: string;
   description: string;
   benefit: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  currentState?: string;
+  recommendedAction?: string;
+  expectedOutcome?: string;
+  estimatedEffort?: string;
 }
 
 export interface RiskAlert {
@@ -99,21 +111,11 @@ export interface RiskAlert {
 }
 
 export interface IntegrationMetrics {
-  knowledgeHub: {
-    connected: boolean;
-    lastSync: Date | null;
-    itemsCount: number;
-  };
-  supplier: {
-    connected: boolean;
-    lastSync: Date | null;
-    suppliersCount: number;
-  };
-  auditTrail: {
-    connected: boolean;
-    lastSync: Date | null;
-    entriesCount: number;
-  };
+  knowledgeHubArticles: number;
+  activeSuppliers: number;
+  recentAuditActions: number;
+  integrationHealth: number;
+  lastSync: string;
 }
 
 // Placeholder services for compatibility
@@ -135,9 +137,11 @@ export class IntelligenceRecommendationService {
 export class IntelligenceIntegrationService {
   static async getIntegrationMetrics(): Promise<IntegrationMetrics> {
     return {
-      knowledgeHub: { connected: false, lastSync: null, itemsCount: 0 },
-      supplier: { connected: false, lastSync: null, suppliersCount: 0 },
-      auditTrail: { connected: false, lastSync: null, entriesCount: 0 },
+      knowledgeHubArticles: 0,
+      activeSuppliers: 0,
+      recentAuditActions: 0,
+      integrationHealth: 0,
+      lastSync: new Date().toISOString(),
     };
   }
 }

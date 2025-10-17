@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { Database } from '@/types/supabase/generated';
 import type {
   LearningAISettings,
-  _LearningAISettingsRow,
+  LearningAISettingsRow,
   LearningProgressData,
   UserProfile,
   SupabaseError,
@@ -11,7 +11,7 @@ import type { Json } from '@/types/database.types';
 import { SUPABASE_ERROR_CODES, QUERY_LIMITS } from '../learningAIConfig';
 import {
   getCurrentTimestamp,
-  _transformSettingsData,
+  transformSettingsData,
   transformUserProfileData,
 } from '../../../learningAI/learningAIUtils';
 import { logSettingsAudit } from '@/services/audit/AuditLogger';
@@ -85,7 +85,7 @@ export async function saveLearningAISettings(
         userId: 'system',
         module: 'learning',
         action: 'UPDATE',
-        details: upsertData,
+        details: upsertData as any,
       });
     }
 

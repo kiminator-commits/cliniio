@@ -1,4 +1,5 @@
 import { resetStoreState } from './__mocks__/knowledgeHubMocks';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 // Import store test suites
 import './store/initialization.test';

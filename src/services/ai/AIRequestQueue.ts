@@ -189,10 +189,10 @@ export class AIRequestQueue {
       const checkResult = () => {
         const result = this.getResult(requestId);
         if (result) {
-          if (result.success) {
-            resolve(result.data);
+          if ((result as any).success) {
+            resolve((result as any).data);
           } else {
-            reject(new Error(result.error));
+            reject(new Error((result as any).error));
           }
         } else {
           // Check again in 100ms

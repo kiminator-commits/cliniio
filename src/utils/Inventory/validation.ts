@@ -3,6 +3,6 @@ export interface ValidationResult {
   errors: string[];
 }
 
-export const validateInventoryItem = (item: any): ValidationResult => {
+export const validateInventoryItem = (_item: Record<string, unknown>): ValidationResult => {
   return { isValid: true, errors: [] };
 };

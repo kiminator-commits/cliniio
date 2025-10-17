@@ -74,6 +74,9 @@ export interface UserData {
   profile_photo?: string;
   created_at: string;
   updated_at: string;
+  role: string;
+  active_sessions: number;
+  password_changed_at?: string;
 }
 
 export interface ProfileSettingsState {
@@ -90,4 +93,5 @@ export interface ProfileSettingsState {
   isPasswordReset: boolean;
   passwordError: string | null;
   passwordSuccess: string | null;
+  uploadingPhoto: boolean;
 }

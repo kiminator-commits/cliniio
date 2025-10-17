@@ -1,12 +1,12 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, type Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import AddItemModal from '../../../src/components/Inventory/modals/AddItemModal';
 
 interface InventoryStoreState {
   inventoryItems: unknown[];
   categories: string[];
-  addInventoryItem: vi.Mock;
+  addInventoryItem: Mock;
 }
 
 const mockStore: InventoryStoreState = {

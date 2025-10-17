@@ -1,4 +1,5 @@
 import { ErrorHandler } from '@/services/ErrorHandler';
+import { vi, describe, test, expect, beforeEach, afterEach, it } from 'vitest';
 
 beforeEach(() => {
   vi.spyOn(ErrorHandler as any, 'delay').mockImplementation(() =>

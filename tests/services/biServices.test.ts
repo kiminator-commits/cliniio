@@ -1,9 +1,10 @@
-import { BIWorkflowService } from '../../src/services/biWorkflowService';
+import { describe, test, expect, it } from 'vitest';
 import { BITestCRUDService } from '../../src/services/bi/BITestCRUDService';
 import { BIAnalyticsService } from '../../src/services/bi/BIAnalyticsService';
 import { BISubscriptionService } from '../../src/services/bi/BISubscriptionService';
 import { BIAIService } from '../../src/services/bi/BIAIService';
 import { BIFacilityService } from '../../src/services/bi/BIFacilityService';
+import { BIWorkflowService } from '../../src/services/biWorkflowService';
 
 describe('BI Services Refactoring', () => {
   describe('API Compatibility', () => {

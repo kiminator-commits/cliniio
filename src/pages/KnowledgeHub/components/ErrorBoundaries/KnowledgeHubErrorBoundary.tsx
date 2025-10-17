@@ -1,7 +1,11 @@
 import React from 'react';
 
-const KnowledgeHubErrorBoundary: React.FC = () => {
-  return <div>Test</div>;
+interface KnowledgeHubErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+const KnowledgeHubErrorBoundary: React.FC<KnowledgeHubErrorBoundaryProps> = ({ children }) => {
+  return <div>{children}</div>;
 };
 
 export default KnowledgeHubErrorBoundary;

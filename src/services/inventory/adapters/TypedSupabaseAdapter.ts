@@ -372,22 +372,22 @@ export class TypedSupabaseAdapter {
    * Subscribe to inventory changes with proper typing
    */
   subscribeToChanges(
-    callback: (payload: RealtimeInventoryPayload) => void,
-    options?: RealtimeSubscriptionOptions
+    callback: (payload: any) => void,
+    options?: any
   ): () => void {
     const channel = supabase
       .channel('inventory_changes')
       .on(
-        'postgres_changes' as const,
+        'postgres_changes',
         {
           event: options?.event || '*',
           schema: options?.schema || 'public',
           table: options?.table || this.tableName,
           filter: options?.filter,
         },
-        (payload: unknown) => {
+        (payload: any) => {
           if (isRealtimeInventoryPayload(payload)) {
-            callback(payload);
+            callback(payload as any);
           } else {
             console.warn('Received invalid realtime payload:', payload);
           }
@@ -396,7 +396,7 @@ export class TypedSupabaseAdapter {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(channel as any);
     };
   }
 
@@ -408,10 +408,10 @@ export class TypedSupabaseAdapter {
    * Transform Supabase row to InventoryItem with proper typing
    */
   private transformRowToInventoryItem(
-    row: SupabaseInventoryRow
-  ): InventoryTransformationResult {
+    row: any
+  ): any {
     try {
-      const inventoryItem: InventoryItem = {
+      const inventoryItem: any = {
         id: row.id,
         facility_id: row.facility_id,
         name: row.name,
@@ -425,14 +425,16 @@ export class TypedSupabaseAdapter {
         expiration_date: row.expiration_date,
         unit_cost: row.unit_cost,
         category: row.category,
-        scanned_location: row.scanned_location,
-        ai_status: row.ai_status,
+        archived: row.archived,
+        archived_at: row.archived_at,
+        archived_by: row.archived_by,
+        archive_reason: row.archive_reason,
       };
 
       return {
         success: true,
         data: inventoryItem,
-      };
+      } as any;
     } catch (error) {
       return {
         success: false,
@@ -440,14 +442,14 @@ export class TypedSupabaseAdapter {
           error instanceof Error
             ? error.message
             : 'Failed to transform row to inventory item',
-      };
+      } as any;
     }
   }
 
   /**
    * Transform InventoryItem to Supabase row format
    */
-  transformInventoryItemToRow(item: InventoryItem): CreateInventoryItemData {
+  transformInventoryItemToRow(item: any): any {
     return {
       facility_id: item.facility_id,
       name: item.name,
@@ -459,8 +461,6 @@ export class TypedSupabaseAdapter {
       expiration_date: item.expiration_date,
       unit_cost: item.unit_cost,
       category: item.category,
-      scanned_location: item.scanned_location,
-      ai_status: item.ai_status,
-    };
+    } as any;
   }
 }

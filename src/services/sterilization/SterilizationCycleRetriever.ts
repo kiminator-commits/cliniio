@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 import { Database } from '@/types/database.types';
 import { ToolStatus } from '@/types/toolTypes';
-import { SterilizationCycle } from './SterilizationTypes';
+import { SterilizationCycle } from './sterilizationTypes';
 import { getCurrentFacilityId, safeDate } from './SterilizationUtils';
 
 export class SterilizationCycleRetriever {

@@ -1,7 +1,7 @@
 import { knowledgeHubApiService } from '@/pages/KnowledgeHub/services/knowledgeHubApiService';
 import { setupDefaultMocks } from './__mocks__/knowledgeHubMocks';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 
 // Mock the service
 vi.mock('@/pages/KnowledgeHub/services/knowledgeHubApiService', () => ({

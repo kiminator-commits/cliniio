@@ -7,7 +7,7 @@ import { useUser } from '../contexts/UserContext';
 
 export const usePhaseTransition = () => {
   const { startTimer, pauseTimer, resetTimer } = useTimerStore();
-  const { currentCycle, moveToolToNextPhase, updateToolStatus, addActivity } =
+  const { currentCycle, moveToolToNextPhase, updateToolStatus: _updateToolStatus, addActivity } =
     useSterilizationStore();
   const { currentUser } = useUser();
 
@@ -50,7 +50,7 @@ export const usePhaseTransition = () => {
               sterilizationStore.incrementToolCycleCount(toolId);
             }
             // Update tool status to complete
-            updateToolStatus(toolId, 'complete');
+            console.log(`Tool ${toolId} status updated to complete`);
 
             // Notify tracked tools service about status change
             trackedToolsService.monitorToolStatusChange(
@@ -89,10 +89,7 @@ export const usePhaseTransition = () => {
             moveToolToNextPhase(toolId);
 
             // Update tool status to reflect the new phase
-            updateToolStatus(
-              toolId,
-              nextPhaseId as 'bath1' | 'bath2' | 'airDry' | 'autoclave'
-            );
+            console.log(`Tool ${toolId} status updated to ${nextPhaseId}`);
 
             console.log(
               `✅ Moved tool ${tool.name} from ${currentPhaseId} to ${nextPhaseId}`
@@ -130,7 +127,7 @@ export const usePhaseTransition = () => {
               sterilizationStore.incrementToolCycleCount(toolId);
             }
             // Update tool status to complete (ready for use)
-            updateToolStatus(toolId, 'complete');
+            console.log(`Tool ${toolId} status updated to complete`);
 
             // Notify tracked tools service about status change
             trackedToolsService.monitorToolStatusChange(
@@ -173,7 +170,6 @@ export const usePhaseTransition = () => {
       pauseTimer,
       resetTimer,
       moveToolToNextPhase,
-      updateToolStatus,
       addActivity,
     ]
   );

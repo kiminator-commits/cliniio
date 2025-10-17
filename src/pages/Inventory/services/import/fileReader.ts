@@ -1,4 +1,4 @@
-import { ImportFormat, ImportOptions } from './types';
+import { ImportFormat, ImportOptions as _ImportOptions } from './types';
 
 /**
  * File reading utilities for import operations
@@ -9,9 +9,9 @@ export class FileReader {
    */
   static async readFileContent(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
+      const reader = new globalThis.FileReader() as any;
+      reader.onload = (e: ProgressEvent<globalThis.FileReader>) => {
+        const content = (e.target as any)?.result as string;
         resolve(content);
       };
       reader.onerror = () => reject(new Error('Failed to read file'));

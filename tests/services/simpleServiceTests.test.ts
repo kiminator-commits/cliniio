@@ -1,6 +1,6 @@
 // Simple tests for key services to improve coverage
 import { ErrorReportingService } from '@/services/errorReportingService';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, it, beforeEach } from 'vitest';
 import {
   login,
   validateToken,

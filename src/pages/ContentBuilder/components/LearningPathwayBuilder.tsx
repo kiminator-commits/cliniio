@@ -85,20 +85,20 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
 
       const allContent = [
         ...((coursesResult.data as CourseRow[]) || []).map(
-          CONTENT_TRANSFORMATIONS.COURSE
+          (item: CourseRow) => CONTENT_TRANSFORMATIONS.COURSE(item as any)
         ),
         ...((policiesResult.data as PolicyRow[]) || []).map(
-          CONTENT_TRANSFORMATIONS.POLICY
+          (item: PolicyRow) => CONTENT_TRANSFORMATIONS.POLICY(item as any)
         ),
         ...((proceduresResult.data as ProcedureRow[]) || []).map(
-          CONTENT_TRANSFORMATIONS.PROCEDURE
+          (item: ProcedureRow) => CONTENT_TRANSFORMATIONS.PROCEDURE(item as any)
         ),
         ...((sdsResult.data as SDSRow[]) || []).map(
-          CONTENT_TRANSFORMATIONS.SDS
+          (item: SDSRow) => CONTENT_TRANSFORMATIONS.SDS(item as any)
         ),
       ];
 
-      setAvailableContent(allContent);
+        setAvailableContent(allContent as any);
     } catch (error) {
       console.error('Error fetching available content:', error);
     } finally {

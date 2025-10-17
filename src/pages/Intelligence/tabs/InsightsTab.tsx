@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import Icon from '@mdi/react';
 import {
   mdiLightningBolt,
@@ -48,6 +48,13 @@ export default function InsightsTab({
     estimatedTimeSavings: 0,
   };
 
+  // Helper function to safely get numeric values
+  const getNumericValue = (value: unknown): number => {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') return parseFloat(value) || 0;
+    return 0;
+  };
+
   const recs = recommendations || [];
 
   const tips = optimizationTips || [];
@@ -84,25 +91,25 @@ export default function InsightsTab({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-900">
-              {summaryData.totalRecommendations}
+              {getNumericValue(summaryData.totalRecommendations)}
             </div>
             <div className="text-sm text-blue-700">Total Recommendations</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-red-600">
-              {summaryData.criticalItems}
+              {getNumericValue(summaryData.criticalItems)}
             </div>
             <div className="text-sm text-red-700">Critical Items</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
-              ${summaryData.estimatedSavings.toLocaleString()}
+              ${getNumericValue(summaryData.estimatedSavings).toLocaleString()}
             </div>
             <div className="text-sm text-green-700">Estimated Savings</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {summaryData.estimatedTimeSavings}h
+              {getNumericValue(summaryData.estimatedTimeSavings)}h
             </div>
             <div className="text-sm text-purple-700">Time Savings</div>
           </div>
@@ -140,11 +147,11 @@ export default function InsightsTab({
                       Category: {rec.category}
                     </span>
                   </div>
-                  {rec.impact.costSavings && (
+                  {rec.costSavings && (
                     <div className="mt-2 text-sm">
                       <span className="text-green-600 font-medium">
                         💰 Potential savings: $
-                        {rec.impact.costSavings.toLocaleString()}
+                        {rec.costSavings.toLocaleString()}
                       </span>
                     </div>
                   )}

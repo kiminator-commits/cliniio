@@ -69,13 +69,13 @@ export class InventoryImportService {
       }
 
       // Get existing items for duplicate checking
-      const existingItems = await InventoryServiceFacade.getAllItems();
+      const existingItems = await inventoryServiceFacade.getAllItems();
 
       // Process import
       const result = await ImportProcessor.processImport(
         validationResult.validItems,
         options,
-        existingItems
+        existingItems as unknown as InventoryItem[]
       );
 
       return {

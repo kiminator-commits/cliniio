@@ -4,6 +4,7 @@ import {
   mockUseInventoryDataManager,
   mockDataManager,
 } from '../__mocks__/inventoryTestMocks';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('Real-time Data Updates Workflow', () => {
   beforeEach(() => {

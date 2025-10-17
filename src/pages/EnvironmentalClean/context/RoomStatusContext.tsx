@@ -89,7 +89,12 @@ export const RoomStatusProvider: React.FC<RoomStatusProviderProps> = ({
       metadata: room.metadata,
     }));
 
-    setContextRooms(mappedRooms);
+    // Use setTimeout to avoid calling setState synchronously in effect
+    const timeoutId = setTimeout(() => {
+      setContextRooms(mappedRooms);
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, [rooms]);
 
   // Load recently cleaned rooms from service when component mounts

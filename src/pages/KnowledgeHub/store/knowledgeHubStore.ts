@@ -117,8 +117,10 @@ export const useKnowledgeHubStore = create<KnowledgeHubStore>()(
         console.warn(DEPRECATED_MOCK_NOTICE);
         const stats = {
           currentRequests: 0,
-          windowStart: Date.now(),
-          requestsInWindow: 0,
+          currentBurstRequests: 0,
+          maxRequests: 100,
+          maxBurstRequests: 20,
+          windowMs: 60000,
         };
         set({ rateLimitStats: stats });
       },

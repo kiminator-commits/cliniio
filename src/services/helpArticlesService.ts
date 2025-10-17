@@ -41,7 +41,7 @@ class HelpArticlesService {
       const { data, error } = await supabase
         .from('help_articles')
         .select(
-          'id, slug, title, excerpt, category, subcategory, priority, is_featured, view_count'
+          'id, slug, title, excerpt, category, subcategory, priority, is_featured, view_count, is_published'
         )
         .eq('category', category)
         .eq('is_published', true)
@@ -118,7 +118,7 @@ class HelpArticlesService {
       const { data, error } = await supabase
         .from('help_articles')
         .select(
-          'id, slug, title, excerpt, category, subcategory, priority, is_featured, view_count'
+          'id, slug, title, excerpt, category, subcategory, priority, is_featured, view_count, is_published'
         )
         .eq('is_published', true)
         .eq('is_featured', true)
@@ -149,7 +149,7 @@ class HelpArticlesService {
       let supabaseQuery = supabase
         .from('help_articles')
         .select(
-          'id, slug, title, excerpt, category, subcategory, priority, is_featured, view_count'
+          'id, slug, title, excerpt, category, subcategory, priority, is_featured, view_count, is_published'
         )
         .eq('is_published', true)
         .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%`);

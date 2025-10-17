@@ -48,11 +48,11 @@ const BIFailureBannerContent: React.FC<GlobalBIFailureBannerProps> = ({
                 🚨 TOOL RECALL: BI TEST FAILURE
               </h3>
               <span className="text-sm bg-red-700 px-2 py-1 rounded">
-                {biFailureDetails?.date
-                  ? biFailureDetails.date instanceof Date
-                    ? biFailureDetails.date.toLocaleDateString()
-                    : new Date(biFailureDetails.date).toLocaleDateString()
-                  : 'Today'}
+                {biFailureDetails?.failure_date && typeof biFailureDetails.failure_date === 'string'
+                  ? new Date(biFailureDetails.failure_date).toLocaleDateString()
+                  : (biFailureDetails?.failure_date as any) instanceof Date
+                    ? (biFailureDetails.failure_date as any).toLocaleDateString()
+                    : 'Today'}
               </span>
             </div>
 
@@ -85,11 +85,11 @@ const BIFailureBannerContent: React.FC<GlobalBIFailureBannerProps> = ({
           </button>
 
           {/* Affected Tools Count */}
-          {biFailureDetails?.affectedToolsCount !== undefined && (
+          {biFailureDetails?.affected_tools_count !== undefined && (
             <div className="flex items-center gap-2 bg-red-700 px-3 py-1 rounded-lg">
               <Icon path={mdiPackage} size={1} className="text-white" />
               <span className="text-sm font-medium">
-                {biFailureDetails.affectedToolsCount} tools affected
+                {biFailureDetails.affected_tools_count} tools affected
               </span>
             </div>
           )}

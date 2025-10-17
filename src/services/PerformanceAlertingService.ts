@@ -278,7 +278,10 @@ export class PerformanceAlertingService {
       value: alert.value,
       threshold: rule.condition.value,
       timestamp: alert.timestamp,
-      tags: (alert as { tags?: string[] }).tags || [],
+      tags: (alert as { tags?: string[] }).tags?.reduce((acc, tag, index) => {
+        acc[`tag_${index}`] = tag;
+        return acc;
+      }, {} as Record<string, string>) || {},
     };
   }
 

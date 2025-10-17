@@ -58,6 +58,7 @@ export const createBatchSlice: StateCreator<BatchState, [], [], BatchState> = (
           packageSize: '',
         },
         sterilizationInfo: {},
+        facility_id: 'default-facility',
         auditTrail: [
           {
             id: `audit_${Date.now()}`,

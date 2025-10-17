@@ -5,6 +5,7 @@ import {
   setupDefaultMocks,
   setupStoreWithContent,
 } from '../__mocks__/knowledgeHubMocks';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('Category Management', () => {
   beforeEach(() => {

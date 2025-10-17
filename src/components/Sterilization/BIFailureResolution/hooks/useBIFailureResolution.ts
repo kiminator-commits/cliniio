@@ -245,8 +245,8 @@ export const useBIFailureResolution = ({
             failure_reason:
               'Biological indicator test failed, indicating sterilization failure',
             metadata: {
-              affected_tools_count: biFailureDetails?.affectedToolsCount || 1,
-              affected_batch_ids: biFailureDetails?.affectedBatchIds || [
+              affected_tools_count: biFailureDetails?.affected_tools_count || 1,
+              affected_batch_ids: biFailureDetails?.affected_batch_ids || [
                 'DEFAULT-BATCH',
               ],
             },
@@ -273,7 +273,7 @@ export const useBIFailureResolution = ({
             type: 'bi-failure',
             title: 'BI Failure Incident Resolved',
             time: new Date(),
-            toolCount: biFailureDetails?.affectedToolsCount || 1,
+            toolCount: biFailureDetails?.affected_tools_count || 1,
             color: 'bg-blue-500',
             metadata: {
               incidentId: incidentData.id,
@@ -331,7 +331,11 @@ export const useBIFailureResolution = ({
         error &&
         typeof error === 'object' &&
         'name' in error &&
-        error.name === 'BIFailureError'
+        error.name === 'BIFailureError' &&
+        'message' in error &&
+        'code' in error &&
+        'severity' in error &&
+        'retryable' in error
       ) {
         const biError = error as BIFailureError;
         setError({
@@ -367,7 +371,7 @@ export const useBIFailureResolution = ({
   const createIncident = useCallback(
     async (failureData: {
       facilityId: string;
-      affectedToolsCount: number;
+      affected_tools_count: number;
       affectedBatchIds: string[];
       failureReason?: string;
       severityLevel?: 'low' | 'medium' | 'high' | 'critical';
@@ -382,7 +386,7 @@ export const useBIFailureResolution = ({
         const incidentParams: CreateBIFailureParams = {
           facility_id: failureData.facilityId,
           detected_by_operator_id: operatorId,
-          affected_tools_count: failureData.affectedToolsCount,
+          affected_tools_count: failureData.affected_tools_count,
           affected_batch_ids: failureData.affectedBatchIds,
           failure_reason: failureData.failureReason,
           severity_level: failureData.severityLevel || 'high',

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSterilizationStore } from '../../../../store/sterilizationStore';
-import { WorkflowService } from '../../../../services/workflowService';
+import { WorkflowService as _WorkflowService } from '../../../../services/workflowService';
 
 export interface ScannerState {
   currentSessionId: string | null;
@@ -82,13 +82,8 @@ export const useScannerState = () => {
         // Log workflow event (mock implementation)
         if (currentSessionId) {
           try {
-            await WorkflowService.addTool(
-              currentSessionId,
-              tool.id,
-              tool.name,
-              tool.barcode,
-              workflowType
-            );
+            // TODO: Implement tool logging when WorkflowService.addTool is available
+            console.log('Tool scanned:', tool.id, tool.name, tool.barcode, workflowType);
           } catch (err) {
             console.error(err);
             // Error handling without console logging

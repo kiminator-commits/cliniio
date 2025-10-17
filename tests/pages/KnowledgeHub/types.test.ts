@@ -5,6 +5,7 @@ import {
   SearchValidationResult,
   StatusUpdateValidationResult,
 } from '@/pages/KnowledgeHub/utils/inputValidation';
+import { describe, test, expect } from 'vitest';
 
 describe('Validation Types', () => {
   test('validateSearchQuery should return ValidationResult', () => {

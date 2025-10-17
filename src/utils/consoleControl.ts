@@ -24,8 +24,8 @@ export const setConsoleLogLevel = (level: LogLevel): void => {
     localStorage.setItem('cliniio_log_level', level);
 
     // Update the logger if it exists
-    if ((window as { cliniioLogger?: { setLevel: (level: LogLevel) => void } }).cliniioLogger) {
-      (window as { cliniioLogger: { setLevel: (level: LogLevel) => void } }).cliniioLogger.setLevel(level);
+    if ((window as unknown as { cliniioLogger?: { setLevel: (level: LogLevel) => void } }).cliniioLogger) {
+      (window as unknown as { cliniioLogger: { setLevel: (level: LogLevel) => void } }).cliniioLogger.setLevel(level);
     }
 
     console.log(`🔧 Console log level set to: ${level}`);
@@ -63,7 +63,7 @@ export const consoleControl = {
     const originalConsole = { ...console };
     Object.keys(console).forEach((key) => {
       if (typeof console[key as keyof Console] === 'function') {
-        (console as Record<string, unknown>)[key] = () => {};
+        (console as unknown as Record<string, unknown>)[key] = () => {};
       }
     });
     console.log(
@@ -95,7 +95,7 @@ export const consoleControl = {
 export const initializeConsoleControl = (): void => {
   if (typeof window !== 'undefined') {
     // Make console control available globally for easy access
-    (window as { consoleControl: typeof consoleControl }).consoleControl = consoleControl;
+    (window as unknown as { consoleControl: typeof consoleControl }).consoleControl = consoleControl;
 
     // Show current status
     console.log(

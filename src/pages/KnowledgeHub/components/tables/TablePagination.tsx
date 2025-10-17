@@ -1,5 +1,12 @@
 import React from 'react';
 
+interface PaginationInfo {
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 interface TablePaginationProps {
   pagination: PaginationInfo;
   onPageChange: (page: number) => void;

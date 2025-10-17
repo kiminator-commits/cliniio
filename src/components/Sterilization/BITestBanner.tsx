@@ -10,12 +10,14 @@ interface BITestBannerProps {
   isVisible: boolean;
   onComplete: (result: BITestResult) => void;
   onOptOut: () => void;
+  onDismiss?: () => void;
 }
 
 const BITestBanner: React.FC<BITestBannerProps> = ({
   isVisible,
   onComplete,
   onOptOut,
+  onDismiss: _onDismiss,
 }) => {
   const [showFailConfirmation, setShowFailConfirmation] = useState(false);
   const [pendingResult, setPendingResult] = useState<

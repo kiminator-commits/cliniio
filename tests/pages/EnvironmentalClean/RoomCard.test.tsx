@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import RoomCard from '@/pages/EnvironmentalClean/components/ui/RoomCard';
 

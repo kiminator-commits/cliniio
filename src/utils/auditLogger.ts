@@ -57,8 +57,8 @@ export const logSterilizationEvent = async (event: SterilizationEvent) => {
     }
 
     // Get current user and facility IDs
-    const { userId, facilityId } =
-      await FacilityService.getCurrentUserAndFacility();
+    const facilityId = await FacilityService.getCurrentFacilityId();
+    const userId = 'unknown'; // TODO: Get actual user ID
 
     const electronicSignature = `${event.operator || 'unknown'}-${Date.now()}`;
     const signature = generateAuditSignature(
@@ -106,8 +106,8 @@ export const useAuditLogger = () => {
       }
 
       // Get current user and facility IDs
-      const { userId, facilityId } =
-        await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
+      const userId = 'unknown'; // TODO: Get actual user ID
 
       const { error } = await supabase.from('audit_logs').insert({
         id: crypto.randomUUID(),
@@ -161,8 +161,8 @@ export const auditLogger = {
       }
 
       // Get current user and facility IDs
-      const { userId, facilityId } =
-        await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
+      const userId = 'unknown'; // TODO: Get actual user ID
 
       const { error } = await supabase.from('audit_logs').insert({
         id: crypto.randomUUID(),

@@ -7,25 +7,8 @@ export * from './cache';
 
 // Export types (excluding service implementations to avoid conflicts)
 export type {
-  InventoryServiceFacade,
   InventoryItem,
   LocalInventoryItem,
-  InventoryDataResponse,
-  InventoryUpdateResponse,
-  InventoryDeleteResponse,
-  InventoryCreateResponse,
-  InventorySingleResponse,
-  InventoryFilters,
-  InventoryBulkResponse,
-  InventoryResponse,
-  OperationResult,
-  SearchOptions,
-  FilterOptions,
-  PaginationOptions,
-  SortOptions,
-  AdapterType,
-  AdapterMetadata,
-  CacheStats,
 } from './types';
 
 // Export class implementations directly

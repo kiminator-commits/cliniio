@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { BIFailureService as biFailureService } from '../../src/services/bi/failure/index';
 import { BIFailureNotificationDataProvider as _BIFailureNotificationDataProvider } from '../../src/services/bi/notification/data/BIFailureNotificationDataProvider';
 import { BIFailureNotificationService as _BIFailureNotificationService } from '../../src/services/bi/failure/BIFailureNotificationService';
@@ -139,7 +139,7 @@ describe('BIFailure Facility Isolation Integration Tests', () => {
     };
 
     // Mock the supabase.from method to return our mock query
-    (supabase.from as vi.Mock).mockImplementation((_tableName) => {
+    (supabase.from as Mock).mockImplementation((_tableName) => {
       return mockQuery;
     });
 

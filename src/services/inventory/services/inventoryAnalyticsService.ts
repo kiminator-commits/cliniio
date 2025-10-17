@@ -119,8 +119,8 @@ export class InventoryAnalyticsService {
   calculateExpiredItems(items: InventoryItem[]): InventoryItem[] {
     const now = new Date();
     return items.filter((item) => {
-      if (!item.data?.expiration) return false;
-      const expirationDate = new Date(item.data.expiration as string);
+      if (!(item.data as any)?.expiration) return false;
+      const expirationDate = new Date((item.data as any).expiration as string);
       return expirationDate < now;
     });
   }
@@ -133,8 +133,8 @@ export class InventoryAnalyticsService {
     thresholdDate.setDate(thresholdDate.getDate() + daysThreshold);
 
     return items.filter((item) => {
-      if (!item.data?.lastServiced) return false;
-      const lastServicedDate = new Date(item.data.lastServiced as string);
+      if (!(item.data as any)?.lastServiced) return false;
+      const lastServicedDate = new Date((item.data as any).lastServiced as string);
       return lastServicedDate < thresholdDate;
     });
   }

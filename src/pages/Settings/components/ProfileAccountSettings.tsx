@@ -6,6 +6,16 @@ import {
   ProfileSettingsProvider,
   useProfileSettingsContext,
 } from './ProfileAccountSettings/context';
+import { MobileShortcuts, BasicInfoForm, UserData } from './ProfileAccountSettings/types';
+
+interface Preferences {
+  theme?: string;
+  notifications?: {
+    push?: boolean;
+    sound?: boolean;
+    volume?: number;
+  };
+}
 
 const ProfileAccountSettingsContent: React.FC = () => {
   const {
@@ -78,9 +88,9 @@ const ProfileAccountSettingsContent: React.FC = () => {
           <BasicInfoTab
             basicInfoForm={state.basicInfoForm}
             setBasicInfoForm={(formData) =>
-              setState((prev) => ({ ...prev, basicInfoForm: formData }))
+              setState((prev) => ({ ...prev, basicInfoForm: formData as BasicInfoForm }))
             }
-            userData={state.userData}
+            userData={state.userData ? { avatar_url: state.userData.profile_photo } : null}
             uploadingPhoto={state.uploadingPhoto}
             uploadProfilePhoto={uploadProfilePhoto}
             removeProfilePhoto={removeProfilePhoto}
@@ -89,39 +99,55 @@ const ProfileAccountSettingsContent: React.FC = () => {
 
         {state.activeTab === 'preferences' && (
           <PreferencesTab
-            preferences={state.preferences}
-            onPreferencesChange={(preferences) =>
-              setState((prev) => ({ ...prev, preferences }))
-            }
-            onSave={handleSave}
-            saving={state.saving}
-            saveSuccess={state.saveSuccess}
-            saveError={state.saveError}
+            preferences={{
+              theme: state.preferences.theme,
+              notifications: {
+                push: state.preferences.notifications.push,
+                sound: state.preferences.notifications.sound,
+                volume: state.preferences.notifications.volume,
+                vibration: 'medium',
+                vibrationEnabled: true,
+              },
+            }}
+            setPreferences={(preferences) => {
+              setState((prev: any) => ({
+                ...prev,
+                preferences: {
+                  ...prev.preferences,
+                  theme: (preferences as Preferences).theme,
+                  notifications: {
+                    ...prev.preferences.notifications,
+                    push: (preferences as Preferences).notifications?.push,
+                    sound: (preferences as Preferences).notifications?.sound,
+                    volume: (preferences as Preferences).notifications?.volume,
+                  },
+                },
+              }));
+            }}
           />
         )}
 
         {state.activeTab === 'mobile' && (
           <MobileTab
-            shortcuts={state.mobileShortcuts}
+            mobileShortcuts={Object.entries(state.mobileShortcuts).map(([key, value]) => ({ [key]: value }))}
+            setMobileShortcuts={(shortcuts) => {
+              const newShortcuts = (shortcuts as Array<Record<string, unknown>>).reduce((acc, shortcut) => ({ ...acc, ...shortcut }), {});
+              setState((prev) => ({ ...prev, mobileShortcuts: newShortcuts as unknown as MobileShortcuts }));
+            }}
             availableShortcuts={availableShortcuts}
-            onShortcutsChange={(shortcuts) =>
-              setState((prev) => ({ ...prev, mobileShortcuts: shortcuts }))
-            }
-            onSave={handleSave}
-            saving={state.saving}
-            saveSuccess={state.saveSuccess}
-            saveError={state.saveError}
           />
         )}
 
         {state.activeTab === 'account' && (
           <AccountTab
-            userData={state.userData}
-            onPasswordChange={() =>
+            userData={state.userData as any}
+            onPasswordChange={handlePasswordChange}
+            onOpenPasswordModal={() =>
               setState((prev) => ({ ...prev, showPasswordModal: true }))
             }
             onArchiveAccount={handleArchiveAccount}
-            loading={state.loading}
+            passwordError={state.passwordError}
+            passwordSuccess={state.passwordSuccess}
           />
         )}
       </div>
@@ -131,11 +157,10 @@ const ProfileAccountSettingsContent: React.FC = () => {
         onClose={() =>
           setState((prev) => ({ ...prev, showPasswordModal: false }))
         }
-        onPasswordChange={handlePasswordChange}
-        isPasswordReset={state.isPasswordReset}
+        onSubmit={handlePasswordChange}
         error={state.passwordError}
         success={state.passwordSuccess}
-        userEmail={state.userData?.email || ''}
+        isPasswordReset={state.isPasswordReset}
       />
     </div>
   );

@@ -55,7 +55,7 @@ export const ContentTable: React.FC = React.memo(() => {
 
   // Filter options
   const statusOptions = ['Not Started', 'In Progress', 'Completed'];
-  const departmentOptions = [
+  const _departmentOptions = [
     'central_sterile',
     'clinical',
     'biomedical',

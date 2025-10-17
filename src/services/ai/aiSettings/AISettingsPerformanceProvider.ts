@@ -325,7 +325,7 @@ export class AISettingsPerformanceProvider {
   private shouldEnableDataSharing(settings: UnifiedAISettings): boolean {
     // Enable only if privacy settings allow
     return (
-      settings.privacy.dataSharingEnabled && !settings.privacy.dataAnonymization
+      settings.privacy.thirdPartyPermissions && !settings.privacy.dataAnonymization
     );
   }
 

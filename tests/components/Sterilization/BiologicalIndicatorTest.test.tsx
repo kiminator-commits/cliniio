@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import BiologicalIndicatorTest from '../../../src/components/Sterilization/BiologicalIndicatorTest';
+import { describe, test, expect, it } from 'vitest';
 
 describe('BiologicalIndicatorTest', () => {
   it('renders the component', () => {

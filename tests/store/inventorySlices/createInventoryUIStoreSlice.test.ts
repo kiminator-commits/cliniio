@@ -3,6 +3,7 @@ import {
   createInventoryUIStoreSlice,
   InventoryUIState,
 } from '../../../src/store/inventorySlices/createInventoryUIStoreSlice';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('createInventoryUIStoreSlice', () => {
   let store: StoreApi<InventoryUIState>;

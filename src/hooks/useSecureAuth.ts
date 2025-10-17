@@ -54,6 +54,68 @@ export const useSecureAuth = () => {
   const initializationRef = useRef(false);
   const tokenValidationInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // Stop token validation
+  const stopTokenValidation = useCallback(() => {
+    if (tokenValidationInterval.current) {
+      clearInterval(tokenValidationInterval.current);
+      tokenValidationInterval.current = null;
+    }
+  }, []);
+
+  // Logout function
+  const logout = useCallback(async () => {
+    try {
+      setAuthState((prev) => ({ ...prev, isLoading: true }));
+
+      await secureAuthService.logout();
+
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        error: null,
+        migrationStatus: {
+          isComplete: true,
+          isRunning: false,
+          stepsCompleted: [],
+          errors: [],
+        },
+      });
+
+      // Stop token validation
+      stopTokenValidation();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: 'Logout failed',
+      }));
+    }
+  }, [stopTokenValidation]);
+
+  // Start periodic token validation
+  const startTokenValidation = useCallback(() => {
+    if (tokenValidationInterval.current) {
+      clearInterval(tokenValidationInterval.current);
+    }
+
+    tokenValidationInterval.current = setInterval(
+      async () => {
+        try {
+          const isValid = await secureAuthService.validateToken();
+          if (!isValid) {
+            await logout();
+          }
+        } catch (error) {
+          console.warn('Token validation failed:', error);
+          await logout();
+        }
+      },
+      5 * 60 * 1000
+    ); // Check every 5 minutes
+  }, [logout]);
+
   // Initialize authentication state
   const initializeAuth = useCallback(async () => {
     if (initializationRef.current) return;
@@ -132,68 +194,6 @@ export const useSecureAuth = () => {
       }));
     }
   }, [startTokenValidation]);
-
-  // Stop token validation
-  const stopTokenValidation = useCallback(() => {
-    if (tokenValidationInterval.current) {
-      clearInterval(tokenValidationInterval.current);
-      tokenValidationInterval.current = null;
-    }
-  }, []);
-
-  // Logout function
-  const logout = useCallback(async () => {
-    try {
-      setAuthState((prev) => ({ ...prev, isLoading: true }));
-
-      await secureAuthService.logout();
-
-      setAuthState({
-        isAuthenticated: false,
-        isLoading: false,
-        user: null,
-        error: null,
-        migrationStatus: {
-          isComplete: true,
-          isRunning: false,
-          stepsCompleted: [],
-          errors: [],
-        },
-      });
-
-      // Stop token validation
-      stopTokenValidation();
-    } catch (error) {
-      console.error('Logout failed:', error);
-      setAuthState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: 'Logout failed',
-      }));
-    }
-  }, [stopTokenValidation]);
-
-  // Start periodic token validation
-  const startTokenValidation = useCallback(() => {
-    if (tokenValidationInterval.current) {
-      clearInterval(tokenValidationInterval.current);
-    }
-
-    tokenValidationInterval.current = setInterval(
-      async () => {
-        try {
-          const isValid = await secureAuthService.validateToken();
-          if (!isValid) {
-            await logout();
-          }
-        } catch (error) {
-          console.warn('Token validation failed:', error);
-          await logout();
-        }
-      },
-      5 * 60 * 1000
-    ); // Check every 5 minutes
-  }, [logout]);
 
   // Login function
   const login = useCallback(

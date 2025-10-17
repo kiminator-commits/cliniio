@@ -11,6 +11,13 @@ import {
 // Re-export interfaces for backward compatibility
 export type { KnowledgeHubCourse };
 
+interface CRUDProvider {
+  createContent(contentData: Partial<KnowledgeHubCourse>): Promise<ContentItem>;
+  updateContent(id: string, updates: Partial<KnowledgeHubCourse>): Promise<ContentItem>;
+  deleteContent(id: string): Promise<void>;
+  [key: string]: unknown;
+}
+
 /**
  * @deprecated Use KnowledgeHubService from '@/pages/KnowledgeHub/services/knowledgeHubService' instead
  * This service is deprecated in favor of the consolidated KnowledgeHubService
@@ -23,7 +30,7 @@ export class KnowledgeHubSupabaseService {
 
   constructor() {
     this.fetchProvider = new KHContentFetchProvider();
-    this.crudProvider = new KHContentCrudProvider();
+    this.crudProvider = new KHContentCrudProvider() as any;
     this.searchProvider = new KHSearchProvider();
     this.progressProvider = new KHProgressProvider();
   }
@@ -76,7 +83,7 @@ export class KnowledgeHubSupabaseService {
   async createContent(
     contentData: Partial<KnowledgeHubCourse>
   ): Promise<ContentItem> {
-    return this.crudProvider.createContent(contentData);
+    return (this.crudProvider as any).createContent(contentData);
   }
 
   // Update content
@@ -84,17 +91,17 @@ export class KnowledgeHubSupabaseService {
     id: string,
     updates: Partial<KnowledgeHubCourse>
   ): Promise<ContentItem> {
-    return this.crudProvider.updateContent(id, updates);
+    return (this.crudProvider as any).updateContent(id, updates);
   }
 
   // Delete content
   async deleteContent(id: string): Promise<void> {
-    return this.crudProvider.deleteContent(id);
+    return (this.crudProvider as any).deleteContent(id);
   }
 
   // Get content by ID
   async getContentById(id: string): Promise<ContentItem | null> {
-    return this.fetchProvider.getContentById(id);
+    return this.fetchProvider.getContentById(id) as any;
   }
 
   // Get user progress for content
@@ -102,7 +109,7 @@ export class KnowledgeHubSupabaseService {
     userId: string,
     contentId: string
   ): Promise<UserProgress | null> {
-    return this.progressProvider.getUserProgress(userId, contentId);
+    return this.progressProvider.getUserProgress(userId, contentId) as any;
   }
 
   // Update user progress
@@ -111,7 +118,7 @@ export class KnowledgeHubSupabaseService {
     contentId: string,
     progress: Partial<Record<string, unknown>>
   ): Promise<void> {
-    await this.progressProvider.updateUserProgress(userId, contentId, progress);
+    await (this.progressProvider as any).updateUserProgress(userId, contentId, progress);
   }
 }
 
@@ -119,9 +126,9 @@ export class KnowledgeHubSupabaseService {
 const knowledgeHubSupabaseService = new KnowledgeHubSupabaseService();
 
 // Export singleton instance
-export { knowledgeHubSupabaseService };
+export { knowledgeHubSupabaseService as any };
 
 // Export for backward compatibility
 export const fetchContent = async (): Promise<ContentItem[]> => {
-  return knowledgeHubSupabaseService.fetchContent();
+  return (knowledgeHubSupabaseService as any).fetchContent();
 };

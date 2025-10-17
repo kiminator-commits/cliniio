@@ -300,7 +300,7 @@ export class AdminTaskConfigService {
       );
 
       // Apply count for pagination
-      const queryWithCount = query.select(getSafeFields('admin_task_config'), {
+      const queryWithCount = (query as any).select(getSafeFields('admin_task_config'), {
         count: 'exact',
       });
 

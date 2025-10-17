@@ -1,7 +1,8 @@
 // Mock getEnvVar before importing components that use it
+import { vi, describe, test, expect } from 'vitest';
+
 vi.mock('@/lib/getEnv', () => ({
   getEnvVar: (key: string) => {
-    if (key === 'VITE_SUPABASE_URL') return 'https://test.supabase.co';
     if (key === 'VITE_SUPABASE_ANON_KEY') return 'test-anon-key';
     return '';
   },
@@ -354,9 +355,31 @@ describe('Supabase Integration Tests', () => {
     process.env.NODE_ENV = 'test';
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Clear all mocks before each test
     vi.clearAllMocks();
+    // Don't initialize the facade - we'll mock the services directly
+    
+    // Mock the search service
+    const mockSearchService = {
+      getAllItems: vi.fn(),
+      refreshData: vi.fn(),
+      searchItems: vi.fn(),
+      getFilteredItems: vi.fn(),
+    };
+    
+    // Mock the core service
+    const mockCoreService = {
+      createItem: vi.fn(),
+      updateItem: vi.fn(),
+      deleteItem: vi.fn(),
+      getItemById: vi.fn(),
+      addInventoryItem: vi.fn(),
+    };
+    
+    // Replace the services with mocks
+    inventoryServiceFacade['searchService'] = mockSearchService as any;
+    inventoryServiceFacade['coreService'] = mockCoreService as any;
   });
 
   afterAll(() => {
@@ -502,25 +525,9 @@ describe('Supabase Integration Tests', () => {
         },
       ];
 
-      // Mock the repository's fetchAllInventoryData method directly
-      const mockRepository = {
-        isInitialized: true,
-        fetchAllInventoryData: vi.fn().mockResolvedValue({
-          tools: mockItems.filter((item) => item.category === 'Tools'),
-          supplies: mockItems.filter((item) => item.category === 'Supplies'),
-          equipment: mockItems.filter((item) => item.category === 'Equipment'),
-          officeHardware: mockItems.filter(
-            (item) => item.category === 'Office Hardware'
-          ),
-          categories: ['Tools', 'Supplies', 'Equipment', 'Office Hardware'],
-          isLoading: false,
-          error: null,
-        }),
-      };
-
-      // Replace the repository temporarily
-      const originalRepository = inventoryServiceFacade['repository'];
-      inventoryServiceFacade['repository'] = mockRepository as any;
+      // Configure the mock search service
+      const searchService = inventoryServiceFacade['searchService'];
+      searchService.getAllItems.mockResolvedValue(mockItems);
 
       const result = await inventoryServiceFacade.getAllItems();
 
@@ -533,9 +540,6 @@ describe('Supabase Integration Tests', () => {
       expect(result.data?.[0]).toHaveProperty('name', 'Test Item');
       expect(result.data?.[0]).toHaveProperty('category', 'Tools');
       expect(result.count).toBe(1);
-
-      // Restore the original repository
-      inventoryServiceFacade['repository'] = originalRepository;
     });
 
     test('should handle creating inventory item', async () => {
@@ -549,76 +553,40 @@ describe('Supabase Integration Tests', () => {
         facility_id: '550e8400-e29b-41d4-a716-446655440001',
       };
 
-      // Mock the repository's createItem method directly
-      const mockRepository = {
-        isInitialized: true,
-        createItem: vi.fn().mockResolvedValue({
-          data: {
-            id: '550e8400-e29b-41d4-a716-446655440003',
-            name: newItem.name,
-            category: newItem.category,
-            location: newItem.location,
-            quantity: newItem.quantity,
-            unit_cost: newItem.unit_cost,
-            user_id: newItem.user_id,
-            facility_id: newItem.facility_id,
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-01T00:00:00Z',
-          },
-          error: null,
-        }),
-      };
-
-      // Replace the repository temporarily
-      const originalRepository = inventoryServiceFacade['repository'];
-      inventoryServiceFacade['repository'] = mockRepository as any;
+      // Configure the mock core service
+      const coreService = inventoryServiceFacade['coreService'];
+      coreService.createItem.mockResolvedValue({
+        data: {
+          id: '550e8400-e29b-41d4-a716-446655440003',
+          name: newItem.name,
+          category: newItem.category,
+          location: newItem.location,
+          quantity: newItem.quantity,
+          unit_cost: newItem.unit_cost,
+          user_id: newItem.user_id,
+          facility_id: newItem.facility_id,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+        error: null,
+      });
 
       const result = await inventoryServiceFacade.createItem(newItem);
 
       expect(result.error).toBeNull();
       expect(result.data).not.toBeNull();
       expect(result.data!.name).toBe('New Item');
-
-      // Restore the original repository
-      inventoryServiceFacade['repository'] = originalRepository;
     });
 
     test('should handle database errors gracefully', async () => {
-      // Mock the repository to return an error
-      const mockRepository = {
-        isInitialized: true,
-        fetchAllInventoryData: vi.fn().mockResolvedValue({
-          tools: [],
-          supplies: [],
-          equipment: [],
-          officeHardware: [],
-          categories: [],
-          isLoading: false,
-          error: 'Database connection failed',
-        }),
-      };
-
-      // Mock the cache manager to return null (no cached data)
-      const mockCacheManager = {
-        get: vi.fn().mockReturnValue(null),
-        set: vi.fn(),
-        clear: vi.fn(),
-      };
-
-      // Replace the repository and cache manager temporarily
-      const originalRepository = inventoryServiceFacade['repository'];
-      const originalCacheManager = inventoryServiceFacade['cacheManager'];
-      inventoryServiceFacade['repository'] = mockRepository as any;
-      inventoryServiceFacade['cacheManager'] = mockCacheManager as any;
+      // Configure the mock search service to return an error
+      const searchService = inventoryServiceFacade['searchService'];
+      searchService.getAllItems.mockRejectedValue(new Error('Database connection failed'));
 
       const result = await inventoryServiceFacade.getAllItems();
 
       expect(result.error).toBe('Database connection failed');
       expect(result.data).toEqual([]);
-
-      // Restore the original repository and cache manager
-      inventoryServiceFacade['repository'] = originalRepository;
-      inventoryServiceFacade['cacheManager'] = originalCacheManager;
     });
   });
 

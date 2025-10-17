@@ -39,10 +39,7 @@ const EnvironmentalCleaningSettings: React.FC = () => {
         );
       case 'ai':
         return (
-          <AITab
-            aiSettings={aiSettings}
-            onAISettingChange={handleAISettingChange}
-          />
+          <AITab />
         );
       case 'protocols':
         return (

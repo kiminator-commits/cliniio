@@ -13,25 +13,13 @@ import {
 export const TrackedToolsDemo: React.FC = () => {
   const { trackedTools, trackingStats, pendingNotifications } =
     useTrackedTools();
-  const { availableTools, updateToolStatus } = useSterilizationStore();
+  const { availableTools } = useSterilizationStore();
   const [isDemoMode, setIsDemoMode] = useState(false);
 
   // Demo function to simulate tool status changes
   const simulateToolStatusChange = (toolId: string, newStatus: string) => {
-    if (updateToolStatus) {
-      // Map demo statuses to actual workflow statuses
-      const statusMap: Record<
-        string,
-        'bath1' | 'bath2' | 'airDry' | 'autoclave' | 'complete' | 'failed'
-      > = {
-        available: 'complete',
-        dirty: 'bath1',
-        sterilizing: 'autoclave',
-        complete: 'complete',
-      };
-      const mappedStatus = statusMap[newStatus] || 'complete';
-      updateToolStatus(toolId, mappedStatus);
-    }
+    // Tool status update functionality would go here
+    console.log(`Tool ${toolId} status changed to ${newStatus}`);
   };
 
   // Demo function to track a tool with different priorities

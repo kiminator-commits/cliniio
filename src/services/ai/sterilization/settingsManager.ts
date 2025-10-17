@@ -65,7 +65,7 @@ export class SettingsManager {
           userId: 'system',
           module: 'sterilization',
           action: 'UPDATE',
-          details: settingsToSave,
+          details: settingsToSave as any,
         });
       }
 

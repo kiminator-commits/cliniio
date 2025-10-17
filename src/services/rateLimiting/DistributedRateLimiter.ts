@@ -80,25 +80,25 @@ export class DistributedRateLimiter {
     const client = redisManager.getClient();
 
     // Use Redis pipeline for atomic operations
-    const pipeline = (client as { multi: () => unknown }).multi();
+    const pipeline = (client as any).multi();
 
     // Remove expired entries
-    pipeline.zRemRangeByScore(key, '-inf', windowStart);
+    (pipeline as any).zRemRangeByScore(key, '-inf', windowStart);
 
     // Count current requests in window
-    pipeline.zCard(key);
+    (pipeline as any).zCard(key);
 
     // Add current request
-    pipeline.zAdd(key, { score: now, member: `${now}-${Math.random()}` });
+    (pipeline as any).zAdd(key, { score: now, member: `${now}-${Math.random()}` });
 
     // Set expiration
-    pipeline.expire(key, Math.ceil(config.windowMs / 1000));
+    (pipeline as any).expire(key, Math.ceil(config.windowMs / 1000));
 
     // Check if blocked
     const blockKey = `${key}:blocked`;
-    pipeline.get(blockKey);
+    (pipeline as any).get(blockKey);
 
-    const results = await pipeline.exec();
+    const results = await (pipeline as any).exec();
 
     if (!results || results.length < 4) {
       throw new Error('Redis pipeline execution failed');

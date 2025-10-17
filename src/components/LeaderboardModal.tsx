@@ -53,7 +53,7 @@ const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
           .limit(10);
 
         if (error) throw error;
-        setLeaderboard(data || []);
+        _setLeaderboard(data || []);
       } catch (err) {
         console.error('Error fetching leaderboard:', err);
       }

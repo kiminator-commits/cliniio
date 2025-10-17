@@ -7,7 +7,7 @@ import {
   isItemCategoryTrackable,
   TRACKING_CONFIG,
 } from '../../src/utils/inventory/trackingUtils';
-import { TabType } from '../../src/types/inventory';
+import { TabType as _TabType } from '../../src/types/inventory';
 
 describe('Tracking Utils', () => {
   describe('isTrackingSupportedForTab', () => {

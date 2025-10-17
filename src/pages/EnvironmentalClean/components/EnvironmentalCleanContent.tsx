@@ -26,7 +26,11 @@ const EnvironmentalCleanContent: React.FC = () => {
   const [isScanning] = useState(false);
   const audit = useEnvironmentalCleanAudit();
   const auditRef = useRef(audit);
-  auditRef.current = audit;
+
+  // Update ref in effect to avoid accessing during render
+  useEffect(() => {
+    auditRef.current = audit;
+  }, [audit]);
 
   // Set up real-time updates for environmental cleaning changes
   // Temporarily disabled to fix production issues

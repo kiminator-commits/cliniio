@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 import { render, screen, waitFor as _waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -200,9 +200,7 @@ describe('CoursesTable Integration', () => {
     await screen.findByText('Course 1');
 
     // Verify that the table can handle large datasets
-    expect(
-      screen.getByText('Showing 1 to 10 of 100 items')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Page 1 of 10')).toBeInTheDocument();
     expect(screen.getByText('Course 1')).toBeInTheDocument();
   });
 

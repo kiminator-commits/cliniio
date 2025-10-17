@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useLibraryRootState } from '@/features/library/hooks/useLibraryRootState';
+import { describe, test, expect, it } from 'vitest';
 
 describe('useLibraryRootState', () => {
   it('should initialize with default state', () => {

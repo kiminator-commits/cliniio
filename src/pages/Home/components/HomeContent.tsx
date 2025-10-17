@@ -197,8 +197,8 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
           const { FacilityService } = await import(
             '@/services/facilityService'
           );
-          const { userId } = await FacilityService.getCurrentUserAndFacility();
-          if (!userId) throw new Error('No authenticated user for task toggle');
+          const facilityId = await FacilityService.getCurrentFacilityId();
+          if (!facilityId) throw new Error('No authenticated facility for task toggle');
 
           await completeTask(taskId);
 

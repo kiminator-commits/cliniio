@@ -159,8 +159,8 @@ export default memo(function PhaseTimer({
     validatePhaseDuration,
     getTimeDisplayText,
     handleComplete: handleCompleteFromLogic,
-    handleStart,
-    handlePause,
+    handleStart: _handleStart,
+    handlePause: _handlePause,
     handleMoveToolsToNext,
     handleReset,
     handleCIConfirmationComplete,
@@ -183,21 +183,19 @@ export default memo(function PhaseTimer({
   // Store the handleComplete function in the ref
   useEffect(() => {
     handleCompleteRef.current = handleCompleteFromLogic;
-  }, [handleCompleteFromLogic]);
+  }, [handleCompleteFromLogic, handleCompleteRef]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { handleStartTimer, handlePauseTimer } = useTimerControls();
 
   const timerStart = useCallback(() => {
-    handleStart();
     handleStartTimer(phase.id, duration); // Start timer store timer
     setError(null); // Clear any previous errors
-  }, [handleStart, handleStartTimer, phase.id, duration, setError]);
+  }, [handleStartTimer, phase.id, duration, setError]);
 
   const timerPause = useCallback(() => {
-    handlePause();
     handlePauseTimer(phase.id); // Pause timer store timer
-  }, [handlePause, handlePauseTimer, phase.id]);
+  }, [handlePauseTimer, phase.id]);
 
   const handleCIModalComplete = useCallback(async () => {
     await handleCIConfirmationComplete();

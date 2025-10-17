@@ -25,7 +25,7 @@ interface TableActionsProps {
 }
 
 const TableActions = React.memo(
-  forwardRef<TableActionsRef, TableActionsProps>(
+  forwardRef<TableActionsRef | null, TableActionsProps>(
     (
       {
         item,

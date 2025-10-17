@@ -1,4 +1,4 @@
-import { InventoryResponse } from './InventoryServiceFacade';
+import { InventoryResponse } from './types/inventoryServiceTypes';
 
 export interface SyncOperation {
   id: string;

@@ -1,4 +1,4 @@
-import { Json, _Tables, _Inserts, _Updates } from './common';
+import { Json, Tables, Inserts, Updates } from './common';
 
 // Sterilization table types - using proper types based on table definitions
 export type SterilizationCycle = SterilizationTables['sterilization_cycles']['Row'];

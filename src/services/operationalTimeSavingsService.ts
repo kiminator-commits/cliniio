@@ -57,7 +57,7 @@ class OperationalTimeSavingsService {
       console.log('🔍 OperationalTimeSavingsService: Starting calculation...');
 
       const { FacilityService } = await import('./facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       console.log('🏥 OperationalTimeSavingsService: Facility ID:', facilityId);
 

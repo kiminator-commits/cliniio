@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import { useCentralizedInventoryData } from '../../src/hooks/useCentralizedInventoryData';
 
 // Mock the service access

@@ -15,6 +15,7 @@ import {
   SupplyDepletion,
   ToolTurnoverUtilization,
 } from './utils/intelligenceTypes';
+import { useCurrentTime } from './hooks/useCurrentTime';
 
 interface IntelligenceOverviewTabProps {
   summary: IntelligenceSummary;
@@ -26,6 +27,8 @@ interface IntelligenceOverviewTabProps {
 export const IntelligenceOverviewTab: React.FC<
   IntelligenceOverviewTabProps
 > = ({ summary, hasHighRiskItems, getUrgentActions, setActiveTab }) => {
+  const currentTime = useCurrentTime();
+
   const getUrgencyColor = (urgency: string): string => {
     switch (urgency?.toLowerCase()) {
       case 'critical':
@@ -191,7 +194,7 @@ export const IntelligenceOverviewTab: React.FC<
                         Depletes in{' '}
                         {Math.ceil(
                           (new Date(item.depletionDate).getTime() -
-                            Date.now()) /
+                            currentTime) /
                             (1000 * 60 * 60 * 24)
                         )}{' '}
                         days

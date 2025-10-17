@@ -24,7 +24,7 @@ export class OptimizationService {
 
       // Generate optimization using provider service
       const optimization =
-        await this.providerService.generateOptimizationWithAI();
+        await this.providerService.generateCostOptimizationWithAI();
 
       const processingTime = Date.now() - startTime;
 
@@ -75,7 +75,7 @@ export class OptimizationService {
 
       // Process input with AI using provider service
       const categorization =
-        await this.providerService.processCategorizationWithAI();
+        await this.providerService.generateSmartCategorizationWithAI();
 
       const processingTime = Date.now() - startTime;
 

@@ -71,6 +71,14 @@ interface InventoryState {
   setOfficeHardwareData: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
 }
 
+interface InventoryItemData {
+  toolId?: string;
+  supplyId?: string;
+  equipmentId?: string;
+  hardwareId?: string;
+  [key: string]: unknown;
+}
+
 export const useInventoryActions = (state: InventoryState) => {
   const {
     setCategoryFilter,
@@ -165,21 +173,21 @@ export const useInventoryActions = (state: InventoryState) => {
       itemData?.hardwareId;
 
     if (itemId) {
-      if (itemData?.toolId) {
+      if ((itemData?.data as InventoryItemData)?.toolId) {
         setInventoryData((prev) =>
-          prev.filter((i: InventoryItem) => i.data?.toolId !== itemId)
+          prev.filter((i: InventoryItem) => (i.data as InventoryItemData)?.toolId !== itemId)
         );
-      } else if (itemData?.supplyId) {
+      } else if ((itemData?.data as InventoryItemData)?.supplyId) {
         setSuppliesData((prev) =>
-          prev.filter((i: InventoryItem) => i.data?.supplyId !== itemId)
+          prev.filter((i: InventoryItem) => (i.data as InventoryItemData)?.supplyId !== itemId)
         );
-      } else if (itemData?.equipmentId) {
+      } else if ((itemData?.data as InventoryItemData)?.equipmentId) {
         setEquipmentData((prev) =>
-          prev.filter((i: InventoryItem) => i.data?.equipmentId !== itemId)
+          prev.filter((i: InventoryItem) => (i.data as InventoryItemData)?.equipmentId !== itemId)
         );
-      } else if (itemData?.hardwareId) {
+      } else if ((itemData?.data as InventoryItemData)?.hardwareId) {
         setOfficeHardwareData((prev) =>
-          prev.filter((i: InventoryItem) => i.data?.hardwareId !== itemId)
+          prev.filter((i: InventoryItem) => (i.data as InventoryItemData)?.hardwareId !== itemId)
         );
       }
     }

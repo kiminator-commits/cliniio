@@ -7,7 +7,7 @@ import type {
   AIForecastResult,
   DemandForecastingResult,
   HistoricalInventoryData,
-} from './types';
+} from '../types';
 
 export class InventoryForecastingCoreService {
   private facilityId: string;
@@ -34,14 +34,20 @@ export class InventoryForecastingCoreService {
       const processingTime = Date.now() - startTime;
 
       return {
-        itemId,
-        period,
-        forecast,
-        confidence: this.calculateConfidence(data, forecast),
-        processingTime,
-        timestamp: new Date(),
-        facilityId: this.facilityId,
-      };
+        inventory_item_id: itemId,
+        forecast_period: period as 'week' | 'month' | 'quarter' | 'year',
+        forecast_date: new Date().toISOString(),
+        predicted_demand: forecast.predicted_demand,
+        confidence_interval_lower: forecast.confidence_interval_lower,
+        confidence_interval_upper: forecast.confidence_interval_upper,
+        seasonal_factors: forecast.seasonal_factors,
+        trend_analysis: forecast.trend_analysis,
+        influencing_factors: forecast.influencing_factors,
+        confidence_score: this.calculateConfidence(data, forecast),
+        model_id: 'default',
+        processing_time_ms: processingTime,
+        facility_id: this.facilityId,
+      } as any;
     } catch (error) {
       console.error('Error generating demand forecast:', error);
       throw new Error(
@@ -67,10 +73,15 @@ export class InventoryForecastingCoreService {
     // Implementation for AI forecasting
     // This would typically call an AI service
     return {
-      predictedDemand: 0,
-      trend: 'stable',
-      seasonality: 'none',
-      accuracy: 0.8,
+      predicted_demand: 0,
+      confidence_interval_lower: 0,
+      confidence_interval_upper: 0,
+      seasonal_factors: {},
+      trend_analysis: 'stable',
+      influencing_factors: [],
+      confidence_score: 0.8,
+      accuracy_metrics: {},
+      recommendations: [],
     };
   }
 
@@ -80,6 +91,6 @@ export class InventoryForecastingCoreService {
     forecast: AIForecastResult
   ): number {
     // Implementation for confidence calculation
-    return Math.min(0.95, Math.max(0.1, forecast.accuracy));
+    return Math.min(0.95, Math.max(0.1, forecast.confidence_score || 0.8));
   }
 }

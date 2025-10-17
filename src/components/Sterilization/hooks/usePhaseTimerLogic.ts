@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { SterilizationPhase } from '@/store/sterilizationStore';
-import { SterilizationCycle } from '@/store/slices/types/sterilizationCycleTypes';
+import { SterilizationCycle } from '@/store/sterilizationStore';
 import {
   PhaseTimerService,
   PhaseStatusInfo,
@@ -8,7 +8,7 @@ import {
 } from '../services/phaseTimerService';
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabaseClient';
-import { useComplianceSettingsStore } from '@/store/slices/complianceSettingsSlice';
+import { useComplianceSettingsStore } from '@/store/hooks/useComplianceSettingsStore';
 
 // Helper function to get current facility ID
 async function getCurrentFacilityId(): Promise<string> {

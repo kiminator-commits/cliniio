@@ -3,13 +3,13 @@
  * Extracted from InventoryServiceFacade for better maintainability
  */
 
-import { LocalInventoryItem } from '../../types/inventoryTypes';
+import { LocalInventoryItem } from '../../../types/inventoryTypes';
 import {
   InventoryBulkResponse,
-  _OperationResult,
-} from '../../types/inventoryServiceTypes';
-import { InventoryRepository } from './facade/repository';
-import { InventoryAdapterManager } from './facade/adapters';
+  OperationResult,
+} from '../../../types/inventoryServiceTypes';
+import { InventoryRepository } from '../facade/repository';
+import { InventoryAdapterManager } from '../facade/adapters';
 import { AnalyticsTrackingService } from '../../shared/analyticsTrackingService';
 import { performanceMonitor } from '../../monitoring/PerformanceMonitor';
 
@@ -37,7 +37,7 @@ export class InventoryBulkService {
 
       const duration = performance.now() - startTime;
       performanceMonitor.recordResponseTime('inventory_bulk_create', duration, {
-        itemCount: items.length,
+        itemCount: items.length.toString(),
       });
 
       return result;
@@ -69,7 +69,7 @@ export class InventoryBulkService {
 
       const duration = performance.now() - startTime;
       performanceMonitor.recordResponseTime('inventory_bulk_update', duration, {
-        updateCount: updates.length,
+        updateCount: updates.length.toString(),
       });
 
       return result;
@@ -99,7 +99,7 @@ export class InventoryBulkService {
 
       const duration = performance.now() - startTime;
       performanceMonitor.recordResponseTime('inventory_bulk_delete', duration, {
-        itemCount: ids.length,
+        itemCount: ids.length.toString(),
       });
 
       return result;

@@ -3,6 +3,7 @@ import {
   getCurrentTraceabilityCode,
   isValidTraceabilityCode,
 } from '../../src/utils/generateTraceabilityCode';
+import { describe, test, expect } from 'vitest';
 
 describe('Traceability Code Generation', () => {
   test('should generate a valid traceability code format', () => {

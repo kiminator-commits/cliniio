@@ -3,7 +3,8 @@ import {
   ExportTemplate,
 } from './inventoryExportTemplateService';
 import { InventoryExportService } from './inventoryExportService';
-import { InventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+import { InventoryItem } from '@/types/inventoryTypes';
 
 export interface ScheduledExportResult {
   id: string;
@@ -240,11 +241,11 @@ export class InventoryScheduledExportService {
       }
 
       // Get all items
-      const allItems = await InventoryServiceFacade.getAllItems();
+      const allItems = await inventoryServiceFacade.getAllItems();
 
       // Apply template
       const filteredItems = InventoryExportTemplateService.applyTemplate(
-        allItems,
+        allItems as unknown as InventoryItem[],
         template
       );
 
@@ -252,7 +253,7 @@ export class InventoryScheduledExportService {
       // exportOptions variable removed as it's not used
 
       const exportResult = await InventoryExportService.exportWithTemplate(
-        allItems,
+        allItems as unknown as InventoryItem[],
         template
       );
 

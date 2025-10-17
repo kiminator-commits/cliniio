@@ -1,6 +1,8 @@
 // Enhanced Supabase Integration Tests - Queries and Filtering
 // Focused on queries, selects, and filtering logic
 
+import { vi, describe, test, expect } from 'vitest';
+
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
@@ -138,7 +140,7 @@ describe('Enhanced Supabase Integration Tests - Queries and Filtering', () => {
 
   describe('Inventory Service - Query Operations', () => {
     test('should handle large dataset pagination', async () => {
-      // Mock the repository's fetchAllInventoryData method
+      // Mock the repository's getAllItems method
       const mockData = {
         tools: testLargeDataset.slice(0, 12),
         supplies: testLargeDataset.slice(12, 25),
@@ -150,7 +152,15 @@ describe('Enhanced Supabase Integration Tests - Queries and Filtering', () => {
       // Get the repository instance and mock its method
       const facade = inventoryServiceFacade as any;
       const repository = facade.repository;
-      vi.spyOn(repository, 'fetchAllInventoryData').mockResolvedValue(mockData);
+      
+      // Mock getAllItems to return the combined data as an array
+      const allItems = [
+        ...mockData.tools,
+        ...mockData.supplies,
+        ...mockData.equipment,
+        ...mockData.officeHardware,
+      ];
+      vi.spyOn(repository, 'getAllItems').mockResolvedValue(allItems);
 
       const result = await inventoryServiceFacade.getAllItems();
 
@@ -175,7 +185,7 @@ describe('Enhanced Supabase Integration Tests - Queries and Filtering', () => {
       // Get the repository instance and mock its method
       const facade = inventoryServiceFacade as any;
       const repository = facade.repository;
-      vi.spyOn(repository, 'fetchAllInventoryData').mockResolvedValue(mockData);
+      vi.spyOn(repository, 'getAllItems').mockResolvedValue([]);
 
       const result = await inventoryServiceFacade.getAllItems();
 
@@ -249,7 +259,7 @@ describe('Enhanced Supabase Integration Tests - Queries and Filtering', () => {
     });
 
     test('should handle memory-efficient data processing', async () => {
-      // Mock the repository's fetchAllInventoryData method
+      // Mock the repository's getAllItems method
       const mockData = {
         tools: testLargeDataset.slice(0, 25),
         supplies: testLargeDataset.slice(25, 50),
@@ -261,7 +271,15 @@ describe('Enhanced Supabase Integration Tests - Queries and Filtering', () => {
       // Get the repository instance and mock its method
       const facade = inventoryServiceFacade as any;
       const repository = facade.repository;
-      vi.spyOn(repository, 'fetchAllInventoryData').mockResolvedValue(mockData);
+      
+      // Mock getAllItems to return the combined data as an array
+      const allItems = [
+        ...mockData.tools,
+        ...mockData.supplies,
+        ...mockData.equipment,
+        ...mockData.officeHardware,
+      ];
+      vi.spyOn(repository, 'getAllItems').mockResolvedValue(allItems);
 
       const result = await inventoryServiceFacade.getAllItems();
 

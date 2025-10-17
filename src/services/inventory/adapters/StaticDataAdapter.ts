@@ -1,5 +1,5 @@
-import { InventoryItem } from '../../../types/inventoryTypes';
-import { InventoryResponse } from '../InventoryServiceFacade';
+import { InventoryItem } from '../types/supabaseTypes';
+import { InventoryResponse } from '../types/inventoryServiceTypes';
 import {
   BaseInventoryDataAdapter,
   DataSourceConfig,
@@ -45,7 +45,7 @@ export class StaticDataAdapter extends BaseInventoryDataAdapter {
   async fetchAllInventoryData(): Promise<InventoryResponse> {
     if (isDevelopment() || !isBrowser()) {
       return {
-        data: this.getMockInventoryItems(),
+        data: this.getMockInventoryItems() as any,
         error: null,
         count: this.getMockInventoryItems().length,
       };
@@ -137,7 +137,6 @@ export class StaticDataAdapter extends BaseInventoryDataAdapter {
         facility_id: 'mock-facility',
         name: 'Surgical Scissors',
         category: 'Surgical Instruments',
-        location: 'Operating Room 1',
         status: 'Available',
         quantity: 5,
         unit_cost: 150.0,
@@ -148,13 +147,17 @@ export class StaticDataAdapter extends BaseInventoryDataAdapter {
         data: {
           lastUpdated: new Date().toISOString(),
         },
+        reorder_level: 2,
+        archived: false,
+        archived_at: null,
+        archived_by: null,
+        archive_reason: null,
       },
       {
         id: 'mock-2',
         facility_id: 'mock-facility',
         name: 'Stethoscope',
         category: 'Diagnostic Equipment',
-        location: 'Exam Room 2',
         status: 'Available',
         quantity: 3,
         unit_cost: 75.0,
@@ -165,13 +168,17 @@ export class StaticDataAdapter extends BaseInventoryDataAdapter {
         data: {
           lastUpdated: new Date().toISOString(),
         },
+        reorder_level: 1,
+        archived: false,
+        archived_at: null,
+        archived_by: null,
+        archive_reason: null,
       },
       {
         id: 'mock-3',
         facility_id: 'mock-facility',
         name: 'Blood Pressure Cuff',
         category: 'Diagnostic Equipment',
-        location: 'Exam Room 1',
         status: 'In Use',
         quantity: 2,
         unit_cost: 45.0,
@@ -182,6 +189,11 @@ export class StaticDataAdapter extends BaseInventoryDataAdapter {
         data: {
           lastUpdated: new Date().toISOString(),
         },
+        reorder_level: 1,
+        archived: false,
+        archived_at: null,
+        archived_by: null,
+        archive_reason: null,
       },
     ];
   }

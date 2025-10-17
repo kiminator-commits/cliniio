@@ -5,12 +5,21 @@ import { useCourseViewerData } from '@/features/learning/hooks/useCourseViewerDa
 import { CourseService } from '@/features/learning/services/CourseService';
 import { supabase } from '@/lib/supabaseClient';
 import {
-  CourseHeader,
-  ProgressBar,
-  ModuleTree,
-  ActionBar,
-  ContentRenderer,
+  CourseHeader as _CourseHeader,
+  ProgressBar as _ProgressBar,
+  ModuleTree as _ModuleTree,
+  ActionBar as _ActionBar,
+  ContentRenderer as _ContentRenderer,
 } from '@/features/learning/shared';
+
+interface Lesson {
+  id: string;
+  title: string;
+  content: string | { body?: string };
+  duration: number;
+  isCompleted: boolean;
+  estimated_duration?: number;
+}
 
 export default function CourseViewer() {
   const { courseId } = useParams();
@@ -75,8 +84,8 @@ export default function CourseViewer() {
     if (!course || !progress) return;
     console.log('✅ CourseViewer hydrated:', {
       courseTitle: course.title,
-      moduleCount: course.knowledge_hub_modules?.length ?? 0,
-      progressPercent: progress.percentage ?? 0,
+      moduleCount: course.lessons?.length ?? 0,
+      progressPercent: progress.progressPercent ?? 0,
     });
   }, [course, progress]);
 
@@ -85,9 +94,8 @@ export default function CourseViewer() {
   if (!course) return <div className="p-6">No course found.</div>;
 
   const activeLesson =
-    course.knowledge_hub_modules
-      ?.flatMap((m: any) => m.knowledge_hub_lessons)
-      ?.find((l: any) => l.id === activeLessonId) || null;
+    course.lessons
+      ?.find((l: Lesson) => l.id === activeLessonId) || null;
 
   const toggleModule = (moduleId: string) =>
     setOpenModules((prev) => ({ ...prev, [moduleId]: !prev[moduleId] }));
@@ -253,13 +261,13 @@ export default function CourseViewer() {
             </div>
 
             <nav className="space-y-3">
-              {course.knowledge_hub_modules?.map((module: any) => (
+              {course.lessons?.map((lesson: Lesson) => (
                 <div
-                  key={module.id}
+                  key={lesson.id}
                   className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
                 >
                   <button
-                    onClick={() => toggleModule(module.id)}
+                    onClick={() => toggleModule(lesson.id)}
                     className="w-full text-left p-4 hover:bg-slate-50 transition-colors duration-200 flex justify-between items-center"
                   >
                     <div className="flex items-center gap-3">
@@ -280,39 +288,36 @@ export default function CourseViewer() {
                       </div>
                       <div>
                         <span className="font-semibold text-slate-900">
-                          {module.title}
+                          {lesson.title}
                         </span>
                         <p className="text-xs text-slate-500">
-                          {module.knowledge_hub_lessons?.length || 0} lessons
+                          1 lesson
                         </p>
                       </div>
                     </div>
                     <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
                       <span className="text-slate-600 text-sm font-medium">
-                        {openModules[module.id] ? '−' : '+'}
+                        {openModules[lesson.id] ? '−' : '+'}
                       </span>
                     </div>
                   </button>
 
-                  {openModules[module.id] && (
-                    <div className="border-t border-slate-100 bg-slate-50/50">
-                      <div className="p-2 space-y-1">
-                        {module.knowledge_hub_lessons?.map((lesson: any) => {
-                          const isCompleted =
-                            progress.completedLessons > 0 &&
-                            lesson.id === activeLessonId;
-                          const isActive = lesson.id === activeLessonId;
-                          return (
-                            <button
-                              key={lesson.id}
-                              onClick={() => setActiveLessonId(lesson.id)}
-                              className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
-                                isActive
-                                  ? 'bg-teal/10 border border-teal/20 shadow-sm'
-                                  : isCompleted
-                                    ? 'bg-green-50 hover:bg-green-100 border border-green-200'
-                                    : 'hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200'
-                              }`}
+                  <div className="border-t border-slate-100 bg-slate-50/50">
+                    <div className="p-2 space-y-1">
+                      {(() => {
+                        const isCompleted = lesson.isCompleted;
+                        const isActive = lesson.id === activeLessonId;
+                        return (
+                          <button
+                            key={lesson.id}
+                            onClick={() => setActiveLessonId(lesson.id)}
+                            className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
+                              isActive
+                                ? 'bg-teal/10 border border-teal/20 shadow-sm'
+                                : isCompleted
+                                  ? 'bg-green-50 hover:bg-green-100 border border-green-200'
+                                  : 'hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200'
+                            }`}
                             >
                               <div className="flex items-center gap-3">
                                 <div
@@ -384,11 +389,10 @@ export default function CourseViewer() {
                               )}
                             </button>
                           );
-                        })}
+                        })()}
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
               ))}
             </nav>
           </div>
@@ -419,9 +423,9 @@ export default function CourseViewer() {
                     <h2 className="text-3xl font-bold text-slate-900">
                       {activeLesson.title}
                     </h2>
-                    {activeLesson.estimated_duration && (
+                    {activeLesson.duration && (
                       <p className="text-sm text-slate-600 mt-1">
-                        Estimated time: {activeLesson.estimated_duration}{' '}
+                        Estimated time: {activeLesson.duration}{' '}
                         minutes
                       </p>
                     )}
@@ -432,10 +436,10 @@ export default function CourseViewer() {
               <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="p-8">
                   <article className="prose prose-slate max-w-none">
-                    {activeLesson.content?.body ? (
+                    {activeLesson.content && typeof activeLesson.content === 'string' ? (
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: activeLesson.content.body,
+                          __html: activeLesson.content,
                         }}
                       />
                     ) : (

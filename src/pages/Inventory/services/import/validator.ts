@@ -35,7 +35,7 @@ export class ImportValidator {
       const itemWarnings: string[] = [];
 
       // Required field validation
-      if (!item.itemName || item.itemName.trim() === '') {
+      if (!item.name || item.name.trim() === '') {
         itemErrors.push('Item name is required');
       }
 
@@ -56,46 +56,37 @@ export class ImportValidator {
       }
 
       if (
-        item.unitCost !== undefined &&
-        (isNaN(item.unitCost) || item.unitCost < 0)
+        item.unit_cost !== undefined &&
+        (isNaN(item.unit_cost) || item.unit_cost < 0)
       ) {
         itemErrors.push('Unit cost must be a positive number');
       }
 
       if (
-        item.minimumQuantity !== undefined &&
-        (isNaN(item.minimumQuantity) || item.minimumQuantity < 0)
+        item.reorder_point !== undefined &&
+        (isNaN(item.reorder_point) || item.reorder_point < 0)
       ) {
-        itemErrors.push('Minimum quantity must be a positive number');
-      }
-
-      if (
-        item.maximumQuantity !== undefined &&
-        (isNaN(item.maximumQuantity) || item.maximumQuantity < 0)
-      ) {
-        itemErrors.push('Maximum quantity must be a positive number');
+        itemErrors.push('Reorder point must be a positive number');
       }
 
       // Range validation
       if (
-        item.minimumQuantity !== undefined &&
-        item.maximumQuantity !== undefined
+        item.quantity !== undefined &&
+        item.reorder_point !== undefined
       ) {
-        if (item.minimumQuantity > item.maximumQuantity) {
-          itemErrors.push(
-            'Minimum quantity cannot be greater than maximum quantity'
-          );
+        if (item.quantity < item.reorder_point) {
+          itemWarnings.push('Quantity is below reorder point');
         }
       }
 
       // Warning checks
-      if (item.quantity !== undefined && item.minimumQuantity !== undefined) {
-        if (item.quantity < item.minimumQuantity) {
-          itemWarnings.push('Quantity is below minimum threshold');
+      if (item.quantity !== undefined && item.reorder_point !== undefined) {
+        if (item.quantity < item.reorder_point) {
+          itemWarnings.push('Quantity is below reorder point');
         }
       }
 
-      if (item.itemName && item.itemName.length > 100) {
+      if (item.name && item.name.length > 100) {
         itemWarnings.push('Item name is very long');
       }
 
@@ -103,7 +94,7 @@ export class ImportValidator {
         invalidItems.push({ item, errors: itemErrors });
         errors.push(
           ...itemErrors.map(
-            (err) => `${item.itemName || 'Unknown item'}: ${err}`
+            (err) => `${item.name || 'Unknown item'}: ${err}`
           )
         );
       } else {
@@ -112,7 +103,7 @@ export class ImportValidator {
 
       warnings.push(
         ...itemWarnings.map(
-          (warn) => `${item.itemName || 'Unknown item'}: ${warn}`
+          (warn) => `${item.name || 'Unknown item'}: ${warn}`
         )
       );
     }
@@ -154,11 +145,11 @@ export class ImportValidator {
     }
 
     // Check by name and location
-    if (item.itemName && item.location) {
+    if (item.name && item.location) {
       const duplicateByNameAndLocation = existingItems.find(
         (existing) =>
-          existing.itemName.toLowerCase() === item.itemName!.toLowerCase() &&
-          existing.location.toLowerCase() === item.location!.toLowerCase()
+          existing.name?.toLowerCase() === item.name!.toLowerCase() &&
+          existing.location?.toLowerCase() === item.location!.toLowerCase()
       );
       if (duplicateByNameAndLocation) {
         return duplicateByNameAndLocation;

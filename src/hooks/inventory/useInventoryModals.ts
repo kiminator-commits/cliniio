@@ -70,28 +70,76 @@ export const useInventoryModals = () => {
       console.log(`💰 Cost parsing: "${formData.unitCost}" -> ${parsedCost}`);
 
       const itemToSave: Omit<InventoryItem, 'id' | 'lastUpdated'> = {
-        name: formData.itemName || null,
-        category: formData.category || null,
-        location: formData.location || undefined,
-        status: formData.status || undefined,
+        name: formData.itemName || '',
+        category: formData.category || '',
+        location: formData.location || '',
+        status: formData.status || 'Active',
         quantity: formData.quantity || 1,
         unit_cost: parsedCost,
         facility_id: 'unknown',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        reorder_point: null,
-        expiration_date: null,
+        reorder_point: (typeof formData.reorder_point === 'number' ? formData.reorder_point : 0) || 0,
+        expiration_date: (typeof formData.expiry_date === 'string' ? formData.expiry_date : '') || '',
+        supplier: (typeof formData.supplier === 'string' ? formData.supplier : '') || '',
+        cost: parsedCost,
+        vendor: (typeof formData.supplier === 'string' ? formData.supplier : '') || '',
+        warranty: (typeof formData.warranty === 'string' ? formData.warranty : '') || '',
+        maintenance_schedule: '',
+        next_due: '',
+        service_provider: '',
+        assigned_to: '',
+        notes: formData.notes || '',
+        tool_id: '',
+        supply_id: '',
+        equipment_id: '',
+        hardware_id: '',
+        p2_status: '',
+        serial_number: (typeof formData.serialNumber === 'string' ? formData.serialNumber : '') || '',
+        manufacturer: (typeof formData.manufacturer === 'string' ? formData.manufacturer : '') || '',
+        image_url: '',
+        tags: [],
+        favorite: false,
+        tracked: true,
+        barcode: formData.barcode || '',
+        sku: formData.sku || '',
+        description: formData.description || '',
+        current_phase: 'Active',
+        is_active: true,
+        unit: '',
+        expiration: (typeof formData.expiry_date === 'string' ? formData.expiry_date : '') || '',
+        purchase_date: (typeof formData.purchaseDate === 'string' ? formData.purchaseDate : '') || '',
+        last_serviced: '',
+        last_updated: new Date().toISOString(),
         data: {
-          warranty: formData.warranty || null,
-          notes: formData.notes || null,
-          purchaseDate: formData.purchaseDate || null,
-          supplier: formData.supplier || null,
-          manufacturer: formData.manufacturer || null,
-          expiry_date: formData.expiry_date || null,
-          assetTag: formData.assetTag || null,
-          brand: formData.brand || null,
-          model: formData.model || null,
-          serialNumber: formData.serialNumber || null,
+          warranty: formData.warranty || '',
+          notes: formData.notes || '',
+          purchaseDate: formData.purchaseDate || '',
+          supplier: formData.supplier || '',
+          manufacturer: formData.manufacturer || '',
+          expiry_date: formData.expiry_date || '',
+          assetTag: formData.assetTag || '',
+          brand: formData.brand || '',
+          model: formData.model || '',
+          serialNumber: formData.serialNumber || '',
+          barcode: formData.barcode || '',
+          sku: formData.sku || '',
+          description: formData.description || '',
+          tags: [],
+          imageUrl: '',
+          isActive: true,
+          tracked: true,
+          favorite: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          currentPhase: 'Active',
+          p2Status: '',
+          toolId: '',
+          supplyId: '',
+          equipmentId: '',
+          hardwareId: '',
+          serviceProvider: '',
+          assignedTo: '',
         } as Json,
       };
 
@@ -163,6 +211,14 @@ export const useInventoryModals = () => {
               unitCost: item.unit_cost || 0,
               minimumQuantity: 0,
               maximumQuantity: 1000,
+              warranty: (item.data as { warranty?: string })?.warranty || '',
+              purchaseDate: (item.data as { purchaseDate?: string })?.purchaseDate || '',
+              expiry_date: (item.data as { expiry_date?: string })?.expiry_date || '',
+              assetTag: (item.data as { assetTag?: string })?.assetTag || '',
+              brand: (item.data as { brand?: string })?.brand || '',
+              model: (item.data as { model?: string })?.model || '',
+              serialNumber: (item.data as { serialNumber?: string })?.serialNumber || '',
+              manufacturer: item.manufacturer || '',
             });
             const updatedFormData = convertItemToFormData(updateResponse.data);
             modalState.setFormData(updatedFormData);
@@ -174,7 +230,7 @@ export const useInventoryModals = () => {
         // Add new item
         console.log('➕ Creating new item...');
         const createResponse =
-          await inventoryServiceFacade.createItem(itemToSave);
+          await inventoryServiceFacade.createItem(itemToSave as InventoryItem);
         console.log('✅ Create response:', createResponse);
 
         // Check for errors
@@ -268,6 +324,14 @@ export const useInventoryModals = () => {
         unitCost: item.unit_cost || 0,
         minimumQuantity: 0,
         maximumQuantity: 1000,
+        warranty: (item.data as { warranty?: string })?.warranty || '',
+        purchaseDate: (item.data as { purchaseDate?: string })?.purchaseDate || '',
+        expiry_date: (item.data as { expiry_date?: string })?.expiry_date || '',
+        assetTag: (item.data as { assetTag?: string })?.assetTag || '',
+        brand: (item.data as { brand?: string })?.brand || '',
+        model: (item.data as { model?: string })?.model || '',
+        serialNumber: (item.data as { serialNumber?: string })?.serialNumber || '',
+        manufacturer: item.manufacturer || '',
       });
       const formData = convertItemToFormData(item);
       modalState.openEditModal(formData);
@@ -286,6 +350,41 @@ export const useInventoryModals = () => {
       console.log('🔄 Cloning item:', item);
 
       // Convert item to form data
+      const convertItemToFormData = (
+        item: InventoryItem
+      ): InventoryFormData => ({
+        itemName: item.name || item.item || '',
+        category: item.category || '',
+        id: item.id || '',
+        location: item.location || '',
+        createdAt:
+          (item.data as { purchaseDate?: string })?.purchaseDate ||
+          new Date().toISOString(),
+        supplier: item.supplier || '',
+        unit_cost: item.unit_cost || 0,
+        notes: (item.data as { notes?: string })?.notes || '',
+        updated_at:
+          (item.data as { lastServiced?: string })?.lastServiced ||
+          new Date().toISOString(),
+        status: item.status || '',
+        quantity: item.quantity || 1,
+        reorder_point: item.reorder_point || 0,
+        barcode: (item.data as { barcode?: string })?.barcode || '',
+        sku: (item.data as { sku?: string })?.sku || '',
+        description:
+          (item.data as { description?: string })?.description || '',
+        unitCost: item.unit_cost || 0,
+        minimumQuantity: 0,
+        maximumQuantity: 1000,
+        warranty: (item.data as { warranty?: string })?.warranty || '',
+        purchaseDate: (item.data as { purchaseDate?: string })?.purchaseDate || '',
+        expiry_date: (item.data as { expiry_date?: string })?.expiry_date || '',
+        assetTag: (item.data as { assetTag?: string })?.assetTag || '',
+        brand: (item.data as { brand?: string })?.brand || '',
+        model: (item.data as { model?: string })?.model || '',
+        serialNumber: (item.data as { serialNumber?: string })?.serialNumber || '',
+        manufacturer: item.manufacturer || '',
+      });
       const clonedFormData = convertItemToFormData(item);
 
       // Clear unique identifiers to avoid conflicts
@@ -302,7 +401,6 @@ export const useInventoryModals = () => {
 
       // Set the cloned data and open add modal
       modalState.setFormData(cleanedFormData);
-      modalState.setEditMode(false);
       modalState.openAddModal();
     },
     [modalState]
@@ -329,8 +427,6 @@ export const useInventoryModals = () => {
     // Close current modal and open new one with cloned data
     modalState.closeAddModal();
     modalState.setFormData(clonedFormData);
-    modalState.setEditMode(false);
-    modalState.setIsCloned(true); // Mark as cloned
     modalState.openAddModal();
   }, [modalState]);
 

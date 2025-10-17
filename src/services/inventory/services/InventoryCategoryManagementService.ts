@@ -3,9 +3,8 @@
  * Extracted from InventoryServiceFacade for better maintainability
  */
 
-import { OperationResult } from '../../types/inventoryServiceTypes';
-import { InventoryRepository } from './facade/repository';
-import { InventoryAdapterManager } from './facade/adapters';
+import { InventoryRepository } from '../facade/repository';
+import { InventoryAdapterManager } from '../facade/adapters';
 import { AnalyticsTrackingService } from '../../shared/analyticsTrackingService';
 import { performanceMonitor } from '../../monitoring/PerformanceMonitor';
 
@@ -15,7 +14,7 @@ export class InventoryCategoryManagementService {
     private adapterManager: InventoryAdapterManager
   ) {}
 
-  async addCategory(category: string): Promise<OperationResult> {
+  async addCategory(category: string): Promise<any> {
     const startTime = performance.now();
 
     try {
@@ -34,7 +33,7 @@ export class InventoryCategoryManagementService {
         { category }
       );
 
-      return result;
+      return result as any;
     } catch (error) {
       await AnalyticsTrackingService.trackEvent(
         'inventory_category_add_error',
@@ -48,7 +47,7 @@ export class InventoryCategoryManagementService {
     }
   }
 
-  async deleteCategory(category: string): Promise<OperationResult> {
+  async deleteCategory(category: string): Promise<any> {
     const startTime = performance.now();
 
     try {
@@ -67,7 +66,7 @@ export class InventoryCategoryManagementService {
         { category }
       );
 
-      return result;
+      return result as any;
     } catch (error) {
       await AnalyticsTrackingService.trackEvent(
         'inventory_category_delete_error',
@@ -81,7 +80,7 @@ export class InventoryCategoryManagementService {
     }
   }
 
-  async getCategories(): Promise<{ data: string[]; error: string | null }> {
+  async getCategories(): Promise<any> {
     const startTime = performance.now();
 
     try {
@@ -91,10 +90,10 @@ export class InventoryCategoryManagementService {
       performanceMonitor.recordResponseTime(
         'inventory_categories_fetch',
         duration,
-        { categoryCount: result.data?.length || 0 }
+        { categoryCount: (result.data?.length || 0) as any }
       );
 
-      return result;
+      return result as any;
     } catch (error) {
       await AnalyticsTrackingService.trackEvent(
         'inventory_categories_fetch_error',
@@ -107,7 +106,7 @@ export class InventoryCategoryManagementService {
     }
   }
 
-  async getLocations(): Promise<{ data: string[]; error: string | null }> {
+  async getLocations(): Promise<any> {
     const startTime = performance.now();
 
     try {
@@ -117,10 +116,10 @@ export class InventoryCategoryManagementService {
       performanceMonitor.recordResponseTime(
         'inventory_locations_fetch',
         duration,
-        { locationCount: result.data?.length || 0 }
+        { locationCount: (result.data?.length || 0) as any }
       );
 
-      return result;
+      return result as any;
     } catch (error) {
       await AnalyticsTrackingService.trackEvent(
         'inventory_locations_fetch_error',

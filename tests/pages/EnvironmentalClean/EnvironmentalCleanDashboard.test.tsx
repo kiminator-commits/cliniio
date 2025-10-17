@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import EnvironmentalCleanDashboard from '@/pages/EnvironmentalClean/components/EnvironmentalCleanDashboard';
 import { EnvironmentalCleanProvider } from '@/pages/EnvironmentalClean/providers/EnvironmentalCleanProvider';

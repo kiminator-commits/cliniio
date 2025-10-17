@@ -38,7 +38,7 @@ class PerformanceMetricsCache {
       );
       const { FacilityService } = await import('../services/facilityService');
 
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       if (!facilityId) {
         logger.debug('PerformanceMetricsCache: No facility ID, skipping cache');
@@ -129,9 +129,9 @@ class PerformanceMetricsCache {
   /**
    * Get cached metrics if available and not expired
    */
-  getCachedMetrics(): CachedPerformanceMetrics | null {
+  async getCachedMetrics(): Promise<CachedPerformanceMetrics | null> {
     // Check memory cache first
-    if (this.cache && this.isCacheValid(this.cache)) {
+    if (this.cache && await this.isCacheValid(this.cache)) {
       return this.cache;
     }
 
@@ -140,7 +140,7 @@ class PerformanceMetricsCache {
       const stored = localStorage.getItem('performanceMetricsCache');
       if (stored) {
         const cached: CachedPerformanceMetrics = JSON.parse(stored);
-        if (this.isCacheValid(cached)) {
+        if (await this.isCacheValid(cached)) {
           this.cache = cached; // Restore to memory cache
           return cached;
         }
@@ -172,7 +172,7 @@ class PerformanceMetricsCache {
   /**
    * Check if cached metrics are still valid
    */
-  private isCacheValid(cached: CachedPerformanceMetrics): boolean {
+  private async isCacheValid(cached: CachedPerformanceMetrics): Promise<boolean> {
     const now = Date.now();
     const age = now - cached.timestamp;
 
@@ -184,14 +184,13 @@ class PerformanceMetricsCache {
 
     // Verify facility ID matches current facility
     try {
-      FacilityService.getCurrentUserAndFacility().then(({ facilityId }) => {
-        if (facilityId !== cached.facilityId) {
-          logger.debug(
-            'PerformanceMetricsCache: Facility changed, cache invalid'
-          );
-          return false;
-        }
-      });
+      const facilityId = await FacilityService.getCurrentFacilityId();
+      if (facilityId !== cached.facilityId) {
+        logger.debug(
+          'PerformanceMetricsCache: Facility changed, cache invalid'
+        );
+        return false;
+      }
     } catch {
       // If we can't verify facility, assume valid for now
     }
@@ -211,8 +210,8 @@ class PerformanceMetricsCache {
   /**
    * Get cache status for debugging
    */
-  getCacheStatus(): { hasCache: boolean; age?: number; facilityId?: string } {
-    const cached = this.getCachedMetrics();
+  async getCacheStatus(): Promise<{ hasCache: boolean; age?: number; facilityId?: string }> {
+    const cached = await this.getCachedMetrics();
     if (cached) {
       return {
         hasCache: true,

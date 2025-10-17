@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import useHomePage from '../../src/hooks/useHomePage';
 
 // Mock the dependencies

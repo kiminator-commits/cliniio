@@ -116,7 +116,7 @@ export class HomeDataUserProvider {
           };
           return this.cachedUser;
         } catch (error) {
-          lastError = error;
+          lastError = error as Error;
 
           if (attempt < maxRetries - 1) {
             const delay = Math.pow(2, attempt) * 500;

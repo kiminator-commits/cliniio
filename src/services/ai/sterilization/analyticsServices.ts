@@ -236,6 +236,9 @@ export class AnalyticsServices {
           },
           created_at: new Date().toISOString(),
           facility_id: this.facilityId,
+          severity: 'medium',
+          category: 'efficiency',
+          timestamp: new Date().toISOString(),
         };
       }
       return null;
@@ -277,6 +280,9 @@ export class AnalyticsServices {
           },
           created_at: new Date().toISOString(),
           facility_id: this.facilityId,
+          severity: 'high',
+          category: 'maintenance',
+          timestamp: new Date().toISOString(),
         };
       }
       return null;

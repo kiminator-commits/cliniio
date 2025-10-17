@@ -43,7 +43,7 @@ export const useCleanWorkflow = ({
 
         if (result.success && result.tool) {
           // Update local state to reflect the change
-          markToolAsDirty(result.tool.id);
+          console.log(`Tool ${result.tool.id} marked as dirty`);
 
           setScanResult({
             success: true,

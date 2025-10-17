@@ -22,6 +22,10 @@ const RoomStatusSummary: React.FC = () => {
   // Get dynamic status cards from store data
   const dynamicStatusCards = useStatusCards();
 
+  const toggleDrawer = (status: RoomStatusType) => {
+    setActiveDrawer(activeDrawer === status ? null : status);
+  };
+
   const { selectedIndex, handleKeyDown } = useListNavigation(
     dynamicStatusCards,
     (card) => toggleDrawer(card.status as RoomStatusType),
@@ -33,10 +37,6 @@ const RoomStatusSummary: React.FC = () => {
       const newStatus = statuses[0];
       updateRoomStatus(roomId, newStatus);
     }
-  };
-
-  const toggleDrawer = (status: RoomStatusType) => {
-    setActiveDrawer(activeDrawer === status ? null : status);
   };
 
   const handleUpdateStatus = (roomId: string) => {

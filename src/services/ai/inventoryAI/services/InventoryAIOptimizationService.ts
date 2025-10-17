@@ -17,16 +17,20 @@ export class InventoryAIOptimizationService {
     // This would integrate with AI optimization models
     // For now, return mock data
     return {
-      optimizationType: 'cost',
-      potentialSavings: 15000,
-      recommendations: [
+      current_cost: 100000,
+      optimized_cost: 85000,
+      cost_savings: 15000,
+      savings_percentage: 15,
+      optimization_factors: { supplier_consolidation: 0.4, inventory_turnover: 0.3, storage_efficiency: 0.3 },
+      recommended_actions: [
         'Consolidate suppliers for bulk discounts',
         'Implement just-in-time inventory',
         'Optimize storage layout',
       ],
-      implementationCost: 5000,
-      paybackPeriod: 6, // months
-      confidence: 0.88,
+      implementation_timeline: '6 months',
+      risk_assessment: 'low',
+      confidence_score: 0.88,
+      roi_estimate: 300,
     };
   }
 
@@ -35,20 +39,26 @@ export class InventoryAIOptimizationService {
     // This would integrate with AI categorization models
     // For now, return mock data
     return {
-      suggestedCategories: [
-        {
-          name: 'Surgical Instruments',
-          items: ['scissors', 'forceps', 'scalpels'],
-          confidence: 0.92,
-        },
-        {
-          name: 'Diagnostic Equipment',
-          items: ['stethoscope', 'thermometer', 'blood_pressure_cuff'],
-          confidence: 0.89,
-        },
+      suggested_category: 'Surgical Instruments',
+      suggested_subcategory: 'Cutting Tools',
+      category_confidence_score: 0.92,
+      alternative_categories: ['Medical Tools', 'Surgical Equipment'],
+      categorization_reasoning: [
+        'Items are sharp cutting instruments',
+        'Commonly used in surgical procedures',
+        'Similar material composition',
       ],
-      uncategorizedItems: ['misc_item_001', 'misc_item_002'],
-      overallAccuracy: 0.9,
+      form_fill_suggestions: {
+        category: 'Surgical Instruments',
+        subcategory: 'Cutting Tools',
+        material: 'Stainless Steel',
+      },
+      workflow_recommendations: [
+        'Store in sterile environment',
+        'Regular sharpening required',
+        'Handle with care',
+      ],
+      confidence_score: 0.92,
     };
   }
 

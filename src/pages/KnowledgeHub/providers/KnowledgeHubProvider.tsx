@@ -7,8 +7,8 @@ import React, {
   useCallback,
 } from 'react';
 import { getAllContentItems } from '../services/supabaseService';
-import { supabase as _supabase } from '@/lib/supabaseClient';
-import type { ContentItem } from '../types';
+import { supabase } from '@/lib/supabaseClient';
+import type { ContentItem, ContentStatus } from '../types';
 
 interface KnowledgeHubContextType {
   content: ContentItem[];
@@ -34,8 +34,6 @@ export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const { supabase } = knowledgeHubSupabaseService;
 
   const logAuditEvent = async (action: string, item: ContentItem) => {
     try {
@@ -103,10 +101,10 @@ export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateStatus = async (id: string, status: string) => {
-    await updateItem(id, { status });
+    await updateItem(id, { status: status as ContentStatus });
     const updatedItem = content.find((c) => c.id === id);
     if (updatedItem)
-      await logAuditEvent('status_update', { ...updatedItem, status });
+      await logAuditEvent('status_update', { ...updatedItem, status: status as ContentStatus });
   };
 
   // Apply category filtering
@@ -123,7 +121,7 @@ export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
   // Real-time Supabase subscriptions
   useEffect(() => {
     refresh(); // initial load
-    const channel = _supabase
+    const channel = supabase
       .channel('knowledge_hub_changes')
       .on(
         'postgres_changes',
@@ -136,7 +134,7 @@ export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
       .subscribe();
 
     return () => {
-      _supabase.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
   }, [refresh]);
 

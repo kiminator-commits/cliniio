@@ -38,7 +38,15 @@ import {
 } from '../../../types/inventoryActionTypes';
 import { ExportOptions } from './inventoryExportService';
 import { BulkOperationConfig } from './inventoryBulkProgressService';
-import { ImportOptions, ImportResult } from './inventoryImportService';
+import { ImportOptions, ImportResult as ImportResultType } from './import/types';
+
+interface ImportSuccessCallback {
+  (result: ImportResultType): void;
+}
+
+interface _ImportErrorCallback {
+  (error: string): void;
+}
 
 /**
  * Facade service for handling inventory action operations
@@ -102,10 +110,10 @@ export class InventoryActionService {
   static async handleBulkImport(
     file: File,
     importOptions?: ImportOptions,
-    onSuccess?: (result: ImportResult) => void,
+    onSuccess?: (result: ImportResultType) => void,
     onError?: (error: string) => void
-  ): Promise<ImportResult | null> {
-    return handleBulkImport(file, importOptions, onSuccess, onError);
+  ): Promise<ImportResultType | null> {
+    return handleBulkImport(file, importOptions, onSuccess as ImportSuccessCallback, onError);
   }
 
   /**

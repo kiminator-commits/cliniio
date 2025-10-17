@@ -40,7 +40,7 @@ async function runCourseServiceTest() {
     console.log('📊 Initial Progress:', initialProgress);
 
     // 5️⃣ Mark first lesson complete
-    const firstLessonId = course.modules?.[0]?.knowledge_hub_lessons?.[0]?.id;
+    const firstLessonId = course.knowledge_hub_modules?.[0]?.knowledge_hub_lessons?.[0]?.id;
     if (!firstLessonId) {
       console.error('❌ No lessons found in the first module.');
       return;

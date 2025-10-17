@@ -1,8 +1,9 @@
 // MOCKS MUST BE AT THE TOP - BEFORE ANY IMPORTS
+import { vi, describe, test, expect, type Mock } from 'vitest';
 vi.mock('@/lib/supabase', () => {
   const mockChannel: {
-    on: vi.Mock;
-    subscribe: vi.Mock;
+    on: Mock;
+    subscribe: Mock;
   } = {
     on: vi.fn(() => mockChannel),
     subscribe: vi.fn(() => mockChannel),
@@ -72,10 +73,19 @@ import { BIFailureResolutionModal } from '@/components/BIFailureResolution';
 let mockStore: {
   biFailureActive: boolean;
   biFailureDetails: {
-    date: Date;
-    affectedToolsCount: number;
-    affectedBatchIds: string[];
-    operator: string;
+    id: string;
+    facility_id: string;
+    incident_number: string;
+    failure_date: string;
+    affected_tools_count: number;
+    affected_batch_ids: string[];
+    detected_by_operator_id: string;
+    severity_level: string;
+    status: string;
+    regulatory_notification_required: boolean;
+    regulatory_notification_sent: boolean;
+    created_at: string;
+    updated_at: string;
   } | null;
   activateBIFailure: vi.Mock;
   deactivateBIFailure: vi.Mock;
@@ -132,10 +142,19 @@ describe('BI Failure Workflow Steps Tests', () => {
         ...mockStore,
         biFailureActive: true,
         biFailureDetails: {
-          date: new Date('2024-01-14'),
-          affectedToolsCount: 15,
-          affectedBatchIds: ['BATCH-001', 'BATCH-002'],
-          operator: 'Dr. Smith',
+          id: 'incident-123',
+          facility_id: 'facility-456',
+          incident_number: 'BI-FAIL-20240115-001',
+          failure_date: '2024-01-15T10:30:00Z',
+          affected_tools_count: 15,
+          affected_batch_ids: ['BATCH-001', 'BATCH-002'],
+          detected_by_operator_id: 'operator-123',
+          severity_level: 'high',
+          status: 'active',
+          regulatory_notification_required: false,
+          regulatory_notification_sent: false,
+          created_at: '2024-01-15T10:30:00Z',
+          updated_at: '2024-01-15T10:30:00Z',
         },
       };
       (useSterilizationStore as unknown as vi.Mock).mockReturnValue(
@@ -180,10 +199,18 @@ describe('BI Failure Workflow Steps Tests', () => {
         biFailureActive: true,
         biFailureDetails: {
           id: 'current-incident-id',
-          date: new Date('2024-01-15'),
-          affectedToolsCount: 10,
-          affectedBatchIds: ['BATCH-001'],
-          operator: 'Dr. Smith',
+          facility_id: 'facility-456',
+          incident_number: 'BI-FAIL-20240115-001',
+          failure_date: '2024-01-15T10:30:00Z',
+          affected_tools_count: 10,
+          affected_batch_ids: ['BATCH-001'],
+          detected_by_operator_id: 'Dr. Smith',
+          severity_level: 'high',
+          status: 'active',
+          regulatory_notification_required: false,
+          regulatory_notification_sent: false,
+          created_at: '2024-01-15T10:30:00Z',
+          updated_at: '2024-01-15T10:30:00Z',
         },
       });
 
@@ -238,10 +265,19 @@ describe('BI Failure Workflow Steps Tests', () => {
       const mockStore = {
         biFailureActive: true,
         biFailureDetails: {
-          date: new Date('2024-01-15'),
-          affectedToolsCount: 10,
-          affectedBatchIds: ['BATCH-001'],
-          operator: 'Dr. Johnson',
+          id: 'incident-456',
+          facility_id: 'facility-789',
+          incident_number: 'BI-FAIL-20240115-002',
+          failure_date: '2024-01-15T10:30:00Z',
+          affected_tools_count: 10,
+          affected_batch_ids: ['BATCH-001'],
+          detected_by_operator_id: 'Dr. Johnson',
+          severity_level: 'high',
+          status: 'active',
+          regulatory_notification_required: false,
+          regulatory_notification_sent: false,
+          created_at: '2024-01-15T10:30:00Z',
+          updated_at: '2024-01-15T10:30:00Z',
         },
         activateBIFailure: vi.fn(),
         deactivateBIFailure: vi.fn(),

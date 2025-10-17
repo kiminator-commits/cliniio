@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '../../../contexts/UserContext';
-import { SterilizationAISettings as SterilizationAISettingsType } from '../../../services/ai/sterilization/types';
-import { _Message } from '../../../types/sterilizationAISettingsTypes';
-import { isValidApiKeyValue } from '../utils/sterilizationAISettingsUtils';
+import { useUser } from '../../../../contexts/UserContext';
+import { SterilizationAISettings as _SterilizationAISettingsType } from '../../../../services/ai/sterilization/types';
+import { Message as _Message } from '../../../../types/sterilizationAISettingsTypes';
+import { isValidApiKeyValue } from '../../utils/sterilizationAISettingsUtils';
 import {
   fetchSettings,
   saveSettings as saveSettingsToStorage,
   STERILIZATION_AI_CONSTANTS,
   DEFAULT_SETTINGS,
-} from './sterilizationAI';
+} from '../sterilizationAI';
 import { SterilizationAISettingsState } from './types';
 
 export const useSterilizationAISettings = () => {
@@ -84,7 +84,7 @@ export const useSterilizationAISettings = () => {
   };
 
   const handleInputChange = (
-    field: keyof SterilizationAISettingsType,
+    field: string,
     value: string | number | boolean
   ) => {
     setState((prev) => ({

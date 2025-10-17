@@ -6,8 +6,8 @@ import { getEnvVar } from '../../../lib/getEnv';
  */
 export class SupabaseTransformer {
   static transformFromSupabase(
-    supabaseItem: Record<string, unknown>
-  ): InventoryItem {
+    supabaseItem: any
+  ): any {
     // Extract category from data JSONB field if it exists
     const data = (supabaseItem.data as Record<string, unknown>) || {};
     const category =

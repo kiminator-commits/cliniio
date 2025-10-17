@@ -1,5 +1,6 @@
 import { isTask } from '../../src/utils/validateTask';
 import { Task } from '../../src/store/homeStore';
+import { describe, test, expect, it } from 'vitest';
 
 describe('isTask', () => {
   it('returns true for a valid task', () => {

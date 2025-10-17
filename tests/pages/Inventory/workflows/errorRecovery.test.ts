@@ -5,6 +5,7 @@ import {
   mockUseInventoryDataManager,
   mockDataManager,
 } from '../__mocks__/inventoryTestMocks';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('Error Recovery and Resilience Workflow', () => {
   beforeEach(() => {

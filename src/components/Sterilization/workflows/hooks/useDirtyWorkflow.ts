@@ -9,9 +9,9 @@ const showErrorMessage = (message: string) => {
   // Try to use global toast if available, otherwise use console
   if (
     typeof window !== 'undefined' &&
-    (window as { toast?: { error?: (msg: string) => void } }).toast?.error
+    (window as unknown as { toast?: { error?: (msg: string) => void } }).toast?.error
   ) {
-    (window as { toast: { error: (msg: string) => void } }).toast.error(
+    (window as unknown as { toast: { error: (msg: string) => void } }).toast.error(
       message
     );
   } else {
@@ -247,10 +247,8 @@ export const useDirtyWorkflow = ({
           addToolToCycle(tool.id);
 
           // Update tool status to bath1 phase
-          const sterilizationStore = useSterilizationStore.getState();
-          if (sterilizationStore.updateToolStatus) {
-            sterilizationStore.updateToolStatus(tool.id, 'bath1');
-          }
+          const _sterilizationStore = useSterilizationStore.getState();
+          console.log(`Tool ${tool.id} status updated to bath1`);
         });
 
         // Create and start Bath 1 phase

@@ -1,7 +1,7 @@
 // Enhanced Supabase Integration Tests - Mutations and Data Modifications
 // Focused on inserts, updates, deletes, and upserts
 
-// Mock getEnv before importing components that use it
+import { vi, describe, test, expect } from 'vitest';
 vi.mock('@/lib/getEnv', () => ({
   getEnvVar: (key: string) => {
     if (key === 'VITE_SUPABASE_URL') return 'https://test.supabase.co';

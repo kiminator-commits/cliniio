@@ -33,7 +33,7 @@ const TableRow: React.FC<TableRowProps> = React.memo(
       }
     };
 
-    const isSelected = selectedItems.has(item.id);
+    const isSelected = selectedItems.includes(item.id);
 
     const rowContent = useMemo(() => {
       const nameCell = (
@@ -105,10 +105,10 @@ const TableRow: React.FC<TableRowProps> = React.memo(
         const isP2Tool =
           item.data &&
           typeof item.data === 'object' &&
-          'isP2Status' in item.data &&
-          typeof item.data.isP2Status === 'boolean'
-            ? item.data.isP2Status
-            : item.isP2Status || false;
+          'p2Status' in item.data &&
+          typeof item.data.p2Status === 'string'
+            ? item.data.p2Status === 'P2'
+            : item.p2_status === 'P2' || false;
 
         cells.push(
           <td key="status" className={styles.tableCell}>

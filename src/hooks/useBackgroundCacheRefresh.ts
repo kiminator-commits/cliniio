@@ -27,7 +27,7 @@ export const useBackgroundCacheRefresh = (
 
   useEffect(() => {
     if (!enabled) {
-      return;
+      return () => {}; // Return empty cleanup function
     }
 
     const performRefresh = async () => {

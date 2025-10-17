@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
-import { useUser } from '@/contexts/UserContext';
+import { supabase } from '../../../../lib/supabase';
+import { useUser } from '../../../../contexts/UserContext';
 import { ProfileSettingsService } from './service';
 import {
-  _BasicInfoForm,
-  _PreferencesForm,
-  _MobileShortcuts,
+  BasicInfoForm as _BasicInfoForm,
+  PreferencesForm as _PreferencesForm,
+  MobileShortcuts as _MobileShortcuts,
   PasswordChangeData,
   ProfileSettingsState,
 } from './types';
@@ -78,7 +78,7 @@ export const useProfileSettings = () => {
     isPasswordReset: false,
     passwordError: null,
     passwordSuccess: null,
-  });
+  } as ProfileSettingsState);
 
   // Handle URL parameters
   useEffect(() => {
@@ -161,7 +161,7 @@ export const useProfileSettings = () => {
       console.error('Error fetching user data:', error);
       setState((prev) => ({ ...prev, loading: false }));
     }
-  }, [setState, refreshUserData]);
+  }, [setState]);
 
   const handleSave = async () => {
     try {

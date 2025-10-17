@@ -15,6 +15,9 @@ import { LessonQuiz, QuizQuestion } from '../../types';
 import QuizEditor from './QuizEditor';
 import QuizPreview from './QuizPreview';
 
+// Utility function to generate unique IDs
+const generateQuizId = () => `quiz-${crypto.randomUUID()}`;
+
 interface QuizBuilderProps {
   quiz?: LessonQuiz;
   onSave: (quiz: LessonQuiz) => void;
@@ -28,7 +31,7 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
 }) => {
   const [quizData, setQuizData] = useState<LessonQuiz>(
     quiz || {
-      id: `quiz-${Date.now()}`,
+      id: generateQuizId(),
       title: '',
       description: '',
       questions: [],

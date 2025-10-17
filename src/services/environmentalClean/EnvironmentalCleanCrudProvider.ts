@@ -4,6 +4,7 @@ import { insertSterilizationLog } from '@/services/auditLogService';
 import { usageTrackingService } from '@/services/usageTrackingService';
 import { createUserFriendlyError } from '../../pages/EnvironmentalClean/services/errors/EnvironmentalCleanServiceError';
 import { EnvironmentalCleanBatchProvider } from './EnvironmentalCleanBatchProvider';
+import { EnvironmentalCleanService } from '../../pages/EnvironmentalClean/services/EnvironmentalCleanService';
 import { supabase } from '@/lib/supabaseClient';
 
 /**
@@ -22,7 +23,7 @@ export class EnvironmentalCleanCrudProvider {
         .order('name');
 
       if (error) {
-        throw createUserFriendlyError('Failed to fetch rooms', error);
+        throw createUserFriendlyError('Failed to fetch rooms', error.message);
       }
 
       // Log audit and tracking

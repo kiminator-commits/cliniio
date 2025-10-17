@@ -11,7 +11,7 @@ export interface UseRealtimeUpdatesOptions {
 }
 
 export interface UseRealtimeUpdatesReturn {
-  isSubscribed: boolean;
+  isSubscribed: () => boolean;
   subscribe: () => void;
   unsubscribe: () => void;
 }
@@ -31,9 +31,11 @@ export function useRealtimeUpdates({
   const configRef = useRef({ table, event, filter, enabled });
   const onUpdateRef = useRef(onUpdate);
 
-  // Update refs when dependencies change
-  configRef.current = { table, event, filter, enabled };
-  onUpdateRef.current = onUpdate;
+  // Update refs in effect to avoid accessing during render
+  useEffect(() => {
+    configRef.current = { table, event, filter, enabled };
+    onUpdateRef.current = onUpdate;
+  }, [table, event, filter, enabled, onUpdate]);
 
   const subscribe = useCallback(() => {
     if (!enabled || !configRef.current.enabled) {
@@ -99,7 +101,7 @@ export function useRealtimeUpdates({
   }, [subscribe, unsubscribe]);
 
   return {
-    isSubscribed: !!unsubscribeRef.current,
+    isSubscribed: () => !!unsubscribeRef.current,
     subscribe,
     unsubscribe,
   };

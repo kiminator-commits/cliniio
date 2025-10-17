@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BulkOperationProgress } from '../../../src/pages/Inventory/components/BulkOperationProgress';
 import { PerformanceMonitor } from '../../../src/pages/Inventory/components/PerformanceMonitor';

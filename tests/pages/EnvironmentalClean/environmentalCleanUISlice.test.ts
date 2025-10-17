@@ -1,6 +1,7 @@
 import { act } from 'react';
 import { useEnvironmentalCleanStore } from '@/pages/EnvironmentalClean/store/environmentalCleanStore';
 import { RoomStatusType } from '@/pages/EnvironmentalClean/models';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('environmentalCleanStore UI functionality', () => {
   beforeEach(() => {

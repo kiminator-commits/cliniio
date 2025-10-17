@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 import { InventoryItemData } from '@/pages/Inventory/services/inventoryActionService';
 import {
   setupDefaultMocks,

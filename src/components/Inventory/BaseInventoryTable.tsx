@@ -23,7 +23,7 @@ interface BaseInventoryTableProps {
   activeTab: string;
 }
 
-const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
+const BaseInventoryTable: React.FC<BaseInventoryTableProps> = React.memo(
   ({
     data,
     columns,
@@ -37,7 +37,7 @@ const BaseInventoryTable = React.memo<BaseInventoryTableProps>(
     currentPage = 1,
     onPageChange,
     activeTab,
-  }) => {
+  }: BaseInventoryTableProps) => {
     // Use virtualization for large datasets (more than 100 items)
     const shouldUseVirtualization = data.length > 100;
 

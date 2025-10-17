@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SharedLayout } from '../../components/Layout/SharedLayout';
-import { KnowledgeHubErrorBoundary } from './components/ErrorBoundaries/KnowledgeHubErrorBoundary';
+import KnowledgeHubErrorBoundary from './components/ErrorBoundaries/KnowledgeHubErrorBoundary';
 import {
   SimplifiedKnowledgeHubProvider,
   useSimplifiedKnowledgeHub,
@@ -121,17 +121,13 @@ const KnowledgeHubContent: React.FC = React.memo(() => {
 KnowledgeHubContent.displayName = 'KnowledgeHubContent';
 
 const KnowledgeHub: React.FC = React.memo(() => {
-  const handleError = useCallback((error: unknown) => {
+  const _handleError = useCallback((error: unknown) => {
     console.error('Knowledge Hub error:', error);
     // Additional error handling logic can be added here
   }, []);
 
   return (
-    <KnowledgeHubErrorBoundary
-      onError={handleError}
-      maxRetries={3}
-      retryDelay={1000}
-    >
+    <KnowledgeHubErrorBoundary>
       <SharedLayout>
         <SimplifiedKnowledgeHubProvider>
           <KnowledgeHubContent />

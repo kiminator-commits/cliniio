@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ScheduleSummaryCard from '../../../src/components/EnvironmentalCleaning/ScheduleSummaryCard';
 import { ScheduleSummary } from '../../../src/pages/EnvironmentalClean/models';
+import { describe, test, expect } from 'vitest';
 
 describe('ScheduleSummaryCard', () => {
   const mockSchedule: ScheduleSummary = {

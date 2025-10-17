@@ -18,7 +18,7 @@ export class AISettingsPersistenceProvider {
     settings: Partial<UnifiedAISettings>
   ): Promise<boolean> {
     try {
-      const { error } = await supabase.from('ai_settings').upsert(
+      const { data, error } = await supabase.from('ai_settings').upsert(
         {
           facility_id: this.facilityId,
           module: 'general',

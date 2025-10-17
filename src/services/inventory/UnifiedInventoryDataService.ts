@@ -2,10 +2,10 @@ import {
   InventoryItem,
   LocalInventoryItem,
   getItemStatus,
-} from '@/types/inventoryTypes';
-import { TabType } from '@/pages/Inventory/types';
-import { handleCategoryChange } from '@/utils/inventoryHelpers';
-import { getStatusBadge, getStatusText } from '@/utils/Inventory/statusUtils';
+} from '../../types/inventoryTypes';
+import { TabType } from '../../pages/Inventory/types';
+import { handleCategoryChange } from '../../utils/inventoryHelpers';
+import { getStatusBadge, getStatusText } from '../../utils/Inventory/statusUtils';
 import { InventoryDataProvider } from './data/inventoryDataProvider';
 import { inventoryServiceFacade } from './InventoryServiceFacade';
 
@@ -407,9 +407,12 @@ export class UnifiedInventoryDataServiceImpl implements InventoryDataService {
           item.name?.toLowerCase().includes(query) ||
           item.category?.toLowerCase().includes(query) ||
           item.location?.toLowerCase().includes(query) ||
-          (item.data?.barcode &&
-            typeof item.data.barcode === 'string' &&
-            item.data.barcode.toLowerCase().includes(query))
+          (item.data &&
+            typeof item.data === 'object' &&
+            item.data !== null &&
+            'barcode' in item.data &&
+            typeof (item.data as Record<string, unknown>).barcode === 'string' &&
+            ((item.data as Record<string, unknown>).barcode as string).toLowerCase().includes(query))
       );
     }
 
@@ -459,8 +462,12 @@ export class UnifiedInventoryDataServiceImpl implements InventoryDataService {
       id: this.getItemId(item),
       name: item.name || '',
       barcode:
-        item.data?.barcode && typeof item.data.barcode === 'string'
-          ? item.data.barcode
+        item.data &&
+        typeof item.data === 'object' &&
+        item.data !== null &&
+        'barcode' in item.data &&
+        typeof (item.data as Record<string, unknown>).barcode === 'string'
+          ? (item.data as Record<string, unknown>).barcode as string
           : '',
       currentPhase: this.getItemStatus(item),
       category: item.category || '',
@@ -485,22 +492,18 @@ export class UnifiedInventoryDataServiceImpl implements InventoryDataService {
   }
 
   private getItemId(item: LocalInventoryItem): string {
-    return (
-      item.id ||
-      (item.data?.toolId && typeof item.data.toolId === 'string'
-        ? item.data.toolId
-        : '') ||
-      (item.data?.supplyId && typeof item.data.supplyId === 'string'
-        ? item.data.supplyId
-        : '') ||
-      (item.data?.equipmentId && typeof item.data.equipmentId === 'string'
-        ? item.data.equipmentId
-        : '') ||
-      (item.data?.hardwareId && typeof item.data.hardwareId === 'string'
-        ? item.data.hardwareId
-        : '') ||
-      ''
-    );
+    if (item.id) return item.id;
+    
+    if (item.data && typeof item.data === 'object' && item.data !== null) {
+      const data = item.data as Record<string, unknown>;
+      
+      if (data.toolId && typeof data.toolId === 'string') return data.toolId;
+      if (data.supplyId && typeof data.supplyId === 'string') return data.supplyId;
+      if (data.equipmentId && typeof data.equipmentId === 'string') return data.equipmentId;
+      if (data.hardwareId && typeof data.hardwareId === 'string') return data.hardwareId;
+    }
+    
+    return '';
   }
 
   private getItemStatus(item: LocalInventoryItem): string {

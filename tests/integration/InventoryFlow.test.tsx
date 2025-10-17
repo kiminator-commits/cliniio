@@ -1,25 +1,23 @@
-vi.mock('@/store/useInventoryStore', async () => {
-  const actual = await vi.importActual('@/store/useInventoryStore');
-  return {
-    ...actual,
-    useInventoryStore: vi.fn(() => ({
-      items: [],
-      categories: [],
-      fetchItems: vi.fn(),
-      fetchCategories: vi.fn(),
-      setState: vi.fn(),
-      pagination: { currentPage: 1, pageSize: 10 },
-      setPagination: vi.fn(),
-      inventoryItems: [],
-    })),
-  };
-});
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
+import '@testing-library/jest-dom';
+
+vi.mock('@/store/useInventoryStore', () => ({
+  useInventoryStore: vi.fn(() => ({
+    items: [],
+    categories: [],
+    fetchItems: vi.fn(),
+    fetchCategories: vi.fn(),
+    setState: vi.fn(),
+    pagination: { currentPage: 1, pageSize: 10 },
+    setPagination: vi.fn(),
+    inventoryItems: [],
+  })),
+}));
 
 import React from 'react';
-import { vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import InventoryManagementTable from '@/__mocks__/InventoryManagementTable';
-import { InventoryItem } from '@/types/inventoryTypes';
+import InventoryManagementTable from '../../src/__mocks__/InventoryManagementTable';
+import { InventoryItem } from '../../src/types/inventoryTypes';
 
 describe('InventoryFlow', () => {
   const mockItems: InventoryItem[] = [];

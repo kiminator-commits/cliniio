@@ -52,6 +52,7 @@ export interface InventoryItem {
   created_at: string | null;
   updated_at: string | null;
   reorder_point: number | null;
+  reorder_level?: number | null;
   expiration_date: string | null;
   unit_cost: number | null;
   category: string | null;
@@ -87,6 +88,10 @@ export interface InventoryItem {
   purchase_date: string | null;
   last_serviced: string | null;
   last_updated: string | null;
+  archived?: boolean | null;
+  archived_at?: string | null;
+  archived_by?: string | null;
+  archive_reason?: string | null;
 }
 
 // Sterilization Cycle Interface

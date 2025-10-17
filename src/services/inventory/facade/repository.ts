@@ -87,6 +87,13 @@ export class InventoryRepository {
   }
 
   /**
+   * Get all inventory items (alias for fetchInventoryItems)
+   */
+  async getAllItems(): Promise<LocalInventoryItem[]> {
+    return this.itemCrudProvider!.fetchInventoryItems();
+  }
+
+  /**
    * Fetch all inventory data with category transformation
    */
   async fetchAllInventoryData(): Promise<{

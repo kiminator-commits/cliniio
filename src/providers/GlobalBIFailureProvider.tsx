@@ -5,8 +5,9 @@ import React, {
   useRef,
   createContext,
 } from 'react';
-import { BIFailureService } from '../services/bi/failure';
+import { BIFailureService, initializeBIFailureState, useBIStore } from '../services/bi/failure';
 import { useSterilizationStore } from '../store/sterilizationStore';
+import { supabase } from '../lib/supabaseClient';
 
 /**
  * GlobalBIFailureProvider - Integrates BI failure management with sterilization store
@@ -142,7 +143,8 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
         // Get current facility ID
         let facilityId;
         try {
-          facilityId = await BIFailureService.getCurrentFacilityId();
+          const { data: { user } } = await supabase.auth.getUser();
+          facilityId = user?.user_metadata?.facility_id;
         } catch (error) {
           console.error(
             '❌ Failed to resolve facility ID in GlobalBIFailureProvider:',
@@ -159,19 +161,16 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
         }
 
         // Initialize state from database
-        await BIFailureService.initializeBIFailureState(facilityId);
+        await initializeBIFailureState();
 
         // Sync BI failure data from database to sterilization store
         await syncBIFailureData(facilityId);
 
         // Subscribe to real-time updates
-        const subscription =
-          BIFailureService.subscribeToBIFailureUpdates(facilityId);
-        if (subscription) {
-          subscriptionRef.current = {
-            unsubscribe: () => subscription.unsubscribe(),
-          };
-        }
+        useBIStore.getState().subscribe();
+        subscriptionRef.current = {
+          unsubscribe: () => useBIStore.getState().unsubscribe(),
+        };
 
         initializedRef.current = true;
         console.log('Global BI Failure system initialized');

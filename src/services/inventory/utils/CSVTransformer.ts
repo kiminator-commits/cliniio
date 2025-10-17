@@ -29,14 +29,14 @@ export class CSVTransformer {
   /**
    * Converts CSV string to inventory items
    */
-  static transformFromCSV(csvString: string): InventoryItem[] {
+  static transformFromCSV(csvString: string): any[] {
     const lines = csvString.trim().split('\n');
     if (lines.length < 2) return [];
 
     const headers = lines[0].split(',').map((h) => h.replace(/"/g, '').trim());
     const dataLines = lines.slice(1);
 
-    return dataLines.map((line) => {
+    return dataLines.map((line: any) => {
       const values = line.split(',').map((v) => v.replace(/"/g, '').trim());
       const item: Record<string, unknown> = {};
 

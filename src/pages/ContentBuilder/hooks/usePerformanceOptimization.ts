@@ -46,7 +46,9 @@ export function useExpensiveCalculation<T>(
   calculation: () => T,
   dependencies: unknown[]
 ): T {
-  return useMemo(calculation, [calculation, ...dependencies]);
+  // Use a proper array literal for useMemo dependencies
+  // eslint-disable-next-line react-hooks/use-memo, react-hooks/exhaustive-deps
+  return useMemo(() => calculation(), [calculation, ...dependencies]);
 }
 
 // Virtual scrolling optimization for large lists
@@ -92,7 +94,7 @@ export function useIntersectionObserver(
     };
   }, [callback, options]);
 
-  return observerRef.current;
+  return observerRef;
 }
 
 // Performance monitoring hook
@@ -157,8 +159,9 @@ export function usePerformanceMonitor() {
 export function useBatchUpdates() {
   const isBatchingRef = useRef(false);
   const pendingUpdatesRef = useRef<(() => void)[]>([]);
+  const processPendingUpdatesRef = useRef<((updates: (() => void)[]) => void) | null>(null);
 
-  const batchUpdate = useCallback((updates: (() => void)[]) => {
+  const processPendingUpdates = useCallback((updates: (() => void)[]) => {
     if (isBatchingRef.current) {
       pendingUpdatesRef.current.push(...updates);
       return;
@@ -172,9 +175,23 @@ export function useBatchUpdates() {
     if (pendingUpdatesRef.current.length > 0) {
       const pending = [...pendingUpdatesRef.current];
       pendingUpdatesRef.current = [];
-      batchUpdate(pending);
+      // Use setTimeout to avoid accessing processPendingUpdates before it's fully initialized
+      setTimeout(() => {
+        if (processPendingUpdatesRef.current) {
+          processPendingUpdatesRef.current(pending);
+        }
+      }, 0);
     }
   }, []);
+
+  // Store the function reference in the ref using useEffect to avoid accessing during render
+  useEffect(() => {
+    processPendingUpdatesRef.current = processPendingUpdates;
+  }, [processPendingUpdates]);
+
+  const batchUpdate = useCallback((updates: (() => void)[]) => {
+    processPendingUpdates(updates);
+  }, [processPendingUpdates]);
 
   return { batchUpdate };
 }

@@ -65,13 +65,13 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
         .fetchLeaderboardData()
         .then((data) => {
           setLeaderboardData({
-            rank: data.userRank || 1,
+            rank: 1, // Default rank since we don't have user-specific rank in the data
             topUsers:
-              data.users?.map((user) => ({
-                id: user.id,
-                name: user.full_name || 'Anonymous',
-                score: user.score || 0,
-                avatar: user.avatar || '👤',
+              data?.map((user) => ({
+                id: user.user_id,
+                name: user.user_name || 'Anonymous',
+                score: user.points || 0,
+                avatar: '👤', // Default avatar since it's not in the data
               })) || [],
           });
         })

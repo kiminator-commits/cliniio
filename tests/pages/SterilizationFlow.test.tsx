@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import Sterilization from '../../src/pages/Sterilization/page';
 import { UserProvider } from '../../src/contexts/UserContext';

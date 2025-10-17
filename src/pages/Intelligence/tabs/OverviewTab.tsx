@@ -11,6 +11,7 @@ import {
 } from '@mdi/js';
 import { IntelligenceSummary } from '../utils/intelligenceTypes';
 import { RiskAlert } from '../../../services/analyticsService';
+import { useCurrentTime } from '../hooks/useCurrentTime';
 
 interface ExtendedIntelligenceSummary extends IntelligenceSummary {
   risks?: Array<{ level: string; [key: string]: unknown }>;
@@ -23,6 +24,8 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab({ summary }: OverviewTabProps) {
+  const currentTime = useCurrentTime();
+  
   // Use the passed summary prop
   const data = summary;
 
@@ -205,7 +208,7 @@ export default function OverviewTab({ summary }: OverviewTabProps) {
                     <p className="text-sm text-gray-600">
                       Depletes in{' '}
                       {Math.ceil(
-                        (new Date(item.depletionDate).getTime() - Date.now()) /
+                        (new Date(item.depletionDate).getTime() - currentTime) /
                           (1000 * 60 * 60 * 24)
                       )}{' '}
                       days

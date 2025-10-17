@@ -32,7 +32,11 @@ type ImportOptions = {
 type ImportResult = {
   success: boolean;
   importedCount: number;
+  failedCount: number;
+  skippedCount: number;
   errors: string[];
+  warnings: string[];
+  fileName: string;
   data?: unknown[];
 };
 import { logEvent, trackUserAction } from '../../utils/monitoring';
@@ -230,7 +234,7 @@ export async function handleBulkImport(
 
     const importResult = await InventoryImportService.importItems(
       file,
-      options as ImportOptions
+      options as any
     );
 
     logEvent(
@@ -557,7 +561,7 @@ async function processBulkExport(
 ): Promise<BulkOperationResult> {
   try {
     const _exportResult = await InventoryExportService.exportItems(
-      itemIds as InventoryItem[],
+      itemIds as unknown as InventoryItem[],
       exportOptions
     );
 

@@ -1,4 +1,5 @@
 import { logSterilizationEvent } from '../../src/utils/auditLogger';
+import { describe, test, expect, it } from 'vitest';
 
 describe('logSterilizationEvent', () => {
   it('should create event with correct structure', () => {

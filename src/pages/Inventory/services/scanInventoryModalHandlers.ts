@@ -1,9 +1,27 @@
 import { ParsedItem } from '../types/scanInventoryModalTypes';
-import { InventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
+import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 import { InventoryItem } from '@/types/inventoryTypes';
 
 export interface ScanMode {
   mode: 'add' | 'use' | null;
+}
+
+interface InventoryItemData {
+  id?: string;
+  name: string;
+  description?: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  location?: string;
+  barcode?: string;
+  [key: string]: unknown;
+}
+
+interface _ScanResult {
+  success: boolean;
+  data?: InventoryItemData;
+  error?: string;
 }
 
 // Process CSV file and extract inventory items
@@ -72,7 +90,7 @@ export const uploadScannedItems = async (
     }
 
     // Convert ParsedItem to InventoryItem format
-    const inventoryItems: Omit<InventoryItem, 'id' | 'lastUpdated'>[] =
+    const inventoryItems: any[] =
       items.map((item) => ({
         name: item.name || item.item,
         category: item.category || 'Unknown',
@@ -86,6 +104,7 @@ export const uploadScannedItems = async (
         cost: 0,
         expiration_date: null,
         unit_cost: 0,
+        unit: 'piece',
         data: {
           barcode:
             (item as { data?: { barcode?: string } }).data?.barcode || item.id,
@@ -113,11 +132,11 @@ export const uploadScannedItems = async (
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
-      }));
+      })) as InventoryItemData[];
 
     // Upload items using InventoryServiceFacade
     const uploadPromises = inventoryItems.map((item) =>
-      InventoryServiceFacade.createItem(item)
+      inventoryServiceFacade.createItem(item as any)
     );
 
     const results = await Promise.allSettled(uploadPromises);

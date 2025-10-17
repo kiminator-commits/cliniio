@@ -108,12 +108,12 @@ export class EnvironmentalAIAnalyticsService {
         return data.map((item: CleaningSessionRow) => ({
           date: item.created_at,
           room_id: item.room_id,
-          cleaning_type: item.cleaning_type || 'routine',
+          cleaning_type: item.session_type || 'routine',
           duration: this.calculateDuration(
-            item.started_time,
-            item.completed_time
+            item.created_at,
+            item.created_at
           ),
-          quality_score: item.quality_score || 0.8,
+          quality_score: item.cleaning_quality_score || 0.8,
           resources_used: {
             cleaning_supplies: 5,
             staff_hours: 1,

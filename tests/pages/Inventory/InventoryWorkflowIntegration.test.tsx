@@ -1,4 +1,5 @@
 import { setupDefaultMocks } from './__mocks__/inventoryTestMocks';
+import { describe, test, expect, beforeEach } from 'vitest';
 
 // Import workflow test suites
 import './workflows/dataSynchronization.test';

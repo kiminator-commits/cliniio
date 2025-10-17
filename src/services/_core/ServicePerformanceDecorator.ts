@@ -189,7 +189,7 @@ export class PerformanceTrackedService {
     });
   }
 
-  getService(): T {
+  getService<T>(): T {
     return this.originalService as T;
   }
 }

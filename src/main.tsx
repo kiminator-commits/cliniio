@@ -12,7 +12,7 @@ initializeConsoleControl();
 
 // Make logger available globally for console control
 if (typeof window !== 'undefined') {
-  (window as any).cliniioLogger = logger;
+  (window as Window & { cliniioLogger?: typeof logger }).cliniioLogger = logger;
 }
 
 // Aggressively unregister all service workers to prevent issues

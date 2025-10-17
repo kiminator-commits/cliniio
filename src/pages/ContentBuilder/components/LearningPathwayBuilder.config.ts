@@ -119,8 +119,19 @@ export const ICONS = {
 } as const;
 
 // Content transformation configuration
+interface ContentItem {
+  id: string;
+  title: string;
+  data?: { description?: string };
+  difficulty?: string;
+  estimated_duration?: number;
+  policy_type?: string;
+  procedure_type?: string;
+  [key: string]: unknown;
+}
+
 export const CONTENT_TRANSFORMATIONS = {
-  COURSE: (item: any) => ({
+  COURSE: (item: ContentItem) => ({
     ...item,
     id: item.id,
     title: item.title,
@@ -130,7 +141,7 @@ export const CONTENT_TRANSFORMATIONS = {
     type: CONTENT_TYPES.COURSE,
     displayTitle: item.title,
   }),
-  POLICY: (item: any) => ({
+  POLICY: (item: ContentItem) => ({
     ...item,
     id: item.id,
     title: item.title,
@@ -139,7 +150,7 @@ export const CONTENT_TRANSFORMATIONS = {
     type: CONTENT_TYPES.POLICY,
     displayTitle: item.title,
   }),
-  PROCEDURE: (item: any) => ({
+  PROCEDURE: (item: ContentItem) => ({
     ...item,
     id: item.id,
     title: item.title,
@@ -148,7 +159,7 @@ export const CONTENT_TRANSFORMATIONS = {
     type: CONTENT_TYPES.PROCEDURE,
     displayTitle: item.title,
   }),
-  SDS: (item: any) => ({
+  SDS: (item: ContentItem) => ({
     ...item,
     id: item.id,
     chemical_name: item.chemical_name,

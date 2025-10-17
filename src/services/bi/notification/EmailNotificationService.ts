@@ -226,7 +226,7 @@ export class EmailNotificationService {
     _config: Record<string, unknown>
   ): Promise<void> {
     try {
-      const smtpConfig = config.smtpConfig as {
+      const smtpConfig = _config.smtpConfig as {
         host: string;
         port: number;
         username: string;

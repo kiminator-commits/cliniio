@@ -15,9 +15,20 @@ import { IntelligenceIntegrationService } from '../../services/analytics/intelli
 import {
   IntelligenceRecommendation,
   OptimizationTip,
-  RiskAlert,
-  IntegrationMetrics,
+  RiskAlert as _RiskAlert,
 } from '../../types/intelligenceRecommendationTypes';
+import { IntegrationMetrics } from '../../services/analyticsService';
+
+interface ActionableInsight {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  category: string;
+  actionable: boolean;
+  metadata?: Record<string, unknown>;
+}
 
 export default function IntelligencePage() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -29,7 +40,7 @@ export default function IntelligencePage() {
   );
   const [integrationMetrics, setIntegrationMetrics] =
     useState<IntegrationMetrics | null>(null);
-  const [actionableInsights, setActionableInsights] = useState<RiskAlert[]>([]);
+  const [actionableInsights, setActionableInsights] = useState<ActionableInsight[]>([]);
   const [insightsSummary, setInsightsSummary] = useState<Record<
     string,
     unknown
@@ -67,14 +78,14 @@ export default function IntelligencePage() {
               summary
             );
 
-          setRecommendations(recs || []);
-          setOptimizationTips(tips || []);
-          setActionableInsights(alerts || []);
+          setRecommendations(recs as any || []);
+          setOptimizationTips(tips as any || []);
+          setActionableInsights(alerts as any || []);
           setInsightsSummary(insights || null);
 
           // Get integration metrics
           IntelligenceIntegrationService.getIntegrationMetrics().then(
-            setIntegrationMetrics
+            (metrics) => setIntegrationMetrics(metrics)
           );
         } catch (error) {
           console.error('Error generating insights:', error);
@@ -95,16 +106,16 @@ export default function IntelligencePage() {
         return (
           <ActionsTab
             summary={summary}
-            recommendations={recommendations}
-            optimizationTips={optimizationTips}
+            recommendations={recommendations as any}
+            optimizationTips={optimizationTips as any}
           />
         );
       case 'insights':
         return (
           <InsightsTab
             summary={summary}
-            recommendations={recommendations}
-            optimizationTips={optimizationTips}
+            recommendations={recommendations as any}
+            optimizationTips={optimizationTips as any}
             insightsSummary={insightsSummary}
           />
         );
@@ -119,7 +130,7 @@ export default function IntelligencePage() {
         return (
           <OverviewTab
             summary={summary}
-            actionableInsights={actionableInsights}
+            actionableInsights={actionableInsights as any}
           />
         );
       default:

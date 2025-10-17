@@ -1,6 +1,6 @@
 import { attemptLogin, LoginAttemptData } from '@/services/loginService';
 import { supabase } from '@/lib/supabaseClient';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, afterEach, it, type Mock } from 'vitest';
 import { rateLimitService } from '@/services/rateLimitService';
 import { UserSessionService } from '@/services/userSessionService';
 
@@ -35,11 +35,11 @@ vi.mock('@/services/userSessionService', () => ({
   },
 }));
 
-const mockSupabase = supabase as vi.Mocked<typeof supabase>;
-const mockRateLimitService = rateLimitService as vi.Mocked<
+const mockSupabase = supabase as Mock<typeof supabase>;
+const mockRateLimitService = rateLimitService as Mock<
   typeof rateLimitService
 >;
-const mockUserSessionService = UserSessionService as vi.Mocked<
+const mockUserSessionService = UserSessionService as Mock<
   typeof UserSessionService
 >;
 

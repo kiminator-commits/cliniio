@@ -3,16 +3,15 @@
  * Extracted from InventoryServiceFacade for better maintainability
  */
 
-import { InventoryItem, LocalInventoryItem } from '../../types/inventoryTypes';
+import { InventoryItem } from '../types/supabaseTypes';
 import {
   InventorySingleResponse,
   InventoryCreateResponse,
   InventoryUpdateResponse,
   InventoryDeleteResponse,
-  _OperationResult,
-} from '../../types/inventoryServiceTypes';
-import { InventoryRepository } from './facade/repository';
-import { InventoryAdapterManager } from './facade/adapters';
+} from '../types/inventoryServiceTypes';
+import { InventoryRepository } from '../facade/repository';
+import { InventoryAdapterManager } from '../facade/adapters';
 import { AnalyticsTrackingService } from '../../shared/analyticsTrackingService';
 import { performanceMonitor } from '../../monitoring/PerformanceMonitor';
 
@@ -26,7 +25,7 @@ export class InventoryCoreService {
     return await this.repository.getItemById(id);
   }
 
-  async createItem(item: LocalInventoryItem): Promise<InventoryCreateResponse> {
+  async createItem(item: any): Promise<InventoryCreateResponse> {
     const startTime = performance.now();
 
     try {
@@ -56,7 +55,7 @@ export class InventoryCoreService {
 
   async updateItem(
     id: string,
-    updates: Partial<LocalInventoryItem>
+    updates: any
   ): Promise<InventoryUpdateResponse> {
     const startTime = performance.now();
 
@@ -66,7 +65,7 @@ export class InventoryCoreService {
       // Track analytics
       await AnalyticsTrackingService.trackEvent('inventory_item_updated', {
         itemId: id,
-        updatedFields: Object.keys(updates),
+        updatedFields: Object.keys(updates).join(','),
         adapterType: this.adapterManager.getCurrentAdapterType(),
       });
 
@@ -114,12 +113,12 @@ export class InventoryCoreService {
     }
   }
 
-  async addInventoryItem(item: LocalInventoryItem): Promise<InventoryItem> {
-    return await this.repository.addInventoryItem(item);
+  async addInventoryItem(item: any): Promise<InventoryItem> {
+    return await this.repository.addInventoryItem(item) as any;
   }
 
   async validateItem(
-    item: Partial<LocalInventoryItem>
+    item: any
   ): Promise<{ isValid: boolean; errors: string[] }> {
     const errors: string[] = [];
 

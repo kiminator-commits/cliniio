@@ -3,7 +3,7 @@ import { InventoryActionService } from '../services/inventoryActionService';
 import {
   ImportOptions,
   ImportResult,
-} from '../services/inventoryImportService';
+} from '../services/import/types';
 import { BulkProgress } from '../services/inventoryBulkProgressService';
 import { BulkOperationProgress } from './BulkOperationProgress';
 

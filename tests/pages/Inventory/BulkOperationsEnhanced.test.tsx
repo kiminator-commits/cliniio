@@ -1,6 +1,6 @@
 import { act } from '@testing-library/react';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 // Mock the inventory service facade
 vi.mock('@/services/inventory/InventoryServiceFacade', () => ({
   InventoryServiceFacade: {

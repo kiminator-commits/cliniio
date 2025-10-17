@@ -225,7 +225,7 @@ class SecureApiClient {
       return {
         success: false,
         error: 'Invalid response format',
-        message: error.message,
+        message: (error as Error).message,
         metadata: {
           requestId,
           timestamp: Date.now(),
@@ -395,7 +395,7 @@ class SecureApiClient {
     } catch (error) {
       clearTimeout(timeoutId);
 
-      if (error.name === 'AbortError') {
+      if ((error as Error).name === 'AbortError') {
         throw new Error('Request timeout');
       }
 

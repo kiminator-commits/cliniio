@@ -269,7 +269,6 @@ export const trackPerformance =
 export type {
   AnalyticsConfig,
   AnalyticsProvider,
-  AnalyticsProviderConfig,
 } from './types';
 
 export default AnalyticsService;

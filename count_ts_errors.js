@@ -1,44 +1,37 @@
-// Simple script to count TypeScript errors
-import { execSync } from 'child_process';
+const { execSync } = require('child_process');
 
 try {
-  const output = execSync('npx tsc --noEmit --skipLibCheck 2>&1', { 
-    encoding: 'utf8',
-    cwd: process.cwd()
+  console.log('Running TypeScript check...');
+  const output = execSync('npx tsc --noEmit --skipLibCheck', { 
+    encoding: 'utf8', 
+    stdio: 'pipe' 
   });
+} catch (error) {
+  const output = error.stdout || error.stderr || '';
   
+  // Extract file paths and count errors
   const lines = output.split('\n');
   const fileErrorCounts = {};
-  let totalErrors = 0;
   
-  for (const line of lines) {
-    // Match TypeScript error lines
-    const match = line.match(/^([^(]+)\([0-9]+,[0-9]+\): error TS[0-9]+:/);
-    if (match) {
-      const filePath = match[1];
-      if (!fileErrorCounts[filePath]) {
-        fileErrorCounts[filePath] = 0;
+  lines.forEach(line => {
+    if (line.includes('error TS') && (line.includes('.ts') || line.includes('.tsx'))) {
+      // Extract file path from error line
+      const match = line.match(/^([^(]+)\(/);
+      if (match) {
+        const filePath = match[1];
+        fileErrorCounts[filePath] = (fileErrorCounts[filePath] || 0) + 1;
       }
-      fileErrorCounts[filePath]++;
-      totalErrors++;
     }
-  }
-  
-  // Sort files by error count (descending)
-  const sortedFiles = Object.entries(fileErrorCounts)
-    .sort(([,a], [,b]) => b - a)
-    .slice(0, 20);
-  
-  console.log(`\n🔴 Total TypeScript Errors: ${totalErrors}`);
-  console.log(`\n📊 Top 20 Files with Most TypeScript Errors:`);
-  console.log('='.repeat(70));
-  
-  sortedFiles.forEach(([filePath, count], index) => {
-    console.log(`${String(index + 1).padStart(2)}. ${filePath.padEnd(50)} - ${count} errors`);
   });
   
-  console.log('\n' + '='.repeat(70));
+  // Sort by error count (descending)
+  const sortedFiles = Object.entries(fileErrorCounts)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 10); // Get top 10
   
-} catch (error) {
-  console.error('Error:', error.message);
+  console.log('\nTop 10 files with most TypeScript errors:');
+  console.log('==========================================');
+  sortedFiles.forEach(([file, count], index) => {
+    console.log(`${index + 1}. ${file} - ${count} errors`);
+  });
 }

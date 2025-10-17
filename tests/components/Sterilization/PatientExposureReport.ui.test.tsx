@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, type Mock } from 'vitest';
 import { render, screen, waitFor, act } from '../../utils/testUtils';
 
 import { PatientExposureReport } from '../../../src/components/Sterilization/PatientExposureReport';
@@ -7,7 +7,7 @@ import { BIFailureService } from '../../../src/services/bi/failure/index';
 
 // Mock the BIFailureService
 vi.mock('../../../src/services/bi/failure/index');
-const mockBIFailureService = BIFailureService as vi.Mocked<
+const mockBIFailureService = BIFailureService as Mock<
   typeof BIFailureService
 >;
 

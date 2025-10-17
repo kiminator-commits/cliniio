@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 
 // Mock getEnv before importing components that use it
 vi.mock('@/lib/getEnv', () => ({

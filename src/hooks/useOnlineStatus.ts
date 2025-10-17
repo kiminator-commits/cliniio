@@ -28,7 +28,11 @@ export const useOnlineStatus = () => {
 
   // Use ref to store current network status for callbacks
   const networkStatusRef = useRef(networkStatus);
-  networkStatusRef.current = networkStatus;
+
+  // Update ref in effect to avoid accessing during render
+  useEffect(() => {
+    networkStatusRef.current = networkStatus;
+  }, [networkStatus]);
 
   // Get connection information
   const getConnectionInfo = useCallback(() => {
@@ -105,7 +109,10 @@ export const useOnlineStatus = () => {
   useEffect(() => {
     // Initial connection info
     const connectionInfo = getConnectionInfo();
-    setNetworkStatus((prev) => ({ ...prev, ...connectionInfo }));
+    // Use setTimeout to avoid calling setState synchronously in effect
+    const timeoutId = setTimeout(() => {
+      setNetworkStatus((prev) => ({ ...prev, ...connectionInfo }));
+    }, 0);
 
     // Event listeners
     window.addEventListener('online', handleOnline);
@@ -122,6 +129,7 @@ export const useOnlineStatus = () => {
       connection?.addEventListener('change', handleConnectionChange);
 
       return () => {
+        clearTimeout(timeoutId);
         window.removeEventListener('online', handleOnline);
         window.removeEventListener('offline', handleOffline);
         connection?.removeEventListener('change', handleConnectionChange);

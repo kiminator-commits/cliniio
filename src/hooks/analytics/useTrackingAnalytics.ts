@@ -3,7 +3,7 @@ import {
   trackingAnalyticsService,
   TrackingAnalyticsSummary,
   TrackingAnalyticsEvent,
-} from '../services/analytics/trackingAnalyticsService';
+} from '../../services/analytics/trackingAnalyticsService';
 
 export interface UseTrackingAnalyticsReturn {
   // Data

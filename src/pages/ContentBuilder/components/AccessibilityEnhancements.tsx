@@ -83,7 +83,7 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Keyboard navigation enhancements
   useEffect(() => {
-    if (!isKeyboardNavigationMode) return;
+    if (!isKeyboardNavigationMode) return undefined;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       // Enhanced keyboard navigation
@@ -535,7 +535,7 @@ export const FocusTrap: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isActive || !containerRef.current) return;
+    if (!isActive || !containerRef.current) return undefined;
 
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll(

@@ -61,7 +61,7 @@ const ContentManagementSettings: React.FC = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
               >
-                <Icon path={tab.icon} size={1} className="mr-2" />
+                <Icon path={tab.icon as string} size={1} className="mr-2" />
                 {tab.label}
               </button>
             ))}

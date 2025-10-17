@@ -1,5 +1,6 @@
 import { act } from '@testing-library/react';
 import { useSterilizationStore } from '../../src/store/sterilizationStore';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('sterilizationStore', () => {
   beforeEach(() => {

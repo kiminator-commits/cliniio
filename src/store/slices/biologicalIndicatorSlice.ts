@@ -8,6 +8,7 @@ import {
 } from '../../services/bi/BITestKitService';
 import { BIWorkflowService } from '../../services/biWorkflowService';
 import { calculateNextBIDue } from '../../utils/calculateNextBIDue';
+import { BIFailureIncident } from '../../services/bi/failure/BIFailureIncidentService';
 import { supabase } from '../../lib/supabaseClient';
 
 export interface BiologicalIndicatorState {
@@ -23,13 +24,7 @@ export interface BiologicalIndicatorState {
 
   // Global BI failure state
   biFailureActive: boolean;
-  biFailureDetails: {
-    id: string;
-    date: Date;
-    affectedToolsCount: number;
-    affectedBatchIds: string[];
-    operator: string;
-  } | null;
+  biFailureDetails: BIFailureIncident | null;
 
   // Actions
   setBiTestCompleted: (completed: boolean) => void;
@@ -249,11 +244,11 @@ export const createBiologicalIndicatorSlice: StateCreator<
       biFailureActive: true,
       biFailureDetails: {
         id: `bi-failure-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        date: new Date(),
-        affectedToolsCount: details.affectedToolsCount,
-        affectedBatchIds: details.affectedBatchIds,
-        operator: details.operator,
-      },
+        failure_date: new Date(),
+        affected_tools_count: details.affectedToolsCount,
+        affected_batch_ids: details.affectedBatchIds,
+        detected_by_operator_id: details.operator,
+      } as any,
     })),
   deactivateBIFailure: () =>
     set(() => ({
@@ -437,10 +432,18 @@ export const createBiologicalIndicatorSlice: StateCreator<
         incident.status === 'active'
           ? {
               id: `bi-failure-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              date: new Date(incident.failure_date),
-              affectedToolsCount: incident.affected_tools_count,
-              affectedBatchIds: incident.affected_batch_ids,
-              operator: incident.detected_by_operator || 'System Alert',
+              facility_id: '',
+              incident_number: '',
+              failure_date: incident.failure_date,
+              affected_tools_count: incident.affected_tools_count,
+              affected_batch_ids: incident.affected_batch_ids,
+              detected_by_operator_id: incident.detected_by_operator || 'System Alert',
+              severity_level: 'medium',
+              status: incident.status || 'active',
+              regulatory_notification_required: false,
+              regulatory_notification_sent: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
             }
           : null,
     }),

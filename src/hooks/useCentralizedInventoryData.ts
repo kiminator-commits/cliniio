@@ -310,6 +310,7 @@ export const useInitializeInventoryData = () => {
 
       return () => clearTimeout(timeoutId);
     }
+    return undefined;
   }, [refreshData, isLoading, data]);
 
   return { refreshData, isLoading };

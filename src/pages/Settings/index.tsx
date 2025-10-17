@@ -119,7 +119,7 @@ const Settings: React.FC = () => {
             currentUser.facility_id
           );
           if (settings) {
-            setFacilitySettings(settings);
+            _setFacilitySettings(settings);
           }
         } catch (err) {
           console.error('Error loading facility settings:', err);
@@ -140,7 +140,7 @@ const Settings: React.FC = () => {
             updates
           );
         if (updatedSettings) {
-          setFacilitySettings(updatedSettings);
+          _setFacilitySettings(updatedSettings);
         }
       } catch (err) {
         console.error('Error updating facility settings:', err);

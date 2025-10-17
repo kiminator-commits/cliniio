@@ -60,7 +60,7 @@ export const useFocusTrap = (isActive: boolean) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isActive || !containerRef.current) return;
+    if (!isActive || !containerRef.current) return undefined;
 
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll(

@@ -60,7 +60,7 @@ export class InventoryStatsProvider {
           totalItems: allItems.length,
           categories: Array.from(new Set(allItems.map((item) => item.category)))
             .length,
-          locations: Array.from(new Set(allItems.map((item) => item.location)))
+          locations: Array.from(new Set(allItems.map((item) => (item as any).location)))
             .length,
           activeItems: allItems.filter((item) => item.status === 'active')
             .length,
@@ -120,7 +120,7 @@ export class InventoryStatsProvider {
 
         // Calculate location distribution
         allItems.forEach((item) => {
-          const location = item.location || 'unknown';
+          const location = (item as any).location || 'unknown';
           stats.locationDistribution[location] =
             (stats.locationDistribution[location] || 0) + 1;
         });
@@ -205,7 +205,7 @@ export class InventoryStatsProvider {
         const stats: Record<string, number> = {};
 
         allItems.forEach((item) => {
-          const location = item.location || 'unknown';
+          const location = (item as any).location || 'unknown';
           stats[location] = (stats[location] || 0) + 1;
         });
 
@@ -296,15 +296,15 @@ export class InventoryStatsProvider {
         const trendingItems = allItems
           .sort(
             (a, b) =>
-              new Date(b.lastUpdated || b.created_at).getTime() -
-              new Date(a.lastUpdated || a.created_at).getTime()
+              new Date((b as any).lastUpdated || b.created_at).getTime() -
+              new Date((a as any).lastUpdated || a.created_at).getTime()
           )
           .slice(0, limit)
           .map((item) => ({
             id: item.id,
-            name: item.name || item.item || 'Unknown',
+            name: item.name || (item as any).item || 'Unknown',
             category: item.category || 'Unknown',
-            lastUpdated: item.lastUpdated || item.created_at,
+            lastUpdated: (item as any).lastUpdated || item.created_at,
             updateCount: itemUpdateCounts[item.id] || 1,
           }));
 

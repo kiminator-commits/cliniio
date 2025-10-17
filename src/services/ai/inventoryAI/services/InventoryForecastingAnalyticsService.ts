@@ -4,7 +4,7 @@
  */
 
 import type {
-  _AIForecastResult,
+  AIForecastResult,
   DemandForecastingResult,
   HistoricalInventoryData,
 } from '../types';

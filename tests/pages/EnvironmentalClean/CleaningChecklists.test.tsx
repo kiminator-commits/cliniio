@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, type Mock } from 'vitest';
 import { render } from '@testing-library/react';
 import { useChecklistStore } from '@/store/checklistStore';
 import CleaningChecklists from '@/pages/EnvironmentalClean/components/ui/CleaningChecklists';
@@ -7,7 +7,7 @@ import CleaningChecklists from '@/pages/EnvironmentalClean/components/ui/Cleanin
 // Mock the checklist store
 vi.mock('@/store/checklistStore');
 
-const mockUseChecklistStore = useChecklistStore as vi.MockedFunction<
+const mockUseChecklistStore = useChecklistStore as Mock<
   typeof useChecklistStore
 >;
 

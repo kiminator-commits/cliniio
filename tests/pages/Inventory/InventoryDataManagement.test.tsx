@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { ErrorBoundary } from 'react-error-boundary';
 import InventoryPage from '@/pages/Inventory/index';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, it } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import EnvironmentalCleanErrorFallback from '@/pages/EnvironmentalClean/components/EnvironmentalCleanErrorFallback';
 

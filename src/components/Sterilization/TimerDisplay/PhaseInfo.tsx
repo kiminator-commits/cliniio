@@ -20,7 +20,7 @@ export const PhaseInfo: React.FC<PhaseInfoProps> = ({
 }) => {
   return (
     <div className="text-xs text-gray-500 space-y-1 bg-gray-50 p-3 rounded-lg">
-      <div>Duration: {formatTime(duration)}</div>
+      <div>Duration: {formatTime(duration || 0)}</div>
       <div>Status: {isRunning ? 'Running' : 'Stopped'}</div>
       {timer && (
         <>

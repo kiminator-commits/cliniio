@@ -210,8 +210,8 @@ export class SupabaseAdapter implements InventoryDataAdapter {
 
   async updateInventoryItem(
     id: string,
-    item: Partial<InventoryItem>
-  ): Promise<InventoryItem> {
+    item: Partial<any>
+  ): Promise<any> {
     if (!this.isInitialized) {
       throw new Error('Supabase adapter not initialized');
     }
@@ -293,11 +293,11 @@ export class SupabaseAdapter implements InventoryDataAdapter {
     }
   }
 
-  async fetchInventoryItems(): Promise<InventoryItem[]> {
+  async fetchInventoryItems(): Promise<any[]> {
     return (this.getAllItems() as unknown as Promise<InventoryItem[]>) || [];
   }
 
-  async addInventoryItem(item: InventoryItem): Promise<InventoryItem> {
+  async addInventoryItem(item: any): Promise<any> {
     if (!this.isInitialized) {
       throw new Error('Supabase adapter not initialized');
     }
@@ -326,8 +326,8 @@ export class SupabaseAdapter implements InventoryDataAdapter {
     // For now, we'll just log it
   }
 
-  async batchAddItems(items: InventoryItem[]): Promise<InventoryItem[]> {
-    const results: InventoryItem[] = [];
+  async batchAddItems(items: any[]): Promise<any[]> {
+    const results: any[] = [];
     for (const item of items) {
       try {
         const result = await this.addInventoryItem(item);
@@ -341,9 +341,9 @@ export class SupabaseAdapter implements InventoryDataAdapter {
   }
 
   async batchUpdateItems(
-    updates: Array<{ id: string; item: Partial<InventoryItem> }>
-  ): Promise<InventoryItem[]> {
-    const results: InventoryItem[] = [];
+    updates: Array<{ id: string; item: Partial<any> }>
+  ): Promise<any[]> {
+    const results: any[] = [];
     for (const update of updates) {
       try {
         const result = await this.updateInventoryItem(update.id, update.item);

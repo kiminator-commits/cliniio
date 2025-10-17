@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, type Mock } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { useLoginService } from '@/services/loginApiService';
 import LoginForm from '@/components/Login/LoginForm';
 
 vi.mock('@/services/loginApiService');
 
-const mockUseLoginService = useLoginService as vi.MockedFunction<
+const mockUseLoginService = useLoginService as Mock<
   typeof useLoginService
 >;
 

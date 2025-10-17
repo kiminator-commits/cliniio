@@ -1,4 +1,4 @@
-import { vi as _vi } from 'vitest';
+import { vi as _vi, describe, test, expect } from 'vitest';
 import {
   validateSearchQuery,
   validateStatusUpdate,

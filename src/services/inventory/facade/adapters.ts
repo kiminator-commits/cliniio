@@ -60,7 +60,7 @@ export class InventoryFilterService {
     return this.filteredToolsData.map((item) => ({
       id: item.id || '',
       name: item.name || item.item || '',
-      barcode: item.data?.barcode || '',
+      barcode: (item.data as any)?.barcode || '',
       currentPhase: getItemStatus(item),
       category: item.category || '',
     }));

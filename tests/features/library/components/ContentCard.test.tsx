@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ContentCard from '@/features/library/components/ContentCard';
+import { describe, test, expect, it } from 'vitest';
 
 describe('ContentCard', () => {
   const mockItem = {

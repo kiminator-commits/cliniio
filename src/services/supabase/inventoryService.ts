@@ -99,7 +99,7 @@ export class SupabaseInventoryService {
         created_at: new Date().toISOString(),
       } as Omit<InventoryItem, 'id' | 'lastUpdated'>;
 
-      const result = await InventoryCrudOperations.createItem(itemWithDefaults);
+      const result = await InventoryCrudOperations.createItem(itemWithDefaults as any);
       return {
         data: result ? [result] : null,
         error: null,
@@ -255,11 +255,11 @@ export class SupabaseInventoryService {
    * Subscribe to real-time inventory updates
    */
   static subscribeToInventoryChanges(
-    callback: (payload: Record<string, unknown>) => void
+    callback: (payload: Record<string, string | number | boolean>) => void
   ) {
     try {
       // Use centralized realtime manager
-      return RealtimeManager.subscribe('inventory_items', callback, {
+      return RealtimeManager.subscribe('inventory_items', callback as any, {
         event: '*',
       });
     } catch (error) {

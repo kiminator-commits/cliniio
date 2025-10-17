@@ -9,6 +9,11 @@ import {
 } from '@mdi/js';
 import { useQuarantineData } from './hooks/useQuarantineData';
 
+interface AffectedCycle {
+  batchId?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Props for the BIFailureStatus component.
  * @interface BIFailureStatusProps
@@ -39,7 +44,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
   // Extract batch IDs from affected cycles
   const _affectedBatchIds = quarantineData.affectedCycles
     ? quarantineData.affectedCycles
-        .map((cycle) => cycle.batchId)
+        .map((cycle: any) => cycle.batchId)
         .filter((batchId): batchId is string => Boolean(batchId))
     : [];
 
@@ -93,7 +98,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
             <span className="text-xs font-medium text-red-700">Batches</span>
           </div>
           <div className="text-lg font-bold text-red-800">
-            {biFailureDetails.affectedBatchIds.length}
+            {biFailureDetails.affected_batch_ids?.length || 0}
           </div>
         </div>
         <div className="text-center">
@@ -102,7 +107,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
             <span className="text-xs font-medium text-red-700">Tools</span>
           </div>
           <div className="text-lg font-bold text-red-800">
-            {biFailureDetails.affectedToolsCount}
+            {biFailureDetails.affected_tools_count || 0}
           </div>
         </div>
 
@@ -123,7 +128,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
           <Icon path={mdiTools} size={0.8} className="text-red-500 mt-0.5" />
           <div>
             <strong>Affected Tools:</strong>{' '}
-            {biFailureDetails.affectedToolsCount} tools are currently
+            {biFailureDetails.affected_tools_count || 0} tools are currently
             quarantined
           </div>
         </div>
@@ -157,11 +162,11 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
           <Icon path={mdiPackage} size={0.8} className="text-red-500 mt-0.5" />
           <div>
             <strong>Affected Batches:</strong>{' '}
-            {biFailureDetails.affectedBatchIds.length > 0 ? (
+            {(biFailureDetails.affected_batch_ids?.length || 0) > 0 ? (
               <span className="font-mono text-xs">
-                {biFailureDetails.affectedBatchIds.slice(0, 3).join(', ')}
-                {biFailureDetails.affectedBatchIds.length > 3 &&
-                  ` +${biFailureDetails.affectedBatchIds.length - 3} more`}
+                {biFailureDetails.affected_batch_ids?.slice(0, 3).join(', ')}
+                {(biFailureDetails.affected_batch_ids?.length || 0) > 3 &&
+                  ` +${(biFailureDetails.affected_batch_ids?.length || 0) - 3} more`}
               </span>
             ) : (
               'No batch IDs available'
@@ -183,7 +188,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
             <span className="text-xs">
               {quarantineData.toolsByCategory
                 ? Object.entries(quarantineData.toolsByCategory)
-                    .map(([category, count]) => `${category}: ${count}`)
+                    .map(([category, count]: [string, number]) => `${category}: ${count}`)
                     .join(', ')
                 : 'No tools categorized'}
             </span>

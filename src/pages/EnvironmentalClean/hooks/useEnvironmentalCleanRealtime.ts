@@ -146,19 +146,17 @@ export function useEnvironmentalCleanRealtime(autoConnect: boolean = false) {
   // Initialize real-time connection only if autoConnect is true
   useEffect(() => {
     if (!autoConnect) {
-      return;
+      return undefined;
     }
 
-    // Subscribe to environmental cleaning changes
-    subscribeToEnvironmentalCleans();
-
-    // Set up reconnection on error
-    if (status.error && status.connectionAttempts < maxReconnectAttempts) {
-      handleReconnection();
-    }
+    // Use setTimeout to avoid calling setState synchronously in effect
+    const timeoutId = setTimeout(() => {
+      subscribeToEnvironmentalCleans();
+    }, 0);
 
     // Cleanup function
     return () => {
+      clearTimeout(timeoutId);
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -175,10 +173,6 @@ export function useEnvironmentalCleanRealtime(autoConnect: boolean = false) {
   }, [
     autoConnect,
     subscribeToEnvironmentalCleans,
-    status.error,
-    status.connectionAttempts,
-    maxReconnectAttempts,
-    handleReconnection,
   ]);
 
   // Handle reconnection on status changes
@@ -188,8 +182,14 @@ export function useEnvironmentalCleanRealtime(autoConnect: boolean = false) {
       !status.isConnected &&
       status.connectionAttempts < maxReconnectAttempts
     ) {
-      handleReconnection();
+      // Use setTimeout to avoid calling setState synchronously in effect
+      const timeoutId = setTimeout(() => {
+        handleReconnection();
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
     }
+    return undefined;
   }, [
     status.error,
     status.isConnected,

@@ -29,7 +29,7 @@ export const BIFailConfirmationModal: React.FC<
       <div
         className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
         onClick={onCancel}
-        onKeyDown={(e) => {
+        onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === 'Escape') {
             onCancel();
           }

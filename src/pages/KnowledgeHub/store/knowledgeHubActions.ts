@@ -122,7 +122,7 @@ export const createBusinessActions = (
       // Update local state with the response from API
       const updatedContent = content.map((item: ContentItem) =>
         item.id === id ? updatedContentItem : item
-      );
+      ).filter((item): item is ContentItem => item !== undefined);
 
       set({ content: updatedContent });
 

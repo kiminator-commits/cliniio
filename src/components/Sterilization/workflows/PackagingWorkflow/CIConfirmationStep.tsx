@@ -6,7 +6,7 @@ import {
   mdiIdentifier,
 } from '@mdi/js';
 import Icon from '@mdi/react';
-import { useComplianceSettingsStore } from '@/store/slices/complianceSettingsSlice';
+import { useComplianceSettingsStore } from '@/store/hooks/useComplianceSettingsStore';
 import { upsertCiConfirmation } from '@/services/sterilization/ciConfirmationService';
 
 interface CIConfirmationStepProps {

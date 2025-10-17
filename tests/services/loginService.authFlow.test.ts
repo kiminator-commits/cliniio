@@ -6,7 +6,7 @@ import {
   LoginAttemptData,
 } from '@/services/loginService';
 import { supabase } from '@/lib/supabaseClient';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, afterEach, it, type Mock } from 'vitest';
 import { rateLimitService } from '@/services/rateLimitService';
 import { sessionManager } from '@/lib/sessionManager';
 import { UserSessionService } from '@/services/userSessionService';

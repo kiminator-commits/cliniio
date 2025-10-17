@@ -7,11 +7,11 @@ import { aiDailyTaskService } from '../services/aiDailyTaskService';
  * Always verify authentication before calling this hook to prevent data leaks.
  */
 import {
-  homeMetricsService,
+  homeMetricsService as _homeMetricsService,
   HomePerformanceMetrics,
 } from '../services/home/homeMetricsService';
-import { homeSterilizationIntegration } from '../services/homeSterilizationIntegration';
-import { homeIntegrationService } from '../services/homeIntegrationService';
+import { homeSterilizationIntegration as _homeSterilizationIntegration } from '../services/homeSterilizationIntegration';
+import { homeIntegrationService as _homeIntegrationService } from '../services/homeIntegrationService';
 import { useFacility } from '../contexts/FacilityContext';
 import { HomeTask } from '../types/homeTypes';
 import { HomeData } from '../types/homeDataTypes';
@@ -210,19 +210,19 @@ export const useHomeDataLoader = (): HomeData => {
               const stats = gamificationStats.value;
               const leaderboardResult =
                 (
-                  leaderboardData as {
+                  leaderboardData as unknown as {
                     status?: string;
                     values?: { userRank: number; totalUsers: number };
                   }
                 ).status === 'fulfilled' &&
                 (
-                  leaderboardData as {
+                  leaderboardData as unknown as {
                     status?: string;
                     values?: { userRank: number; totalUsers: number };
                   }
                 ).values
                   ? (
-                      leaderboardData as {
+                      leaderboardData as unknown as {
                         status?: string;
                         values?: { userRank: number; totalUsers: number };
                       }
@@ -315,7 +315,7 @@ export const useHomeDataLoader = (): HomeData => {
         aiMetrics: ai as HomePerformanceMetrics,
         sterilizationMetrics: sterilization as Record<string, unknown>,
         integrationMetrics: integration,
-        aiImpactMetrics: (metrics?.aiImpactMetrics || null) as Record<
+        aiImpactMetrics: (metrics?.aiImpactMetrics || null) as unknown as Record<
           string,
           unknown
         > | null,
@@ -374,7 +374,7 @@ export const useHomeDataLoader = (): HomeData => {
         error: null, // Don't show error, just use fallback data
       });
     }
-  }, [currentFacility?.id, facilityLoading]);
+  }, [currentFacility, facilityLoading]);
 
   // Load data when facility becomes available or when facility loading completes
   useEffect(() => {
@@ -386,6 +386,7 @@ export const useHomeDataLoader = (): HomeData => {
       
       return () => clearTimeout(timeoutId);
     }
+    return undefined;
   }, [facilityLoading, loadAllData]);
 
   // Removed the separate immediate loading effect to prevent multiple loading phases

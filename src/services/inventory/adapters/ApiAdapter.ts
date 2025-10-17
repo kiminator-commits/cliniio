@@ -63,7 +63,7 @@ export class ApiAdapter implements InventoryDataAdapter {
     };
   }
 
-  async fetchInventoryItems(): Promise<LocalInventoryItem[]> {
+  async fetchInventoryItems(): Promise<any[]> {
     const response = await this.makeRequest('GET', '/inventory/items');
     return response.json();
   }
@@ -74,16 +74,16 @@ export class ApiAdapter implements InventoryDataAdapter {
   }
 
   async addInventoryItem(
-    item: LocalInventoryItem
-  ): Promise<LocalInventoryItem> {
+    item: any
+  ): Promise<any> {
     const response = await this.makeRequest('POST', '/inventory/items', item);
     return response.json();
   }
 
   async updateInventoryItem(
     id: string,
-    item: Partial<LocalInventoryItem>
-  ): Promise<LocalInventoryItem> {
+    item: Partial<any>
+  ): Promise<any> {
     const response = await this.makeRequest(
       'PUT',
       `/inventory/items/${id}`,
@@ -109,8 +109,8 @@ export class ApiAdapter implements InventoryDataAdapter {
   }
 
   async batchAddItems(
-    items: LocalInventoryItem[]
-  ): Promise<LocalInventoryItem[]> {
+    items: any[]
+  ): Promise<any[]> {
     const response = await this.makeRequest('POST', '/inventory/items/batch', {
       items,
     });
@@ -118,8 +118,8 @@ export class ApiAdapter implements InventoryDataAdapter {
   }
 
   async batchUpdateItems(
-    updates: Array<{ id: string; item: Partial<LocalInventoryItem> }>
-  ): Promise<LocalInventoryItem[]> {
+    updates: Array<{ id: string; item: Partial<any> }>
+  ): Promise<any[]> {
     const response = await this.makeRequest('PUT', '/inventory/items/batch', {
       updates,
     });

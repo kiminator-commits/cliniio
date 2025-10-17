@@ -53,7 +53,7 @@ export class PerformanceMonitoringIntegration {
    */
   getPerformanceStatus(): PerformanceStatus {
     const health = (
-      performanceMonitor as { getSystemHealthSync?: () => unknown }
+      performanceMonitor as any
     ).getSystemHealthSync?.() || {
       status: 'unknown',
       checks: [],

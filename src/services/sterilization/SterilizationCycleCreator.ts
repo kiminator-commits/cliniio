@@ -7,10 +7,10 @@ import { ToolService } from '@/services/tools/ToolService';
 import { ToolStatus } from '@/types/toolTypes';
 import {
   SterilizationPhase,
-  _SterilizationCycle,
+  SterilizationCycle,
   CreateCycleResult,
-  _CycleCreationParams,
-} from './SterilizationTypes';
+  CycleCreationParams,
+} from './sterilizationTypes';
 
 export class SterilizationCycleCreator {
   private static readonly PHASES: SterilizationPhase[] = [

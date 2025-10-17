@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ChecklistCategory from '@/pages/EnvironmentalClean/components/ui/ChecklistCategory';
 import { CleaningChecklist } from '@/pages/EnvironmentalClean/models';
+import { describe, test, expect } from 'vitest';
 
 describe('ChecklistCategory', () => {
   const mockCategory: CleaningChecklist = {

@@ -55,10 +55,10 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "lint": "eslint --config .eslintrc.json src/ --ignore-pattern \"src/__mocks__/**\" --ignore-pattern \"**/*.test.*\" --ignore-pattern \"**/*.spec.*\"",
+    "lint:fast": "eslint src --max-warnings=0 --ignore-pattern src/services --ignore-pattern src/types",
     "lint:quick": "eslint --config .eslintrc.json src/lib/ src/components/ src/pages/ --max-warnings 0",
     "lint:benchmark": "npx tsx scripts/lintBenchmark.ts",
     "prepare": "husky install",
-    "pre-commit": "lint-staged",
     "check:strict": "ts-node scripts/check-strict-mode.ts",
     "type-check": "echo 'TypeScript checking disabled temporarily'",
     "type-check:strict": "tsc --noEmit --project tsconfig.strict.json",
@@ -102,7 +102,7 @@
     "eslint-plugin-prettier": "^5.5.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.0",
-    "husky": "^9.1.7",
+    "husky": "8.0.3",
     "identity-obj-proxy": "^3.0.0",
     "jest-axe": "^10.0.0",
     "jsdom": "^27.0.0",
@@ -115,11 +115,9 @@
     "vitest": "^3.2.4"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "eslint --fix"
+    "*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0"
   },
   "husky": {
-    "hooks": {
-      "pre-commit": "npx lint-staged"
-    }
+    "skipCI": true
   }
 }

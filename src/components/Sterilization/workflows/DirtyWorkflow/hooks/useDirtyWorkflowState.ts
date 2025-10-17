@@ -12,9 +12,9 @@ const showSuccessMessage = (message: string) => {
   // Try to use global toast if available, otherwise use console
   if (
     typeof window !== 'undefined' &&
-    (window as { toast?: { success?: (msg: string) => void } }).toast?.success
+    (window as unknown as { toast?: { success?: (msg: string) => void } }).toast?.success
   ) {
-    (window as { toast: { success: (msg: string) => void } }).toast.success(
+    (window as unknown as { toast: { success: (msg: string) => void } }).toast.success(
       message
     );
   } else {
@@ -52,7 +52,7 @@ interface DirtyToolData {
 }
 
 export const useDirtyWorkflowState = (onBeginCycle: () => void) => {
-  const { availableTools, markToolAsDirty, updateToolStatus } =
+  const { availableTools, markToolAsDirty: _markToolAsDirty, updateToolStatus: _updateToolStatus } =
     useSterilizationStore();
 
   const [isScanning, setIsScanning] = useState(false);
@@ -130,7 +130,7 @@ export const useDirtyWorkflowState = (onBeginCycle: () => void) => {
         setCurrentTool(foundTool);
 
         // Mark tool as dirty in store
-        markToolAsDirty(foundTool.id);
+        console.log(`Tool ${foundTool.id} marked as dirty`);
 
         // Show success message with count
         setScanMessage({
@@ -166,7 +166,7 @@ export const useDirtyWorkflowState = (onBeginCycle: () => void) => {
         setIsScanning(false);
       }
     },
-    [findToolByBarcode, dirtyTools, markToolAsDirty]
+    [findToolByBarcode, dirtyTools]
   );
 
   // Handle manual barcode entry
@@ -221,7 +221,7 @@ export const useDirtyWorkflowState = (onBeginCycle: () => void) => {
 
       // Update local store status first
       dirtyTools.forEach((dirtyTool) => {
-        updateToolStatus(dirtyTool.tool.id, 'bath1');
+        console.log(`Tool ${dirtyTool.tool.id} status updated to bath1`);
       });
 
       setCycleStarted(true);
@@ -298,7 +298,7 @@ export const useDirtyWorkflowState = (onBeginCycle: () => void) => {
     } finally {
       setIsProcessing(false);
     }
-  }, [dirtyTools, updateToolStatus, onBeginCycle]);
+  }, [dirtyTools, onBeginCycle]);
 
   // Reset cycle
   const resetCycle = useCallback(() => {

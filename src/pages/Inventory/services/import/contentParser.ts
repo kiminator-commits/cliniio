@@ -1,5 +1,9 @@
 import { InventoryItem } from '../../../../types/inventoryTypes';
-import { ImportFormat, ImportOptions } from './types';
+import { ImportFormat as _ImportFormat, ImportOptions } from './types';
+
+interface ParsedInventoryItem {
+  [key: string]: unknown;
+}
 
 /**
  * Content parsing utilities for different import formats
@@ -52,7 +56,7 @@ export class ContentParser {
             options.customFieldMapping
           );
           if (fieldName) {
-            (item as any)[fieldName] = this.convertValue(value, fieldName);
+            (item as ParsedInventoryItem)[fieldName] = this.convertValue(value, fieldName);
           }
         }
       });
@@ -68,7 +72,7 @@ export class ContentParser {
     try {
       const data = JSON.parse(content);
       return Array.isArray(data) ? data : [data];
-    } catch (error) {
+    } catch {
       throw new Error('Invalid JSON format');
     }
   }
@@ -115,7 +119,7 @@ export class ContentParser {
   /**
    * Convert string values to appropriate types
    */
-  private static convertValue(value: string, fieldName: string): any {
+  private static convertValue(value: string, fieldName: string): unknown {
     // Convert numeric fields
     if (
       ['quantity', 'unitCost', 'minimumQuantity', 'maximumQuantity'].includes(

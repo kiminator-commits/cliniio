@@ -402,9 +402,11 @@ export function getNestedProperty(
   obj: Record<string, unknown>,
   path: string
 ): unknown {
-  return path.split('.').reduce((current, key) => {
-    return current && current[key] !== undefined ? current[key] : undefined;
-  }, obj);
+  return path.split('.').reduce((current: unknown, key: string) => {
+    return current && typeof current === 'object' && current !== null && key in current 
+      ? (current as Record<string, unknown>)[key] 
+      : undefined;
+  }, obj as unknown);
 }
 
 /**
@@ -417,11 +419,11 @@ export function setNestedProperty(
 ): void {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
-  const target = keys.reduce((current, key) => {
+  const target = keys.reduce((current: Record<string, unknown>, key: string) => {
     if (!current[key] || typeof current[key] !== 'object') {
       current[key] = {};
     }
-    return current[key];
+    return current[key] as Record<string, unknown>;
   }, obj);
   target[lastKey] = value;
 }
@@ -434,9 +436,11 @@ export function removeNestedProperty(
   path: string
 ): void {
   const keys = path.split('.');
-  const lastKey = keys.pop()!;
-  const target = keys.reduce((current, key) => {
-    return current && current[key] ? current[key] : {};
+  const lastKey = keys.pop();
+  if (!lastKey) return;
+  
+  const target = keys.reduce((current: Record<string, unknown>, key: string) => {
+    return current && current[key] ? current[key] as Record<string, unknown> : {};
   }, obj);
   if (target && typeof target === 'object') {
     delete target[lastKey];

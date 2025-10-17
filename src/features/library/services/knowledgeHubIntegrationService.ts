@@ -125,7 +125,7 @@ export class KnowledgeHubIntegrationService {
       title: libraryItem.title,
       content_type: libraryItem.category || 'generic',
       content: contentPayload, // required JSON column
-      domain: libraryItem.domain || null,
+      domain: null, // Domain not available in ContentItem
       tags: [libraryItem.category, libraryItem.level].filter(Boolean),
       status: 'not_started',
       author_id: userId,

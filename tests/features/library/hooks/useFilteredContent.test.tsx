@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { useFilteredContent } from '@/features/library/hooks/useFilteredContent';
 import { ContentItem } from '@/features/library/libraryTypes';
+import { describe, test, expect, it } from 'vitest';
 
 const mockItems: ContentItem[] = [
   {

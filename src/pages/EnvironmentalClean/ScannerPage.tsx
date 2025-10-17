@@ -31,7 +31,7 @@ import { useStatusTypesStore } from '../../store/statusTypesStore';
 
 const ScannerPage: React.FC = () => {
   const navigate = useNavigate();
-  const { getAllStatusTypes } = useStatusTypesStore();
+  const { getAllStatusTypes: _getAllStatusTypes } = useStatusTypesStore();
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(
     null
@@ -59,7 +59,7 @@ const ScannerPage: React.FC = () => {
       description: status.description || '',
       isCore: status.isCore || false,
     }));
-  }, [getAllStatusTypes]);
+  }, []);
 
   const handleScan = async () => {
     setIsScanning(true);

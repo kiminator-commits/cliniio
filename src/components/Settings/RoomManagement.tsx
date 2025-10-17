@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { useRoomStore, Room } from '../../store/roomStore';
-import { useStatusTypesStore } from '../../store/statusTypesStore';
-import {
-  getBundleById,
-  convertBundleToStatusTypes,
-} from '../../config/statusBundles';
+import { useStatusTypesStore, StatusType } from '../../store/statusTypesStore';
+import * as StatusBundles from '../../config/statusBundles';
 import Icon from '@mdi/react';
 import { mdiPlus, mdiChevronDown, mdiChevronRight, mdiCog } from '@mdi/js';
 import RoomList from './RoomList';
@@ -41,9 +38,9 @@ const RoomManagement: React.FC = () => {
       name: roomData.name || '',
       department: roomData.department || '',
       floor: roomData.floor || '',
-      barcode: roomData.barcode,
+      barcode: roomData.barcode || '',
       isActive: true,
-    });
+    } as Omit<Room, 'id' | 'createdAt' | 'updatedAt'>);
     setIsAdding(false);
   };
 
@@ -100,11 +97,11 @@ const RoomManagement: React.FC = () => {
   };
 
   const handleLoadBundle = (bundleId: string) => {
-    const bundle = getBundleById(bundleId);
+    const bundle = StatusBundles.getBundleById(bundleId);
     if (!bundle) return;
 
     // Convert bundle to status types
-    const bundleStatuses = convertBundleToStatusTypes(bundle);
+    const bundleStatuses = StatusBundles.convertBundleToStatusTypes(bundle);
 
     // Filter out exact duplicates (keep existing ones)
     const existingNames = customStatuses.map((s) => s.name.toLowerCase());
@@ -113,23 +110,23 @@ const RoomManagement: React.FC = () => {
     );
 
     // Add new statuses
-    newStatuses.forEach((status) => {
+    newStatuses.forEach((status: StatusType) => {
       addStatusType(status);
     });
   };
 
   const handleReplaceWithBundle = (bundleId: string) => {
-    const bundle = getBundleById(bundleId);
+    const bundle = StatusBundles.getBundleById(bundleId);
     if (!bundle) return;
 
     // Remove all existing custom statuses
-    customStatuses.forEach((status) => {
+    customStatuses.forEach((status: StatusType) => {
       deleteStatusType(status.id);
     });
 
     // Add all bundle statuses
-    const bundleStatuses = convertBundleToStatusTypes(bundle);
-    bundleStatuses.forEach((status) => {
+    const bundleStatuses = StatusBundles.convertBundleToStatusTypes(bundle);
+    bundleStatuses.forEach((status: StatusType) => {
       addStatusType(status);
     });
   };

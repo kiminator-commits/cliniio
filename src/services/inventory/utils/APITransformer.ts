@@ -7,8 +7,8 @@ export class APITransformer {
   /**
    * Transforms inventory items for API consumption
    */
-  static transformForAPI(items: InventoryItem[]): Record<string, unknown>[] {
-    return items.map((item) => ({
+  static transformForAPI(items: any[]): Record<string, unknown>[] {
+    return items.map((item: any) => ({
       id: item.id,
       name: item.name,
       category: item.category,
@@ -67,8 +67,8 @@ export class APITransformer {
   /**
    * Transforms API response to internal format
    */
-  static transformFromAPI(apiData: Record<string, unknown>[]): InventoryItem[] {
-    return apiData.map((item) => ({
+  static transformFromAPI(apiData: Record<string, unknown>[]): any[] {
+    return apiData.map((item: any) => ({
       id: item.id as string,
       name: item.name as string,
       category: item.category as string,

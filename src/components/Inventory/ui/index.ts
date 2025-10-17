@@ -15,7 +15,6 @@ export { InventoryTabs } from './InventoryTabs';
 export { InventoryItemsList } from './InventoryItemsList';
 export { InventoryPagination } from './InventoryPagination';
 export { InventoryAnalytics } from './InventoryAnalytics';
-export { default as InventoryExample } from './InventoryExample';
 
 // Types
 export type { InventoryHeaderTitleProps } from './InventoryHeaderTitle';

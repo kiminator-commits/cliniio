@@ -6,10 +6,17 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { UnifiedAIService } from '../../services/ai/UnifiedAIService';
 import { SecureAuthService } from '../../services/secureAuthService';
 import { KnowledgeHubService } from '../../pages/KnowledgeHub/services/knowledgeHubService';
-import { InventoryServiceFacade } from '../../services/inventory/InventoryServiceFacade';
+import { inventoryServiceFacade } from '../../services/inventory/InventoryServiceFacade';
 import { ServiceRegistry } from '../../services/ServiceRegistry';
 import { servicePerformanceMonitor } from '../../services/_core/ServicePerformanceMonitor';
 import { serviceValidationTest } from '../../services/_core/ServiceValidationTest';
+
+// Mock biFailureService for testing
+const biFailureService = {
+  getActiveIncidents: async (_facilityId: string) => [],
+  getAnalyticsSummary: async (_facilityId: string, _startDate: string) => ({}),
+  sendRegulatoryNotification: async (_incidentId: string, _facilityId: string) => true,
+};
 
 describe('Service Consolidation Test Suite', () => {
   beforeEach(() => {
@@ -156,17 +163,20 @@ describe('Service Consolidation Test Suite', () => {
 
   describe('InventoryServiceFacade', () => {
     it('should fetch all inventory data', async () => {
-      const data = await InventoryServiceFacade.fetchAllInventoryData();
+      const data = await inventoryServiceFacade.fetchAllInventoryData();
 
       expect(data).toBeDefined();
       expect(typeof data).toBe('object');
-      expect(data).toHaveProperty('items');
+      expect(data).toHaveProperty('tools');
+      expect(data).toHaveProperty('supplies');
+      expect(data).toHaveProperty('equipment');
+      expect(data).toHaveProperty('officeHardware');
       expect(data).toHaveProperty('categories');
     });
 
     it('should be a singleton', () => {
-      const instance1 = InventoryServiceFacade.getInstance();
-      const instance2 = InventoryServiceFacade.getInstance();
+      const instance1 = inventoryServiceFacade;
+      const instance2 = inventoryServiceFacade;
 
       expect(instance1).toBe(instance2);
     });
@@ -291,7 +301,7 @@ describe('Service Consolidation Test Suite', () => {
       expect(SecureAuthService).toBeDefined();
       expect(KnowledgeHubService).toBeDefined();
       expect(biFailureService).toBeDefined();
-      expect(InventoryServiceFacade).toBeDefined();
+      expect(inventoryServiceFacade).toBeDefined();
       expect(ServiceRegistry).toBeDefined();
       expect(servicePerformanceMonitor).toBeDefined();
     });
@@ -302,7 +312,7 @@ describe('Service Consolidation Test Suite', () => {
         UnifiedAIService,
         KnowledgeHubService,
         biFailureService,
-        InventoryServiceFacade,
+        inventoryServiceFacade,
       ];
 
       services.forEach((Service) => {

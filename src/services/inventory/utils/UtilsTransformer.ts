@@ -12,92 +12,35 @@ export class UtilsTransformer {
   ): InventoryItem {
     const now = new Date().toISOString();
 
+    // Helper function to safely extract data properties
+    const getDataProperty = (key: string): string => {
+      if (
+        item.data &&
+        typeof item.data === 'object' &&
+        item.data !== null &&
+        key in item.data &&
+        typeof (item.data as Record<string, unknown>)[key] === 'string'
+      ) {
+        return (item.data as Record<string, unknown>)[key] as string;
+      }
+      return '';
+    };
+
     return {
       id: '',
-      name: (item as Partial<InventoryItem>).name || '',
-      category: (item as Partial<InventoryItem>).category || '',
-      location: (item as Partial<InventoryItem>).location || '',
-      status: (item as Partial<InventoryItem>).status || 'Active',
-      quantity: (item as Partial<InventoryItem>).quantity || 0,
-      unit_cost: (item as Partial<InventoryItem>).unit_cost || 0,
-      reorder_point: (item as Partial<InventoryItem>).reorder_point || 0,
-      expiration_date: (item as Partial<InventoryItem>).expiration_date || '',
-      created_at: now,
-      updated_at: now,
-      facility_id: (item as Partial<InventoryItem>).facility_id || '',
+      facility_id: item.facility_id || '',
+      name: item.name || '',
+      quantity: item.quantity || 0,
       data: {
-        description:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'description' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.description === 'string'
-            ? (item as Partial<InventoryItem>).data.description
-            : '') || '',
-        barcode:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'barcode' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.barcode === 'string'
-            ? (item as Partial<InventoryItem>).data.barcode
-            : '') || '',
-        warranty:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'warranty' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.warranty === 'string'
-            ? (item as Partial<InventoryItem>).data.warranty
-            : '') || '',
-        serialNumber:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'serialNumber' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.serialNumber === 'string'
-            ? (item as Partial<InventoryItem>).data.serialNumber
-            : '') || '',
-        manufacturer:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'manufacturer' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.manufacturer === 'string'
-            ? (item as Partial<InventoryItem>).data.manufacturer
-            : '') || '',
-        lastServiced:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'lastServiced' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.lastServiced === 'string'
-            ? (item as Partial<InventoryItem>).data.lastServiced
-            : '') || '',
-        unit:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'unit' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.unit === 'string'
-            ? (item as Partial<InventoryItem>).data.unit
-            : '') || '',
-        supplier:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'supplier' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.supplier === 'string'
-            ? (item as Partial<InventoryItem>).data.supplier
-            : '') || '',
-        notes:
-          ((item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data === 'object' &&
-          (item as Partial<InventoryItem>).data !== null &&
-          'notes' in (item as Partial<InventoryItem>).data &&
-          typeof (item as Partial<InventoryItem>).data.notes === 'string'
-            ? (item as Partial<InventoryItem>).data.notes
-            : '') || '',
+        description: getDataProperty('description'),
+        barcode: getDataProperty('barcode'),
+        warranty: getDataProperty('warranty'),
+        serialNumber: getDataProperty('serialNumber'),
+        manufacturer: getDataProperty('manufacturer'),
+        lastServiced: getDataProperty('lastServiced'),
+        unit: getDataProperty('unit'),
+        supplier: getDataProperty('supplier'),
+        notes: getDataProperty('notes'),
         tags: [],
         imageUrl: '',
         isActive: true,
@@ -116,6 +59,44 @@ export class UtilsTransformer {
         serviceProvider: '',
         assignedTo: '',
       },
+      created_at: now,
+      updated_at: now,
+      reorder_point: item.reorder_point || 0,
+      expiration_date: item.expiration_date || '',
+      unit_cost: item.unit_cost || 0,
+      category: item.category || '',
+      status: item.status || 'Active',
+      location: item.location || '',
+      supplier: item.supplier || '',
+      cost: item.cost || 0,
+      vendor: item.vendor || '',
+      warranty: item.warranty || '',
+      maintenance_schedule: item.maintenance_schedule || '',
+      next_due: item.next_due || '',
+      service_provider: item.service_provider || '',
+      assigned_to: item.assigned_to || '',
+      notes: item.notes || '',
+      tool_id: item.tool_id || '',
+      supply_id: item.supply_id || '',
+      equipment_id: item.equipment_id || '',
+      hardware_id: item.hardware_id || '',
+      p2_status: item.p2_status || '',
+      serial_number: item.serial_number || '',
+      manufacturer: item.manufacturer || '',
+      image_url: item.image_url || '',
+      tags: item.tags || [],
+      favorite: item.favorite || false,
+      tracked: item.tracked || true,
+      barcode: item.barcode || '',
+      sku: item.sku || '',
+      description: item.description || '',
+      current_phase: item.current_phase || 'Active',
+      is_active: item.is_active || true,
+      unit: item.unit || '',
+      expiration: item.expiration || '',
+      purchase_date: item.purchase_date || '',
+      last_serviced: item.last_serviced || '',
+      last_updated: now,
     };
   }
 

@@ -7,6 +7,7 @@ import {
   expectStudentPermissions,
   expectNursePermissions,
 } from '../__mocks__/knowledgeHubMocks';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('Permission Checks', () => {
   beforeEach(() => {

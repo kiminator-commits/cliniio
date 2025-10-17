@@ -1,4 +1,5 @@
 import LearningProgressService from '@/services/learningProgressService';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('LearningProgressService', () => {
   const service = LearningProgressService.getInstance()!;

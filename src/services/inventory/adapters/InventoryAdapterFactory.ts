@@ -70,7 +70,7 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
       case 'localStorage': {
         adapter = new LocalStorageAdapter(
           config || this.config.adapters.localStorage
-        );
+        ) as any;
         break;
       }
       case 'api': {
@@ -82,7 +82,7 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
         if (!isApiAdapterConfig(apiConfig)) {
           throw new Error('API adapter requires baseUrl configuration');
         }
-        adapter = new ApiAdapter(apiConfig);
+        adapter = new ApiAdapter(apiConfig) as any;
         break;
       }
       case 'supabase': {
@@ -91,7 +91,7 @@ export class InventoryAdapterFactoryImpl implements InventoryAdapterFactory {
         if (!supabaseConfig) {
           throw new Error('Supabase adapter configuration is required');
         }
-        adapter = new SupabaseAdapter(supabaseConfig);
+        adapter = new SupabaseAdapter(supabaseConfig) as any;
         break;
       }
       default:

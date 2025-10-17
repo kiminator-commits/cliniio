@@ -15,7 +15,7 @@ vi.mock('../../src/pages/KnowledgeHub/services/actions/contentActions', () => ({
 // Import the mocked ContentActions
 import { ContentActions } from '../../src/pages/KnowledgeHub/services/actions/contentActions';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, type Mock } from 'vitest';
 // Mock ContentItem for testing
 const mockContentItems = [
   {
@@ -140,7 +140,7 @@ describe('KnowledgeHub Export Functionality', () => {
     });
 
     test('bulkExportContent should handle JSON format', async () => {
-      (ContentActions.bulkExportContent as vi.Mock).mockResolvedValue({
+      (ContentActions.bulkExportContent as Mock).mockResolvedValue({
         success: true,
         filename: 'knowledge_hub_export_2024-01-01.json',
         processedCount: 2,
@@ -155,7 +155,7 @@ describe('KnowledgeHub Export Functionality', () => {
     });
 
     test('bulkExportContent should handle CSV format', async () => {
-      (ContentActions.bulkExportContent as vi.Mock).mockResolvedValue({
+      (ContentActions.bulkExportContent as Mock).mockResolvedValue({
         success: true,
         filename: 'knowledge_hub_export_2024-01-01.csv',
         processedCount: 2,
@@ -170,7 +170,7 @@ describe('KnowledgeHub Export Functionality', () => {
     });
 
     test('bulkExportContent should handle PDF format', async () => {
-      (ContentActions.bulkExportContent as vi.Mock).mockResolvedValue({
+      (ContentActions.bulkExportContent as Mock).mockResolvedValue({
         success: true,
         filename: 'knowledge_hub_export_2024-01-01.pdf',
         processedCount: 2,
@@ -185,7 +185,7 @@ describe('KnowledgeHub Export Functionality', () => {
     });
 
     test('bulkExportContent should handle empty itemIds', async () => {
-      (ContentActions.bulkExportContent as vi.Mock).mockResolvedValue({
+      (ContentActions.bulkExportContent as Mock).mockResolvedValue({
         success: false,
         filename: '',
         processedCount: 0,
@@ -199,7 +199,7 @@ describe('KnowledgeHub Export Functionality', () => {
     });
 
     test('bulkExportContent should handle invalid format', async () => {
-      (ContentActions.bulkExportContent as vi.Mock).mockResolvedValue({
+      (ContentActions.bulkExportContent as Mock).mockResolvedValue({
         success: false,
         filename: '',
         processedCount: 0,

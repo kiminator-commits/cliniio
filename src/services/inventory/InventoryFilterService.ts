@@ -5,7 +5,7 @@ import {
   EquipmentItem,
   OfficeHardwareItem,
   getItemStatus,
-} from '@/types/inventoryTypes';
+} from '../../types/inventoryTypes';
 
 export interface FilterCriteria {
   searchQuery?: string;
@@ -338,15 +338,15 @@ export class InventoryFilterServiceImpl implements InventoryFilterService {
     locations: string[];
     statuses: string[];
   } {
-    const categories = [
-      ...new Set(items.map((item) => item.category).filter(Boolean)),
-    ];
-    const locations = [
-      ...new Set(items.map((item) => item.location).filter(Boolean)),
-    ];
-    const statuses = [
-      ...new Set(items.map((item) => this.getItemStatus(item)).filter(Boolean)),
-    ];
+    const categories = Array.from(
+      new Set(items.map((item) => item.category).filter(Boolean))
+    );
+    const locations = Array.from(
+      new Set(items.map((item) => item.location).filter(Boolean))
+    );
+    const statuses = Array.from(
+      new Set(items.map((item) => this.getItemStatus(item)).filter(Boolean))
+    );
 
     return {
       categories: (categories as string[]).sort(),
@@ -390,25 +390,34 @@ export class InventoryFilterServiceImpl implements InventoryFilterService {
   }
 
   private isItemTracked(item: LocalInventoryItem): boolean {
-    return 'tracked' in item ? Boolean(item.data?.tracked) : false;
+    if (item.data && typeof item.data === 'object' && item.data !== null && 'tracked' in item.data) {
+      return Boolean((item.data as Record<string, unknown>).tracked);
+    }
+    return false;
   }
 
   private isItemFavorite(item: LocalInventoryItem): boolean {
-    return 'favorite' in item ? Boolean(item.data?.favorite) : false;
+    if (item.data && typeof item.data === 'object' && item.data !== null && 'favorite' in item.data) {
+      return Boolean((item.data as Record<string, unknown>).favorite);
+    }
+    return false;
   }
 
   private getItemDate(item: LocalInventoryItem): Date | null {
     if ('lastUpdated' in item && item.lastUpdated) {
       return new Date(item.lastUpdated as string);
     }
-    if ('updatedAt' in item && item.data?.updatedAt) {
-      return new Date(item.data.updatedAt as string);
-    }
-    if ('expiration' in item && item.data?.expiration) {
-      return new Date(item.data.expiration as string);
-    }
-    if ('lastServiced' in item && item.data?.lastServiced) {
-      return new Date(item.data.lastServiced as string);
+    if (item.data && typeof item.data === 'object' && item.data !== null) {
+      const data = item.data as Record<string, unknown>;
+      if ('updatedAt' in data && typeof data.updatedAt === 'string') {
+        return new Date(data.updatedAt);
+      }
+      if ('expiration' in data && typeof data.expiration === 'string') {
+        return new Date(data.expiration);
+      }
+      if ('lastServiced' in data && typeof data.lastServiced === 'string') {
+        return new Date(data.lastServiced);
+      }
     }
     return null;
   }
@@ -422,8 +431,11 @@ export class InventoryFilterServiceImpl implements InventoryFilterService {
 
   private filterOutExpired(items: LocalInventoryItem[]): LocalInventoryItem[] {
     return items.filter((item) => {
-      if ('expiration' in item && item.data?.expiration) {
-        return new Date(item.data.expiration as string) > new Date();
+      if (item.data && typeof item.data === 'object' && item.data !== null && 'expiration' in item.data) {
+        const expiration = (item.data as Record<string, unknown>).expiration;
+        if (typeof expiration === 'string') {
+          return new Date(expiration) > new Date();
+        }
       }
       return true;
     });
@@ -440,15 +452,30 @@ export class InventoryFilterServiceImpl implements InventoryFilterService {
       case 'status':
         return 'status' in item ? item.status : undefined;
       case 'p2Status':
-        return 'p2Status' in item ? item.data?.p2Status : undefined;
+        if (item.data && typeof item.data === 'object' && item.data !== null && 'p2Status' in item.data) {
+          return (item.data as Record<string, unknown>).p2Status;
+        }
+        return undefined;
       case 'toolId':
-        return 'toolId' in item ? item.data?.toolId : undefined;
+        if (item.data && typeof item.data === 'object' && item.data !== null && 'toolId' in item.data) {
+          return (item.data as Record<string, unknown>).toolId;
+        }
+        return undefined;
       case 'supplyId':
-        return 'supplyId' in item ? item.data?.supplyId : undefined;
+        if (item.data && typeof item.data === 'object' && item.data !== null && 'supplyId' in item.data) {
+          return (item.data as Record<string, unknown>).supplyId;
+        }
+        return undefined;
       case 'equipmentId':
-        return 'equipmentId' in item ? item.data?.equipmentId : undefined;
+        if (item.data && typeof item.data === 'object' && item.data !== null && 'equipmentId' in item.data) {
+          return (item.data as Record<string, unknown>).equipmentId;
+        }
+        return undefined;
       case 'hardwareId':
-        return 'hardwareId' in item ? item.data?.hardwareId : undefined;
+        if (item.data && typeof item.data === 'object' && item.data !== null && 'hardwareId' in item.data) {
+          return (item.data as Record<string, unknown>).hardwareId;
+        }
+        return undefined;
       default:
         return undefined;
     }

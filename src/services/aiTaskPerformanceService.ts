@@ -139,7 +139,7 @@ export class AITaskPerformanceService {
   private async getCurrentFacilityId(): Promise<string> {
     try {
       const { FacilityService } = await import('./facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
       return facilityId;
     } catch (error) {
       handleFacilityIdError(error);
@@ -219,7 +219,7 @@ export async function getTimeSavingsAggregates(): Promise<{
 }> {
   try {
     const { FacilityService } = await import('./facilityService');
-    const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+    const facilityId = await FacilityService.getCurrentFacilityId();
     const today = formatDateToString(new Date());
     const startOfMonth = formatDateToString(new Date()).slice(0, 7);
 
@@ -277,7 +277,7 @@ export async function getTeamPerformanceAggregates(): Promise<{
 }> {
   try {
     const { FacilityService } = await import('./facilityService');
-    const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+    const facilityId = await FacilityService.getCurrentFacilityId();
     const today = formatDateToString(new Date());
 
     console.log(

@@ -85,7 +85,7 @@ export function useContentAutosave(
 
   // Autosave effect
   useEffect(() => {
-    if (!enabled || !onSave) return;
+    if (!enabled || !onSave) return undefined;
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);

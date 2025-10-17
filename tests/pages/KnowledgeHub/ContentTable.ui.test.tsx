@@ -1,6 +1,7 @@
 import React from 'react';
 import { vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock getEnvVar before importing components that use it
 vi.mock('@/lib/getEnv', () => ({
@@ -99,9 +100,11 @@ vi.mock('@/pages/KnowledgeHub/components/EmptyState', () => ({
 }));
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <UserProvider>
-    <SimplifiedKnowledgeHubProvider>{children}</SimplifiedKnowledgeHubProvider>
-  </UserProvider>
+  <MemoryRouter>
+    <UserProvider>
+      <SimplifiedKnowledgeHubProvider>{children}</SimplifiedKnowledgeHubProvider>
+    </UserProvider>
+  </MemoryRouter>
 );
 
 const renderWithProvider = (component: React.ReactElement) => {

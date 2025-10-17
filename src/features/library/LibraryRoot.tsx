@@ -21,7 +21,7 @@ import { useLibraryRootState } from './hooks/useLibraryRootState';
 const LibraryRoot = () => {
   const navigate = useNavigate();
   const { addToKnowledgeHub } = useKnowledgeHubIntegration();
-  const { currentUser } = useUser();
+  const { currentUser: _currentUser } = useUser();
   const {
     searchQuery,
     setSearchQuery,
@@ -213,7 +213,7 @@ const LibraryRoot = () => {
       console.log('Successfully added to knowledge hub:', item.title);
 
       // Add to Knowledge Hub integration
-      await addToKnowledgeHub(item, currentUser?.id);
+      await addToKnowledgeHub(item);
       console.log('✅ Added to Knowledge Hub:', item.title);
 
       // Add visual feedback
@@ -239,7 +239,7 @@ const LibraryRoot = () => {
     } catch (error) {
       console.error('Error adding to knowledge hub:', error);
     }
-  }, [addToKnowledgeHub, currentUser?.id]);
+  }, [addToKnowledgeHub]);
 
   return (
     <LibraryErrorBoundary>

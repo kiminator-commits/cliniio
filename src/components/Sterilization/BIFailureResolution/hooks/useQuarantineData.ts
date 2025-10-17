@@ -65,12 +65,12 @@ export const useQuarantineData = (): QuarantineData => {
 
     // Get ALL tool instances from affected cycles (not unique - track multiple uses)
     const allToolInstances = affectedCycles.flatMap(
-      (cycle: SterilizationCycle) => cycle.tools.map((toolId) => toolId)
+      (cycle: SterilizationCycle) => cycle.tools.map((toolId: string) => toolId)
     );
 
     // Count how many times each tool appears in the risk window
     const toolFrequencyMap = new Map<string, number>();
-    allToolInstances.forEach((toolId) => {
+    allToolInstances.forEach((toolId: string) => {
       toolFrequencyMap.set(toolId, (toolFrequencyMap.get(toolId) || 0) + 1);
     });
 
@@ -78,7 +78,7 @@ export const useQuarantineData = (): QuarantineData => {
     const uniqueAffectedToolIds = Array.from(toolFrequencyMap.keys());
 
     // Get detailed tool information
-    const affectedTools = uniqueAffectedToolIds.map((toolId) => {
+    const affectedTools = uniqueAffectedToolIds.map((toolId: string) => {
       const availableTool = availableTools.find((t: Tool) => t.id === toolId);
 
       return (
@@ -96,22 +96,20 @@ export const useQuarantineData = (): QuarantineData => {
     });
 
     // Calculate statistics
-    const totalToolsAffected = affectedTools.length;
-    const totalCyclesAffected = affectedCycles.length;
-    const totalSterilizationEvents = allToolInstances.length; // Total sterilization events (including repeats)
-    const toolsUsedMultipleTimes = affectedTools.filter(
-      (tool) => (toolFrequencyMap.get(tool.id) || 0) > 1
+    const totalToolsAffected: number = affectedTools.length;
+    const totalCyclesAffected: number = affectedCycles.length;
+    const totalSterilizationEvents: number = allToolInstances.length; // Total sterilization events (including repeats)
+    const toolsUsedMultipleTimes: number = affectedTools.filter(
+      (tool: Tool) => (toolFrequencyMap.get(tool.id) || 0) > 1
     ).length;
 
-    const uniqueOperators = [
+    const uniqueOperators: string[] = [
       ...new Set(
         affectedCycles
           .map((cycle: SterilizationCycle) => cycle.operator)
-          .filter(
-            (operator): operator is string => typeof operator === 'string'
-          )
-      ),
-    ];
+          .filter((operator): operator is string => typeof operator === 'string')
+      )
+    ] as string[];
     const dateRange =
       affectedCycles.length > 0
         ? {

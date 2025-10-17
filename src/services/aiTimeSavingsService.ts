@@ -59,7 +59,7 @@ class AITimeSavingsService {
   async getAITimeSavings(): Promise<AITimeSavings> {
     try {
       const { FacilityService } = await import('./facilityService');
-      const { facilityId } = await FacilityService.getCurrentUserAndFacility();
+      const facilityId = await FacilityService.getCurrentFacilityId();
 
       if (!facilityId) {
         logger.debug(

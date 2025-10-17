@@ -1,6 +1,7 @@
+import React from 'react';
 import { render } from '@testing-library/react';
-import { vi } from 'vitest';
-import { useCleanup } from '@/hooks/useCleanup';
+import { vi, describe, test, expect, it } from 'vitest';
+import { useCleanup } from '../../src/hooks/useCleanup';
 
 describe('useCleanup', () => {
   it('calls cleanup function on unmount', () => {

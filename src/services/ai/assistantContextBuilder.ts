@@ -1,4 +1,5 @@
-import { aiInventoryRankingService } from '@/services/ai/aiInventoryRankingService';
+import { aiInventoryRankingService } from './aiInventoryRankingService';
+import { intelligenceDataService } from './intelligenceDataService';
 
 export async function buildAssistantContext(baseContext: string) {
   try {

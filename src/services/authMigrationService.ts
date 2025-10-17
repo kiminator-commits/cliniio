@@ -102,8 +102,9 @@ class AuthMigrationService {
 
           console.log(`[MIGRATION] Completed step: ${step.name}`);
         } catch (error) {
-          step.error = error.message;
-          this.migrationStatus.errors.push(`${step.name}: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          step.error = errorMessage;
+          this.migrationStatus.errors.push(`${step.name}: ${errorMessage}`);
 
           if (step.required) {
             console.error(
@@ -117,7 +118,7 @@ class AuthMigrationService {
               error
             );
             this.migrationStatus.warnings.push(
-              `${step.name}: ${error.message}`
+              `${step.name}: ${(error as Error).message}`
             );
           }
         }
@@ -253,7 +254,8 @@ class AuthMigrationService {
 
       console.log('[MIGRATION] Old authentication tokens cleared');
     } catch (error) {
-      throw new Error(`Failed to clear old tokens: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to clear old tokens: ${errorMessage}`);
     }
   }
 
@@ -264,7 +266,8 @@ class AuthMigrationService {
 
       console.log('[MIGRATION] Secure authentication service initialized');
     } catch (error) {
-      throw new Error(`Failed to initialize secure auth: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to initialize secure auth: ${errorMessage}`);
     }
   }
 
@@ -324,7 +327,8 @@ class AuthMigrationService {
 
       console.log('[MIGRATION] Migration validation successful');
     } catch (error) {
-      throw new Error(`Migration validation failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Migration validation failed: ${errorMessage}`);
     }
   }
 
@@ -409,7 +413,8 @@ class AuthMigrationService {
       console.log('[MIGRATION] Migration rollback completed');
     } catch (error) {
       console.error('[MIGRATION] Rollback failed:', error);
-      throw new Error(`Migration rollback failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Migration rollback failed: ${errorMessage}`);
     }
   }
 

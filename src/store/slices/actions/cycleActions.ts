@@ -66,15 +66,7 @@ export const createCycleActions: StateCreator<
 
         // Update the tool's status using the current state
         const currentState = get();
-        if (currentState.updateToolStatus) {
-          const tool = currentState.availableTools.find(
-            (t: Tool) => t.id === toolId
-          );
-          if (tool) {
-            currentState.updateToolStatus(toolId, 'bath1');
-          }
-        }
-
+        // Tool status updates are handled by the tool actions slice
         return { ...state, currentCycle: newCycle };
       }
 
@@ -88,14 +80,7 @@ export const createCycleActions: StateCreator<
 
         // Update the tool's status using the current state
         const currentState = get();
-        if (currentState.updateToolStatus) {
-          const tool = currentState.availableTools.find(
-            (t: Tool) => t.id === toolId
-          );
-          if (tool) {
-            currentState.updateToolStatus(toolId, 'bath1');
-          }
-        }
+        // Tool status updates are handled by the tool actions slice
 
         return {
           ...state,

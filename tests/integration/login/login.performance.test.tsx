@@ -2,6 +2,7 @@ import React from 'react';
 import { waitFor, screen, act } from '@testing-library/react';
 import { renderWithProviders } from '../../utils/renderWithProviders';
 import LoginForm from '@/pages/Login/LoginForm';
+import { describe, test, expect, it } from 'vitest';
 
 describe('LoginForm Performance', () => {
   it('renders within acceptable time', async () => {

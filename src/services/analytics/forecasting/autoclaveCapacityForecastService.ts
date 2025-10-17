@@ -138,8 +138,8 @@ export class AutoclaveCapacityForecastService {
           (recentCycles as _SterilizationCycleRow[])?.filter(
             (cycle: _SterilizationCycleRow) =>
               (cycle.autoclave_id === autoclaveId &&
-                cycle.status === 'pending') ||
-              cycle.status === 'running'
+                cycle.status === 'pending' as any) ||
+              cycle.status === 'in_progress' as any
           ) || [];
         const queueLength = recentCyclesForQueue.length;
 

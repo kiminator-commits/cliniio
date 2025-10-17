@@ -2,6 +2,7 @@ import React from 'react';
 import Icon from '@mdi/react';
 import { mdiPlay, mdiPause } from '@mdi/js';
 import { useSterilizationStore } from '../../../store/sterilizationStore';
+import { Tool } from '@/types/toolTypes';
 
 interface Timer {
   isRunning?: boolean;
@@ -15,6 +16,12 @@ interface PhaseControlsProps {
   onPauseTimer: (phaseId: string) => void;
   onStopTimer: (phaseId: string) => void;
   onMoveToNextPhase: (phaseId: string) => void;
+}
+
+interface SterilizationTool {
+  id: string;
+  isP2Status?: boolean;
+  [key: string]: unknown;
 }
 
 export const PhaseControls: React.FC<PhaseControlsProps> = ({
@@ -33,8 +40,8 @@ export const PhaseControls: React.FC<PhaseControlsProps> = ({
   const hasP2StatusTools = currentCycle?.tools.some((toolId: string) => {
     const tool = useSterilizationStore
       .getState()
-      .availableTools.find((t) => t.id === toolId);
-    return tool?.isP2Status;
+      .availableTools.find((t: Tool) => t.id === toolId);
+    return (tool as any)?.isP2Status;
   });
 
   // Show "Move to Next Phase" button when:

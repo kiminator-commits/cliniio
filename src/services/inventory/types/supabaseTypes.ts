@@ -4,6 +4,9 @@
 import { InventoryItem } from '../inventoryTypes';
 import { Json } from '../../../types/database.types';
 
+// Re-export InventoryItem for other modules
+export type { InventoryItem };
+
 // ============================================================================
 // SUPABASE RESPONSE TYPES
 // ============================================================================
@@ -22,6 +25,10 @@ export interface SupabaseInventoryRow {
   expiration_date: string | null;
   unit_cost: number | null;
   category: string | null;
+  archived: boolean | null;
+  archived_at: string | null;
+  archived_by: string | null;
+  archive_reason: string | null;
 }
 
 export interface SupabaseResponse<T = SupabaseInventoryRow> {
@@ -93,6 +100,10 @@ export interface UpdateInventoryItemData {
   expiration_date?: string | null;
   unit_cost?: number | null;
   category?: string | null;
+  archived?: boolean | null;
+  archived_at?: string | null;
+  archived_by?: string | null;
+  archive_reason?: string | null;
 }
 
 export interface InventoryQueryOptions {

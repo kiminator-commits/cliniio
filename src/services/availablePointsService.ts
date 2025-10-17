@@ -13,8 +13,8 @@ export interface AvailablePointsData {
 class AvailablePointsService {
   private async getCachedUser() {
     const { FacilityService } = await import('@/services/facilityService');
-    const { userId, facilityId } =
-      await FacilityService.getCurrentUserAndFacility();
+    const facilityId = await FacilityService.getCurrentFacilityId();
+    const userId = await FacilityService.getCurrentUserId();
     if (!userId || !facilityId) {
       throw new Error(
         'No authenticated user or facility for availablePointsService'

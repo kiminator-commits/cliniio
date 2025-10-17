@@ -25,7 +25,7 @@ export const useLeaderboard = () => {
       setError(null);
 
       const data = await leaderboardService.fetchLeaderboardData();
-      setLeaderboardData(data);
+      setLeaderboardData(data as unknown as LeaderboardData);
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
       setError(

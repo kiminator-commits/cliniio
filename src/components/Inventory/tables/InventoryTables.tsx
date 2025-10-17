@@ -12,7 +12,8 @@
 import React, { useMemo } from 'react';
 import BaseInventoryTable from '../BaseInventoryTable';
 import { InventoryTablesProps } from './types/tableTypes';
-import { getColumnsForTab } from '@/utils/inventory/trackingUtils';
+import { getColumnsForTab } from '@/utils/Inventory/trackingUtils';
+import { TabType } from '@/types/inventory';
 
 const InventoryTables: React.FC<InventoryTablesProps> = React.memo(
   ({
@@ -53,7 +54,7 @@ const InventoryTables: React.FC<InventoryTablesProps> = React.memo(
 
     // Define columns based on active tab using centralized logic
     const columns = useMemo(() => {
-      return getColumnsForTab(activeTab);
+      return getColumnsForTab(activeTab as TabType);
     }, [activeTab]);
 
     return (

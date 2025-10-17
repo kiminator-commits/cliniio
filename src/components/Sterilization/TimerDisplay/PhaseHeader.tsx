@@ -2,6 +2,7 @@ import React from 'react';
 import Icon from '@mdi/react';
 import { mdiChevronDown, mdiChevronUp } from '@mdi/js';
 import { useSterilizationStore } from '../../../store/sterilizationStore';
+import { Tool } from '@/types/toolTypes';
 import {
   getPhaseStatusColor,
   getPhaseStatusText,
@@ -31,6 +32,12 @@ interface PhaseHeaderProps {
   onToggleExpanded: () => void;
 }
 
+interface SterilizationTool {
+  id: string;
+  isP2Status?: boolean;
+  [key: string]: unknown;
+}
+
 export const PhaseHeader: React.FC<PhaseHeaderProps> = ({
   phaseId,
   phaseConfig,
@@ -49,8 +56,8 @@ export const PhaseHeader: React.FC<PhaseHeaderProps> = ({
   const hasP2StatusTools = currentCycle?.tools.some((toolId: string) => {
     const tool = useSterilizationStore
       .getState()
-      .availableTools.find((t) => t.id === toolId);
-    return tool?.isP2Status;
+      .availableTools.find((t: Tool) => t.id === toolId);
+    return (tool as any)?.isP2Status;
   });
 
   return (

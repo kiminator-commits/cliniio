@@ -22,7 +22,13 @@ export default function IntegrationsTab({
     lastSync: new Date().toISOString(),
   };
 
-  const metrics = integrationMetrics || mockIntegrationMetrics;
+  const metrics = (integrationMetrics || mockIntegrationMetrics) as {
+    knowledgeHubArticles: number;
+    activeSuppliers: number;
+    recentAuditActions: number;
+    integrationHealth: number;
+    lastSync: string;
+  };
 
   if (!summary) {
     return (

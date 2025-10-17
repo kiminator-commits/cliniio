@@ -28,7 +28,6 @@ export interface InventoryItem extends BaseInventoryItem {
   lastServiced?: string | null;
   // Additional properties that might be missing from base type
   item?: string | null;
-  description?: string | null;
   sku?: string | null;
   tracked?: boolean | null;
   createdAt?: string | null;

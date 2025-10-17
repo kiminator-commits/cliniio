@@ -15,6 +15,18 @@ interface UseInventoryFormSubmissionReturn {
   resetSubmission: () => void;
 }
 
+interface InventoryItemData {
+  id?: string;
+  name: string;
+  description?: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  location?: string;
+  barcode?: string;
+  [key: string]: unknown;
+}
+
 export const useInventoryFormSubmission = ({
   onSuccess,
   onError,
@@ -48,17 +60,38 @@ export const useInventoryFormSubmission = ({
         // Prepare item data for submission
         const itemToSave = {
           id: formData.id,
-          name: formData.itemName || null,
-          category: formData.category || null,
-          location: formData.location || undefined,
-          status: formData.status || undefined,
+          name: formData.itemName || '',
+          category: formData.category || '',
+          location: formData.location || '',
+          status: formData.status || 'Active',
           quantity: parseInt(formData.quantity?.toString() || '1') || 1,
           unit_cost: parseCost(formData.unitCost?.toString()),
           facility_id: 'unknown',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          reorder_point: null,
-          expiration_date: null,
+          reorder_point: 0,
+          expiration_date: '',
+          supplier: '',
+          warranty: '',
+          serial_number: '',
+          manufacturer: '',
+          image_url: '',
+          tags: [],
+          favorite: false,
+          barcode: '',
+          sku: '',
+          description: formData.notes || '',
+          current_phase: 'Active',
+          is_active: true,
+          unit: '',
+          expiration: '',
+          purchase_date: formData.createdAt
+            ? new Date(formData.createdAt).toISOString()
+            : '',
+          last_serviced: formData.lastUpdated
+            ? new Date(String(formData.lastUpdated)).toISOString()
+            : '',
+          last_updated: new Date().toISOString(),
           data: {
             warranty: formData.notes,
             notes: formData.notes,
@@ -73,7 +106,7 @@ export const useInventoryFormSubmission = ({
         };
 
         // Submit to service
-        await inventoryServiceFacade.createItem(itemToSave);
+        await inventoryServiceFacade.createItem(itemToSave as any);
 
         onSuccess?.();
         return true;

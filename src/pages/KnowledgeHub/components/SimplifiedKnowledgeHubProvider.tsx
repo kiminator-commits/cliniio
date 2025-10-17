@@ -5,8 +5,8 @@ import React, {
   useState,
   ReactNode,
 } from 'react';
-import { knowledgeHubSupabaseService } from '../services/knowledgeHubSupabaseService';
-import type { ContentItem } from '../types';
+import { KnowledgeHubSupabaseService } from '../services/knowledgeHubSupabaseService';
+import type { ContentItem, ContentStatus } from '../types';
 
 interface KnowledgeHubContextType {
   content: ContentItem[];
@@ -26,7 +26,7 @@ const KnowledgeHubContext = createContext<KnowledgeHubContextType | undefined>(
 
 export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
   const [content, setContent] = useState<ContentItem[]>([]);
-  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(
+  const [_selectedContent, _setSelectedContent] = useState<ContentItem | null>(
     null
   );
   const [loading, setLoading] = useState(false);
@@ -35,12 +35,13 @@ export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
   const refresh = async () => {
     try {
       setLoading(true);
-      const data = await knowledgeHubSupabaseService.getAllContentItems();
+      const service = new KnowledgeHubSupabaseService();
+      const data = await service.fetchContent();
       setContent(data || []);
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading Knowledge Hub content:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -48,36 +49,36 @@ export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
 
   const addItem = async (item: ContentItem) => {
     try {
-      const newItem = await knowledgeHubSupabaseService.addContentItem(item);
+      const service = new KnowledgeHubSupabaseService();
+      const newItem = await service.createContent(item);
       setContent((prev) => [...prev, newItem]);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
   const updateItem = async (id: string, changes: Partial<ContentItem>) => {
     try {
-      const updated = await knowledgeHubSupabaseService.updateContentItem(
-        id,
-        changes
-      );
+      const service = new KnowledgeHubSupabaseService();
+      const updated = await service.updateContent(id, changes);
       setContent((prev) => prev.map((c) => (c.id === id ? updated : c)));
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
   const deleteItem = async (id: string) => {
     try {
-      await knowledgeHubSupabaseService.deleteContentItem(id);
+      const service = new KnowledgeHubSupabaseService();
+      await service.deleteContent(id);
       setContent((prev) => prev.filter((c) => c.id !== id));
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
   const updateStatus = async (id: string, status: string) => {
-    await updateItem(id, { status });
+    await updateItem(id, { status: status as ContentStatus });
   };
 
   useEffect(() => {
@@ -88,7 +89,7 @@ export const KnowledgeHubProvider = ({ children }: { children: ReactNode }) => {
     <KnowledgeHubContext.Provider
       value={{
         content,
-        selectedContent,
+        selectedContent: _selectedContent,
         loading,
         error,
         refresh,

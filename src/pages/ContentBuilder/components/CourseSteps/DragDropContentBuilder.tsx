@@ -14,6 +14,9 @@ import {
   mdiLink,
 } from '@mdi/js';
 
+// Utility function to generate unique IDs
+const generateId = () => `block-${crypto.randomUUID()}`;
+
 interface ContentBlock {
   id: string;
   type: 'text' | 'image' | 'video' | 'file' | 'link';
@@ -101,7 +104,7 @@ const DragDropContentBuilder: React.FC<DragDropContentBuilderProps> = ({
 
   const addNewBlock = (type: ContentBlock['type']) => {
     const newBlock: ContentBlock = {
-      id: `block-${Date.now()}-${Math.random()}`,
+      id: generateId(),
       type,
       content: '',
       order: blocks.length,

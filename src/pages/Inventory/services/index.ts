@@ -4,7 +4,6 @@
 
 // 🎯 PRIMARY ENTRY POINT - Use InventoryServiceFacade for ALL operations
 export {
-  InventoryServiceFacade,
   inventoryServiceFacade,
   InventoryServiceFacadeImpl,
 } from './inventoryServiceFacade';

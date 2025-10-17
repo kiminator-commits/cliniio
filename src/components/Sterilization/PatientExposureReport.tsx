@@ -73,15 +73,40 @@ interface ExposureReportProps {
 
 interface ExposureReport {
   incidentNumber: string;
-  totalRoomsAffected: number;
-  roomDetails: Array<{
-    roomId: string;
-    roomName: string;
-    contaminationDate: string; // When tools were marked dirty
-    roomUsedDate: string; // When room went "In Use"
-    usersInvolved: string[]; // Users who worked in room
-    contaminatedTools: string[]; // Tools contaminated during risk window
+  exposureSummary: {
+    totalPatientsExposed: number;
+    highRiskPatients: number;
+    mediumRiskPatients: number;
+    lowRiskPatients: number;
+  };
+  riskBreakdown: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  exposureDetails: Array<{
+    patientId: string;
+    riskLevel: string;
+    exposureDate: string;
+    procedures: string[];
   }>;
+  recommendations: string[];
+  generatedAt: string;
+  generatedBy: string;
+}
+
+interface PatientExposureReportData {
+  totalRoomsAffected?: number;
+  totalToolsAffected?: number;
+  riskAssessment?: string;
+  roomDetails?: Array<{
+    id: string;
+    name: string;
+    status: string;
+    toolsAffected: number;
+    [key: string]: unknown;
+  }>;
+  [key: string]: unknown;
 }
 
 export const PatientExposureReport: React.FC<ExposureReportProps> = ({
@@ -227,7 +252,7 @@ export const PatientExposureReport: React.FC<ExposureReportProps> = ({
                     </span>
                   </div>
                   <p className="text-2xl font-bold text-red-900 mb-3">
-                    {report.totalRoomsAffected}
+                    {(report as unknown as PatientExposureReportData).totalRoomsAffected || 0}
                   </p>
                   <div className="text-sm text-red-700 space-y-2">
                     <p className="font-medium">Risk Window Analysis:</p>
@@ -250,7 +275,7 @@ export const PatientExposureReport: React.FC<ExposureReportProps> = ({
               </div>
 
               {/* Room Details Table */}
-              {report.roomDetails && report.roomDetails.length > 0 ? (
+              {(report as unknown as PatientExposureReportData).roomDetails && (report as unknown as PatientExposureReportData).roomDetails!.length > 0 ? (
                 <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                   <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                     <h3 className="text-lg font-medium text-gray-900">
@@ -276,50 +301,46 @@ export const PatientExposureReport: React.FC<ExposureReportProps> = ({
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {report.roomDetails.map((room, index) => (
+                        {(report as unknown as PatientExposureReportData).roomDetails!.map((room, index: number) => (
                           <tr key={index} className="hover:bg-gray-50">
                             <td className="px-4 py-3 text-sm text-gray-900">
                               <div className="space-y-1">
                                 <div className="font-medium">
-                                  {new Date(
-                                    room.roomUsedDate
-                                  ).toLocaleDateString()}
+                                  {new Date(String(room.roomUsedDate)).toLocaleDateString()}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {new Date(
-                                    room.roomUsedDate
-                                  ).toLocaleTimeString()}
+                                  {new Date(String(room.roomUsedDate)).toLocaleTimeString()}
                                 </div>
                               </div>
                             </td>
                             <td className="px-4 py-3 text-sm text-gray-900">
                               <div className="space-y-1">
                                 <div className="font-medium">
-                                  {room.roomName}
+                                  {String(room.roomName)}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  ID: {room.roomId}
+                                  ID: {String(room.roomId)}
                                 </div>
                               </div>
                             </td>
                             <td className="px-4 py-3 text-sm text-gray-900">
-                              {room.contaminatedTools.length > 0 ? (
+                              {room.contaminatedTools && (room.contaminatedTools as any).length > 0 ? (
                                 <div className="space-y-2">
                                   <div className="text-xs text-gray-500 mb-1">
-                                    {room.contaminatedTools.length} tool
-                                    {room.contaminatedTools.length !== 1
+                                    {room.contaminatedTools && (room.contaminatedTools as any).length} tool
+                                    {room.contaminatedTools && (room.contaminatedTools as any).length !== 1
                                       ? 's'
                                       : ''}{' '}
                                     scanned dirty
                                   </div>
                                   <div className="flex flex-wrap gap-1">
-                                    {room.contaminatedTools.map(
+                                    {room.contaminatedTools && (room.contaminatedTools as any).map(
                                       (tool, toolIndex) => (
                                         <span
                                           key={toolIndex}
                                           className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
                                         >
-                                          {tool}
+                                          {String(tool)}
                                         </span>
                                       )
                                     )}

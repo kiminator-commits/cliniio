@@ -24,7 +24,7 @@ export class BIRealtimeService {
     // Check if Supabase is configured
     if (!isSupabaseConfigured()) {
       console.warn('⚠️ Supabase not configured, skipping BI test subscription');
-      return;
+      return undefined;
     }
 
     try {
@@ -55,7 +55,7 @@ export class BIRealtimeService {
     // Check if Supabase is configured
     if (!isSupabaseConfigured()) {
       console.warn('⚠️ Supabase not configured, skipping cycle subscription');
-      return;
+      return undefined;
     }
 
     try {

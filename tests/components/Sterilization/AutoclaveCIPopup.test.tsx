@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AutoclaveCIPopup } from '@/components/Sterilization/workflows/AutoclaveCIPopup';
 import { batchCiConfirmation } from '@/services/sterilization/ciConfirmationService';
-import { useComplianceSettingsStore } from '@/store/slices/complianceSettingsSlice';
+import { useComplianceSettingsStore } from '@/store/hooks/useComplianceSettingsStore';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 
@@ -12,7 +12,7 @@ vi.mock('@/services/sterilization/ciConfirmationService', () => ({
   batchCiConfirmation: vi.fn(),
 }));
 
-vi.mock('@/store/slices/complianceSettingsSlice', () => ({
+vi.mock('@/store/hooks/useComplianceSettingsStore', () => ({
   useComplianceSettingsStore: vi.fn(),
 }));
 
@@ -54,6 +54,11 @@ describe('AutoclaveCIPopup', () => {
     // Mock compliance settings
     (useComplianceSettingsStore as any).mockReturnValue({
       requireCi: true,
+      requireBi: false,
+      warnOnly: false,
+      loading: false,
+      fetchComplianceSettings: vi.fn(),
+      updateComplianceSettings: vi.fn(),
     });
 
     // Mock user context

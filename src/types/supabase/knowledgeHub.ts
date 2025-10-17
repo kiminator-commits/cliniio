@@ -54,7 +54,21 @@ export type {
   KnowledgeHubFunctions,
 } from './knowledgeHub/viewsAndFunctions';
 
-// Table types are imported from their respective modules above
+// Import the table types for use in the interface
+import type { KnowledgeHubCourseTable } from './knowledgeHub/courseTypes';
+import type { 
+  KnowledgeHubUserProgressTable,
+  KnowledgeHubAssignmentsTable 
+} from './knowledgeHub/progressTypes';
+import type { 
+  KnowledgeHubAchievementsTable,
+  KnowledgeHubUserAchievementsTable 
+} from './knowledgeHub/achievementTypes';
+import type { 
+  KnowledgeHubLearningPathsTable,
+  KnowledgeHubCertificatesTable 
+} from './knowledgeHub/learningTypes';
+import type { KnowledgeHubContentTable } from './knowledgeHub/contentTypes';
 
 // Knowledge Hub table definitions
 export interface KnowledgeHubTables {

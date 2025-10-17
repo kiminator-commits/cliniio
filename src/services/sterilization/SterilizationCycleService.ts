@@ -2,7 +2,7 @@ import { ToolService, ToolRow } from '@/services/tools/ToolService';
 import { SterilizationCycleCreator } from './SterilizationCycleCreator';
 import { SterilizationCycleRetriever } from './SterilizationCycleRetriever';
 import { SterilizationCycleCompleter } from './SterilizationCycleCompleter';
-import { SterilizationCycle, CreateCycleResult } from './SterilizationTypes';
+import { SterilizationCycle, CreateCycleResult } from './sterilizationTypes';
 
 /**
  * Main SterilizationCycleService - now acts as a facade for modular components
@@ -78,5 +78,5 @@ export async function loadDirtyToolsForCycle(): Promise<ToolRow[]> {
 export type {
   SterilizationCycle,
   CreateCycleResult,
-} from './SterilizationTypes';
-export type { SterilizationPhase } from './SterilizationTypes';
+} from './sterilizationTypes';
+export type { SterilizationPhase } from './sterilizationTypes';

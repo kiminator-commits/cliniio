@@ -1,6 +1,6 @@
 import { homeDataService } from '../../src/services/homeDataService';
 
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach, it } from 'vitest';
 // Mock the logger
 vi.mock('../../src/utils/logger', () => ({
   logger: {

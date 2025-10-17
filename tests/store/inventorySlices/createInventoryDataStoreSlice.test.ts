@@ -4,6 +4,7 @@ import {
   InventoryDataState,
 } from '../../../src/store/inventorySlices/createInventoryDataStoreSlice';
 import { LocalInventoryItem } from '@/types/inventoryTypes';
+import { describe, test, expect, beforeEach, it } from 'vitest';
 
 describe('createInventoryDataStoreSlice', () => {
   let store: StoreApi<InventoryDataState>;

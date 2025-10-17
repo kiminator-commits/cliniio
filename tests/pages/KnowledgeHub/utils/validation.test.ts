@@ -8,6 +8,7 @@ import {
   isContentItem,
   isRecentUpdate,
 } from '@/pages/KnowledgeHub/utils/validation';
+import { describe, test, expect, it } from 'vitest';
 import { ContentItem, RecentUpdate } from '@/pages/KnowledgeHub/types';
 
 describe('Validation Utilities', () => {

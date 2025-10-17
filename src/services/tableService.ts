@@ -84,7 +84,12 @@ export class TableService {
       // Use safe fields instead of select('*')
       const safeFields = getSafeFields(tableName);
       const safeQuery = (
-        query as { select: (fields: string) => unknown }
+        query as { 
+          select: (fields: string) => { 
+            eq: (column: string, value: string | number | boolean) => unknown;
+            order: (column: string, options?: { ascending?: boolean }) => unknown;
+          }
+        }
       ).select(safeFields);
 
       // Apply facility filter if provided
@@ -99,7 +104,8 @@ export class TableService {
         });
       }
 
-      const { data, error } = await safeQuery;
+      const result = await safeQuery as unknown as { data: unknown[]; error: unknown };
+      const { data, error } = result;
 
       const duration = Date.now() - startTime;
       const rowCount = data?.length || 0;
@@ -115,7 +121,7 @@ export class TableService {
       if (error) {
         return {
           data: null,
-          error: `Failed to fetch records from ${tableName}: ${error.message}`,
+          error: `Failed to fetch records from ${tableName}: ${(error as Error).message}`,
         };
       }
 
