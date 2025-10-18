@@ -9,10 +9,14 @@ export class FileReader {
    */
   static async readFileContent(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
-      const reader = new globalThis.FileReader() as any;
+      const reader = new globalThis.FileReader();
       reader.onload = (e: ProgressEvent<globalThis.FileReader>) => {
-        const content = (e.target as any)?.result as string;
-        resolve(content);
+        const content = e.target?.result;
+        if (typeof content === 'string') {
+          resolve(content);
+        } else {
+          reject(new Error('Failed to read file as text'));
+        }
       };
       reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsText(file);

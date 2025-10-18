@@ -36,7 +36,7 @@ export class InventoryInflationForecastService {
       const cached = this.getCachedData<InventoryInflationForecast[]>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn(
           'No facility ID provided for inventory inflation forecast'
         );

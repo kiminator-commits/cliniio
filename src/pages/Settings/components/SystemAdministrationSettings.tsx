@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import OfficeHoursSettings from './OfficeHoursSettings';
-import UserManagement from './UserManagement';
+import UserManagementTab from '../../../components/UserManagementTab';
 import UserForm from './UserForm';
 import UserModals from './UserModals';
 import SecuritySessionsSettings from './SecuritySessionsSettings';
 import AuditDashboardPage from '../../Admin/AuditDashboardPage';
-import { Badge } from '../../../components/ui/badge';
+import { Badge as _Badge } from '../../../components/ui/badge';
 import { supabase } from '../../../lib/supabaseClient';
 // import BillingTierManager from './BillingTierManager';
 
@@ -18,16 +18,24 @@ interface User {
   twoFactorEnabled: boolean;
 }
 
-const SystemAdministrationSettings: React.FC = () => {
+interface SystemAdministrationSettingsProps {
+  initialTab?: string | null;
+  complianceFlagCount?: number;
+}
+
+const SystemAdministrationSettings: React.FC<SystemAdministrationSettingsProps> = ({ 
+  initialTab, 
+  complianceFlagCount = 0 
+}) => {
   const [users] = useState<User[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'security' | 'audit'>(
-    'users'
+  const [activeTab, setActiveTab] = useState<'users' | 'office-hours' | 'security' | 'audit'>(
+    (initialTab === 'audit' ? 'audit' : initialTab === 'security' ? 'security' : initialTab === 'office-hours' ? 'office-hours' : 'users')
   );
-  const [flagCount, setFlagCount] = useState<number>(0);
+  const [_flagCount, setFlagCount] = useState<number>(0);
 
   // Calculate billing tier information
   const getBillingTierInfo = () => {
@@ -63,7 +71,7 @@ const SystemAdministrationSettings: React.FC = () => {
     };
   };
 
-  const billingTierInfo = getBillingTierInfo();
+  const _billingTierInfo = getBillingTierInfo();
 
   // Fetch audit flag count
   useEffect(() => {
@@ -84,17 +92,17 @@ const SystemAdministrationSettings: React.FC = () => {
   }, []);
 
   // Handler functions for the refactored components
-  const handleEditUser = (user: User) => {
+  const _handleEditUser = (user: User) => {
     setSelectedUser(user);
     setShowEditModal(true);
   };
 
-  const handleDeleteUser = (user: User) => {
+  const _handleDeleteUser = (user: User) => {
     setSelectedUser(user);
     setShowDeleteModal(true);
   };
 
-  const handleAddUser = () => {
+  const _handleAddUser = () => {
     setShowAddUserModal(true);
   };
 
@@ -136,6 +144,16 @@ const SystemAdministrationSettings: React.FC = () => {
               User Management
             </button>
             <button
+              onClick={() => setActiveTab('office-hours')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'office-hours'
+                  ? 'border-[#4ECDC4] text-[#4ECDC4]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Office Hours
+            </button>
+            <button
               onClick={() => setActiveTab('security')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'security'
@@ -151,14 +169,13 @@ const SystemAdministrationSettings: React.FC = () => {
                 activeTab === 'audit'
                   ? 'border-[#4ECDC4] text-[#4ECDC4]'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } ${
+                complianceFlagCount > 0 
+                  ? 'bg-red-50 text-red-700 border-red-300' 
+                  : ''
               }`}
             >
               <span>Audit & Compliance</span>
-              {flagCount > 0 && (
-                <Badge variant="destructive" className="ml-2">
-                  ⚠️ {flagCount}
-                </Badge>
-              )}
             </button>
           </nav>
         </div>
@@ -168,19 +185,14 @@ const SystemAdministrationSettings: React.FC = () => {
       {activeTab === 'users' && (
         <>
           {/* User Management */}
-          <UserManagement
-            users={users}
-            onEditUser={handleEditUser}
-            onDeleteUser={handleDeleteUser}
-            onAddUser={handleAddUser}
-            billingTierInfo={billingTierInfo}
-          />
-
-          {/* Office Hours & Scheduling */}
-          <div className="mb-6 border-t pt-6">
-            <OfficeHoursSettings />
-          </div>
+          <UserManagementTab />
         </>
+      )}
+
+      {activeTab === 'office-hours' && (
+        <div>
+          <OfficeHoursSettings />
+        </div>
       )}
 
       {activeTab === 'security' && (

@@ -242,7 +242,7 @@ export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
   }
 
   async createItem(item: LocalInventoryItem): Promise<InventoryCreateResponse> {
-    return await this.coreService.createItem(item);
+    return await this.coreService.createItem(item as unknown as Record<string, unknown>);
   }
 
   async updateItem(
@@ -257,7 +257,7 @@ export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
   }
 
   async addInventoryItem(item: LocalInventoryItem): Promise<InventoryItem> {
-    return await this.coreService.addInventoryItem(item) as any;
+    return await this.coreService.addInventoryItem(item as unknown as Record<string, unknown>) as unknown as InventoryItem;
   }
 
   async addCategory(category: string): Promise<{ success: boolean; error: string | null }> {

@@ -412,15 +412,13 @@ export class IntelligenceIntegrationService {
         .single();
 
       if (tableError || !tableExists) {
-        console.log(
-          '📊 inventory_suppliers table not found, using default count'
-        );
+        // Table doesn't exist, use default count - this is expected
         return 5;
       }
 
       return 5;
     } catch (error) {
-      console.log('📊 Exception fetching supplier count:', error);
+      // Expected error when table doesn't exist
       return 5;
     }
   }

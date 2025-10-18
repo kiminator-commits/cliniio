@@ -6,7 +6,7 @@ import {
   ProfileSettingsProvider,
   useProfileSettingsContext,
 } from './ProfileAccountSettings/context';
-import { MobileShortcuts, BasicInfoForm, UserData } from './ProfileAccountSettings/types';
+import { MobileShortcuts, BasicInfoForm, UserData as ProfileUserData, ProfileSettingsState } from './ProfileAccountSettings/types';
 
 interface Preferences {
   theme?: string;
@@ -22,7 +22,7 @@ const ProfileAccountSettingsContent: React.FC = () => {
     state,
     setState,
     fetchUserData,
-    handleSave,
+    handleSave: _handleSave,
     handlePasswordChange,
     handleArchiveAccount,
     uploadProfilePhoto,
@@ -90,7 +90,7 @@ const ProfileAccountSettingsContent: React.FC = () => {
             setBasicInfoForm={(formData) =>
               setState((prev) => ({ ...prev, basicInfoForm: formData as BasicInfoForm }))
             }
-            userData={state.userData ? { avatar_url: state.userData.profile_photo } : null}
+            userData={state.userData ? { avatar_url: state.userData.avatar_url } : null}
             uploadingPhoto={state.uploadingPhoto}
             uploadProfilePhoto={uploadProfilePhoto}
             removeProfilePhoto={removeProfilePhoto}
@@ -110,7 +110,7 @@ const ProfileAccountSettingsContent: React.FC = () => {
               },
             }}
             setPreferences={(preferences) => {
-              setState((prev: any) => ({
+              setState((prev: ProfileSettingsState) => ({
                 ...prev,
                 preferences: {
                   ...prev.preferences,
@@ -118,7 +118,7 @@ const ProfileAccountSettingsContent: React.FC = () => {
                   notifications: {
                     ...prev.preferences.notifications,
                     push: (preferences as Preferences).notifications?.push,
-                    sound: (preferences as Preferences).notifications?.sound,
+                    sound: (preferences as Preferences).notifications?.sound as unknown as string,
                     volume: (preferences as Preferences).notifications?.volume,
                   },
                 },
@@ -140,7 +140,7 @@ const ProfileAccountSettingsContent: React.FC = () => {
 
         {state.activeTab === 'account' && (
           <AccountTab
-            userData={state.userData as any}
+            userData={state.userData as unknown as ProfileUserData}
             onPasswordChange={handlePasswordChange}
             onOpenPasswordModal={() =>
               setState((prev) => ({ ...prev, showPasswordModal: true }))

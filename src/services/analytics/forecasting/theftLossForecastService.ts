@@ -34,7 +34,7 @@ export class TheftLossForecastService {
       const cached = this.getCachedData<TheftLossEstimate>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for theft/loss estimation');
         return {
           estimatedLossPercentage: 0,

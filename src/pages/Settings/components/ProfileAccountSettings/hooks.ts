@@ -264,7 +264,7 @@ export const useProfileSettings = () => {
       setState((prev) => ({
         ...prev,
         userData: prev.userData
-          ? { ...prev.userData, profile_photo_url: publicUrl }
+          ? { ...prev.userData, avatar_url: publicUrl }
           : null,
       }));
 
@@ -286,7 +286,7 @@ export const useProfileSettings = () => {
       setState((prev) => ({
         ...prev,
         userData: prev.userData
-          ? { ...prev.userData, profile_photo_url: null }
+          ? { ...prev.userData, avatar_url: null }
           : null,
       }));
 

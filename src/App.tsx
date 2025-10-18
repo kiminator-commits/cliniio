@@ -400,9 +400,9 @@ function App() {
                   />
                   <Route path="/" element={<Navigate to="/home" replace />} />
                 </Routes>
-                <GlobalBIFailureBanner />
                 <NotificationContainer />
               </NavigationProvider>
+              <GlobalBIFailureBanner />
             </Router>
           </FacilityProvider>
         </UserProvider>

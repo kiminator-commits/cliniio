@@ -17,12 +17,14 @@ interface DrawerMenuProps {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
+  hasComplianceIssues?: boolean;
 }
 
 export const DrawerMenu: React.FC<DrawerMenuProps> = ({
   isOpen,
   onOpen,
   onClose,
+  hasComplianceIssues = false,
 }) => {
   const { currentUser, getUserDisplayName, isLoading, clearUserData } =
     useUser();
@@ -142,7 +144,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
             <button
               key={path}
               onClick={() => handleNavigation(path)}
-              className={`flex items-center transition-colors duration-200 w-full text-left touch-manipulation ${
+              className={`flex items-center transition-colors duration-200 w-full text-left touch-manipulation relative ${
                 isOpen
                   ? 'px-4 sm:px-6 py-4'
                   : 'px-3 sm:px-4 py-4 justify-center'
@@ -160,11 +162,25 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
                 aria-hidden="true"
               />
               {isOpen && (
-                <span
-                  className={`font-medium whitespace-nowrap ${currentPath === path ? 'text-[#4ECDC4]' : 'text-[#5b5b5b]'}`}
-                >
-                  {label}
-                </span>
+                <div className="flex items-center justify-between w-full">
+                  <span
+                    className={`font-medium whitespace-nowrap ${currentPath === path ? 'text-[#4ECDC4]' : 'text-[#5b5b5b]'}`}
+                  >
+                    {label}
+                  </span>
+                  {/* Compliance warning badge for Settings */}
+                  {path === '/settings' && hasComplianceIssues && (
+                    <div className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold ml-2">
+                      !
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Compliance warning badge for Settings (collapsed menu) */}
+              {!isOpen && path === '/settings' && hasComplianceIssues && (
+                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  !
+                </div>
               )}
             </button>
           ))}

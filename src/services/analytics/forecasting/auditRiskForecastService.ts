@@ -35,7 +35,7 @@ export class AuditRiskForecastService {
       const cached = this.getCachedData<AuditRiskScore>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for audit risk score');
         return null;
       }
@@ -157,7 +157,7 @@ export class AuditRiskForecastService {
       const cached = this.getCachedData<TrainingKnowledgeGaps>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for training knowledge gaps');
         return null;
       }

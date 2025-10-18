@@ -137,7 +137,7 @@ export const useHomeDataLoader = (): HomeData => {
         return;
       } else {
         // Facility failed to load, use fallback
-        facilityId = 'demo-facility-id';
+        facilityId = '550e8400-e29b-41d4-a716-446655440000';
       }
 
       // Load essential data in parallel including gamification data

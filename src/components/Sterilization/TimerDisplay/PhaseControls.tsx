@@ -18,7 +18,7 @@ interface PhaseControlsProps {
   onMoveToNextPhase: (phaseId: string) => void;
 }
 
-interface SterilizationTool {
+interface _SterilizationTool {
   id: string;
   isP2Status?: boolean;
   [key: string]: unknown;
@@ -41,7 +41,7 @@ export const PhaseControls: React.FC<PhaseControlsProps> = ({
     const tool = useSterilizationStore
       .getState()
       .availableTools.find((t: Tool) => t.id === toolId);
-    return (tool as any)?.isP2Status;
+    return (tool as Tool)?.isP2Status;
   });
 
   // Show "Move to Next Phase" button when:

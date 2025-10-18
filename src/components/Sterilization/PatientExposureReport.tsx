@@ -324,17 +324,17 @@ export const PatientExposureReport: React.FC<ExposureReportProps> = ({
                               </div>
                             </td>
                             <td className="px-4 py-3 text-sm text-gray-900">
-                              {room.contaminatedTools && (room.contaminatedTools as any).length > 0 ? (
+                              {room.contaminatedTools && Array.isArray(room.contaminatedTools) && room.contaminatedTools.length > 0 ? (
                                 <div className="space-y-2">
                                   <div className="text-xs text-gray-500 mb-1">
-                                    {room.contaminatedTools && (room.contaminatedTools as any).length} tool
-                                    {room.contaminatedTools && (room.contaminatedTools as any).length !== 1
+                                    {room.contaminatedTools && Array.isArray(room.contaminatedTools) && room.contaminatedTools.length} tool
+                                    {room.contaminatedTools && Array.isArray(room.contaminatedTools) && room.contaminatedTools.length !== 1
                                       ? 's'
                                       : ''}{' '}
                                     scanned dirty
                                   </div>
                                   <div className="flex flex-wrap gap-1">
-                                    {room.contaminatedTools && (room.contaminatedTools as any).map(
+                                    {room.contaminatedTools && Array.isArray(room.contaminatedTools) && room.contaminatedTools.map(
                                       (tool, toolIndex) => (
                                         <span
                                           key={toolIndex}

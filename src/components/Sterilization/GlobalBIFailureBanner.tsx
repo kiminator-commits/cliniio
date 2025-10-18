@@ -50,8 +50,8 @@ const BIFailureBannerContent: React.FC<GlobalBIFailureBannerProps> = ({
               <span className="text-sm bg-red-700 px-2 py-1 rounded">
                 {biFailureDetails?.failure_date && typeof biFailureDetails.failure_date === 'string'
                   ? new Date(biFailureDetails.failure_date).toLocaleDateString()
-                  : (biFailureDetails?.failure_date as any) instanceof Date
-                    ? (biFailureDetails.failure_date as any).toLocaleDateString()
+                  : biFailureDetails?.failure_date && (biFailureDetails.failure_date as unknown as Date) instanceof Date
+                    ? (biFailureDetails.failure_date as unknown as Date).toLocaleDateString()
                     : 'Today'}
               </span>
             </div>

@@ -40,7 +40,7 @@ export class AutoclaveCapacityForecastService {
       const cached = this.getCachedData<AutoclaveCapacityForecast[]>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for autoclave capacity forecast');
         return [];
       }

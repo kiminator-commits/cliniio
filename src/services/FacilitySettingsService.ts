@@ -16,7 +16,7 @@ export class FacilitySettingsService {
         .from('facility_settings')
         .select('*')
         .eq('facility_id', facilityId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching facility settings:', error);

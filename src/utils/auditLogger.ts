@@ -58,7 +58,10 @@ export const logSterilizationEvent = async (event: SterilizationEvent) => {
 
     // Get current user and facility IDs
     const facilityId = await FacilityService.getCurrentFacilityId();
-    const userId = 'unknown'; // TODO: Get actual user ID
+    
+    // Get actual user ID from Supabase auth
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || crypto.randomUUID();
 
     const electronicSignature = `${event.operator || 'unknown'}-${Date.now()}`;
     const signature = generateAuditSignature(
@@ -107,7 +110,10 @@ export const useAuditLogger = () => {
 
       // Get current user and facility IDs
       const facilityId = await FacilityService.getCurrentFacilityId();
-      const userId = 'unknown'; // TODO: Get actual user ID
+      
+      // Get actual user ID from Supabase auth
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id || crypto.randomUUID();
 
       const { error } = await supabase.from('audit_logs').insert({
         id: crypto.randomUUID(),
@@ -162,7 +168,10 @@ export const auditLogger = {
 
       // Get current user and facility IDs
       const facilityId = await FacilityService.getCurrentFacilityId();
-      const userId = 'unknown'; // TODO: Get actual user ID
+      
+      // Get actual user ID from Supabase auth
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id || crypto.randomUUID();
 
       const { error } = await supabase.from('audit_logs').insert({
         id: crypto.randomUUID(),

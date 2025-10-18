@@ -90,7 +90,7 @@ export const uploadScannedItems = async (
     }
 
     // Convert ParsedItem to InventoryItem format
-    const inventoryItems: any[] =
+    const inventoryItems: Record<string, unknown>[] =
       items.map((item) => ({
         name: item.name || item.item,
         category: item.category || 'Unknown',
@@ -136,7 +136,7 @@ export const uploadScannedItems = async (
 
     // Upload items using InventoryServiceFacade
     const uploadPromises = inventoryItems.map((item) =>
-      inventoryServiceFacade.createItem(item as any)
+      inventoryServiceFacade.createItem(item as unknown as InventoryItem)
     );
 
     const results = await Promise.allSettled(uploadPromises);

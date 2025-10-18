@@ -297,7 +297,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
     return (this.getAllItems() as unknown as Promise<InventoryItem[]>) || [];
   }
 
-  async addInventoryItem(item: any): Promise<any> {
+  async addInventoryItem(item: Record<string, unknown>): Promise<any> {
     if (!this.isInitialized) {
       throw new Error('Supabase adapter not initialized');
     }
@@ -305,9 +305,9 @@ export class SupabaseAdapter implements InventoryDataAdapter {
     try {
       const supabaseItem = InventoryDataTransformer.transformToSupabase(item);
       const response = await InventoryCrudOperations.createItem(
-        supabaseItem as Omit<InventoryItem, 'id' | 'lastUpdated'>
+        supabaseItem as unknown as Omit<InventoryItem, 'id' | 'lastUpdated'>
       );
-      return response;
+      return response as unknown as any;
     } catch (error) {
       throw new Error(
         `Failed to add inventory item: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -326,7 +326,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
     // For now, we'll just log it
   }
 
-  async batchAddItems(items: any[]): Promise<any[]> {
+  async batchAddItems(items: Record<string, unknown>[]): Promise<any[]> {
     const results: any[] = [];
     for (const item of items) {
       try {
@@ -343,7 +343,7 @@ export class SupabaseAdapter implements InventoryDataAdapter {
   async batchUpdateItems(
     updates: Array<{ id: string; item: Partial<any> }>
   ): Promise<any[]> {
-    const results: any[] = [];
+    const results: InventoryItem[] = [];
     for (const update of updates) {
       try {
         const result = await this.updateInventoryItem(update.id, update.item);
@@ -500,9 +500,9 @@ export class SupabaseAdapter implements InventoryDataAdapter {
     try {
       // Use typed adapter for type-safe realtime subscriptions
       return this.typedAdapter.subscribeToChanges(
-        (payload: RealtimeInventoryPayload) => {
+        (payload: Record<string, unknown>) => {
           if (callback) {
-            callback(payload);
+            callback(payload as unknown as RealtimeInventoryPayload);
           }
         },
         { event: '*' }

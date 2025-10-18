@@ -11,6 +11,33 @@ export async function fetchAuditFlags(): Promise<AuditFlag[]> {
   return data ?? [];
 }
 
+export async function fetchHistoricalCompliance(
+  startDate?: string, 
+  endDate?: string, 
+  includeResolved: boolean = true
+): Promise<AuditFlag[]> {
+  let query = supabase
+    .from('audit_flags')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (startDate) {
+    query = query.gte('created_at', startDate);
+  }
+  
+  if (endDate) {
+    query = query.lte('created_at', endDate);
+  }
+
+  if (!includeResolved) {
+    query = query.eq('resolved', false);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function fetchRecentActivity(): Promise<ActivityRecord[]> {
   const { data, error } = await supabase
     .from('activity_feed')

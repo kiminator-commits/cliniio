@@ -28,13 +28,6 @@ export interface SearchResult {
   options: SearchOptions;
 }
 
-interface QueryBuilder {
-  eq(column: string, value: string): QueryBuilder;
-  ilike(column: string, pattern: string): QueryBuilder;
-  order(column: string, options?: { ascending?: boolean }): QueryBuilder;
-  range(from: number, to: number): QueryBuilder;
-  [key: string]: unknown;
-}
 
 export class KHSearchProvider {
   private tableName = 'knowledge_hub_courses';
@@ -48,41 +41,41 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder: any = supabase
+      let queryBuilder = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
-        .eq('is_active', true);
+        .eq('is_active', true) as unknown;
 
       // Add text search
       if (query && query.trim() !== '') {
         const searchQuery =
           KHDataTransformationProvider.createSearchQuery(query);
-        queryBuilder = queryBuilder.or(searchQuery);
+        queryBuilder = (queryBuilder as unknown).or(searchQuery);
       }
 
       // Add filters
       if (filters) {
-        queryBuilder = this.applyFilters(queryBuilder as any, filters);
+        queryBuilder = this.applyFilters(queryBuilder, filters);
       }
 
       // Apply options
       if (options) {
-        queryBuilder = this.applyOptions(queryBuilder as any, options);
+        queryBuilder = this.applyOptions(queryBuilder, options);
       } else {
         // Default ordering
-        queryBuilder = queryBuilder.order('created_at', { ascending: false });
+        queryBuilder = (queryBuilder as unknown).order('created_at', { ascending: false });
       }
 
-      const { data, error, count } = await queryBuilder;
+      const { data, error, count } = await (queryBuilder as unknown);
 
       if (error) throw error;
 
       const content =
-        KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+        KHDataTransformationProvider.transformRawRowsToContentItems((data as Record<string, unknown>[]) || []);
 
       return {
         content,
-        total: count || 0,
+        total: (count as number) || 0,
         query,
         filters: filters || {},
         options: options || {},
@@ -104,33 +97,33 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder: any = supabase
+      let queryBuilder = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
-        .eq('is_active', true);
+        .eq('is_active', true) as unknown;
 
       // Search for content that contains any of the specified tags
       if (tags.length > 0) {
-        queryBuilder = queryBuilder.overlaps('tags', tags);
+        queryBuilder = (queryBuilder as unknown).overlaps('tags', tags);
       }
 
       // Apply options
       if (options) {
-        queryBuilder = this.applyOptions(queryBuilder as any, options);
+        queryBuilder = this.applyOptions(queryBuilder, options);
       } else {
-        queryBuilder = queryBuilder.order('created_at', { ascending: false });
+        queryBuilder = (queryBuilder as unknown).order('created_at', { ascending: false });
       }
 
-      const { data, error, count } = await queryBuilder;
+      const { data, error, count } = await (queryBuilder as unknown);
 
       if (error) throw error;
 
       const content =
-        KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+        KHDataTransformationProvider.transformRawRowsToContentItems((data as Record<string, unknown>[]) || []);
 
       return {
         content,
-        total: count || 0,
+        total: (count as number) || 0,
         query: '',
         filters: { tags },
         options: options || {},
@@ -153,41 +146,41 @@ export class KHSearchProvider {
     options?: SearchOptions;
   }): Promise<SearchResult> {
     try {
-      let queryBuilder: any = supabase
+      let queryBuilder = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
-        .eq('is_active', true);
+        .eq('is_active', true) as unknown;
 
       // Add text search
       if (criteria.query && criteria.query.trim() !== '') {
         const searchQuery = KHDataTransformationProvider.createSearchQuery(
           criteria.query
         );
-        queryBuilder = queryBuilder.or(searchQuery);
+        queryBuilder = (queryBuilder as unknown).or(searchQuery);
       }
 
       // Add filters
       if (criteria.filters) {
-        queryBuilder = this.applyFilters(queryBuilder as any, criteria.filters);
+        queryBuilder = this.applyFilters(queryBuilder, criteria.filters);
       }
 
       // Apply options
       if (criteria.options) {
-        queryBuilder = this.applyOptions(queryBuilder as any, criteria.options);
+        queryBuilder = this.applyOptions(queryBuilder, criteria.options);
       } else {
-        queryBuilder = queryBuilder.order('created_at', { ascending: false });
+        queryBuilder = (queryBuilder as unknown).order('created_at', { ascending: false });
       }
 
-      const { data, error, count } = await queryBuilder;
+      const { data, error, count } = await (queryBuilder as unknown);
 
       if (error) throw error;
 
       const content =
-        KHDataTransformationProvider.transformRawRowsToContentItems(data || []);
+        KHDataTransformationProvider.transformRawRowsToContentItems((data as Record<string, unknown>[]) || []);
 
       return {
         content,
-        total: count || 0,
+        total: (count as number) || 0,
         query: criteria.query || '',
         filters: criteria.filters || {},
         options: criteria.options || {},
@@ -308,59 +301,55 @@ export class KHSearchProvider {
    * Apply filters to query builder
    */
   private applyFilters(
-    queryBuilder: QueryBuilder,
+    queryBuilder: unknown,
     filters: SearchFilters
-  ): QueryBuilder {
+  ): unknown {
+    const qb = queryBuilder as unknown;
     if (filters.category) {
-      queryBuilder = queryBuilder.eq(
-        'content_type',
-        filters.category.toLowerCase()
-      );
+      qb.eq('content_type', filters.category.toLowerCase());
     }
     if (filters.status) {
-      queryBuilder = queryBuilder.eq('status', filters.status);
+      qb.eq('status', filters.status);
     }
     if (filters.department) {
-      queryBuilder = queryBuilder.eq('department', filters.department);
+      qb.eq('department', filters.department);
     }
     if (filters.domain) {
-      queryBuilder = queryBuilder.eq('domain', filters.domain);
+      qb.eq('domain', filters.domain);
     }
     if (filters.difficultyLevel) {
-      queryBuilder = queryBuilder.eq(
-        'difficulty_level',
-        filters.difficultyLevel
-      );
+      qb.eq('difficulty_level', filters.difficultyLevel);
     }
     if (filters.tags && filters.tags.length > 0) {
-      queryBuilder = (queryBuilder as any).overlaps('tags', filters.tags);
+      qb.overlaps('tags', filters.tags);
     }
 
-    return queryBuilder;
+    return qb;
   }
 
   /**
    * Apply options to query builder
    */
   private applyOptions(
-    queryBuilder: QueryBuilder,
+    queryBuilder: unknown,
     options: SearchOptions
-  ): QueryBuilder {
+  ): unknown {
+    const qb = queryBuilder as unknown;
     if (options.limit) {
-      queryBuilder = (queryBuilder as any).limit(options.limit);
+      qb.limit(options.limit);
     }
     if (options.offset) {
-      queryBuilder = (queryBuilder as any).range(
+      qb.range(
         options.offset,
         options.offset + (options.limit || 10) - 1
       );
     }
     if (options.sortBy) {
-      queryBuilder = (queryBuilder as any).order(options.sortBy, {
+      qb.order(options.sortBy, {
         ascending: options.sortOrder === 'asc',
       });
     }
 
-    return queryBuilder;
+    return qb;
   }
 }

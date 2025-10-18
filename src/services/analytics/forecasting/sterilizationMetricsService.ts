@@ -40,7 +40,7 @@ export class SterilizationMetricsService {
       const cached = this.getCachedData<ToolTurnoverUtilization[]>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for tool turnover utilization');
         return [];
       }

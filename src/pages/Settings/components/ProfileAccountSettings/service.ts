@@ -75,6 +75,13 @@ export class ProfileSettingsService {
   }
 
   static async saveProfile(userId: string, profileData: BasicInfoForm) {
+    // First, get the current user profile to preserve avatar_url
+    const { data: currentProfile } = await supabase
+      .from('users')
+      .select('avatar_url')
+      .eq('id', userId)
+      .single();
+
     const { error } = await supabase
       .from('users')
       .update({
@@ -88,6 +95,7 @@ export class ProfileSettingsService {
         bio: profileData.bio,
         preferred_language: profileData.preferred_language,
         timezone: profileData.timezone,
+        avatar_url: currentProfile?.avatar_url || null, // Preserve existing avatar_url
         updated_at: new Date().toISOString(),
       })
       .eq('id', userId);
@@ -150,7 +158,7 @@ export class ProfileSettingsService {
 
     const { error: updateError } = await supabase
       .from('users')
-      .update({ profile_photo_url: publicUrl })
+      .update({ avatar_url: publicUrl })
       .eq('id', userId);
 
     if (updateError) {
@@ -163,7 +171,7 @@ export class ProfileSettingsService {
   static async removeProfilePhoto(userId: string) {
     const { error } = await supabase
       .from('users')
-      .update({ profile_photo_url: null })
+      .update({ avatar_url: null })
       .eq('id', userId);
 
     if (error) {

@@ -31,12 +31,12 @@ const InventoryManagementSettings: React.FC = () => {
   const {
     settings,
     setSettings,
-    aiSettings,
-    aiMessage,
+    aiSettings: _aiSettings,
+    aiMessage: _aiMessage,
     isLoading,
-    handleAISettingChange,
-    handleAISettingsSave,
-    handleAISettingsReset,
+    handleAISettingChange: _handleAISettingChange,
+    handleAISettingsSave: _handleAISettingsSave,
+    handleAISettingsReset: _handleAISettingsReset,
     saveSettings,
     loadSettings,
   } = useInventorySettings();

@@ -123,7 +123,7 @@ export const useAnalytics = (filters: AnalyticsFilters = { dateRange: { start: n
 
     try {
       const analyticsService = new AnalyticsDataService();
-      const allData = await (analyticsService as AnalyticsService).getAllAnalytics(filters);
+      const _allData = await (analyticsService as AnalyticsService).getAllAnalytics(filters);
 
       setState({
         data: {

@@ -74,7 +74,7 @@ const ScanModalActions: React.FC<ScanModalActionsProps> = ({
       // Use Inventory workflow: Remove scanned items
       const removalPromises = scannedItems.map(async (barcode) => {
         const itemToRemove = inventoryItems.find(
-          (item) => (item.data as any)?.barcode === barcode || item.id === barcode
+          (item) => (item.data as Record<string, unknown>)?.barcode === barcode || item.id === barcode
         );
 
         if (itemToRemove) {

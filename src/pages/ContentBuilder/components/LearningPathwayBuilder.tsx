@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Icon from '@mdi/react';
 import { mdiBookOpen, mdiPlus } from '@mdi/js';
 import { supabase } from '../../../lib/supabase';
+import { ContentItem } from '@/pages/KnowledgeHub/types';
 import {
   PathwaySection,
   AvailableContent,
@@ -85,20 +86,20 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
 
       const allContent = [
         ...((coursesResult.data as CourseRow[]) || []).map(
-          (item: CourseRow) => CONTENT_TRANSFORMATIONS.COURSE(item as any)
+          (item: CourseRow) => CONTENT_TRANSFORMATIONS.COURSE(item as unknown as Record<string, unknown>) as unknown as ContentItem
         ),
         ...((policiesResult.data as PolicyRow[]) || []).map(
-          (item: PolicyRow) => CONTENT_TRANSFORMATIONS.POLICY(item as any)
+          (item: PolicyRow) => CONTENT_TRANSFORMATIONS.POLICY(item as unknown as Record<string, unknown>) as unknown as ContentItem
         ),
         ...((proceduresResult.data as ProcedureRow[]) || []).map(
-          (item: ProcedureRow) => CONTENT_TRANSFORMATIONS.PROCEDURE(item as any)
+          (item: ProcedureRow) => CONTENT_TRANSFORMATIONS.PROCEDURE(item as unknown as Record<string, unknown>) as unknown as ContentItem
         ),
         ...((sdsResult.data as SDSRow[]) || []).map(
-          (item: SDSRow) => CONTENT_TRANSFORMATIONS.SDS(item as any)
+          (item: SDSRow) => CONTENT_TRANSFORMATIONS.SDS(item as unknown as Record<string, unknown>) as unknown as ContentItem
         ),
       ];
 
-        setAvailableContent(allContent as any);
+        setAvailableContent(allContent as unknown as AvailableContent[]);
     } catch (error) {
       console.error('Error fetching available content:', error);
     } finally {

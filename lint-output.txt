@@ -1,0 +1,6 @@
+
+> lint
+> eslint --config .eslintrc.json src/ --ignore-pattern "src/__mocks__/**" --ignore-pattern "**/*.test.*" --ignore-pattern "**/*.spec.*"
+
+Terminate batch job (Y/N)? Terminate batch job (Y/N)? 
+^C

@@ -32,7 +32,7 @@ interface PhaseHeaderProps {
   onToggleExpanded: () => void;
 }
 
-interface SterilizationTool {
+interface _SterilizationTool {
   id: string;
   isP2Status?: boolean;
   [key: string]: unknown;
@@ -57,7 +57,7 @@ export const PhaseHeader: React.FC<PhaseHeaderProps> = ({
     const tool = useSterilizationStore
       .getState()
       .availableTools.find((t: Tool) => t.id === toolId);
-    return (tool as any)?.isP2Status;
+    return (tool as Tool)?.isP2Status;
   });
 
   return (

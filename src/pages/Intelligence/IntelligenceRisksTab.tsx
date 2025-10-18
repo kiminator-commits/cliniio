@@ -119,10 +119,10 @@ export const IntelligenceRisksTab: React.FC<IntelligenceRisksTabProps> = ({
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
                           (Number(factor.severity) || 0) >= 8
-                            ? 'bg-red-100 text-red-800'
+                            ? 'bg-red-500 text-white hover:bg-red-600'
                             : (Number(factor.severity) || 0) >= 6
-                              ? 'bg-orange-100 text-orange-800'
-                              : 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-orange-500 text-white hover:bg-orange-600'
+                              : 'bg-yellow-500 text-white hover:bg-yellow-600'
                         }`}
                       >
                         Severity {factor.severity}/10

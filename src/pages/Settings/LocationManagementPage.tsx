@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   fetchLocations,
   createLocation,
@@ -20,7 +20,7 @@ export default function LocationManagementPage() {
   const [_facilityId, _setFacilityId] = useState<string>(''); // populate from auth/session if available
   const [creating, setCreating] = useState(false);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchLocations(_facilityId);
@@ -30,7 +30,7 @@ export default function LocationManagementPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [_facilityId]);
 
   async function handleCreate() {
     if (!name || !barcode) return alert('Name and barcode are required');
@@ -75,7 +75,7 @@ export default function LocationManagementPage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   return (
     <div className="p-4 space-y-4">

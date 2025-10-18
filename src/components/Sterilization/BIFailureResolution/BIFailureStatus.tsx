@@ -9,7 +9,7 @@ import {
 } from '@mdi/js';
 import { useQuarantineData } from './hooks/useQuarantineData';
 
-interface AffectedCycle {
+interface _AffectedCycle {
   batchId?: string;
   [key: string]: unknown;
 }
@@ -44,7 +44,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
   // Extract batch IDs from affected cycles
   const _affectedBatchIds = quarantineData.affectedCycles
     ? quarantineData.affectedCycles
-        .map((cycle: any) => cycle.batchId)
+        .map((cycle) => cycle.batchId)
         .filter((batchId): batchId is string => Boolean(batchId))
     : [];
 
@@ -98,7 +98,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
             <span className="text-xs font-medium text-red-700">Batches</span>
           </div>
           <div className="text-lg font-bold text-red-800">
-            {biFailureDetails.affected_batch_ids?.length || 0}
+            {biFailureDetails.affectedBatchIds?.length || 0}
           </div>
         </div>
         <div className="text-center">
@@ -107,7 +107,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
             <span className="text-xs font-medium text-red-700">Tools</span>
           </div>
           <div className="text-lg font-bold text-red-800">
-            {biFailureDetails.affected_tools_count || 0}
+            {biFailureDetails.affectedToolsCount || 0}
           </div>
         </div>
 
@@ -128,7 +128,7 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
           <Icon path={mdiTools} size={0.8} className="text-red-500 mt-0.5" />
           <div>
             <strong>Affected Tools:</strong>{' '}
-            {biFailureDetails.affected_tools_count || 0} tools are currently
+            {biFailureDetails.affectedToolsCount || 0} tools are currently
             quarantined
           </div>
         </div>
@@ -162,11 +162,11 @@ export const BIFailureStatus: React.FC<BIFailureStatusProps> = ({
           <Icon path={mdiPackage} size={0.8} className="text-red-500 mt-0.5" />
           <div>
             <strong>Affected Batches:</strong>{' '}
-            {(biFailureDetails.affected_batch_ids?.length || 0) > 0 ? (
+            {(biFailureDetails.affectedBatchIds?.length || 0) > 0 ? (
               <span className="font-mono text-xs">
-                {biFailureDetails.affected_batch_ids?.slice(0, 3).join(', ')}
-                {(biFailureDetails.affected_batch_ids?.length || 0) > 3 &&
-                  ` +${(biFailureDetails.affected_batch_ids?.length || 0) - 3} more`}
+                {biFailureDetails.affectedBatchIds?.slice(0, 3).join(', ')}
+                {(biFailureDetails.affectedBatchIds?.length || 0) > 3 &&
+                  ` +${(biFailureDetails.affectedBatchIds?.length || 0) - 3} more`}
               </span>
             ) : (
               'No batch IDs available'

@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { InventoryFormData } from '../../types/inventory';
 import { inventoryServiceFacade } from '@/services/inventory/InventoryServiceFacade';
 import { useInventoryFormValidation } from './useInventoryFormValidation';
+import { InventoryItem } from '../../types/inventoryTypes';
 
 interface UseInventoryFormSubmissionParams {
   onSuccess?: () => void;
@@ -15,7 +16,7 @@ interface UseInventoryFormSubmissionReturn {
   resetSubmission: () => void;
 }
 
-interface InventoryItemData {
+interface _InventoryItemData {
   id?: string;
   name: string;
   description?: string;
@@ -105,8 +106,54 @@ export const useInventoryFormSubmission = ({
           },
         };
 
-        // Submit to service
-        await inventoryServiceFacade.createItem(itemToSave as any);
+        // Submit to service - create a proper InventoryItem without id and lastUpdated
+        const inventoryItem: Omit<InventoryItem, 'id' | 'lastUpdated'> = {
+          name: itemToSave.name,
+          category: itemToSave.category,
+          location: itemToSave.location,
+          status: itemToSave.status,
+          quantity: itemToSave.quantity,
+          unit_cost: itemToSave.unit_cost,
+          facility_id: itemToSave.facility_id,
+          created_at: itemToSave.created_at,
+          updated_at: itemToSave.updated_at,
+          reorder_point: itemToSave.reorder_point,
+          expiration_date: itemToSave.expiration_date,
+          supplier: itemToSave.supplier,
+          warranty: itemToSave.warranty,
+          serial_number: itemToSave.serial_number,
+          manufacturer: itemToSave.manufacturer,
+          image_url: itemToSave.image_url,
+          tags: itemToSave.tags,
+          favorite: itemToSave.favorite,
+          barcode: itemToSave.barcode,
+          sku: itemToSave.sku,
+          description: itemToSave.description,
+          current_phase: itemToSave.current_phase,
+          is_active: itemToSave.is_active,
+          unit: itemToSave.unit,
+          expiration: itemToSave.expiration,
+          purchase_date: itemToSave.purchase_date,
+          last_serviced: itemToSave.last_serviced,
+          data: itemToSave.data,
+          // Add missing required properties
+          tool_id: null,
+          cost: itemToSave.unit_cost,
+          vendor: itemToSave.supplier,
+          maintenance_schedule: null,
+          next_due: null,
+          service_provider: null,
+          assigned_to: null,
+          notes: itemToSave.description,
+          supply_id: null,
+          equipment_id: null,
+          hardware_id: null,
+          p2_status: null,
+          tracked: true,
+          last_updated: itemToSave.last_serviced,
+        };
+        
+        await inventoryServiceFacade.createItem(inventoryItem as InventoryItem);
 
         onSuccess?.();
         return true;

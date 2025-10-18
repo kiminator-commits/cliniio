@@ -4,7 +4,7 @@ import {
   SterilizationState,
 } from '../types/sterilizationCycleTypes';
 import { createNewCycle } from '../utils/cycleUtils';
-import { Tool } from '../../../types/toolTypes';
+import { Tool as _Tool } from '../../../types/toolTypes';
 import { BIFacilityCycleService } from '../../../services/bi/BIFacilityCycleService';
 import { ToolActionsState } from '../toolActionsSlice';
 import { ToolDataState } from '../toolDataSlice';
@@ -65,7 +65,7 @@ export const createCycleActions: StateCreator<
         newCycle.tools = [toolId];
 
         // Update the tool's status using the current state
-        const currentState = get();
+        const _currentState = get();
         // Tool status updates are handled by the tool actions slice
         return { ...state, currentCycle: newCycle };
       }
@@ -79,7 +79,7 @@ export const createCycleActions: StateCreator<
         };
 
         // Update the tool's status using the current state
-        const currentState = get();
+        const _currentState = get();
         // Tool status updates are handled by the tool actions slice
 
         return {

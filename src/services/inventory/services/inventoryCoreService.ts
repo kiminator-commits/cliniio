@@ -25,16 +25,16 @@ export class InventoryCoreService {
     return await this.repository.getItemById(id);
   }
 
-  async createItem(item: any): Promise<InventoryCreateResponse> {
+  async createItem(item: Record<string, unknown>): Promise<InventoryCreateResponse> {
     const startTime = performance.now();
 
     try {
-      const result = await this.repository.createItem(item);
+      const result = await this.repository.createItem(item as unknown as any);
 
       // Track analytics
       await AnalyticsTrackingService.trackEvent('inventory_item_created', {
         itemId: result.data?.id,
-        category: item.category,
+        category: item.category as string,
         adapterType: this.adapterManager.getCurrentAdapterType(),
       });
 
@@ -55,7 +55,7 @@ export class InventoryCoreService {
 
   async updateItem(
     id: string,
-    updates: any
+    updates: Record<string, unknown>
   ): Promise<InventoryUpdateResponse> {
     const startTime = performance.now();
 
@@ -113,28 +113,28 @@ export class InventoryCoreService {
     }
   }
 
-  async addInventoryItem(item: any): Promise<InventoryItem> {
-    return await this.repository.addInventoryItem(item) as any;
+  async addInventoryItem(item: Record<string, unknown>): Promise<InventoryItem> {
+    return await this.repository.addInventoryItem(item as unknown as any) as unknown as InventoryItem;
   }
 
   async validateItem(
-    item: any
+    item: Record<string, unknown>
   ): Promise<{ isValid: boolean; errors: string[] }> {
     const errors: string[] = [];
 
-    if (!item.name || item.name.trim() === '') {
+    if (!item.name || (item.name as string).trim() === '') {
       errors.push('Item name is required');
     }
 
-    if (!item.category || item.category.trim() === '') {
+    if (!item.category || (item.category as string).trim() === '') {
       errors.push('Category is required');
     }
 
-    if (!item.location || item.location.trim() === '') {
+    if (!item.location || (item.location as string).trim() === '') {
       errors.push('Location is required');
     }
 
-    if (item.quantity !== undefined && item.quantity < 0) {
+    if (item.quantity !== undefined && (item.quantity as number) < 0) {
       errors.push('Quantity must be non-negative');
     }
 

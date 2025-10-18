@@ -72,7 +72,7 @@ export const useScanModalLogic = ({
     (barcode: string) => {
       // Check if item already exists in inventory
       const existingItem = inventoryItems.find(
-        (item) => (item.data as any)?.barcode === barcode || item.id === barcode
+        (item) => (item.data as Record<string, unknown>)?.barcode === barcode || item.id === barcode
       );
 
       if (existingItem) {

@@ -35,7 +35,7 @@ export class SupplyDepletionForecastService {
       const cached = this.getCachedData<SupplyDepletionForecast[]>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for supply depletion forecast');
         return [];
       }

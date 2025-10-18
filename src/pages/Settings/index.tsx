@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SharedLayout } from '../../components/Layout/SharedLayout';
 import Icon from '@mdi/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { supabase } from '../../lib/supabaseClient';
 import {
   FacilitySettingsService,
   FacilitySettings,
@@ -104,11 +106,53 @@ const sectionColors: Record<string, { bg: string; icon: string }> = {
 };
 
 const Settings: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [openDrawer, setOpenDrawer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [complianceFlagCount, setComplianceFlagCount] = useState<number>(0);
   const [_facilitySettings, _setFacilitySettings] =
     useState<FacilitySettings | null>(null);
   const { currentUser } = useUser();
+
+  // Handle URL parameters to open specific sections
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section && settingsSections.some(s => s.id === section)) {
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => setOpenDrawer(section), 0);
+    }
+  }, [searchParams]);
+
+  // Fetch compliance flag count for styling only (not displayed)
+  useEffect(() => {
+    async function fetchComplianceFlags() {
+      try {
+        const { count, error } = await supabase
+          .from('audit_flags')
+          .select('*', { count: 'exact', head: true })
+          .eq('resolved', false);
+        if (!error && typeof count === 'number') {
+          setComplianceFlagCount(count);
+        }
+      } catch (e) {
+        console.error('Failed to fetch compliance flags:', e);
+      }
+    }
+    fetchComplianceFlags();
+    
+    // Listen for compliance issue resolution events
+    const handleComplianceResolved = () => {
+      setTimeout(() => {
+        fetchComplianceFlags();
+      }, 300);
+    };
+    
+    window.addEventListener('complianceIssueResolved', handleComplianceResolved);
+    
+    return () => {
+      window.removeEventListener('complianceIssueResolved', handleComplianceResolved);
+    };
+  }, []);
 
   // Load facility settings on component mount
   useEffect(() => {
@@ -167,25 +211,50 @@ const Settings: React.FC = () => {
         <div key={section.id} className="relative">
           <button
             onClick={() => handleCardClick(section.id)}
-            className={`bg-white rounded-xl shadow p-6 border border-gray-100 text-left transition-all duration-200 hover:shadow-md hover:scale-105 focus:outline-none w-full min-h-[180px] flex flex-col justify-between ${openDrawer === section.id ? 'ring-2 ring-[#4ECDC4]' : ''}`}
+            className={`rounded-xl shadow p-6 border text-left transition-all duration-200 hover:shadow-md hover:scale-105 focus:outline-none w-full min-h-[180px] flex flex-col justify-between ${
+              openDrawer === section.id ? 'ring-2 ring-[#4ECDC4]' : ''
+            } ${
+              section.id === 'system' && complianceFlagCount > 0 
+                ? 'border-red-500 bg-red-100 shadow-red-200 shadow-lg' 
+                : 'bg-white border-gray-100'
+            }`}
             type="button"
           >
-            <div className="flex items-center mb-4">
-              <span
-                className={`${sectionColors[section.id].bg} rounded-md p-2 mr-3`}
-              >
-                <Icon
-                  path={section.icon}
-                  size={1}
-                  className={sectionColors[section.id].icon}
-                />
-              </span>
-              <h3 className="text-base font-medium text-gray-700">
-                {section.label}
-              </h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <span
+                  className={`${sectionColors[section.id].bg} rounded-md p-2 mr-3`}
+                >
+                  <Icon
+                    path={section.icon}
+                    size={1}
+                    className={sectionColors[section.id].icon}
+                  />
+                </span>
+                <h3 className={`text-base font-medium ${
+                  section.id === 'system' && complianceFlagCount > 0 
+                    ? 'text-red-800' 
+                    : 'text-gray-700'
+                }`}>
+                  {section.label}
+                </h3>
+              </div>
+              {/* Compliance warning indicator for System Administration */}
+              {section.id === 'system' && complianceFlagCount > 0 && (
+                <div className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  !
+                </div>
+              )}
             </div>
-            <p className="text-gray-500 text-sm mt-auto">
-              {section.description}
+            <p className={`text-sm mt-auto ${
+              section.id === 'system' && complianceFlagCount > 0 
+                ? 'text-red-600 font-medium' 
+                : 'text-gray-500'
+            }`}>
+              {section.id === 'system' && complianceFlagCount > 0 
+                ? '⚠️ Compliance issues require attention'
+                : section.description
+              }
             </p>
           </button>
         </div>
@@ -206,7 +275,10 @@ const Settings: React.FC = () => {
 
             {section.id === 'system' && (
               <ErrorBoundary>
-                <SystemAdministrationSettings />
+                <SystemAdministrationSettings 
+                  initialTab={searchParams.get('tab')} 
+                  complianceFlagCount={complianceFlagCount}
+                />
               </ErrorBoundary>
             )}
 
@@ -259,7 +331,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <SharedLayout>
+    <SharedLayout hasComplianceIssues={complianceFlagCount > 0}>
       <div className="flex flex-col min-h-screen">
         <div className="p-4 max-w-7xl w-full mx-auto flex-1 flex flex-col">
           <div className="mb-6">

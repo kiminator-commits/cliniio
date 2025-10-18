@@ -248,7 +248,14 @@ export const createBiologicalIndicatorSlice: StateCreator<
         affected_tools_count: details.affectedToolsCount,
         affected_batch_ids: details.affectedBatchIds,
         detected_by_operator_id: details.operator,
-      } as any,
+        facility_id: 'unknown',
+        incident_number: `BI-${Date.now()}`,
+        severity_level: 'high',
+        status: 'active',
+        resolution_notes: null,
+        resolved_at: null,
+        resolved_by: null,
+      } as unknown as BIFailureIncident,
     })),
   deactivateBIFailure: () =>
     set(() => ({

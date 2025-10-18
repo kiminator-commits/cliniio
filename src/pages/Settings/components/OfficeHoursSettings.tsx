@@ -199,63 +199,87 @@ const OfficeHoursSettings: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h5 className="text-md font-medium text-gray-700 mb-2">
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="mb-6">
+        <h5 className="text-xl font-semibold text-gray-800 mb-2">
           Office Hours & Scheduling
         </h5>
-        <p className="text-xs text-gray-500 mb-4">
-          These settings affect BI test scheduling, analytics calculations, and
-          streak tracking
+        <p className="text-sm text-gray-600">
+          These settings affect BI test scheduling, analytics calculations, and streak tracking
         </p>
         {saving && (
-          <div className="text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-md">
-            Saving changes...
+          <div className="mt-4 text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
+            💾 Saving changes...
           </div>
         )}
       </div>
 
       {/* Working Days */}
-      <div className="space-y-3">
-        <div className="block text-sm font-medium text-gray-700">
-          Office Days
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-center space-x-2 mb-4">
+          <div className="p-2 bg-[#4ECDC4] bg-opacity-10 rounded-lg">
+            <svg className="w-5 h-5 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h6 className="text-lg font-semibold text-gray-800">
+            📅 Working Days
+          </h6>
         </div>
-        <div className="flex flex-wrap gap-2">
+        
+        <div className="grid grid-cols-7 gap-3 mb-4">
           {Object.entries(settings.workingDays).map(([day, isWorking]) => (
             <button
               key={day}
               onClick={() =>
                 handleDayToggle(day as keyof OfficeHoursSettings['workingDays'])
               }
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`p-4 text-center rounded-xl font-medium transition-all duration-200 transform hover:scale-105 ${
                 isWorking
-                  ? 'bg-[#4ECDC4] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#4ECDC4] text-white shadow-lg shadow-[#4ECDC4]/25'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border-2 border-gray-200'
               }`}
             >
-              {day.charAt(0).toUpperCase()}
+              <div className="text-sm font-bold">
+                {day.charAt(0).toUpperCase()}
+              </div>
+              <div className="text-xs opacity-75">
+                {day.slice(0, 3)}
+              </div>
             </button>
           ))}
         </div>
-        <p className="text-xs text-gray-500">
-          Selected: {getWorkingDaysText()}
-        </p>
+        
+        <div className="bg-[#4ECDC4] bg-opacity-10 rounded-lg p-4">
+          <p className="text-sm text-[#4ECDC4] font-medium">
+            ✅ Selected: {getWorkingDaysText()}
+          </p>
+        </div>
       </div>
 
       {/* Hours of Operation */}
-      <div className="space-y-3">
-        <div className="block text-sm font-medium text-gray-700">
-          Hours of Operation
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-center space-x-2 mb-6">
+          <div className="p-2 bg-[#4ECDC4] bg-opacity-10 rounded-lg">
+            <svg className="w-5 h-5 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h6 className="text-lg font-semibold text-gray-800">
+            ⏰ Hours of Operation
+          </h6>
         </div>
-        <div className="flex items-center space-x-4">
-          <div>
-            <div className="block text-xs text-gray-500 mb-1">Start Time</div>
+        
+        <div className="flex items-center justify-center space-x-6">
+          <div className="text-center">
+            <div className="text-sm font-medium text-gray-600 mb-3">Start Time</div>
             <select
               value={settings.startHour}
               onChange={(e) =>
                 handleTimeChange('start', parseInt(e.target.value))
               }
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] text-sm"
+              className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] text-lg font-semibold bg-white shadow-sm"
             >
               {Array.from({ length: 24 }, (_, i) => (
                 <option key={i} value={i}>
@@ -264,15 +288,20 @@ const OfficeHoursSettings: React.FC = () => {
               ))}
             </select>
           </div>
-          <span className="text-gray-500 mt-6">to</span>
-          <div>
-            <div className="block text-xs text-gray-500 mb-1">End Time</div>
+          
+          <div className="flex flex-col items-center">
+            <div className="text-2xl text-[#4ECDC4] font-bold">→</div>
+            <div className="text-xs text-gray-500 mt-1">to</div>
+          </div>
+          
+          <div className="text-center">
+            <div className="text-sm font-medium text-gray-600 mb-3">End Time</div>
             <select
               value={settings.endHour}
               onChange={(e) =>
                 handleTimeChange('end', parseInt(e.target.value))
               }
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] text-sm"
+              className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] text-lg font-semibold bg-white shadow-sm"
             >
               {Array.from({ length: 24 }, (_, i) => (
                 <option key={i} value={i}>
@@ -282,53 +311,85 @@ const OfficeHoursSettings: React.FC = () => {
             </select>
           </div>
         </div>
-        <p className="text-xs text-gray-500">
-          Operating hours: {formatHour(settings.startHour)} -{' '}
-          {formatHour(settings.endHour)}
-        </p>
       </div>
 
       {/* Holiday Settings */}
-      <div className="space-y-3">
-        <div className="block text-sm font-medium text-gray-700">
-          Holiday Operations
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-center space-x-2 mb-6">
+          <div className="p-2 bg-[#4ECDC4] bg-opacity-10 rounded-lg">
+            <svg className="w-5 h-5 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+            </svg>
+          </div>
+          <h6 className="text-lg font-semibold text-gray-800">
+            🎉 Holiday Operations
+          </h6>
         </div>
-        <div className="flex items-center space-x-3">
+        
+        <div className="flex items-center justify-between p-6 bg-gray-50 rounded-xl">
+          <div className="flex items-center space-x-4">
+            <div className="text-4xl">
+              {settings.openHolidays ? '🎊' : '🏠'}
+            </div>
+            <div>
+              <h6 className="text-lg font-semibold text-gray-800">
+                {settings.openHolidays ? 'Open on holidays' : 'Closed on holidays'}
+              </h6>
+              <p className="text-sm text-gray-600">
+                {settings.openHolidays
+                  ? 'BI tests and operations will continue on holidays'
+                  : 'BI tests due on holidays will be rescheduled to the next business day'}
+              </p>
+            </div>
+          </div>
+          
           <button
             onClick={handleHolidayToggle}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:ring-offset-2 ${
-              settings.openHolidays ? 'bg-[#4ECDC4]' : 'bg-gray-200'
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#4ECDC4]/20 ${
+              settings.openHolidays ? 'bg-[#4ECDC4] shadow-lg shadow-[#4ECDC4]/25' : 'bg-gray-300'
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-300 shadow-lg ${
                 settings.openHolidays ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>
-          <span className="text-sm text-gray-700">
-            {settings.openHolidays ? 'Open on holidays' : 'Closed on holidays'}
-          </span>
         </div>
-        <p className="text-xs text-gray-500">
-          {settings.openHolidays
-            ? 'BI tests and operations will continue on holidays'
-            : 'BI tests due on holidays will be rescheduled to the next business day'}
-        </p>
       </div>
 
       {/* Summary */}
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-        <h6 className="text-sm font-medium text-blue-800 mb-2">
-          Current Schedule Summary
-        </h6>
-        <div className="text-sm text-blue-700 space-y-1">
-          <p>• Working days: {getWorkingDaysText()}</p>
-          <p>
-            • Hours: {formatHour(settings.startHour)} -{' '}
-            {formatHour(settings.endHour)}
-          </p>
-          <p>• Holidays: {settings.openHolidays ? 'Open' : 'Closed'}</p>
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center space-x-2 mb-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h6 className="text-lg font-semibold text-blue-800">
+            📋 Current Schedule Summary
+          </h6>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-600 mb-1">Working Days</div>
+            <div className="text-lg font-semibold text-gray-800">{getWorkingDaysText()}</div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-600 mb-1">Hours</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {formatHour(settings.startHour)} - {formatHour(settings.endHour)}
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-600 mb-1">Holidays</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {settings.openHolidays ? 'Open' : 'Closed'}
+            </div>
+          </div>
         </div>
       </div>
 

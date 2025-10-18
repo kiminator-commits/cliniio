@@ -173,28 +173,36 @@ const OfficeClosuresManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h6 className="text-sm font-medium text-gray-700">
-          Office Closures & Holidays
-        </h6>
+    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-2">
+          <div className="p-2 bg-[#4ECDC4] bg-opacity-10 rounded-lg">
+            <svg className="w-5 h-5 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </div>
+          <h6 className="text-lg font-semibold text-gray-800">
+            🗓️ Office Closures & Holidays
+          </h6>
+        </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="px-3 py-1 text-sm bg-[#4ECDC4] text-white rounded-md hover:bg-[#45b8b0] transition-colors"
+          className="px-4 py-2 text-sm bg-[#4ECDC4] text-white rounded-lg hover:bg-[#45b8b0] transition-all duration-200 transform hover:scale-105 shadow-sm"
         >
-          {showAddForm ? 'Cancel' : 'Add Closure'}
+          {showAddForm ? '❌ Cancel' : '➕ Add Closure'}
         </button>
       </div>
 
       {showAddForm && (
-        <div className="bg-gray-50 p-4 rounded-md space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-xl border-2 border-gray-200 space-y-4 mb-6">
+          <h6 className="text-lg font-semibold text-gray-800 mb-4">➕ Add New Closure</h6>
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="closureDate"
-                className="block text-xs text-gray-600 mb-1"
+                className="block text-sm font-medium text-gray-600 mb-2"
               >
-                Date
+                📅 Date
               </label>
               <input
                 id="closureDate"
@@ -206,15 +214,15 @@ const OfficeClosuresManager: React.FC = () => {
                     closure_date: e.target.value,
                   }))
                 }
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#4ECDC4]"
+                className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
               />
             </div>
             <div>
               <label
                 htmlFor="closureType"
-                className="block text-xs text-gray-600 mb-1"
+                className="block text-sm font-medium text-gray-600 mb-2"
               >
-                Type
+                🏷️ Type
               </label>
               <select
                 id="closureType"
@@ -231,20 +239,20 @@ const OfficeClosuresManager: React.FC = () => {
                       }) as typeof prev
                   )
                 }
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#4ECDC4]"
+                className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
               >
-                <option value="holiday">Holiday</option>
-                <option value="maintenance">Maintenance</option>
-                <option value="custom">Custom</option>
+                <option value="holiday">🎉 Holiday</option>
+                <option value="maintenance">🔧 Maintenance</option>
+                <option value="custom">📝 Custom</option>
               </select>
             </div>
           </div>
           <div>
             <label
               htmlFor="closureDescription"
-              className="block text-xs text-gray-600 mb-1"
+              className="block text-sm font-medium text-gray-600 mb-2"
             >
-              Description
+              📝 Description
             </label>
             <input
               id="closureDescription"
@@ -257,10 +265,10 @@ const OfficeClosuresManager: React.FC = () => {
                 }))
               }
               placeholder="e.g., Christmas Day, Annual Maintenance"
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#4ECDC4]"
+              className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
             />
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <input
               type="checkbox"
               id="recurring"
@@ -271,25 +279,25 @@ const OfficeClosuresManager: React.FC = () => {
                   is_recurring: e.target.checked,
                 }))
               }
-              className="rounded border-gray-300 text-[#4ECDC4] focus:ring-[#4ECDC4]"
+              className="rounded border-gray-300 text-[#4ECDC4] focus:ring-[#4ECDC4] h-4 w-4"
             />
-            <label htmlFor="recurring" className="text-sm text-gray-600">
-              Recurring annually
+            <label htmlFor="recurring" className="text-sm font-medium text-gray-600">
+              🔄 Recurring annually
             </label>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button
               onClick={addClosure}
               disabled={saving || !newClosure.closure_date}
-              className="px-3 py-1 text-sm bg-[#4ECDC4] text-white rounded hover:bg-[#45b8b0] disabled:opacity-50 transition-colors"
+              className="px-4 py-2 text-sm bg-[#4ECDC4] text-white rounded-lg hover:bg-[#45b8b0] disabled:opacity-50 transition-all duration-200 transform hover:scale-105 shadow-sm"
             >
-              {saving ? 'Adding...' : 'Add Closure'}
+              {saving ? '⏳ Adding...' : '✅ Add Closure'}
             </button>
             <button
               onClick={() => setShowAddForm(false)}
-              className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+              className="px-4 py-2 text-sm bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-all duration-200 transform hover:scale-105"
             >
-              Cancel
+              ❌ Cancel
             </button>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { mdiTools } from '@mdi/js';
 import { useSterilizationStore } from '../../../store/sterilizationStore';
 import { Tool } from '@/types/toolTypes';
 
-interface SterilizationTool {
+interface _SterilizationTool {
   id: string;
   name: string;
   barcode?: string;

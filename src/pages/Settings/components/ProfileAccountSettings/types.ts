@@ -71,7 +71,7 @@ export interface UserData {
   bio?: string;
   preferred_language?: string;
   timezone?: string;
-  profile_photo?: string;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
   role: string;

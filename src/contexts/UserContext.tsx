@@ -3,7 +3,7 @@ import React, {
   useContext,
   useState,
   ReactNode,
-  useEffect as _useEffect,
+  useEffect,
   useCallback,
 } from 'react';
 import { supabase } from '../lib/supabaseClient';
@@ -168,6 +168,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
               last_name: '',
               role: 'user',
               facility_id: facilityConfigService.getDefaultFacilityId(), // Use configured default facility
+              avatar_url: user.user_metadata?.avatar_url || null, // Preserve avatar URL from auth metadata
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             });
@@ -217,6 +218,36 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         );
 
         if (userProfile) {
+          // Check if avatar_url is missing and try to get it from auth metadata
+          let avatarUrl = userProfile.avatar_url as string | null;
+          if (!avatarUrl && user.user_metadata?.avatar_url) {
+            avatarUrl = user.user_metadata.avatar_url;
+            console.log('🔧 UserContext: Using avatar_url from auth metadata:', avatarUrl);
+            
+            // Update the database with the avatar_url from auth metadata
+            try {
+              await supabase
+                .from('users')
+                .update({ avatar_url: avatarUrl })
+                .eq('id', user.id);
+              console.log('✅ UserContext: Updated database with avatar_url from auth metadata');
+            } catch (updateError) {
+              console.error('❌ UserContext: Failed to update avatar_url:', updateError);
+            }
+          }
+          
+          // If still no avatar_url, try to get it from Supabase auth user
+          if (!avatarUrl && user.user_metadata?.avatar_url) {
+            avatarUrl = user.user_metadata.avatar_url;
+            console.log('🔧 UserContext: Using avatar_url from Supabase auth user:', avatarUrl);
+          }
+          
+          // If still no avatar_url, set a default placeholder
+          if (!avatarUrl) {
+            avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.first_name || userProfile.email || 'User')}&background=4ECDC4&color=fff&size=128`;
+            console.log('🔧 UserContext: Using default avatar URL:', avatarUrl);
+          }
+          
           // Transform the user data to match our User interface
           const transformedUser: User = {
             id: userProfile.id as string,
@@ -226,7 +257,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
               'User',
             email: userProfile.email as string,
             role: userProfile.role as string,
-            avatar_url: userProfile.avatar_url as string | null,
+            avatar_url: avatarUrl,
             facility_id: userProfile.facility_id as string, // Include facility_id
           };
 
@@ -245,6 +276,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
           setCurrentUser(transformedUser);
           setLastFetchTime(now);
         }
+        
+        // Mark as initialized after successful fetch
+        setIsInitialized(true);
       })();
 
       // Race between fetch and timeout
@@ -258,7 +292,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       console.error('❌ UserContext: Error refreshing user data:', error);
     } finally {
       setIsLoading(false);
-      setHasInitialized(true);
+      setIsInitialized(true);
     }
   }, [isLoading, currentUser, lastFetchTime, CACHE_DURATION]);
 
@@ -339,35 +373,49 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     setIsInitialized(true);
   }, [isInitialized, isLoading, refreshUserData]);
 
-  // Remove automatic initialization - only initialize when manually called
-  // useEffect(() => {
-  //   if (!hasInitialized) {
-  //     const now = Date.now();
-  //
-  //     // If we have cached user data that's still valid, use it immediately
-  //     if (currentUser && now - lastFetchTime < CACHE_DURATION) {
-  //       setHasInitialized(true);
-  //       return;
-  //     }
-  //
-  //     // Defer authentication to avoid blocking initial render
-  //     const timer = setTimeout(() => {
-  //       if (process.env.NODE_ENV === 'development' || currentUser) {
-  //         refreshUserData();
-  //       } else {
-  //         setHasInitialized(true);
-  //       }
-  //     }, 100); // Small delay to avoid blocking render
-  //
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [
-  //   hasInitialized,
-  //   currentUser,
-  //   lastFetchTime,
-  //   CACHE_DURATION,
-  //   refreshUserData,
-  // ]);
+  // Automatic initialization on app startup
+  useEffect(() => {
+    if (!isInitialized) {
+      const now = Date.now();
+
+      // If we have cached user data that's still valid, use it immediately
+      if (currentUser && now - lastFetchTime < CACHE_DURATION) {
+        setIsInitialized(true);
+        return undefined;
+      }
+
+      // Defer authentication to avoid blocking initial render
+      const timer = setTimeout(() => {
+        // Check if user has been explicitly logged out (no auth token)
+        const authToken =
+          localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        if (!authToken) {
+          console.log(
+            '🚫 UserContext: No auth token found, skipping auto-initialization'
+          );
+          setIsInitialized(true);
+          return;
+        }
+
+        if (process.env.NODE_ENV === 'development' || currentUser) {
+          refreshUserData();
+        } else {
+          setIsInitialized(true);
+        }
+      }, 100); // Small delay to avoid blocking render
+
+      return () => clearTimeout(timer);
+    }
+    
+    // Return undefined for cleanup when not initializing
+    return undefined;
+  }, [
+    isInitialized,
+    currentUser,
+    lastFetchTime,
+    CACHE_DURATION,
+    refreshUserData,
+  ]);
 
   return (
     <UserContext.Provider

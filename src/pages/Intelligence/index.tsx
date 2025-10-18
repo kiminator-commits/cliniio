@@ -8,6 +8,7 @@ import RisksTab from './tabs/RisksTab';
 import ActionsTab from './tabs/ActionsTab';
 import InsightsTab from './tabs/InsightsTab';
 import IntegrationsTab from './tabs/IntegrationsTab';
+import { IntelligenceRecommendation as AnalyticsIntelligenceRecommendation, OptimizationTip as AnalyticsOptimizationTip, RiskAlert as AnalyticsRiskAlert } from '@/services/analyticsService';
 import { useForecastingIntelligence } from '../../hooks/useForecastingIntelligence';
 import { useFacility } from '../../contexts/FacilityContext';
 import { IntelligenceRecommendationService } from '../../services/analytics/intelligenceRecommendationService';
@@ -49,11 +50,23 @@ export default function IntelligencePage() {
   const { getCurrentFacilityId } = useFacility();
   const facilityId = getCurrentFacilityId();
 
+  // State for date range to avoid calling Date.now() during render
+  const [dateRange, _setDateRange] = useState(() => {
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    return {
+      start: new Date(thirtyDaysAgo).toISOString(),
+      end: new Date(now).toISOString()
+    };
+  });
+
   // Memoize filters to prevent infinite re-renders
-  const filters = useMemo(
-    () => ({ facilityId: facilityId || '' }),
-    [facilityId]
-  );
+  const filters = useMemo(() => {
+    return { 
+      facilityId: facilityId || '550e8400-e29b-41d4-a716-446655440000',
+      dateRange
+    };
+  }, [facilityId, dateRange]);
   const { summary, loading, lastUpdated, refreshData } =
     useForecastingIntelligence(filters);
 
@@ -78,9 +91,9 @@ export default function IntelligencePage() {
               summary
             );
 
-          setRecommendations(recs as any || []);
-          setOptimizationTips(tips as any || []);
-          setActionableInsights(alerts as any || []);
+          setRecommendations(recs as unknown as IntelligenceRecommendation[] || []);
+          setOptimizationTips(tips as unknown as OptimizationTip[] || []);
+          setActionableInsights(alerts as unknown as ActionableInsight[] || []);
           setInsightsSummary(insights || null);
 
           // Get integration metrics
@@ -106,16 +119,16 @@ export default function IntelligencePage() {
         return (
           <ActionsTab
             summary={summary}
-            recommendations={recommendations as any}
-            optimizationTips={optimizationTips as any}
+            recommendations={recommendations as unknown as AnalyticsIntelligenceRecommendation[]}
+            optimizationTips={optimizationTips as unknown as AnalyticsOptimizationTip[]}
           />
         );
       case 'insights':
         return (
           <InsightsTab
             summary={summary}
-            recommendations={recommendations as any}
-            optimizationTips={optimizationTips as any}
+            recommendations={recommendations as unknown as AnalyticsIntelligenceRecommendation[]}
+            optimizationTips={optimizationTips as unknown as AnalyticsOptimizationTip[]}
             insightsSummary={insightsSummary}
           />
         );
@@ -130,7 +143,7 @@ export default function IntelligencePage() {
         return (
           <OverviewTab
             summary={summary}
-            actionableInsights={actionableInsights as any}
+            actionableInsights={actionableInsights as unknown as AnalyticsRiskAlert[]}
           />
         );
       default:

@@ -39,7 +39,7 @@ export class ClinicalStaffingForecastService {
       const cached = this.getCachedData<ClinicalStaffingForecast[]>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for clinical staffing forecast');
         return [];
       }

@@ -37,7 +37,7 @@ export class ToolReplacementForecastService {
       if (cached) return cached;
 
       // Check if we have a valid facility ID before making Supabase calls
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for tool replacement forecast');
         return [];
       }

@@ -35,7 +35,7 @@ export class EfficiencyRoiForecastService {
       const cached = this.getCachedData<EfficiencyROITracker>(cacheKey);
       if (cached) return cached;
 
-      if (!filters.facilityId) {
+      if (!filters.facilityId || filters.facilityId.trim() === '') {
         console.warn('No facility ID provided for efficiency ROI tracking');
         return null;
       }

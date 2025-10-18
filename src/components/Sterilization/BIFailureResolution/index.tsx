@@ -111,7 +111,16 @@ export const BIFailureResolution: React.FC<BIFailureResolutionProps> = ({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Current Status */}
-          <BIFailureStatus biFailureDetails={biFailureDetails as any} />
+          <BIFailureStatus biFailureDetails={biFailureDetails ? {
+            date: typeof biFailureDetails.failure_date === 'string' 
+              ? new Date(biFailureDetails.failure_date) 
+              : (biFailureDetails.failure_date as Date) instanceof Date 
+                ? biFailureDetails.failure_date 
+                : new Date(),
+            affectedToolsCount: biFailureDetails.affected_tools_count,
+            affectedBatchIds: biFailureDetails.affected_batch_ids,
+            operator: biFailureDetails.detected_by_operator_id,
+          } : null} />
 
           {/* Workflow Steps */}
           <BIFailureWorkflowSteps
