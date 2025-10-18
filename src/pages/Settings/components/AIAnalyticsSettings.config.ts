@@ -26,6 +26,8 @@ export const UI_TEXT = {
     AI_SERVICE_STATUS: 'AI Service Status',
     ENABLE_AI_FEATURES: 'Enable AI Features',
     AI_FEATURES: 'AI Features',
+    TOKEN_USAGE_DASHBOARD: 'AI Usage Dashboard',
+    THROTTLING_CONTROLS: 'Throttling Controls',
     ANALYTICS_CONFIGURATION: 'Analytics Configuration',
     INTELLIGENCE_SETTINGS: 'Intelligence Settings',
     PERFORMANCE_MONITORING: 'Performance Monitoring',

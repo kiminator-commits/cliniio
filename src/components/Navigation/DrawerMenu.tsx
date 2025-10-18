@@ -18,6 +18,7 @@ interface DrawerMenuProps {
   onOpen: () => void;
   onClose: () => void;
   hasComplianceIssues?: boolean;
+  hasAIUsageIssues?: boolean;
 }
 
 export const DrawerMenu: React.FC<DrawerMenuProps> = ({
@@ -25,6 +26,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
   onOpen,
   onClose,
   hasComplianceIssues = false,
+  hasAIUsageIssues = false,
 }) => {
   const { currentUser, getUserDisplayName, isLoading, clearUserData } =
     useUser();
@@ -169,7 +171,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
                     {label}
                   </span>
                   {/* Compliance warning badge for Settings */}
-                  {path === '/settings' && hasComplianceIssues && (
+                  {path === '/settings' && (hasComplianceIssues || hasAIUsageIssues) && (
                     <div className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold ml-2">
                       !
                     </div>
@@ -177,7 +179,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
                 </div>
               )}
               {/* Compliance warning badge for Settings (collapsed menu) */}
-              {!isOpen && path === '/settings' && hasComplianceIssues && (
+              {!isOpen && path === '/settings' && (hasComplianceIssues || hasAIUsageIssues) && (
                 <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
                   !
                 </div>

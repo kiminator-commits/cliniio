@@ -9,9 +9,10 @@ import { supabase } from '../../lib/supabaseClient';
 interface SharedLayoutProps {
   children: React.ReactNode;
   hasComplianceIssues?: boolean;
+  hasAIUsageIssues?: boolean;
 }
 
-export const SharedLayout: React.FC<SharedLayoutProps> = ({ children, hasComplianceIssues }) => {
+export const SharedLayout: React.FC<SharedLayoutProps> = ({ children, hasComplianceIssues, hasAIUsageIssues }) => {
   const { isDrawerOpen, openDrawer, closeDrawer } = useNavigation();
   const [globalComplianceIssues, setGlobalComplianceIssues] = useState<boolean>(false);
 
@@ -58,6 +59,7 @@ export const SharedLayout: React.FC<SharedLayoutProps> = ({ children, hasComplia
             onOpen={openDrawer}
             onClose={closeDrawer}
             hasComplianceIssues={finalComplianceIssues}
+            hasAIUsageIssues={hasAIUsageIssues || false}
           />
           <div className="flex-1">
             <div className="pt-6">{children}</div>

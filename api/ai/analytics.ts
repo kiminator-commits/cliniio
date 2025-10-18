@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { aiServiceIntegration } from '../../../src/services/ai/AIServiceIntegration';
+import { unifiedRAGService } from '../../../src/services/ai/rag/UnifiedRAGService';
 
 // Validate OpenAI API key
 if (!process.env.OPENAI_API_KEY) {
@@ -128,27 +130,43 @@ export async function POST(req: NextRequest) {
         last_activity: operator.last_activity,
       }));
 
-    const prompt = `Analyze this sterilization facility data and provide insights:
+    // Use RAG-enhanced analytics
+    const ragRequest = {
+      query: `Analyze sterilization facility data for performance trends, potential issues, optimization opportunities, and compliance status`,
+      userRole: 'Analytics User',
+      feature: 'analytics' as const,
+      additionalContext: {
+        analyticsData: {
+          cycleData: optimizedCycleData,
+          biTestData: optimizedBiData,
+          operatorData: optimizedOperatorData
+        }
+      }
+    };
 
-Cycle Data (${optimizedCycleData.length} recent cycles): ${JSON.stringify(optimizedCycleData)}
-BI Test Data (${optimizedBiData.length} recent tests): ${JSON.stringify(optimizedBiData)}
-Operator Data (${optimizedOperatorData.length} operators): ${JSON.stringify(optimizedOperatorData)}
+    const ragResponse = await unifiedRAGService.generateResponse(ragRequest);
+    
+    // Generate structured insights using RAG context
+    const prompt = `Based on the RAG-enhanced context, analyze this sterilization facility data:
+
+RAG Context: ${JSON.stringify(ragResponse.sourceBreakdown)}
+Data Points: ${optimizedCycleData.length} cycles, ${optimizedBiData.length} BI tests, ${optimizedOperatorData.length} operators
 
 Generate insights about:
 1. Performance trends
-2. Potential issues
+2. Potential issues  
 3. Optimization opportunities
 4. Compliance status
 
 Return as JSON array with structure:
-[{"type": "trend|anomaly|prediction|recommendation", "title": "...", "description": "...", "confidence": 0.95, "actionable": true, "priority": "low|medium|high|critical"}]`;
+[{"type": "trend|anomaly|prediction|recommendation", "title": "...", "description": "...", "confidence": 0.95, "actionable": true, "priority": "low|medium|high|critical", "sources": ["knowledge_base", "data_analysis"]}]`;
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
-      max_tokens: 800, // Reduced from 1000
-      timeout: 15000, // 15 second timeout
+      max_tokens: 800,
+      timeout: 15000,
     });
 
     const content = response.choices[0]?.message?.content;
@@ -156,8 +174,22 @@ Return as JSON array with structure:
       throw new Error('No response from OpenAI');
     }
 
-    // Parse JSON response
+    // Track token usage
+    const inputTokens = response.usage?.prompt_tokens || 0;
+    const outputTokens = response.usage?.completion_tokens || 0;
+    aiServiceIntegration.trackAnalyticsUsage(inputTokens, outputTokens, true);
+
+    // Parse JSON response and add RAG metadata
     const insights = JSON.parse(content);
+    
+    // Add RAG metadata to insights
+    insights.ragMetadata = {
+      enabled: ragResponse.ragEnabled,
+      confidence: ragResponse.confidence,
+      questionType: ragResponse.questionType,
+      sourceBreakdown: ragResponse.sourceBreakdown,
+      processingTime: ragResponse.metadata?.processingTime
+    };
 
     // Cache the result
     requestCache.set(cacheKey, {
@@ -190,6 +222,9 @@ Return as JSON array with structure:
   } catch (error) {
     console.error('Analytics API error:', error);
     const responseTime = Date.now() - startTime;
+
+    // Track failed request
+    aiServiceIntegration.trackAnalyticsUsage(0, 0, false);
 
     return NextResponse.json(
       {

@@ -2,7 +2,7 @@ import { supabase } from '../../../../lib/supabase';
 import { ContentItem } from '../../types';
 import { ApiError, ErrorType, ErrorSeverity } from '../../types/errors';
 import { KHDataTransformationProvider } from './KHDataTransformationProvider';
-import type { PostgrestFilterBuilder as _PostgrestFilterBuilder } from '@supabase/postgrest-js';
+import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export interface SearchFilters {
   category?: string;
@@ -41,16 +41,16 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder = supabase
+      let queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
-        .eq('is_active', true) as unknown;
+        .eq('is_active', true);
 
       // Add text search
       if (query && query.trim() !== '') {
         const searchQuery =
           KHDataTransformationProvider.createSearchQuery(query);
-        queryBuilder = (queryBuilder as unknown).or(searchQuery);
+        queryBuilder = queryBuilder.or(searchQuery);
       }
 
       // Add filters
@@ -63,10 +63,10 @@ export class KHSearchProvider {
         queryBuilder = this.applyOptions(queryBuilder, options);
       } else {
         // Default ordering
-        queryBuilder = (queryBuilder as unknown).order('created_at', { ascending: false });
+        queryBuilder = queryBuilder.order('created_at', { ascending: false });
       }
 
-      const { data, error, count } = await (queryBuilder as unknown);
+      const { data, error, count } = await queryBuilder;
 
       if (error) throw error;
 
@@ -97,24 +97,24 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder = supabase
+      let queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
-        .eq('is_active', true) as unknown;
+        .eq('is_active', true);
 
       // Search for content that contains any of the specified tags
       if (tags.length > 0) {
-        queryBuilder = (queryBuilder as unknown).overlaps('tags', tags);
+        queryBuilder = queryBuilder.overlaps('tags', tags);
       }
 
       // Apply options
       if (options) {
         queryBuilder = this.applyOptions(queryBuilder, options);
       } else {
-        queryBuilder = (queryBuilder as unknown).order('created_at', { ascending: false });
+        queryBuilder = queryBuilder.order('created_at', { ascending: false });
       }
 
-      const { data, error, count } = await (queryBuilder as unknown);
+      const { data, error, count } = await queryBuilder;
 
       if (error) throw error;
 
@@ -146,17 +146,17 @@ export class KHSearchProvider {
     options?: SearchOptions;
   }): Promise<SearchResult> {
     try {
-      let queryBuilder = supabase
+      let queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
-        .eq('is_active', true) as unknown;
+        .eq('is_active', true);
 
       // Add text search
       if (criteria.query && criteria.query.trim() !== '') {
         const searchQuery = KHDataTransformationProvider.createSearchQuery(
           criteria.query
         );
-        queryBuilder = (queryBuilder as unknown).or(searchQuery);
+        queryBuilder = queryBuilder.or(searchQuery);
       }
 
       // Add filters
@@ -168,10 +168,10 @@ export class KHSearchProvider {
       if (criteria.options) {
         queryBuilder = this.applyOptions(queryBuilder, criteria.options);
       } else {
-        queryBuilder = (queryBuilder as unknown).order('created_at', { ascending: false });
+        queryBuilder = queryBuilder.order('created_at', { ascending: false });
       }
 
-      const { data, error, count } = await (queryBuilder as unknown);
+      const { data, error, count } = await queryBuilder;
 
       if (error) throw error;
 
@@ -301,55 +301,53 @@ export class KHSearchProvider {
    * Apply filters to query builder
    */
   private applyFilters(
-    queryBuilder: unknown,
+    queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>,
     filters: SearchFilters
-  ): unknown {
-    const qb = queryBuilder as unknown;
+  ): PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> {
     if (filters.category) {
-      qb.eq('content_type', filters.category.toLowerCase());
+      queryBuilder = queryBuilder.eq('content_type', filters.category.toLowerCase());
     }
     if (filters.status) {
-      qb.eq('status', filters.status);
+      queryBuilder = queryBuilder.eq('status', filters.status);
     }
     if (filters.department) {
-      qb.eq('department', filters.department);
+      queryBuilder = queryBuilder.eq('department', filters.department);
     }
     if (filters.domain) {
-      qb.eq('domain', filters.domain);
+      queryBuilder = queryBuilder.eq('domain', filters.domain);
     }
     if (filters.difficultyLevel) {
-      qb.eq('difficulty_level', filters.difficultyLevel);
+      queryBuilder = queryBuilder.eq('difficulty_level', filters.difficultyLevel);
     }
     if (filters.tags && filters.tags.length > 0) {
-      qb.overlaps('tags', filters.tags);
+      queryBuilder = queryBuilder.overlaps('tags', filters.tags);
     }
 
-    return qb;
+    return queryBuilder;
   }
 
   /**
    * Apply options to query builder
    */
   private applyOptions(
-    queryBuilder: unknown,
+    queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>,
     options: SearchOptions
-  ): unknown {
-    const qb = queryBuilder as unknown;
+  ): PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> {
     if (options.limit) {
-      qb.limit(options.limit);
+      queryBuilder = queryBuilder.limit(options.limit);
     }
     if (options.offset) {
-      qb.range(
+      queryBuilder = queryBuilder.range(
         options.offset,
         options.offset + (options.limit || 10) - 1
       );
     }
     if (options.sortBy) {
-      qb.order(options.sortBy, {
+      queryBuilder = queryBuilder.order(options.sortBy, {
         ascending: options.sortOrder === 'asc',
       });
     }
 
-    return qb;
+    return queryBuilder;
   }
 }

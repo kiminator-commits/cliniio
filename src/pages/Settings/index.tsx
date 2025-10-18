@@ -9,6 +9,7 @@ import {
   FacilitySettings,
 } from '../../services/FacilitySettingsService';
 import { useUser } from '../../contexts/UserContext';
+import { useAIUsageAlerts } from '../../hooks/useAIUsageAlerts';
 import {
   mdiAccount,
   mdiCog,
@@ -113,6 +114,7 @@ const Settings: React.FC = () => {
   const [_facilitySettings, _setFacilitySettings] =
     useState<FacilitySettings | null>(null);
   const { currentUser } = useUser();
+  const aiUsageAlerts = useAIUsageAlerts();
 
   // Handle URL parameters to open specific sections
   useEffect(() => {
@@ -214,7 +216,8 @@ const Settings: React.FC = () => {
             className={`rounded-xl shadow p-6 border text-left transition-all duration-200 hover:shadow-md hover:scale-105 focus:outline-none w-full min-h-[180px] flex flex-col justify-between ${
               openDrawer === section.id ? 'ring-2 ring-[#4ECDC4]' : ''
             } ${
-              section.id === 'system' && complianceFlagCount > 0 
+              (section.id === 'system' && complianceFlagCount > 0) || 
+              (section.id === 'analytics' && aiUsageAlerts.hasIssues)
                 ? 'border-red-500 bg-red-100 shadow-red-200 shadow-lg' 
                 : 'bg-white border-gray-100'
             }`}
@@ -232,7 +235,8 @@ const Settings: React.FC = () => {
                   />
                 </span>
                 <h3 className={`text-base font-medium ${
-                  section.id === 'system' && complianceFlagCount > 0 
+                  (section.id === 'system' && complianceFlagCount > 0) || 
+                  (section.id === 'analytics' && aiUsageAlerts.hasIssues)
                     ? 'text-red-800' 
                     : 'text-gray-700'
                 }`}>
@@ -245,14 +249,23 @@ const Settings: React.FC = () => {
                   !
                 </div>
               )}
+              {/* AI Usage warning indicator for Analytics */}
+              {section.id === 'analytics' && aiUsageAlerts.hasIssues && (
+                <div className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  !
+                </div>
+              )}
             </div>
             <p className={`text-sm mt-auto ${
-              section.id === 'system' && complianceFlagCount > 0 
+              (section.id === 'system' && complianceFlagCount > 0) || 
+              (section.id === 'analytics' && aiUsageAlerts.hasIssues)
                 ? 'text-red-600 font-medium' 
                 : 'text-gray-500'
             }`}>
               {section.id === 'system' && complianceFlagCount > 0 
                 ? '⚠️ Compliance issues require attention'
+                : section.id === 'analytics' && aiUsageAlerts.hasIssues
+                ? `⚠️ AI usage ${aiUsageAlerts.isExceeded ? 'exceeded' : 'approaching'} limit (${Math.round(aiUsageAlerts.usagePercentage)}%)`
                 : section.description
               }
             </p>
@@ -331,7 +344,10 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <SharedLayout hasComplianceIssues={complianceFlagCount > 0}>
+    <SharedLayout 
+      hasComplianceIssues={complianceFlagCount > 0}
+      hasAIUsageIssues={aiUsageAlerts.hasIssues}
+    >
       <div className="flex flex-col min-h-screen">
         <div className="p-4 max-w-7xl w-full mx-auto flex-1 flex flex-col">
           <div className="mb-6">

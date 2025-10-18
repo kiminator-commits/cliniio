@@ -8,6 +8,7 @@ import { LearningAIService } from './learningAI/learningAIService';
 import { InventoryAIService } from './inventoryAIService';
 import { SterilizationAIService } from './sterilization/sterilizationAIService';
 import { EnvironmentalAIService } from './environmentalAI/environmentalAIService';
+import { aiServiceIntegration } from './AIServiceIntegration';
 
 /**
  * Unified AI Service - Single entry point for all AI operations
@@ -27,7 +28,34 @@ export class UnifiedAIService {
    * Ask Cliniio AI a general question
    */
   static async askAI(prompt: string, context?: string): Promise<string> {
-    return askCliniioAI({ prompt, context });
+    try {
+      const result = await askCliniioAI({ prompt, context });
+      
+      // Track usage for general AI questions
+      // Estimate tokens (rough approximation)
+      const inputTokens = Math.ceil(prompt.length / 4); // ~4 chars per token
+      const outputTokens = Math.ceil(result.length / 4);
+      
+      aiServiceIntegration.trackUsage(
+        'General AI Questions',
+        'gpt-4o-mini',
+        inputTokens,
+        outputTokens,
+        true
+      );
+      
+      return result;
+    } catch (error) {
+      // Track failed request
+      aiServiceIntegration.trackUsage(
+        'General AI Questions',
+        'gpt-4o-mini',
+        0,
+        0,
+        false
+      );
+      throw error;
+    }
   }
 
   /**

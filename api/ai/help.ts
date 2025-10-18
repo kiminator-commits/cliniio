@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { ragHelpService } from '../../../src/services/ai/rag/RAGHelpService';
 
-// Validate OpenAI API key
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY environment variable is not set');
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// OpenAI API key validation is now handled in RAGHelpService
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,35 +14,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const prompt = `Provide helpful guidance for a ${userRole}:
+    // Use RAG-enhanced help service
+    const ragResponse = await ragHelpService.generateHelpResponse(
+      question,
+      userRole,
+      context
+    );
 
-Question: ${question}
-Context: ${context}
-
-Provide:
-1. Clear, actionable steps
-2. Safety considerations
-3. Best practices
-4. Relevant regulations
-5. Additional resources if needed
-
-Format as clear, structured guidance.`;
-
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
-      max_tokens: 1000,
+    return NextResponse.json({
+      help: ragResponse.answer,
+      sources: ragResponse.sources,
+      confidence: ragResponse.confidence,
+      ragEnabled: true
     });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    return NextResponse.json({ help: content });
   } catch (error) {
-    console.error('Help API error:', error);
+    console.error('RAG Help API error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to generate help' },
       { status: 500 }

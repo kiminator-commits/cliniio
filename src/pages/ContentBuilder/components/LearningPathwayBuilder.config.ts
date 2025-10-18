@@ -119,7 +119,7 @@ export const ICONS = {
 } as const;
 
 // Content transformation configuration
-interface ContentItem {
+export interface ContentItem {
   id: string;
   title: string;
   data?: { description?: string };
@@ -159,13 +159,14 @@ export const CONTENT_TRANSFORMATIONS = {
     type: CONTENT_TYPES.PROCEDURE,
     displayTitle: item.title,
   }),
-  SDS: (item: ContentItem) => ({
+  SDS: (item: ContentItem & { chemical_name?: string }) => ({
     ...item,
     id: item.id,
+    title: item.chemical_name || item.title,
     chemical_name: item.chemical_name,
     description: item.data?.description,
     hazard_level: item.hazard_level,
     type: CONTENT_TYPES.SDS,
-    displayTitle: item.chemical_name,
+    displayTitle: item.chemical_name || item.title,
   }),
 } as const;

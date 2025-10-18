@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Icon from '@mdi/react';
 import { mdiBookOpen, mdiPlus } from '@mdi/js';
 import { supabase } from '../../../lib/supabase';
-import { ContentItem } from '@/pages/KnowledgeHub/types';
+// Using local ContentItem type from config
 import {
   PathwaySection,
   AvailableContent,
@@ -25,6 +25,7 @@ import {
   DEFAULTS,
   ICONS,
   CONTENT_TRANSFORMATIONS,
+  ContentItem,
 } from './LearningPathwayBuilder.config';
 import { StepList } from './LearningPathwayBuilder/components/StepList';
 import { PathwayOverview } from './LearningPathwayBuilder/components/PathwayOverview';
@@ -86,16 +87,16 @@ export const LearningPathwayBuilder: React.FC<LearningPathwayBuilderProps> = ({
 
       const allContent = [
         ...((coursesResult.data as CourseRow[]) || []).map(
-          (item: CourseRow) => CONTENT_TRANSFORMATIONS.COURSE(item as unknown as Record<string, unknown>) as unknown as ContentItem
+          (item: CourseRow) => CONTENT_TRANSFORMATIONS.COURSE(item as ContentItem)
         ),
         ...((policiesResult.data as PolicyRow[]) || []).map(
-          (item: PolicyRow) => CONTENT_TRANSFORMATIONS.POLICY(item as unknown as Record<string, unknown>) as unknown as ContentItem
+          (item: PolicyRow) => CONTENT_TRANSFORMATIONS.POLICY(item as ContentItem)
         ),
         ...((proceduresResult.data as ProcedureRow[]) || []).map(
-          (item: ProcedureRow) => CONTENT_TRANSFORMATIONS.PROCEDURE(item as unknown as Record<string, unknown>) as unknown as ContentItem
+          (item: ProcedureRow) => CONTENT_TRANSFORMATIONS.PROCEDURE(item as ContentItem)
         ),
         ...((sdsResult.data as SDSRow[]) || []).map(
-          (item: SDSRow) => CONTENT_TRANSFORMATIONS.SDS(item as unknown as Record<string, unknown>) as unknown as ContentItem
+          (item: SDSRow) => CONTENT_TRANSFORMATIONS.SDS(item as unknown as ContentItem)
         ),
       ];
 

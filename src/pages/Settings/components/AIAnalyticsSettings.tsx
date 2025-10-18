@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Icon from '@mdi/react';
-import { mdiCheckCircle, mdiAlertCircle } from '@mdi/js';
+import { mdiAlertCircle } from '@mdi/js';
 
 import {
   useAISettings,
@@ -17,12 +17,16 @@ import SecurityPrivacy from './AIAnalyticsSettings/components/SecurityPrivacy';
 import IntegrationSettings from './AIAnalyticsSettings/components/IntegrationSettings';
 import SystemHealth from './AIAnalyticsSettings/components/SystemHealth';
 import UserExperience from './AIAnalyticsSettings/components/UserExperience';
+import TokenUsageDashboard from './AIAnalyticsSettings/components/TokenUsageDashboard';
+import ThrottlingControls from './AIAnalyticsSettings/components/ThrottlingControls';
+import { useAIUsageAlerts } from '../../../hooks/useAIUsageAlerts';
 import AnalyticsOverviewPanel from './AnalyticsOverviewPanel';
 import PerformancePanel from './PerformancePanel';
 
 const AIAnalyticsSettings: React.FC = () => {
   const { getCurrentFacilityId } = useFacility();
   const facilityId = getCurrentFacilityId();
+  const aiUsageAlerts = useAIUsageAlerts();
 
   // Initialize AI Settings service - must be called unconditionally
   const aiSettingsService = useAISettings();
@@ -31,10 +35,11 @@ const AIAnalyticsSettings: React.FC = () => {
   const [settings, setSettings] = useState<UnifiedAISettings | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<MessageState | null>(null);
+  const [_message, setMessage] = useState<MessageState | null>(null);
   const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(
     null
   );
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Load settings function
   const loadSettings = useCallback(async () => {
@@ -297,76 +302,144 @@ const AIAnalyticsSettings: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <AnalyticsOverviewPanel
-        isSaving={isSaving}
-        onResetToDefaults={resetToDefaults}
-        onSaveSettings={saveSettings}
-      />
-
-      {/* Service Status */}
-      {serviceStatus && <SystemHealth serviceStatus={serviceStatus} />}
-
-      {/* Message Display */}
-      {message && (
-        <div
-          className={`p-4 rounded-lg border ${
-            message.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-800'
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Icon
-              path={
-                message.type === 'success' ? mdiCheckCircle : mdiAlertCircle
-              }
-              size={1}
+      {/* AI Usage Alert Banner */}
+      {aiUsageAlerts.hasIssues && (
+        <div className={`p-4 rounded-lg border-l-4 ${
+          aiUsageAlerts.isExceeded 
+            ? 'bg-red-50 border-red-500' 
+            : 'bg-yellow-50 border-yellow-500'
+        }`}>
+          <div className="flex items-center">
+            <Icon 
+              path={aiUsageAlerts.isExceeded ? mdiAlertCircle : mdiAlertCircle} 
+              size={1.2} 
+              className={`mr-3 ${
+                aiUsageAlerts.isExceeded ? 'text-red-600' : 'text-yellow-600'
+              }`} 
             />
-            {message.text}
+            <div>
+              <h3 className={`font-semibold ${
+                aiUsageAlerts.isExceeded ? 'text-red-800' : 'text-yellow-800'
+              }`}>
+                {aiUsageAlerts.isExceeded ? 'AI Usage Limit Exceeded' : 'AI Usage Warning'}
+              </h3>
+              <p className={`text-sm ${
+                aiUsageAlerts.isExceeded ? 'text-red-700' : 'text-yellow-700'
+              }`}>
+                {aiUsageAlerts.isExceeded 
+                  ? `You've used ${aiUsageAlerts.usedTokens.toLocaleString()} tokens (${Math.round(aiUsageAlerts.usagePercentage)}%) of your ${aiUsageAlerts.limitTokens.toLocaleString()} token limit.`
+                  : `You've used ${aiUsageAlerts.usedTokens.toLocaleString()} tokens (${Math.round(aiUsageAlerts.usagePercentage)}%) of your ${aiUsageAlerts.limitTokens.toLocaleString()} token limit. Consider adjusting throttling settings.`
+                }
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      <FeatureToggles
-        settings={settings}
-        updateMasterAI={updateMasterAI}
-        updateComputerVision={updateComputerVision}
-        updatePredictiveAnalytics={updatePredictiveAnalytics}
-        updateSmartWorkflow={updateSmartWorkflow}
-      />
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6" aria-label="Tabs">
+            {[
+              { id: 'overview', name: 'Overview', icon: '📊' },
+              { id: 'usage', name: 'Usage & Limits', icon: '📈' },
+              { id: 'features', name: 'AI Features', icon: '⚙️' },
+              { id: 'settings', name: 'Settings', icon: '🔧' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'border-[#4ECDC4] text-[#4ECDC4]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Analytics Configuration */}
-        <AnalyticsConfiguration
-          settings={settings}
-          updateAnalytics={updateAnalytics}
-        />
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              <AnalyticsOverviewPanel
+                isSaving={isSaving}
+                onResetToDefaults={resetToDefaults}
+                onSaveSettings={saveSettings}
+              />
+              {serviceStatus && <SystemHealth serviceStatus={serviceStatus} />}
+            </div>
+          )}
 
-        <PerformancePanel
-          settings={settings}
-          updateIntelligence={updateIntelligence}
-        />
+          {activeTab === 'usage' && (
+            <div className="space-y-6">
+              <TokenUsageDashboard facilityId={facilityId} />
+              <ThrottlingControls
+                settings={{
+                  enabled: true,
+                  requestsPerMinute: 60,
+                  requestsPerHour: 1000,
+                  burstLimit: 10,
+                  monthlyTokenLimit: 1000000,
+                  warningThreshold: 75,
+                  criticalThreshold: 90,
+                }}
+                onUpdateSettings={(newSettings) => {
+                  console.log('Updating throttling settings:', newSettings);
+                }}
+                currentUsage={{
+                  requestsThisMinute: 15,
+                  requestsThisHour: 120,
+                  monthlyTokens: 125000,
+                  monthlyTokenLimit: 1000000,
+                }}
+              />
+            </div>
+          )}
 
-        {/* Performance Monitoring */}
-        <PerformanceMonitoring
-          settings={settings}
-          updatePerformance={updatePerformance}
-        />
+          {activeTab === 'features' && (
+            <FeatureToggles
+              settings={settings}
+              updateMasterAI={updateMasterAI}
+              updateComputerVision={updateComputerVision}
+              updatePredictiveAnalytics={updatePredictiveAnalytics}
+              updateSmartWorkflow={updateSmartWorkflow}
+            />
+          )}
 
-        {/* Data Privacy & Security */}
-        <SecurityPrivacy settings={settings} updatePrivacy={updatePrivacy} />
-
-        {/* Integration Settings */}
-        <IntegrationSettings
-          settings={settings}
-          updateIntegration={updateIntegration}
-        />
-
-        {/* User Experience */}
-        <UserExperience
-          settings={settings}
-          updateUserExperience={updateUserExperience}
-        />
+          {activeTab === 'settings' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AnalyticsConfiguration
+                settings={settings}
+                updateAnalytics={updateAnalytics}
+              />
+              <PerformancePanel
+                settings={settings}
+                updateIntelligence={updateIntelligence}
+              />
+              <PerformanceMonitoring
+                settings={settings}
+                updatePerformance={updatePerformance}
+              />
+              <SecurityPrivacy
+                settings={settings}
+                updatePrivacy={updatePrivacy}
+              />
+              <IntegrationSettings
+                settings={settings}
+                updateIntegration={updateIntegration}
+              />
+              <UserExperience
+                settings={settings}
+                updateUserExperience={updateUserExperience}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
