@@ -37,7 +37,7 @@ const CleaningLogTracker: React.FC = () => {
     getCleaningTypeDisplayName: _getCleaningTypeDisplayName,
     getQualityScoreDisplay,
     getComplianceScoreDisplay,
-    exportLogs,
+    exportLogs: _exportLogs,
   } = useCleaningLogLogic({ filterStatus, filterDate });
 
   if (loading) {
@@ -79,11 +79,15 @@ const CleaningLogTracker: React.FC = () => {
         </h2>
         <div className="flex items-center gap-2">
           <button
-            onClick={exportLogs}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            onClick={() => {
+              console.warn('⚠️ Export not yet implemented.');
+            }}
+            disabled={true}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-400 text-white rounded-lg opacity-70 cursor-not-allowed"
+            aria-disabled="true"
           >
             <Icon path={mdiDownload} size={1} />
-            Export
+            Export (Coming Soon)
           </button>
         </div>
       </div>

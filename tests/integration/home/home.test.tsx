@@ -14,7 +14,7 @@ vi.mock('@/store/useLoginStore', () => ({
   useLoginStore: vi.fn((selector) => {
     const state = {
       authToken: 'mock-token',
-      isTokenExpired: () => false,
+      isTokenExpired: false,
     };
     return selector(state);
   }),

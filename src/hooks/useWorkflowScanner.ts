@@ -1,45 +1,80 @@
-import { useCallback } from 'react';
-import { environmentalService } from '@/services/environmental/environmentalService';
+import { useState, useCallback } from 'react';
+import { notifyDuplicateBarcode, notifyMissingItem } from '@/services/inventory/inventoryFeedbackService';
+import { uploadScannedItems } from '@/services/inventory/inventoryDataTransfer';
+import { logger } from '@/services/loggerService';
 
-interface ScanResult {
-  type: 'sterilization' | 'environmental' | 'unknown';
-  code: string;
+export function useWorkflowScanner() {
+interface ScannedItem {
+  id: string;
+  barcode: string;
+  name: string;
+  status: string;
   timestamp: string;
 }
 
-export function useWorkflowScanner() {
+  const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
+  const [processing, setProcessing] = useState(false);
+
+  // ✅ Normalizes barcode (trims, uppercases)
+  const normalizeBarcode = useCallback((code: string) => {
+    return code.trim().toUpperCase();
+  }, []);
+
+  // ✅ Main scan handler
   const handleScan = useCallback(
-    async (scannedCode: string): Promise<ScanResult> => {
-      const timestamp = new Date().toISOString();
-      console.info('🔍 Workflow scan received:', scannedCode);
+    async (rawBarcode: string) => {
+      const barcode = normalizeBarcode(rawBarcode);
+      if (!barcode) return;
 
+      // Duplicate check
+      const isDuplicate = scannedItems.some((i) => i.barcode === barcode);
+      if (isDuplicate) {
+        notifyDuplicateBarcode(barcode);
+        return;
+      }
+
+      setProcessing(true);
       try {
-        // Determine the scan domain by prefix or pattern
-        if (scannedCode.startsWith('ST-')) {
-          console.info('Routing to sterilization workflow');
-          // Note: Sterilization workflow processing needs implementation
-          // This will integrate with sterilization service for barcode processing
-          return { type: 'sterilization', code: scannedCode, timestamp };
+        // Simulate lookup (replace with real query later)
+        const foundItem = await fakeBarcodeLookup(barcode);
+
+        if (!foundItem) {
+          notifyMissingItem(barcode);
+          return;
         }
 
-        if (scannedCode.startsWith('EC-')) {
-          console.info('Routing to environmental cleaning workflow');
-          await environmentalService.processScan(scannedCode);
-          return { type: 'environmental', code: scannedCode, timestamp };
-        }
+        const newItem = {
+          id: foundItem.id,
+          barcode,
+          name: foundItem.name,
+          status: 'scanned',
+          timestamp: new Date().toISOString(),
+        };
 
-        console.warn('Unrecognized scan pattern:', scannedCode);
-        return { type: 'unknown', code: scannedCode, timestamp };
+        const updatedList = [...scannedItems, newItem];
+        setScannedItems(updatedList);
+
+        // Immediately persist the scanned item list
+        await uploadScannedItems(updatedList);
+        logger.info(`✅ Processed and uploaded barcode: ${barcode}`);
       } catch (err: unknown) {
-        console.error(
-          'Error processing scan:',
-          err instanceof Error ? err.message : String(err)
-        );
-        return { type: 'unknown', code: scannedCode, timestamp };
+        logger.error(`❌ Workflow scan failed for barcode ${rawBarcode}`, err);
+      } finally {
+        setProcessing(false);
       }
     },
-    []
+    [scannedItems, normalizeBarcode]
   );
 
-  return { handleScan };
+  // ✅ Mock lookup for now (until real Supabase endpoint is wired)
+  async function fakeBarcodeLookup(barcode: string) {
+    const mockInventory = [
+      { id: 'ITEM001', barcode: 'ABC123', name: 'Scalpel Set' },
+      { id: 'ITEM002', barcode: 'XYZ789', name: 'Dental Mirror' },
+      { id: 'ITEM003', barcode: 'LMN456', name: 'Autoclave Tray' },
+    ];
+    return mockInventory.find((item) => item.barcode === barcode) || null;
+  }
+
+  return { scannedItems, processing, handleScan };
 }

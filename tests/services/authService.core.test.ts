@@ -5,10 +5,8 @@ import {
   logout,
 } from '@/services/authService';
 import { createDevSession } from '@/config/devAuthConfig';
-import { vi, describe, test, expect, beforeEach, afterEach, it, type Mock } from 'vitest';
+import { vi, describe, expect, beforeEach, afterEach, it, type Mock } from 'vitest';
 import { isDevelopment } from '@/lib/getEnv';
-import { supabase } from '@/lib/supabaseClient';
-import { UserSessionService } from '@/services/userSessionService';
 
 // Mock dependencies
 vi.mock('@/config/devAuthConfig', () => ({
@@ -26,51 +24,15 @@ vi.mock('@/lib/getEnv', () => ({
   isDevelopment: vi.fn(),
 }));
 
-vi.mock('@/lib/supabaseClient', () => ({
-  supabase: {
-    auth: {
-      signInWithPassword: vi.fn().mockResolvedValue({
-        data: {
-          user: { id: 'mock-user', email: 'mock@example.com' },
-          session: { access_token: 'mock-token', expires_at: '2024-12-31T23:59:59Z' },
-        },
-        error: null,
-      }),
-      getUser: vi.fn().mockResolvedValue({
-        data: {
-          user: { id: 'mock-user', email: 'mock@example.com' },
-        },
-        error: null,
-      }),
-      refreshSession: vi.fn().mockResolvedValue({
-        data: {
-          session: { expires_at: '2024-12-31T23:59:59Z' },
-        },
-        error: null,
-      }),
-      getSession: vi.fn(),
-      signOut: vi.fn().mockResolvedValue({ error: null }),
-    },
-  },
-}));
-
-vi.mock('@/services/userSessionService', () => ({
-  UserSessionService: {
-    deactivateSession: vi.fn(),
-    getDeviceInfo: vi.fn(),
-    createSession: vi.fn(),
-  },
-}));
+// Mock fetch globally
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 const mockCreateDevSession = createDevSession as Mock<
   typeof createDevSession
 >;
 const mockIsDevelopment = isDevelopment as Mock<
   typeof isDevelopment
->;
-const mockSupabase = supabase as Mock<typeof supabase>;
-const mockUserSessionService = UserSessionService as Mock<
-  typeof UserSessionService
 >;
 
 // Mock console methods
@@ -87,6 +49,7 @@ const mockPerformanceNow = vi.spyOn(performance, 'now');
 describe('authService Core', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetch.mockClear();
     mockConsoleLog.mockClear();
     mockConsoleError.mockClear();
     mockConsoleWarn.mockClear();
@@ -116,14 +79,16 @@ describe('authService Core', () => {
 
   describe('login', () => {
     it('should login with Supabase successfully', async () => {
-      const mockSession = {
-        access_token: 'supabase-token',
-        expires_at: 1735689599, // 2024-12-31T23:59:59Z
-      };
-
-      mockSupabase.auth.signInWithPassword.mockResolvedValue({
-        data: { session: mockSession, user: null },
-        error: null,
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          token: 'mock-token',
+          expiry: '2024-12-31T23:59:59.000Z',
+        }),
       });
 
       const result = await login('test@example.com', 'password123');
@@ -133,14 +98,24 @@ describe('authService Core', () => {
         expiry: '2024-12-31T23:59:59.000Z',
       });
 
-      // The service uses mock auth in test environment, so Supabase is not called
-      expect(mockSupabase.auth.signInWithPassword).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledWith('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
+        signal: expect.any(AbortSignal),
+      });
     });
 
     it('should throw error when Supabase login fails', async () => {
-      mockSupabase.auth.signInWithPassword.mockResolvedValue({
-        data: { session: null, user: null },
-        error: { message: 'Invalid credentials' },
+      // Mock failed fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          message: 'Invalid credentials',
+        }),
       });
 
       await expect(login('test@example.com', 'wrongpassword')).rejects.toThrow(
@@ -149,172 +124,180 @@ describe('authService Core', () => {
     });
 
     it('should throw error when no session is returned', async () => {
-      mockSupabase.auth.signInWithPassword.mockResolvedValue({
-        data: { session: null, user: null },
-        error: null,
+      // Mock successful fetch but with no session data
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          message: 'No session returned from authentication',
+        }),
       });
-
-      // Set flag to simulate "no session returned" error
-      localStorage.setItem('test-no-session', 'true');
 
       await expect(login('test@example.com', 'password123')).rejects.toThrow(
         'No session returned from authentication'
       );
-
-      // Clean up
-      localStorage.removeItem('test-no-session');
     });
   });
 
   describe('validateToken', () => {
     it('should validate token with Supabase successfully', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com' };
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          valid: true,
+          user: { id: 'user-123', email: 'test@example.com' },
+        }),
       });
 
       const result = await validateToken('valid-token');
 
       expect(result).toEqual({
         valid: true,
-        user: { id: 'mock-user', email: 'mock@example.com' }, // From DEV_AUTH_CONFIG
+        user: { id: 'user-123', email: 'test@example.com' },
       });
 
-      // The service uses mock auth in test environment, so Supabase is not called
-      expect(mockSupabase.auth.getUser).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledWith('/api/validate', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer valid-token' },
+      });
     });
 
     it('should throw error when token validation fails', async () => {
-      mockSupabase.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: { message: 'Invalid token' },
+      // Mock failed fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          error: 'Invalid token',
+        }),
       });
 
-      await expect(validateToken('invalid-token')).rejects.toThrow(
-        'Invalid token'
-      );
+      const result = await validateToken('invalid-token');
+
+      expect(result).toEqual({
+        valid: false,
+        error: 'Invalid token',
+      });
     });
   });
 
   describe('refreshSession', () => {
     it('should refresh session with Supabase successfully', async () => {
-      const mockSession = {
-        access_token: 'new-token',
-        expires_at: 1735689599,
-      };
-
-      mockSupabase.auth.refreshSession.mockResolvedValue({
-        data: { session: mockSession, user: null },
-        error: null,
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          token: 'new-token',
+          expiry: '2024-12-31T23:59:59.000Z',
+        }),
       });
 
-      const result = await refreshSession();
+      const result = await refreshSession('valid-token');
 
       expect(result).toEqual({
+        token: 'new-token',
         expiry: '2024-12-31T23:59:59.000Z',
+        refreshedAt: expect.any(String),
       });
 
-      // The service uses mock auth in test environment, so Supabase is not called
-      expect(mockSupabase.auth.refreshSession).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledWith('/api/refresh', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer valid-token' },
+      });
     });
 
     it('should throw error when refresh fails', async () => {
-      mockSupabase.auth.refreshSession.mockResolvedValue({
-        data: { session: null, user: null },
-        error: { message: 'Refresh failed' },
+      // Mock failed fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          error: 'Session refresh failed',
+        }),
       });
 
-      // Set flag to simulate refresh error
-      localStorage.setItem('test-refresh-error', 'true');
-
-      await expect(refreshSession()).rejects.toThrow('Session refresh failed');
-
-      // Clean up
-      localStorage.removeItem('test-refresh-error');
+      await expect(refreshSession('invalid-token')).rejects.toThrow(
+        'Token refresh failed'
+      );
     });
 
     it('should throw error when no session is returned from refresh', async () => {
-      mockSupabase.auth.refreshSession.mockResolvedValue({
-        data: { session: null, user: null },
-        error: null,
+      // Mock successful fetch but with no session data
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          error: 'No session returned from refresh',
+        }),
       });
 
-      // Set flag to simulate no session returned
-      localStorage.setItem('test-refresh-no-session', 'true');
-
-      await expect(refreshSession()).rejects.toThrow(
+      await expect(refreshSession('valid-token')).rejects.toThrow(
         'No session returned from refresh'
       );
-
-      // Clean up
-      localStorage.removeItem('test-refresh-no-session');
     });
   });
 
   describe('logout', () => {
     it('should logout successfully with session deactivation', async () => {
-      const mockSession = {
-        access_token: 'session-token',
-        expires_at: 1735689599,
-      };
-
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: mockSession },
-        error: null,
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          success: true,
+        }),
       });
 
-      mockSupabase.auth.signOut.mockResolvedValue({
-        error: null,
+      await logout('session-token');
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/logout', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer session-token' },
       });
-
-      mockUserSessionService.deactivateSession.mockResolvedValue(undefined);
-
-      await logout();
-
-      // The service uses mock auth in test environment, so Supabase is not called
-      expect(mockSupabase.auth.getSession).not.toHaveBeenCalled();
-      expect(mockSupabase.auth.signOut).not.toHaveBeenCalled();
-      expect(mockUserSessionService.deactivateSession).not.toHaveBeenCalled();
-      expect(mockConsoleLog).toHaveBeenCalledWith('Logging out...');
-      expect(mockConsoleLog).toHaveBeenCalledWith('Logout successful');
     });
 
     it('should logout successfully without session token', async () => {
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: null },
-        error: null,
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          success: true,
+        }),
       });
 
-      mockSupabase.auth.signOut.mockResolvedValue({
-        error: null,
+      await logout('');
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/logout', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' },
       });
-
-      await logout();
-
-      // The service uses mock auth in test environment, so Supabase is not called
-      expect(mockSupabase.auth.signOut).not.toHaveBeenCalled();
-      expect(mockUserSessionService.deactivateSession).not.toHaveBeenCalled();
-      expect(mockConsoleLog).toHaveBeenCalledWith('Logout successful');
     });
 
     it('should throw error when Supabase signOut fails', async () => {
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: null },
-        error: null,
-      });
+      // Mock failed fetch response
+      mockFetch.mockRejectedValueOnce(new Error('Logout failed'));
 
-      mockSupabase.auth.signOut.mockResolvedValue({
-        error: { message: 'Sign out failed' },
-      });
-
-      // Set flag to simulate logout error
-      localStorage.setItem('test-logout-error', 'true');
-
-      await expect(logout()).rejects.toThrow('Logout failed');
-
-      // Clean up
-      localStorage.removeItem('test-logout-error');
+      await expect(logout('valid-token')).rejects.toThrow('Logout failed');
     });
   });
 });

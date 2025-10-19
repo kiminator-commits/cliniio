@@ -96,7 +96,7 @@ export const useLoginForm = () => {
     const storedExpiry = localStorage.getItem('sessionExpiry');
 
     if (storedToken && storedExpiry && new Date(storedExpiry) > new Date()) {
-      useLoginStore.getState().setAuthToken(storedToken, storedExpiry);
+      useLoginStore.getState().setAuthToken(storedToken);
       useLoginStore.getState().setSessionExpiry(storedExpiry);
     }
   }, []);
@@ -202,11 +202,10 @@ export const useLoginForm = () => {
           ).toISOString();
           useLoginStore
             .getState()
-            .setAuthToken(
-              response.data.accessToken,
-              expiry,
-              credentials.rememberMe
-            );
+            .setAuthToken(response.data.accessToken);
+          useLoginStore
+            .getState()
+            .setSessionExpiry(expiry);
 
           // Initialize UserContext after successful login
           await initializeUserContext();

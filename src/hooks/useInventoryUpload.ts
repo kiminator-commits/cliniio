@@ -1,61 +1,55 @@
-import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { useState, useCallback } from 'react';
+import { uploadScannedItems } from '@/services/inventory/inventoryDataTransfer';
+import { notifyUploadSuccess, notifyUploadFailure } from '@/services/inventory/inventoryFeedbackService';
+import { logger } from '@/services/loggerService';
 
-export function useInventoryUpload(facilityId: string) {
+export function useInventoryUpload() {
+  const [isOpen, setIsOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface ScannedItem {
+  id: string;
+  barcode: string;
+  name: string;
+  status: string;
+  timestamp: string;
+}
 
-  async function handleInventoryUpload(file: File) {
-    if (!file || !facilityId) return undefined;
+  const [items, setItems] = useState<ScannedItem[]>([]);
+
+  // ✅ Modal state controls
+  const openModal = useCallback(() => setIsOpen(true), []);
+  const closeModal = useCallback(() => setIsOpen(false), []);
+  const toggleModal = useCallback(() => setIsOpen((p) => !p), []);
+
+  // ✅ Upload logic
+  const handleUpload = useCallback(async () => {
+    if (!items.length) {
+      notifyUploadFailure('No items to upload.');
+      return;
+    }
 
     try {
       setUploading(true);
-      setError(null);
-
-      // Upload file to Supabase Storage bucket "inventory_uploads"
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('inventory_uploads')
-        .upload(`${facilityId}/${Date.now()}_${file.name}`, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Record metadata for audit tracking
-      const { error: insertError } = await supabase
-        .from('inventory_files')
-        .insert([
-          {
-            facility_id: facilityId,
-            file_name: file.name,
-            storage_path: uploadData?.path || '',
-            uploaded_at: new Date().toISOString(),
-          },
-        ]);
-
-      if (insertError) throw insertError;
-
-      if (process.env.NODE_ENV === 'development') {
-        console.debug(`📦 Uploaded inventory file: ${file.name}`);
-      }
-
-      return uploadData;
+      await uploadScannedItems(items);
+      notifyUploadSuccess(items.length);
+      setItems([]);
+      setIsOpen(false);
     } catch (err: unknown) {
-      console.error(
-        'handleInventoryUpload failed:',
-        err instanceof Error ? err.message : String(err)
-      );
-      setError(err instanceof Error ? err.message : String(err));
-      return null;
+      logger.error('Inventory upload failed', err);
+      notifyUploadFailure(err instanceof Error ? err.message : 'Upload failed.');
     } finally {
       setUploading(false);
     }
-  }
+  }, [items]);
 
   return {
+    isOpen,
     uploading,
-    error,
-    handleInventoryUpload,
+    items,
+    setItems,
+    openModal,
+    closeModal,
+    toggleModal,
+    handleUpload,
   };
 }

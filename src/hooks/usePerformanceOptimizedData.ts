@@ -46,10 +46,7 @@ export const usePerformanceOptimizedData = <T>({
   const isMountedRef = useRef(true);
 
   // Performance tracking
-  const { recordDataFetchComplete } = usePagePerformance({
-    pageName,
-    trackDataLoading: true,
-  });
+  usePagePerformance(true);
 
   // Check cache for existing data
   const getCachedData = useCallback((): T | null => {
@@ -104,7 +101,6 @@ export const usePerformanceOptimizedData = <T>({
           if (cachedData) {
             setData(cachedData);
             setIsLoading(false);
-            recordDataFetchComplete();
             onSuccess?.(cachedData);
             return;
           }
@@ -123,7 +119,6 @@ export const usePerformanceOptimizedData = <T>({
         setData(result);
         setCachedData(result);
         setRetryAttempts(0);
-        recordDataFetchComplete();
         onSuccess?.(result);
 
         if (process.env.NODE_ENV === 'development') {
@@ -172,7 +167,6 @@ export const usePerformanceOptimizedData = <T>({
       retryAttempts,
       retryCount,
       retryDelay,
-      recordDataFetchComplete,
       onSuccess,
       onError,
     ]

@@ -1,4 +1,28 @@
 import { supabase } from '../../lib/supabaseClient';
+import { logger } from '@/services/loggerService';
+
+/**
+ * Initialize BI failure state by loading existing incidents from Supabase
+ */
+export async function initializeBIFailureState(): Promise<any[]> {
+  try {
+    const { data, error } = await supabase
+      .from('bi_failure_incidents')
+      .select('*')
+      .order('failure_date', { ascending: false })
+      .limit(25);
+
+    if (error) throw error;
+    const normalized = data.map((f) => ({
+      ...f,
+      failure_date: f.failure_date ? new Date(f.failure_date) : null,
+    }));
+    return normalized;
+  } catch (error: any) {
+    logger.error('❌ Error initializing BI Failure State:', error.message);
+    return [];
+  }
+}
 
 /**
  * Loads BI compliance configuration for the specified facility.

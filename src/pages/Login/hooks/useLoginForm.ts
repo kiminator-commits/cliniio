@@ -18,6 +18,7 @@ export const useLoginForm = () => {
     setErrors,
     setLoading,
     setAuthToken,
+    setSessionExpiry,
     csrfToken: _csrfToken,
     incrementFailedAttempts,
     resetFailedAttempts,
@@ -102,7 +103,8 @@ export const useLoginForm = () => {
         const expiry = new Date(
           Date.now() + response.data.expiresIn * 1000
         ).toISOString();
-        setAuthToken(response.data.accessToken, expiry, rememberMe);
+        setAuthToken(response.data.accessToken);
+        setSessionExpiry(expiry);
 
         // Refresh user data
         try {

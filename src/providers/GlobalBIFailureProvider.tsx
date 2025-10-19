@@ -8,6 +8,7 @@ import React, {
 import { BIFailureService, initializeBIFailureState, useBIStore } from '../services/bi/failure';
 import { useSterilizationStore } from '../store/sterilizationStore';
 import { supabase } from '../lib/supabaseClient';
+import { logger } from '@/services/loggerService';
 
 /**
  * GlobalBIFailureProvider - Integrates BI failure management with sterilization store
@@ -143,22 +144,20 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
           const { data: { user } } = await supabase.auth.getUser();
           facilityId = user?.user_metadata?.facility_id;
         } catch (error) {
-          console.error(
-            '❌ Failed to resolve facility ID in GlobalBIFailureProvider:',
-            error
-          );
+          logger.error('❌ Failed to resolve facility ID in GlobalBIFailureProvider:', error);
           return;
         }
 
         if (!facilityId) {
-          console.error(
-            '❌ No valid facility ID found. BI Failure Provider initialization aborted.'
-          );
+          logger.error('❌ No valid facility ID found. BI Failure Provider initialization aborted.');
           return;
         }
 
         // Initialize state from database
-        await initializeBIFailureState();
+        const failures = await initializeBIFailureState();
+        if (Array.isArray(failures) && failures.length) {
+          logger.info(`🔄 Hydrated ${failures.length} BI failure incidents from Supabase.`);
+        }
 
         // Sync BI failure data from database to sterilization store
         await syncBIFailureData(facilityId);
@@ -170,9 +169,9 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
         };
 
         initializedRef.current = true;
-        console.log('Global BI Failure system initialized');
+        logger.info('✅ Global BI Failure system initialized');
       } catch (error) {
-        console.error('Failed to initialize BI failure system:', error);
+        logger.error('❌ Failed to initialize BI failure system:', error);
       }
     }, [syncBIFailureData]);
 
@@ -186,16 +185,31 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
     useEffect(() => {
       initializeBIFailureSystem();
 
+      // 🔔 Real-time subscription reinstated
+      const subscription = supabase
+        .channel('bi_failures')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'bi_failure_incidents' },
+          (payload) => {
+            logger.warn('🚨 New BI failure detected:', payload.new);
+            // Handle new BI failure incident
+            handleBIFailureIncident(payload.new as Record<string, unknown>);
+          }
+        )
+        .subscribe();
+
       // Capture the ref value at the time the effect runs
       const currentSubscription = subscriptionRef.current;
 
       // Cleanup subscription on unmount
       return () => {
+        subscription.unsubscribe();
         if (currentSubscription) {
           currentSubscription.unsubscribe();
         }
       };
-    }, [initializeBIFailureSystem]);
+    }, [initializeBIFailureSystem, handleBIFailureIncident]);
 
     return (
       <BIFailureContext.Provider value={biFailureHandlers}>

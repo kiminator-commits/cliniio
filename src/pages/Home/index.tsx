@@ -13,7 +13,7 @@ export default function HomePage() {
   const homeData = useHomeDataLoader();
 
   // AUTHENTICATION GUARD: No user data should show until after login
-  const isAuthenticated = !!(currentUser && authToken && !isTokenExpired());
+  const isAuthenticated = !!(currentUser && authToken && !isTokenExpired);
 
   // Redirect to login if not authenticated
   if (!isAuthenticated && !userLoading) {

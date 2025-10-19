@@ -38,13 +38,7 @@ const AuthCallback: React.FC = () => {
           );
 
           // Set the auth token and session expiry in the store
-          setAuthToken(
-            data.session.access_token,
-            data.session.expires_at
-              ? new Date(data.session.expires_at * 1000).toISOString()
-              : '',
-            true // OAuth logins should be remembered by default
-          );
+          setAuthToken(data.session.access_token);
           setSessionExpiry(
             data.session.expires_at
               ? new Date(data.session.expires_at * 1000).toISOString()

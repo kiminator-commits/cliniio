@@ -1,6 +1,6 @@
 // Simple tests for key services to improve coverage
 import { ErrorReportingService } from '@/services/errorReportingService';
-import { vi, describe, test, expect, it, beforeEach } from 'vitest';
+import { vi, describe, expect, it, beforeEach } from 'vitest';
 import {
   login,
   validateToken,
@@ -43,6 +43,14 @@ vi.mock('@/lib/supabaseClient', () => ({
         })),
       })),
     })),
+  },
+}));
+
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getUser: vi.fn(),
+    },
   },
 }));
 
@@ -151,30 +159,34 @@ describe('Service Coverage Tests', () => {
 
   describe('AuthService', () => {
     it('should handle login with Supabase', async () => {
-      // Ensure the mock is properly set up
-      const mockSignIn = vi.mocked(supabase.auth.signInWithPassword);
-      mockSignIn.mockResolvedValue({
-        data: {
-          session: {
-            access_token: 'mock-token',
-            expires_at: '2024-12-31T23:59:59.000Z',
-          },
-          user: { id: 'user-123' },
+      // Mock successful fetch response
+      const mockFetch = vi.mocked(global.fetch);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
         },
-        error: null,
+        json: vi.fn().mockResolvedValue({
+          token: 'mock-token',
+          expiry: '2024-12-31T23:59:59.000Z',
+        }),
       });
 
       const result = await login('test@example.com', 'password');
-      // In test mode, the login function uses mock authentication, not Supabase
-      // The mock returns 'mock-token' as defined in the test setup
       expect(result.token).toBe('mock-token');
     });
 
     it('should handle login errors', async () => {
-      const mockSignIn = vi.mocked(supabase.auth.signInWithPassword);
-      mockSignIn.mockResolvedValue({
-        data: { session: null, user: null },
-        error: { message: 'Invalid credentials' },
+      // Mock failed fetch response
+      const mockFetch = vi.mocked(global.fetch);
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          message: 'Invalid credentials',
+        }),
       });
 
       await expect(login('test@example.com', 'wrongpassword')).rejects.toThrow(
@@ -183,10 +195,17 @@ describe('Service Coverage Tests', () => {
     });
 
     it('should validate tokens', async () => {
-      const mockGetUser = vi.mocked(supabase.auth.getUser);
-      mockGetUser.mockResolvedValue({
-        data: { user: { id: 'user-123' } },
-        error: null,
+      // Mock successful fetch response
+      const mockFetch = vi.mocked(global.fetch);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({
+          valid: true,
+          user: { id: 'user-123' },
+        }),
       });
 
       const result = await validateToken('valid-token');
@@ -194,33 +213,61 @@ describe('Service Coverage Tests', () => {
     });
 
     it('should refresh sessions', async () => {
-      const mockRefreshSession = vi.mocked(supabase.auth.refreshSession);
-      mockRefreshSession.mockResolvedValue({
-        data: {
-          session: {
-            access_token: 'new-token',
-            expires_at: '2024-12-31T23:59:59.000Z',
-          },
+      // Mock successful fetch response
+      const mockFetch = vi.mocked(global.fetch);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
         },
-        error: null,
+        json: vi.fn().mockResolvedValue({
+          token: 'new-token',
+          expiry: '2024-12-31T23:59:59.000Z',
+        }),
       });
 
-      const result = await refreshSession();
+      const result = await refreshSession('valid-token');
       expect(result.expiry).toBe('2024-12-31T23:59:59.000Z');
     });
 
     it('should handle logout', async () => {
+      // Mock successful fetch response
+      const mockFetch = vi.mocked(global.fetch);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: {
+          get: vi.fn().mockReturnValue('application/json'),
+        },
+        json: vi.fn().mockResolvedValue({}),
+      });
+
       // In test mode, the logout function uses mock authentication, not Supabase
       // So we test that the mock logout completes successfully
-      await expect(logout()).resolves.not.toThrow();
+      await expect(logout('mock-token')).resolves.not.toThrow();
 
       // Verify that the logout function completes without errors
-      // The mock logout just logs and returns, which is the expected behavior
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/logout'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer mock-token',
+          }),
+        })
+      );
     });
   });
 
   describe('FacilityService', () => {
     it('should get current facility ID from cache', async () => {
+      // Mock successful user fetch
+      const mockSupabase = await import('@/lib/supabase');
+      const mockGetUser = vi.mocked(mockSupabase.supabase.auth.getUser);
+      mockGetUser.mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null,
+      });
+
       distributedFacilityCache.getFacility.mockResolvedValue({
         id: 'facility-123',
         name: 'Test Facility',

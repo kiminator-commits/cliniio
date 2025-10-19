@@ -231,6 +231,35 @@ export class CleaningLogService {
   }
 
   /**
+   * Filter cycles based on status and date options
+   */
+  static filterCycles(cycles: SterilizationCycle[], options: { status?: string; date?: string }) {
+    if (!Array.isArray(cycles)) return [];
+    return cycles.filter((c) => {
+      const matchStatus = options.status ? c.status === options.status : true;
+      let matchDate = true;
+
+      if (options.date) {
+        const filterDate = new Date(options.date);
+        if (!isNaN(filterDate.getTime())) {
+          const cycleDate = new Date(c.start_time);
+          matchDate = cycleDate.toDateString() === filterDate.toDateString();
+        }
+      }
+
+      return matchStatus && matchDate;
+    });
+  }
+
+  /**
+   * Calculate failed cycles count
+   */
+  static calculateFailedCycles(cycles: SterilizationCycle[]): number {
+    if (!Array.isArray(cycles)) return 0;
+    return cycles.filter((c) => c.status?.toLowerCase() === 'failed').length;
+  }
+
+  /**
    * Export cleaning logs to CSV
    */
   static exportToCSV(logs: CleaningLog[]): void {

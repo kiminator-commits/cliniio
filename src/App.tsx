@@ -10,6 +10,9 @@ import {
   Navigate,
 } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { logger as _logger } from '@/services/loggerService';
+import RouteLoader from '@/components/common/RouteLoader';
+import { clearMockData } from '@/services/clearMockData';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { UserProvider } from './contexts/UserContext';
 import { FacilityProvider } from './contexts/FacilityContext';
@@ -18,7 +21,6 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import GlobalBIFailureBanner from './components/Sterilization/GlobalBIFailureBanner';
 import NotificationContainer from './components/notifications/NotificationContainer';
 import { EnhancedPerformanceDashboard } from './components/EnhancedPerformanceDashboard';
-import RouteLoader from './components/common/RouteLoader';
 
 // CRITICAL: Import realtime auto-optimizer to prevent database overload
 import './services/_core/realtimeCompatibility';
@@ -253,8 +255,24 @@ function installPostgrestFetchGuard() {
 }
 // END PostgREST runtime guard
 
-// Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // ✅ Per-query control instead of forced global false
+      refetchOnWindowFocus: true,
+      retry: 1,
+      staleTime: 1000 * 60 * 2,
+      refetchOnMount: (query) => query.queryKey.includes('live'),
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
+
+if (import.meta.env.MODE !== 'production') {
+  clearMockData();
+}
 
 function App() {
   const [showPerformanceDashboard, setShowPerformanceDashboard] = React.useState(false);

@@ -1,12 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/services/authService';
+import { useLoginStore } from '@/store/useLoginStore';
 
 export default function LogoutButton() {
   const navigate = useNavigate();
+  const { token } = useLoginStore();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      if (token) {
+        await logout(token);
+      }
       // Redirect user to login after logout
       navigate('/login', { replace: true });
     } catch (error) {
