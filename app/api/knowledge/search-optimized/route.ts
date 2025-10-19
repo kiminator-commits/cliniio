@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { optimizedKnowledgeSearch } from '../../../src/services/knowledge/OptimizedKnowledgeSearchService';
-import { logger } from '../../../src/services/logging/structuredLogger';
+import { optimizedKnowledgeSearch } from '../../../../../src/services/knowledge/OptimizedKnowledgeSearchService';
+import { logger } from '../../../../../src/services/logging/structuredLogger';
 
 export async function POST(req: NextRequest) {
   try {

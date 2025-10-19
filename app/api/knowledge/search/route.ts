@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { enhancedSearchService } from '../../../src/services/knowledge/EnhancedSearchService';
-import { optimizedKnowledgeSearch } from '../../../src/services/knowledge/OptimizedKnowledgeSearchService';
-import { logger } from '../../../src/services/logging/structuredLogger';
+import { enhancedSearchService } from '../../../../../src/services/knowledge/EnhancedSearchService';
+import { optimizedKnowledgeSearch } from '../../../../../src/services/knowledge/OptimizedKnowledgeSearchService';
+import { logger } from '../../../../../src/services/logging/structuredLogger';
 
 export async function POST(req: NextRequest) {
   try {

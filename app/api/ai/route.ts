@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { documentMigrationService } from '../../../src/services/ai/rag/DocumentMigrationService';
-import { logger } from '../../../src/services/logging/structuredLogger';
+import { documentMigrationService } from '../../../../src/services/ai/rag/DocumentMigrationService';
+import { logger } from '../../../../src/services/logging/structuredLogger';
 
 export async function POST(req: NextRequest) {
   try {
