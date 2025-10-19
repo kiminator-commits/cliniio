@@ -422,6 +422,8 @@ export class InventoryServiceFacadeImpl implements InventoryServiceFacade {
     return {
       hits: stats.hits,
       misses: stats.misses,
+      evictions: stats.evictions,
+      totalRequests: stats.hits + stats.misses,
       size: stats.size,
       updated_at: stats.updated_at
     };

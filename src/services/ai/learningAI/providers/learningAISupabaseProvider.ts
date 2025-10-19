@@ -63,6 +63,10 @@ export async function saveLearningAISettings(
   settings: Partial<LearningAISettings>
 ): Promise<boolean> {
   try {
+    // Get current user for proper tracking
+    const { data: { user } } = await supabase.auth.getUser();
+    const currentUserId = user?.id || 'unknown-user';
+    
     const upsertData = {
       facility_id: facilityId,
       module: 'learning',
@@ -82,7 +86,7 @@ export async function saveLearningAISettings(
     if (!error && upsertData) {
       await logSettingsAudit({
         facilityId,
-        userId: 'system',
+        userId: currentUserId,
         module: 'learning',
         action: 'UPDATE',
         details: upsertData as any,

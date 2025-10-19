@@ -482,6 +482,8 @@ export interface AdapterMetadata {
 export interface CacheStats {
   hits: number;
   misses: number;
+  evictions: number;
+  totalRequests: number;
   size: number;
   updated_at: string;
 }

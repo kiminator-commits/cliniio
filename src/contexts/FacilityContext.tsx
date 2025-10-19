@@ -100,7 +100,10 @@ export const FacilityProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     refreshFacility().catch((error) => {
-      setError(error.message);
+      // Only set error if we're in a browser environment
+      if (typeof window !== 'undefined') {
+        setError(error.message);
+      }
     });
   }, []);
 

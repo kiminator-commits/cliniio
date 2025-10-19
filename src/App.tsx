@@ -18,6 +18,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import GlobalBIFailureBanner from './components/Sterilization/GlobalBIFailureBanner';
 import NotificationContainer from './components/notifications/NotificationContainer';
 import { EnhancedPerformanceDashboard } from './components/EnhancedPerformanceDashboard';
+import RouteLoader from './components/common/RouteLoader';
 
 // CRITICAL: Import realtime auto-optimizer to prevent database overload
 import './services/_core/realtimeCompatibility';
@@ -304,9 +305,7 @@ function App() {
           <FacilityProvider>
             <Router>
               <NavigationProvider>
-                <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
-                  <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-                </div>}>
+                <Suspense fallback={<RouteLoader />}>
                   <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />

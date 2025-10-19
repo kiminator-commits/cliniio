@@ -286,6 +286,10 @@ export const BIFailureService = {
 
   async generatePatientExposureReport(incidentId: string | null | undefined) {
     try {
+      // Get current user for proper tracking
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || 'unknown-user';
+      
       // Generate a mock patient exposure report
       const reportId = `BI-FAIL-${incidentId}`;
 
@@ -322,7 +326,7 @@ export const BIFailureService = {
           'Review sterilization protocols',
         ],
         generatedAt: new Date().toISOString(),
-        generatedBy: 'system',
+        generatedBy: currentUserId,
       };
     } catch (error) {
       console.error('Error generating patient exposure report:', error);

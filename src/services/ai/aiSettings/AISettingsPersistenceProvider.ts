@@ -18,6 +18,10 @@ export class AISettingsPersistenceProvider {
     settings: Partial<UnifiedAISettings>
   ): Promise<boolean> {
     try {
+      // Get current user for proper tracking
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || 'unknown-user';
+      
       const { data, error } = await supabase.from('ai_settings').upsert(
         {
           facility_id: this.facilityId,
@@ -36,7 +40,7 @@ export class AISettingsPersistenceProvider {
       if (!error && data) {
         await logSettingsAudit({
           facilityId: this.facilityId,
-          userId: 'system',
+          userId: currentUserId,
           module: 'general',
           action: 'UPDATE',
           details: data[0] ?? {},

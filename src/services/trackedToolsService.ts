@@ -9,6 +9,7 @@ import {
   databaseSyncService,
   TrackingSyncData,
 } from './sync/databaseSyncService';
+import { supabase } from '../lib/supabaseClient';
 
 export interface TrackedToolNotification {
   id: string;
@@ -50,12 +51,12 @@ class TrackedToolsService {
    * Track a tool for a specific doctor with priority
    * Also updates the database tracked field for consistency
    */
-  trackTool(
+  async trackTool(
     toolId: string,
     doctorName: string,
     priority: 'high' | 'medium' | 'low' = 'medium',
     toolName?: string
-  ): void {
+  ): Promise<void> {
     const existingIndex = this.priorityQueue.findIndex(
       (item) => item.toolId === toolId && item.doctorName === doctorName
     );
@@ -81,7 +82,7 @@ class TrackedToolsService {
 
     // TODO: Sync with database tracked field
     // This ensures consistency between in-memory service and database
-    this.syncWithDatabase(toolId, true);
+    await this.syncWithDatabase(toolId, true);
 
     // Simple notification when tracking starts
     const totalInQueue = this.getToolTrackers(toolId).length;
@@ -119,7 +120,7 @@ class TrackedToolsService {
    * Untrack a tool for a specific doctor
    * Also updates the database tracked field for consistency
    */
-  untrackTool(toolId: string, doctorName: string): void {
+  async untrackTool(toolId: string, doctorName: string): Promise<void> {
     const index = this.priorityQueue.findIndex(
       (item) => item.toolId === toolId && item.doctorName === doctorName
     );
@@ -141,7 +142,7 @@ class TrackedToolsService {
       const stillTracked = this.priorityQueue.some(
         (item) => item.toolId === toolId
       );
-      this.syncWithDatabase(toolId, stillTracked);
+      await this.syncWithDatabase(toolId, stillTracked);
 
       // Record analytics event
       trackingAnalyticsService.recordTrackStopped(
@@ -397,7 +398,11 @@ class TrackedToolsService {
    * Sync tracking status with database tracked field
    * This ensures consistency between in-memory service and database
    */
-  private syncWithDatabase(toolId: string, isTracked: boolean): void {
+  private async syncWithDatabase(toolId: string, isTracked: boolean): Promise<void> {
+    // Get current user for proper tracking
+    const { data: { user } } = await supabase.auth.getUser();
+    const currentUserId = user?.id || 'unknown-user';
+    
     // Queue the sync operation
     const trackers = this.getToolTrackers(toolId);
 
@@ -418,7 +423,7 @@ class TrackedToolsService {
       // Tool is no longer tracked - sync removal
       const syncData: TrackingSyncData = {
         toolId,
-        doctorName: 'system', // System removal
+        doctorName: currentUserId, // Use actual user ID instead of 'system'
         priority: 'medium',
         timestamp: new Date().toISOString(),
         status: 'expired',

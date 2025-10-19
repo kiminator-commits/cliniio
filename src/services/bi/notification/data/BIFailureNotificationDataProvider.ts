@@ -69,6 +69,25 @@ interface ActivityLogRow {
 
 export class BIFailureNotificationDataProvider {
   /**
+   * Get regulatory contacts for a facility
+   */
+  static async getRegulatoryContacts(facilityId: string): Promise<{ data: any[] | null; error?: string }> {
+    try {
+      const { data, error } = await supabase
+        .from('regulatory_contacts')
+        .select('*')
+        .eq('facility_id', facilityId)
+        .order('priority', { ascending: true });
+      if (error) throw error;
+      console.info(`✅ Loaded ${data?.length ?? 0} regulatory contacts for facility ${facilityId}`);
+      return { data };
+    } catch (error: any) {
+      console.error('❌ Failed to load regulatory contacts:', error.message);
+      return { data: null, error: error.message };
+    }
+  }
+
+  /**
    * Update incident notification status
    */
   static async updateIncidentNotificationStatus(

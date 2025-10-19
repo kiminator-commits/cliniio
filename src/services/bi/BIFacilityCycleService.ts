@@ -265,7 +265,7 @@ export class BIFacilityCycleService {
           | 'annual'
           | 'incident') || 'daily',
       audit_date: item.created_at,
-      auditor_id: item.user_id ?? 'system',
+      auditor_id: item.user_id ?? 'unknown-user',
       audit_scope:
         (item.metadata as { audit_scope?: Record<string, unknown> })
           ?.audit_scope || {},

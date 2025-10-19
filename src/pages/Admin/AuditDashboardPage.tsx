@@ -135,7 +135,7 @@ export default function AuditDashboardPage() {
       facility_id: getCurrentFacilityId() || 'unknown-facility',
       metadata: {
         resolution_timestamp: new Date().toISOString(),
-        resolved_by: currentUser?.email || 'system',
+        resolved_by: currentUser?.id || 'unknown-user',
         resolution_type: 'manual_resolution',
       },
       created_at: new Date().toISOString(),
@@ -184,7 +184,7 @@ export default function AuditDashboardPage() {
       // Create compliance report data
       const reportData = {
         generated_at: new Date().toISOString(),
-        generated_by: _user?.email || 'system',
+        generated_by: _user?.id || 'unknown-user',
         facility_id: getCurrentFacilityId() || 'unknown-facility',
         active_issues: flags.filter(f => !f.resolved),
         resolved_issues: flags.filter(f => f.resolved),
@@ -205,11 +205,11 @@ export default function AuditDashboardPage() {
           table_name: 'audit_flags',
           action: 'compliance_report_exported',
           record_id: null,
-          user_id: _user?.id || 'system',
+          user_id: _user?.id || 'unknown-user',
           facility_id: getCurrentFacilityId() || 'unknown-facility',
           metadata: {
             export_timestamp: new Date().toISOString(),
-            exported_by: _user?.email || 'system',
+            exported_by: _user?.id || 'unknown-user',
             report_summary: reportData,
           },
           created_at: new Date().toISOString(),

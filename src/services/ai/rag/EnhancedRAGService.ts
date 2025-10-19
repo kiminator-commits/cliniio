@@ -1,5 +1,6 @@
 import { vectorRAGService, RAGContext, VectorSearchResult } from './VectorRAGService';
 import { logger } from '../../logging/structuredLogger';
+import { supabase } from '../../../lib/supabaseClient';
 
 export interface EnhancedRAGRequest {
   query: string;
@@ -51,6 +52,10 @@ export class EnhancedRAGService {
     const startTime = Date.now();
 
     try {
+      // Get current user for proper tracking
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || 'unknown-user';
+
       logger.info('Generating enhanced RAG response', {
         module: 'enhanced-rag',
         facilityId: request.facilityId || 'unknown'
@@ -76,7 +81,7 @@ export class EnhancedRAGService {
       const answer = await UnifiedAIService.askAI(enhancedPrompt, {
         module: request.feature,
         facilityId: request.facilityId,
-        userId: 'system'
+        userId: currentUserId
       });
 
       // Calculate confidence based on vector similarity

@@ -1,8 +1,10 @@
 import { useInventoryStore } from '@/store/useInventoryStore';
 import { InventoryItem } from '@/types/inventoryTypes';
+import { useUser } from '@/contexts/UserContext';
 
 export const useTableActions = () => {
   const { trackedItems, toggleTrackedItem } = useInventoryStore();
+  const { currentUser } = useUser();
 
   const getItemId = (item: InventoryItem): string => {
     return (
@@ -45,7 +47,8 @@ export const useTableActions = () => {
 
   const handleToggleTracked = (item: InventoryItem): void => {
     const itemId = getItemId(item);
-    toggleTrackedItem(itemId, 'system'); // Add default doctor parameter
+    const doctorName = currentUser?.id || 'unknown-user'; // Use actual user ID instead of 'system'
+    toggleTrackedItem(itemId, doctorName);
   };
 
   const getTrackingTooltip = (item: InventoryItem): string => {

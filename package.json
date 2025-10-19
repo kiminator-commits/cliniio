@@ -9,6 +9,7 @@
     "@supabase/supabase-js": "^2.50.5",
     "@tanstack/react-query": "^5.81.5",
     "@types/yup": "^0.29.14",
+    "@vercel/speed-insights": "^1.2.0",
     "@zxing/library": "^0.21.3",
     "bootstrap": "^5.3.6",
     "canvas-confetti": "^1.9.3",

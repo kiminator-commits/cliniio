@@ -9,6 +9,7 @@ import {
 } from '../models';
 import { EnvironmentalCleanService } from '../services/EnvironmentalCleanService';
 import { createUserFriendlyError } from '../services/errors/EnvironmentalCleanServiceError';
+import { supabase } from '@/lib/supabaseClient';
 
 // Define proper error types for the store
 export type EnvironmentalCleanError =
@@ -26,6 +27,17 @@ export interface AuditMetadata {
   timestamp?: string;
   [key: string]: string | number | boolean | undefined;
 }
+
+// Helper function to get current user ID
+const getCurrentUserId = async (): Promise<string> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id || 'unknown-user';
+  } catch (error) {
+    console.warn('Failed to get current user for audit logging:', error);
+    return 'unknown-user';
+  }
+};
 
 // ============================================================================
 // DATA SLICE - Room data, checklists, analytics
@@ -227,10 +239,11 @@ export const useEnvironmentalCleanStore = create<
       setRooms(updatedRooms);
 
       // Add audit log
+      const currentUserId = await getCurrentUserId();
       await EnvironmentalCleanService.addAuditLog(
         'status_update',
         roomId,
-        'system'
+        currentUserId
       );
 
       console.log('✅ Updated room status:', roomId, status);
@@ -264,10 +277,11 @@ export const useEnvironmentalCleanStore = create<
       setRooms(updatedRooms);
 
       // Add audit log
+      const currentUserId = await getCurrentUserId();
       await EnvironmentalCleanService.addAuditLog(
         'complete_cleaning',
         roomId,
-        'system'
+        currentUserId
       );
 
       console.log('✅ Completed room cleaning:', roomId);
@@ -305,10 +319,11 @@ export const useEnvironmentalCleanStore = create<
         }
 
         // Add audit log
+        const currentUserId = await getCurrentUserId();
         await EnvironmentalCleanService.addAuditLog(
           'room_scan',
           result.room.id,
-          'system'
+          currentUserId
         );
       }
 

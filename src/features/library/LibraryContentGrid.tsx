@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
+import RouteLoader from '@/components/common/RouteLoader';
 const ContentCard = React.lazy(() => import('./components/ContentCard'));
 
 interface ContentItem {
@@ -40,7 +41,7 @@ const LibraryContentGrid: React.FC<LibraryContentGridProps> = ({
       aria-label="Library content list"
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
     >
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<RouteLoader />}>
         {filteredContent.map((item, index) => (
           <motion.div
             key={item.id}

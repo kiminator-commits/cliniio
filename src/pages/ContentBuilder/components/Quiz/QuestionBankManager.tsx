@@ -43,7 +43,7 @@ export const QuestionBankManager: React.FC<QuestionBankManagerProps> = ({
       difficulty: 'medium',
       questions: [],
       tags: [],
-      createdBy: currentUserId || 'system',
+      createdBy: currentUserId || 'unknown-user',
       createdAt: new Date(),
       isPublic: false,
     };

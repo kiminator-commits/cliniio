@@ -168,46 +168,31 @@ export class InventoryModalsService {
 }
 
 // Export the missing functions that are imported by InventoryModalsWrapper
-export const handleSave = (
-  formData: ModalFormData,
-  modalType: string,
-  onSubmit: (data: ModalFormData) => void,
-  onClose: () => void
-): void => {
-  const validation = InventoryModalsService.validateModalForm(
-    formData,
-    modalType
-  );
-
-  if (validation.isValid) {
-    onSubmit(formData);
-    onClose();
-  } else {
-    console.warn('Form validation failed:', validation.errors);
+export const handleSave = (formData: Record<string, unknown>, onSave?: (data: Record<string, unknown>) => void) => {
+  try {
+    if (onSave) onSave(formData);
+    console.info('Inventory modal data saved:', formData);
+  } catch (error) {
+    console.error('Error saving inventory modal data:', error);
   }
 };
 
 export const handleToggleSection = (
   sectionId: string,
-  isExpanded: boolean,
-  setIsExpanded: (expanded: boolean) => void
-): void => {
-  setIsExpanded(!isExpanded);
-
-  // Log section toggle for analytics
-  console.log(`Section ${sectionId} ${isExpanded ? 'collapsed' : 'expanded'}`);
+  expandedSections: Set<string>,
+  setExpandedSections: (s: Set<string>) => void
+) => {
+  const updated = new Set(expandedSections);
+  if (updated.has(sectionId)) updated.delete(sectionId);
+  else updated.add(sectionId);
+  setExpandedSections(updated);
 };
 
 export const handleFormChangeWrapper = (
-  formData: ModalFormData,
-  setFormData: (data: ModalFormData) => void,
   field: string,
-  value: unknown
-): void => {
-  InventoryModalsService.handleModalFormData(
-    formData,
-    setFormData,
-    field,
-    value
-  );
+  value: unknown,
+  formState: Record<string, unknown>,
+  setFormState: (state: Record<string, unknown>) => void
+) => {
+  setFormState({ ...formState, [field]: value });
 };

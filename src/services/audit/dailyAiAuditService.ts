@@ -8,6 +8,10 @@ import { logActivity } from './activityLogger';
  */
 export async function runDailyAiAudit(facilityId: string) {
   try {
+    // Get current user for proper tracking
+    const { data: { user } } = await supabase.auth.getUser();
+    const currentUserId = user?.id || 'unknown-user';
+    
     const { data, error } = await supabase.rpc('get_daily_anomaly_summary', {
       facility_id: facilityId,
     });
@@ -26,7 +30,7 @@ ${JSON.stringify(data).slice(0, 1000)}
     const summary = 'Daily AI audit completed - anomaly summary generated.';
 
     await logActivity({
-      userId: 'system',
+      userId: currentUserId,
       facilityId,
       module: 'audit',
       activityType: 'daily_ai_audit',

@@ -58,6 +58,7 @@ export class InventoryCacheManager {
     return {
       hits: this.cache.hits,
       misses: this.cache.misses,
+      evictions: this.cache.evictions,
       size: this.cache.data ? JSON.stringify(this.cache.data).length : 0,
       lastUpdated: new Date(this.cache.timestamp).toISOString(),
       updated_at: new Date(this.cache.timestamp).toISOString(),

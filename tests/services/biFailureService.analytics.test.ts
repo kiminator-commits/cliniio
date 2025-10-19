@@ -1,4 +1,4 @@
-import { vi, describe, test, expect, beforeEach, it } from 'vitest';
+import { vi, describe, expect, beforeEach, it } from 'vitest';
 import {
   BIFailureService as biFailureService,
 } from '../../src/services/bi/failure/index';
@@ -22,6 +22,17 @@ vi.mock('../../src/lib/supabaseClient', () => ({
         subscribe: vi.fn(),
       })),
     })),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: {
+          user: {
+            id: 'test-user-id',
+            email: 'test@example.com',
+          },
+        },
+        error: null,
+      }),
+    },
   },
 }));
 
@@ -65,7 +76,7 @@ describe('biFailureService Analytics', () => {
           'Review sterilization protocols',
         ],
         generatedAt: expect.any(String),
-        generatedBy: 'system',
+        generatedBy: 'test-user-id',
       };
 
       const result =

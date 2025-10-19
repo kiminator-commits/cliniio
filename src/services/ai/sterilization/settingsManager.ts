@@ -43,6 +43,10 @@ export class SettingsManager {
     settings: Partial<SterilizationAISettings>
   ): Promise<boolean> {
     try {
+      // Get current user for proper tracking
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || 'unknown-user';
+      
       const settingsToSave = {
         facility_id: this.facilityId,
         module: 'sterilization',
@@ -62,7 +66,7 @@ export class SettingsManager {
       if (!error && settingsToSave) {
         await logSettingsAudit({
           facilityId: this.facilityId,
-          userId: 'system',
+          userId: currentUserId,
           module: 'sterilization',
           action: 'UPDATE',
           details: settingsToSave as any,

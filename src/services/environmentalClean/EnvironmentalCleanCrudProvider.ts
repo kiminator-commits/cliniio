@@ -12,6 +12,18 @@ import { supabase } from '@/lib/supabaseClient';
  */
 export class EnvironmentalCleanCrudProvider {
   /**
+   * Get current user ID for audit logging
+   */
+  private static async getCurrentUserId(): Promise<string> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user?.id || 'unknown-user';
+    } catch (error) {
+      console.warn('Failed to get current user for audit logging:', error);
+      return 'unknown-user';
+    }
+  }
+  /**
    * Fetch environmental cleans with audit logging
    */
   static async fetchEnvironmentalCleans(): Promise<Room[]> {
@@ -28,11 +40,12 @@ export class EnvironmentalCleanCrudProvider {
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'fetch', { rooms });
+      const currentUserId = await this.getCurrentUserId();
       insertSterilizationLog({
         event: 'environmentalClean_fetch',
         data: { rooms },
         timestamp: new Date().toISOString(),
-        userId: 'system',
+        userId: currentUserId,
       });
       usageTrackingService.trackItemView('environmentalClean_fetch');
 
@@ -58,11 +71,12 @@ export class EnvironmentalCleanCrudProvider {
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'create', { room });
+      const currentUserId = await this.getCurrentUserId();
       insertSterilizationLog({
         event: 'environmentalClean_create',
         data: { room },
         timestamp: new Date().toISOString(),
-        userId: 'system',
+        userId: currentUserId,
       });
       usageTrackingService.trackItemView('environmentalClean_create');
 
@@ -93,11 +107,12 @@ export class EnvironmentalCleanCrudProvider {
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'update', { room });
+      const currentUserId = await this.getCurrentUserId();
       insertSterilizationLog({
         event: 'environmentalClean_update',
         data: { room },
         timestamp: new Date().toISOString(),
-        userId: 'system',
+        userId: currentUserId,
       });
       usageTrackingService.trackItemView('environmentalClean_update');
 
@@ -122,11 +137,12 @@ export class EnvironmentalCleanCrudProvider {
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'delete', { roomId: id });
+      const currentUserId = await this.getCurrentUserId();
       insertSterilizationLog({
         event: 'environmentalClean_delete',
         data: { roomId: id },
         timestamp: new Date().toISOString(),
-        userId: 'system',
+        userId: currentUserId,
       });
       usageTrackingService.trackItemView('environmentalClean_delete');
     } catch (error) {
@@ -159,11 +175,12 @@ export class EnvironmentalCleanCrudProvider {
 
       // Log audit and tracking
       auditLogger.log('environmentalClean', 'batch_action', { ids, action });
+      const currentUserId = await this.getCurrentUserId();
       insertSterilizationLog({
         event: 'environmentalClean_batch_action',
         data: { ids, action },
         timestamp: new Date().toISOString(),
-        userId: 'system',
+        userId: currentUserId,
       });
       usageTrackingService.trackItemView('environmentalClean_batch_action');
 
