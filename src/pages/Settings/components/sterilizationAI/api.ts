@@ -69,24 +69,10 @@ export const fetchSettings = async (
         auto_optimization_enabled: parsed.autoOptimizationEnabled || false,
         performance_monitoring: parsed.performanceMonitoring || false,
         resource_optimization: parsed.resourceOptimization || false,
-        openai_api_key_encrypted: parsed.openaiApiKey
-          ? STERILIZATION_AI_CONSTANTS.API_KEY_MASK_PREFIX +
-            parsed.openaiApiKey.slice(
-              -STERILIZATION_AI_CONSTANTS.API_KEY_VISIBLE_CHARS
-            )
-          : '',
-        google_vision_api_key_encrypted: parsed.googleVisionApiKey
-          ? STERILIZATION_AI_CONSTANTS.API_KEY_MASK_PREFIX +
-            parsed.googleVisionApiKey.slice(
-              -STERILIZATION_AI_CONSTANTS.API_KEY_VISIBLE_CHARS
-            )
-          : '',
-        azure_computer_vision_key_encrypted: parsed.azureComputerVisionKey
-          ? STERILIZATION_AI_CONSTANTS.API_KEY_MASK_PREFIX +
-            parsed.azureComputerVisionKey.slice(
-              -STERILIZATION_AI_CONSTANTS.API_KEY_VISIBLE_CHARS
-            )
-          : '',
+        // API keys are now managed server-side for security
+        openai_api_key_encrypted: '',
+        google_vision_api_key_encrypted: '',
+        azure_computer_vision_key_encrypted: '',
       };
 
       return mappedSettings;
@@ -148,10 +134,8 @@ export const saveSettings = async (
       auto_optimization_enabled: settings.auto_optimization_enabled,
       performance_monitoring: settings.performance_monitoring,
       resource_optimization: settings.resource_optimization,
-      openai_api_key_encrypted: settings.openai_api_key_encrypted,
-      google_vision_api_key_encrypted: settings.google_vision_api_key_encrypted,
-      azure_computer_vision_key_encrypted:
-        settings.azure_computer_vision_key_encrypted,
+      // API keys are now managed server-side for security
+      // These fields are no longer saved to localStorage
     };
 
     localStorage.setItem(
@@ -243,6 +227,7 @@ export const resetToDefaults = async (
       auto_optimization_enabled: false,
       performance_monitoring: false,
       resource_optimization: false,
+      // API keys are now managed server-side for security
       openai_api_key_encrypted: '',
       google_vision_api_key_encrypted: '',
       azure_computer_vision_key_encrypted: '',

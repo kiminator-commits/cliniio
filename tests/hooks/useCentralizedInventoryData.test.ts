@@ -1,20 +1,18 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { vi, describe, test, expect } from 'vitest';
+import { vi, describe, expect } from 'vitest';
 import { useCentralizedInventoryData } from '../../src/hooks/useCentralizedInventoryData';
 
 // Mock the service access
 const mockFetchInventoryItems = vi.fn();
 const mockFetchAllInventoryData = vi.fn().mockResolvedValue({
-  tools: [
+  data: [
     {
       id: '1',
       name: 'Test Tool',
-      category: 'Surgical',
+      category: 'Tools',
       quantity: 1,
       location: 'Test',
     },
-  ],
-  supplies: [
     {
       id: '2',
       name: 'Test Supply',
@@ -22,8 +20,6 @@ const mockFetchAllInventoryData = vi.fn().mockResolvedValue({
       quantity: 1,
       location: 'Test',
     },
-  ],
-  equipment: [
     {
       id: '3',
       name: 'Test Equipment',
@@ -31,8 +27,6 @@ const mockFetchAllInventoryData = vi.fn().mockResolvedValue({
       quantity: 1,
       location: 'Test',
     },
-  ],
-  officeHardware: [
     {
       id: '4',
       name: 'Test Hardware',
@@ -41,18 +35,15 @@ const mockFetchAllInventoryData = vi.fn().mockResolvedValue({
       location: 'Test',
     },
   ],
-  categories: ['Surgical', 'Supplies', 'Equipment', 'Office Hardware'],
-  isLoading: false,
-  error: null,
 });
 
-vi.mock('@/services/ServiceAccess', () => ({
-  getInventoryService: vi.fn(() => ({
-    initialize: vi.fn().mockResolvedValue(undefined),
-    isReady: vi.fn().mockReturnValue(true),
-    fetchAllInventoryData: mockFetchAllInventoryData,
-    fetchInventoryItems: mockFetchInventoryItems,
-  })),
+vi.mock('@/services/inventory/InventoryServiceFacade', () => ({
+  InventoryServiceFacadeImpl: {
+    getInstance: vi.fn(() => ({
+      getAllItems: mockFetchAllInventoryData,
+      fetchInventoryItems: mockFetchInventoryItems,
+    })),
+  },
 }));
 
 // Mock the store
@@ -76,51 +67,42 @@ describe('useCentralizedInventoryData', () => {
   });
 
   it('should provide data access methods', async () => {
-    const mockData = {
-      tools: [
-        {
-          id: '1',
-          name: 'Test Tool',
-          category: 'Surgical',
-          quantity: 1,
-          location: 'Test',
-        },
-      ],
-      supplies: [
-        {
-          id: '2',
-          name: 'Test Supply',
-          category: 'Supplies',
-          quantity: 1,
-          location: 'Test',
-        },
-      ],
-      equipment: [
-        {
-          id: '3',
-          name: 'Test Equipment',
-          category: 'Equipment',
-          quantity: 1,
-          location: 'Test',
-        },
-      ],
-      officeHardware: [
-        {
-          id: '4',
-          name: 'Test Hardware',
-          category: 'Office Hardware',
-          quantity: 1,
-          location: 'Test',
-        },
-      ],
-      categories: ['Surgical', 'Supplies', 'Equipment', 'Office Hardware'],
-      isLoading: false,
-      error: null,
-    };
-
-    const { getInventoryService } = await import('@/services/ServiceAccess');
-    const mockService = getInventoryService();
-    (mockService.fetchAllInventoryData as vi.Mock).mockResolvedValue(mockData);
+    const expectedTools = [
+      {
+        id: '1',
+        name: 'Test Tool',
+        category: 'Tools',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
+    const expectedSupplies = [
+      {
+        id: '2',
+        name: 'Test Supply',
+        category: 'Supplies',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
+    const expectedEquipment = [
+      {
+        id: '3',
+        name: 'Test Equipment',
+        category: 'Equipment',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
+    const expectedOfficeHardware = [
+      {
+        id: '4',
+        name: 'Test Hardware',
+        category: 'Office Hardware',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
 
     const { result } = renderHook(() => useCentralizedInventoryData());
 
@@ -133,39 +115,40 @@ describe('useCentralizedInventoryData', () => {
     });
 
     // Test data access methods
-    expect(result.current.getTools()).toEqual(mockData.tools);
-    expect(result.current.getSupplies()).toEqual(mockData.supplies);
-    expect(result.current.getEquipment()).toEqual(mockData.equipment);
-    expect(result.current.getOfficeHardware()).toEqual(mockData.officeHardware);
-    expect(result.current.getCategories()).toEqual(mockData.categories);
+    expect(result.current.getTools()).toEqual(expectedTools);
+    expect(result.current.getSupplies()).toEqual(expectedSupplies);
+    expect(result.current.getEquipment()).toEqual(expectedEquipment);
+    expect(result.current.getOfficeHardware()).toEqual(expectedOfficeHardware);
+    expect(result.current.getCategories()).toEqual(['Tools', 'Supplies', 'Equipment', 'Office Hardware']);
   });
 
   it('should provide filtered data methods', async () => {
-    const mockData = {
-      tools: [{ item: 'Scalpel', category: 'Surgical' }],
-      supplies: [{ item: 'Gauze', category: 'Supplies' }],
-      equipment: [{ item: 'Monitor', category: 'Equipment' }],
-      officeHardware: [{ item: 'Computer', category: 'Office Hardware' }],
-      categories: ['Surgical', 'Supplies', 'Equipment', 'Office Hardware'],
-      isLoading: false,
-      error: null,
-    };
-
-    const { getInventoryService } = await import('@/services/ServiceAccess');
-    const mockService = getInventoryService();
-    (mockService.fetchAllInventoryData as vi.Mock).mockResolvedValue(mockData);
-    (mockService.fetchInventoryItems as vi.Mock).mockResolvedValue([
-      {
-        id: '1',
-        name: 'Scalpel',
-        category: 'Surgical',
-        quantity: 1,
-        location: 'Test',
-      },
-    ]);
-
-    // Ensure the mock is properly set up
-    expect(mockService.fetchInventoryItems).toBeDefined();
+    // Mock the filtered data response
+    mockFetchAllInventoryData.mockResolvedValue({
+      data: [
+        {
+          id: '1',
+          name: 'Scalpel',
+          category: 'Tools',
+          quantity: 1,
+          location: 'Test',
+        },
+        {
+          id: '2',
+          name: 'Forceps',
+          category: 'Tools',
+          quantity: 1,
+          location: 'Test',
+        },
+        {
+          id: '3',
+          name: 'Bandage',
+          category: 'Supplies',
+          quantity: 1,
+          location: 'Test',
+        },
+      ],
+    });
 
     const { result } = renderHook(() => useCentralizedInventoryData());
 
@@ -179,12 +162,12 @@ describe('useCentralizedInventoryData', () => {
 
     // Test filtered data methods
     const filteredTools = await result.current.getFilteredData('Scalpel');
-    expect(mockFetchInventoryItems).toHaveBeenCalled();
+    expect(mockFetchAllInventoryData).toHaveBeenCalled();
     expect(filteredTools).toEqual([
       {
         id: '1',
         name: 'Scalpel',
-        category: 'Surgical',
+        category: 'Tools',
         quantity: 1,
         location: 'Test',
       },
@@ -192,17 +175,16 @@ describe('useCentralizedInventoryData', () => {
   });
 
   it('should provide legacy compatibility properties', async () => {
-    const mockData = {
-      tools: [
+    // Reset mock to use the original data
+    mockFetchAllInventoryData.mockResolvedValue({
+      data: [
         {
           id: '1',
           name: 'Test Tool',
-          category: 'Surgical',
+          category: 'Tools',
           quantity: 1,
           location: 'Test',
         },
-      ],
-      supplies: [
         {
           id: '2',
           name: 'Test Supply',
@@ -210,8 +192,6 @@ describe('useCentralizedInventoryData', () => {
           quantity: 1,
           location: 'Test',
         },
-      ],
-      equipment: [
         {
           id: '3',
           name: 'Test Equipment',
@@ -219,8 +199,6 @@ describe('useCentralizedInventoryData', () => {
           quantity: 1,
           location: 'Test',
         },
-      ],
-      officeHardware: [
         {
           id: '4',
           name: 'Test Hardware',
@@ -229,14 +207,44 @@ describe('useCentralizedInventoryData', () => {
           location: 'Test',
         },
       ],
-      categories: ['Surgical', 'Supplies', 'Equipment', 'Office Hardware'],
-      isLoading: false,
-      error: null,
-    };
+    });
 
-    const { getInventoryService } = await import('@/services/ServiceAccess');
-    const mockService = getInventoryService();
-    (mockService.fetchAllInventoryData as vi.Mock).mockResolvedValue(mockData);
+    const expectedTools = [
+      {
+        id: '1',
+        name: 'Test Tool',
+        category: 'Tools',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
+    const expectedSupplies = [
+      {
+        id: '2',
+        name: 'Test Supply',
+        category: 'Supplies',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
+    const expectedEquipment = [
+      {
+        id: '3',
+        name: 'Test Equipment',
+        category: 'Equipment',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
+    const expectedOfficeHardware = [
+      {
+        id: '4',
+        name: 'Test Hardware',
+        category: 'Office Hardware',
+        quantity: 1,
+        location: 'Test',
+      },
+    ];
 
     const { result } = renderHook(() => useCentralizedInventoryData());
 
@@ -249,9 +257,9 @@ describe('useCentralizedInventoryData', () => {
     });
 
     // Test legacy compatibility properties
-    expect(result.current.tools).toEqual(mockData.tools);
-    expect(result.current.supplies).toEqual(mockData.supplies);
-    expect(result.current.equipment).toEqual(mockData.equipment);
-    expect(result.current.officeHardware).toEqual(mockData.officeHardware);
+    expect(result.current.tools).toEqual(expectedTools);
+    expect(result.current.supplies).toEqual(expectedSupplies);
+    expect(result.current.equipment).toEqual(expectedEquipment);
+    expect(result.current.officeHardware).toEqual(expectedOfficeHardware);
   });
 });

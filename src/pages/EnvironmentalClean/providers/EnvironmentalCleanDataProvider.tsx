@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext } from 'react';
 import { Room } from '../models';
 import { Checklist } from '../types';
 import { useEnvironmentalCleanStore } from '../store/environmentalCleanStore';
@@ -50,14 +50,4 @@ export const EnvironmentalCleanDataProvider: React.FC<
       {children}
     </EnvironmentalCleanDataContext.Provider>
   );
-};
-
-export const useEnvironmentalCleanData = () => {
-  const context = useContext(EnvironmentalCleanDataContext);
-  if (context === undefined) {
-    throw new Error(
-      'useEnvironmentalCleanData must be used within EnvironmentalCleanDataProvider'
-    );
-  }
-  return context;
 };

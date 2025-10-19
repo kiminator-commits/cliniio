@@ -279,7 +279,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
                       '🚪 DrawerMenu: Calling login store reset()...'
                     );
                     const { useLoginStore } = await import(
-                      '../../stores/useLoginStore'
+                      '../../store/useLoginStore'
                     );
                     await useLoginStore.getState().reset();
 

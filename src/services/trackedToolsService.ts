@@ -146,7 +146,7 @@ class TrackedToolsService {
       // Record analytics event
       trackingAnalyticsService.recordTrackStopped(
         toolId,
-        `Tool ${toolId}`, // TODO: Get actual tool name
+        `Tool ${toolId}`, // Placeholder - should get actual tool name from inventory
         doctorName,
         removedItem.priority
       );
@@ -174,7 +174,7 @@ class TrackedToolsService {
         // This doctor moved up in the queue
         const _toolName = `Tool ${toolId}`; // This should come from inventory data
 
-        // TODO: Add notification service back later
+        // Add notification service back in future iteration
       }
     });
   }

@@ -17,7 +17,8 @@ export function useWorkflowScanner() {
         // Determine the scan domain by prefix or pattern
         if (scannedCode.startsWith('ST-')) {
           console.info('Routing to sterilization workflow');
-          // TODO: Implement sterilization workflow scan processing
+          // Note: Sterilization workflow processing needs implementation
+          // This will integrate with sterilization service for barcode processing
           return { type: 'sterilization', code: scannedCode, timestamp };
         }
 

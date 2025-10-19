@@ -9,6 +9,8 @@ import { InventoryAIService } from './inventoryAIService';
 import { SterilizationAIService } from './sterilization/sterilizationAIService';
 import { EnvironmentalAIService } from './environmentalAI/environmentalAIService';
 import { aiServiceIntegration } from './AIServiceIntegration';
+import { supabase } from '../../lib/supabaseClient';
+import { logger } from '../logging/structuredLogger';
 
 /**
  * Unified AI Service - Single entry point for all AI operations
@@ -25,37 +27,140 @@ export class UnifiedAIService {
   // ============================================================================
 
   /**
-   * Ask Cliniio AI a general question
+   * Ask Cliniio AI a general question - Production hardened version
    */
-  static async askAI(prompt: string, context?: string): Promise<string> {
-    try {
-      const result = await askCliniioAI({ prompt, context });
-      
-      // Track usage for general AI questions
-      // Estimate tokens (rough approximation)
-      const inputTokens = Math.ceil(prompt.length / 4); // ~4 chars per token
-      const outputTokens = Math.ceil(result.length / 4);
-      
-      aiServiceIntegration.trackUsage(
-        'General AI Questions',
-        'gpt-4o-mini',
-        inputTokens,
-        outputTokens,
-        true
-      );
-      
-      return result;
-    } catch (error) {
-      // Track failed request
-      aiServiceIntegration.trackUsage(
-        'General AI Questions',
-        'gpt-4o-mini',
-        0,
-        0,
-        false
-      );
-      throw error;
+  static async askAI(prompt: string, context?: { module?: string; facilityId?: string; userId?: string; }): Promise<string> {
+    const apiKey = process.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('AIServiceError: 401 - OpenAI API key not configured');
     }
+
+    const module = context?.module || 'unknown';
+    const facilityId = context?.facilityId || 'unknown';
+    const userId = context?.userId || 'unknown';
+    const promptLength = prompt.length;
+    const redactedPrompt = prompt.substring(0, 250).replace(/\n/g, ' ');
+
+    const payload = {
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are Cliniio\'s AI assistant, specializing in healthcare facility management, sterilization protocols, inventory management, and compliance workflows. Provide accurate, actionable insights based on the data provided.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 1000
+    };
+
+    let lastError: Error | null = null;
+    const retryDelays = [1000, 2000, 4000]; // 1s, 2s, 4s
+
+    for (let attempt = 0; attempt <= 3; attempt++) {
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          throw new Error(`AIServiceError: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        const responseText = data.choices?.[0]?.message?.content;
+        
+        if (!responseText) {
+          throw new Error('AIServiceError: 500 - No response content from OpenAI');
+        }
+
+        // Log successful attempt
+        try {
+          await supabase.from('ai_usage_logs').insert({
+            facility_id: facilityId,
+            user_id: userId,
+            module: module,
+            prompt_length: promptLength,
+            response_length: responseText.length,
+            success: true,
+            model: 'gpt-4o-mini',
+            created_at: new Date().toISOString()
+          });
+        } catch (logError) {
+          // Log failures silently
+        }
+
+        // Track usage for general AI questions
+        const inputTokens = Math.ceil(promptLength / 4);
+        const outputTokens = Math.ceil(responseText.length / 4);
+        
+        aiServiceIntegration.trackUsage(
+          'General AI Questions',
+          'gpt-4o-mini',
+          inputTokens,
+          outputTokens,
+          true
+        );
+
+        return responseText;
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        
+        // Log failed attempt
+        try {
+          await supabase.from('ai_usage_logs').insert({
+            facility_id: facilityId,
+            user_id: userId,
+            module: module,
+            prompt_length: promptLength,
+            response_length: 0,
+            success: false,
+            model: 'gpt-4o-mini',
+            created_at: new Date().toISOString()
+          });
+        } catch (logError) {
+          // Log failures silently
+        }
+
+        // Track failed request
+        aiServiceIntegration.trackUsage(
+          'General AI Questions',
+          'gpt-4o-mini',
+          0,
+          0,
+          false
+        );
+
+        if (attempt < 3) {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
+          continue;
+        }
+      }
+    }
+
+    // All retries failed
+    const errorMessage = lastError?.message || 'Unknown error';
+    logger.error('All AI service retries failed', {
+      module: module,
+      facilityId: facilityId,
+      userId: userId
+    }, {
+      error: errorMessage,
+      attempts: 3,
+      lastError: lastError?.message
+    });
+    throw new Error(errorMessage);
   }
 
   /**

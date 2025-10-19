@@ -67,7 +67,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
     set({ biTestCompleted: completed }),
   setBiTestDate: (date: string) => set({ biTestDate: date }),
   recordBITestResult: async (result: Omit<BITestResult, 'id'>) => {
-    console.log('🔬 recordBITestResult called with:', result);
+    console.log('🔬 Store: recordBITestResult called with:', result);
     try {
       // Get current user and facility from Supabase
       const {
@@ -161,6 +161,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
       }
 
       // Update local state after successful save
+      console.log('🔬 Store: Updating state with lastBITestDate:', result.date.toISOString());
       set((state) => {
         const nextDue = calculateNextBIDue(result.date);
         const activity: ActivityLogItem = {
@@ -175,7 +176,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
           ...result,
           id: `bi-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         };
-        return {
+        const newState = {
           biTestCompleted: result.passed,
           biTestDate: result.date.toISOString(),
           biTestResults: [...state.biTestResults, newResult],
@@ -184,6 +185,8 @@ export const createBiologicalIndicatorSlice: StateCreator<
           biTestPassed: result.passed,
           activityLog: [activity, ...state.activityLog].slice(0, 20),
         };
+        console.log('🔬 Store: New state lastBITestDate:', newState.lastBITestDate);
+        return newState;
       });
 
       // Note: BI test results will be loaded automatically when analytics tab is accessed
@@ -191,6 +194,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
       return savedResult;
     } catch (error: unknown) {
       console.error('Error recording BI test result:', error);
+      console.log('🔬 Store: Error path - updating state with lastBITestDate:', result.date.toISOString());
       // Still update local state for immediate feedback
       set((state) => {
         const nextDue = calculateNextBIDue(result.date);
@@ -206,7 +210,7 @@ export const createBiologicalIndicatorSlice: StateCreator<
           ...result,
           id: `bi-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         };
-        return {
+        const newState = {
           biTestCompleted: result.passed,
           biTestDate: result.date.toISOString(),
           biTestResults: [...state.biTestResults, newResult],
@@ -215,6 +219,8 @@ export const createBiologicalIndicatorSlice: StateCreator<
           biTestPassed: result.passed,
           activityLog: [activity, ...state.activityLog].slice(0, 20),
         };
+        console.log('🔬 Store: Error path - New state lastBITestDate:', newState.lastBITestDate);
+        return newState;
       });
       throw error;
     }

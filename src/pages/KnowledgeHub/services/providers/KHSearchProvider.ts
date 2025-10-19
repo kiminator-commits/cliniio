@@ -2,7 +2,9 @@ import { supabase } from '../../../../lib/supabase';
 import { ContentItem } from '../../types';
 import { ApiError, ErrorType, ErrorSeverity } from '../../types/errors';
 import { KHDataTransformationProvider } from './KHDataTransformationProvider';
-import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
+// import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
+
+// Removed unused SupabaseQueryBuilder type definition
 
 export interface SearchFilters {
   category?: string;
@@ -41,7 +43,7 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> = supabase
+      let queryBuilder = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
         .eq('is_active', true);
@@ -55,15 +57,18 @@ export class KHSearchProvider {
 
       // Add filters
       if (filters) {
-        queryBuilder = this.applyFilters(queryBuilder, filters);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = this.applyFilters(queryBuilder as any, filters);
       }
 
       // Apply options
       if (options) {
-        queryBuilder = this.applyOptions(queryBuilder, options);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = this.applyOptions(queryBuilder as any, options);
       } else {
         // Default ordering
-        queryBuilder = queryBuilder.order('created_at', { ascending: false });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = (queryBuilder as any).order('created_at', { ascending: false });
       }
 
       const { data, error, count } = await queryBuilder;
@@ -71,7 +76,8 @@ export class KHSearchProvider {
       if (error) throw error;
 
       const content =
-        KHDataTransformationProvider.transformRawRowsToContentItems((data as Record<string, unknown>[]) || []);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        KHDataTransformationProvider.transformRawRowsToContentItems((data as any[]) || []);
 
       return {
         content,
@@ -97,7 +103,7 @@ export class KHSearchProvider {
     options?: SearchOptions
   ): Promise<SearchResult> {
     try {
-      let queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> = supabase
+      let queryBuilder = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
         .eq('is_active', true);
@@ -109,9 +115,12 @@ export class KHSearchProvider {
 
       // Apply options
       if (options) {
-        queryBuilder = this.applyOptions(queryBuilder, options);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = this.applyOptions(queryBuilder as any, options);
       } else {
-        queryBuilder = queryBuilder.order('created_at', { ascending: false });
+        // Default ordering
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = (queryBuilder as any).order('created_at', { ascending: false });
       }
 
       const { data, error, count } = await queryBuilder;
@@ -119,7 +128,8 @@ export class KHSearchProvider {
       if (error) throw error;
 
       const content =
-        KHDataTransformationProvider.transformRawRowsToContentItems((data as Record<string, unknown>[]) || []);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        KHDataTransformationProvider.transformRawRowsToContentItems((data as any[]) || []);
 
       return {
         content,
@@ -146,7 +156,7 @@ export class KHSearchProvider {
     options?: SearchOptions;
   }): Promise<SearchResult> {
     try {
-      let queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> = supabase
+      let queryBuilder = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
         .eq('is_active', true);
@@ -161,14 +171,17 @@ export class KHSearchProvider {
 
       // Add filters
       if (criteria.filters) {
-        queryBuilder = this.applyFilters(queryBuilder, criteria.filters);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = this.applyFilters(queryBuilder as any, criteria.filters);
       }
 
       // Apply options
       if (criteria.options) {
-        queryBuilder = this.applyOptions(queryBuilder, criteria.options);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = this.applyOptions(queryBuilder as any, criteria.options);
       } else {
-        queryBuilder = queryBuilder.order('created_at', { ascending: false });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryBuilder = (queryBuilder as any).order('created_at', { ascending: false });
       }
 
       const { data, error, count } = await queryBuilder;
@@ -176,7 +189,8 @@ export class KHSearchProvider {
       if (error) throw error;
 
       const content =
-        KHDataTransformationProvider.transformRawRowsToContentItems((data as Record<string, unknown>[]) || []);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        KHDataTransformationProvider.transformRawRowsToContentItems((data as any[]) || []);
 
       return {
         content,
@@ -301,9 +315,11 @@ export class KHSearchProvider {
    * Apply filters to query builder
    */
   private applyFilters(
-    queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryBuilder: any,
     filters: SearchFilters
-  ): PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): any {
     if (filters.category) {
       queryBuilder = queryBuilder.eq('content_type', filters.category.toLowerCase());
     }
@@ -330,9 +346,11 @@ export class KHSearchProvider {
    * Apply options to query builder
    */
   private applyOptions(
-    queryBuilder: PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryBuilder: any,
     options: SearchOptions
-  ): PostgrestFilterBuilder<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): any {
     if (options.limit) {
       queryBuilder = queryBuilder.limit(options.limit);
     }

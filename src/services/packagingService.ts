@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { useLoginStore } from '../stores/useLoginStore';
+import { useLoginStore } from '../store/useLoginStore';
 import { SecureAuthService } from './secureAuthService';
 import { ToolService } from './tools/ToolService';
 import { ToolStatus } from '../types/toolTypes';
@@ -306,7 +306,9 @@ export class PackagingService {
         },
       }));
 
-      // TODO: Fix batch items insertion - need proper table structure
+      // Note: Batch items insertion requires database schema update
+      // The batch_items table needs to be created with proper structure
+      // Current implementation skips this step until schema is ready
       // const { error: itemsError } = await supabase
       //   .from('sterilization_batches')
       //   .insert(batchItems);

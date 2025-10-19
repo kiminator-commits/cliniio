@@ -1,13 +1,5 @@
 import React from 'react';
 
-// TODO: Implement shared version from CourseViewer
-// This component will provide consistent progress visualization across both CourseViewer and ContentBuilder
-// Features to include:
-// - Multiple progress bar types (course, level, lesson)
-// - Animated progress transitions
-// - Customizable colors and sizes
-// - Accessibility support
-
 interface ProgressBarProps {
   percentage: number;
   showLabel?: boolean;

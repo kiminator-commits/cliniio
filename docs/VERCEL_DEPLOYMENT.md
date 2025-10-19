@@ -48,7 +48,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 VITE_APP_ENV=production
 VITE_API_BASE_URL=your_api_url
-# Note: Phi-4 has been replaced with OpenAI GPT-4 Mini
+# Note: All AI features now run on OpenAI GPT-4o (via GPT-4o-mini)
 ```
 
 ## Step 3: Configure Environment Variables in Vercel

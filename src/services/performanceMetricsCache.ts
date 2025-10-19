@@ -61,19 +61,15 @@ class PerformanceMetricsCache {
         ),
       ]);
 
-      console.log('🔍 PerformanceMetricsCache: AI Metrics result:', aiMetrics);
-      console.log(
-        '🔍 PerformanceMetricsCache: Sterilization result:',
-        sterilizationMetrics
-      );
-      console.log(
-        '🔍 PerformanceMetricsCache: Integration result:',
-        integrationMetrics
-      );
-      console.log(
-        '🔍 PerformanceMetricsCache: AI Impact result:',
-        aiImpactMetrics
-      );
+      // Only log debug info once per login to avoid StrictMode duplicate logs
+      const now = Date.now();
+      if (now - this.lastLogTime > 1000) {
+        logger.debug('🔍 PerformanceMetricsCache: AI Metrics result:', aiMetrics);
+        logger.debug('🔍 PerformanceMetricsCache: Sterilization result:', sterilizationMetrics);
+        logger.debug('🔍 PerformanceMetricsCache: Integration result:', integrationMetrics);
+        logger.debug('🔍 PerformanceMetricsCache: AI Impact result:', aiImpactMetrics);
+        this.lastLogTime = now;
+      }
 
       const cachedMetrics: CachedPerformanceMetrics = {
         aiMetrics: aiMetrics.status === 'fulfilled' ? aiMetrics.value : null,
@@ -106,8 +102,7 @@ class PerformanceMetricsCache {
         );
       }
 
-      // Only log once per login to avoid StrictMode duplicate logs
-      const now = Date.now();
+      // Log success message (already throttled above)
       if (now - this.lastLogTime > 1000) {
         logger.debug(
           'PerformanceMetricsCache: Metrics cached successfully for facility:',

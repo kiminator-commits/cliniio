@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { useLoginStore } from '../stores/useLoginStore';
+import { useLoginStore } from '../store/useLoginStore';
 import { useUser } from '../contexts/UserContext';
 import { logger } from '../utils/_core/logger';
 import { LOGIN_ERROR_MESSAGES } from '../constants/errorMessages';

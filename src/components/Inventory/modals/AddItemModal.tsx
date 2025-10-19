@@ -5,7 +5,7 @@ import {
   ADD_EDIT_ITEM_SECTIONS,
 } from '@/config/modalConfig';
 import { useInventoryModals } from '@/hooks/inventory/useInventoryModals';
-import { validateFormData } from '@/config/modalConfig';
+import { useInventoryModalSave } from '@/hooks/inventory/useInventoryModalSave';
 
 /**
  * Refactored AddItemModal that uses the new modal management system
@@ -20,30 +20,18 @@ const AddItemModal: React.FC = () => {
     isEditMode,
     expandedSections,
 
-    // Form handlers
-    handleFormChange,
-    toggleSection,
-    handleSaveItem,
-  } = useInventoryModals();
+  // Form handlers
+  handleFormChange,
+  toggleSection,
+  handleSaveItem,
+} = useInventoryModals();
 
-  // Validate form data before saving
-  const handleSave = () => {
-    console.log('🔍 Validating form data before save...');
-    console.log('📝 Current form data:', formData);
-
-    const errors = validateFormData(formData);
-    console.log('✅ Validation errors:', errors);
-
-    if (Object.keys(errors).length === 0) {
-      console.log('✅ Validation passed, calling handleSaveItem...');
-      handleSaveItem();
-    } else {
-      // Handle validation errors - could show toast or error messages
-      console.error('❌ Validation failed:', errors);
-      // For now, just prevent save
-      return;
-    }
-  };
+// Use shared save validation hook
+const { handleSave } = useInventoryModalSave({
+  formData,
+  isEditMode,
+  handleSaveItem,
+});
 
   // Wrapper function to convert the type mismatch
   const handleToggleSection = (section: string) => {

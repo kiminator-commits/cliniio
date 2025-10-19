@@ -45,21 +45,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    let body: any = {};
+    let body: Record<string, unknown> = {};
     try {
       body = await req.json();
-    } catch {}
+    } catch {
+      // Ignore JSON parsing errors
+    }
     const prompt = typeof body?.prompt === 'string' ? body.prompt.trim() : '';
     const context =
       typeof body?.context === 'string' ? body.context.trim() : '';
     if (!prompt) return json(400, { error: "Missing 'prompt'." });
 
-    const payload = {
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are Cliniio's embedded clinical assistant, specializing in healthcare facility management, sterilization protocols, inventory management, and compliance workflows.
+    const systemPrompt = `You are Cliniio's embedded clinical assistant, specializing in healthcare facility management, sterilization protocols, inventory management, and compliance workflows.
 
 KEY KNOWLEDGE AREAS:
 - Sterilization cycles and autoclave operations
@@ -76,12 +73,16 @@ RESPONSE STYLE:
 - Reference relevant standards when applicable
 - Provide actionable, step-by-step guidance
 - Always prioritize patient safety and compliance
-- Use clear, professional medical terminology`,
-        },
+- Use clear, professional medical terminology`;
+
+    const fullPrompt = `${systemPrompt}\n\n${context ? `Context:\n${context}\n\n` : ''}Prompt: ${prompt}`;
+
+    const payload = {
+      model: 'gpt-4o-mini',
+      messages: [
         {
           role: 'user',
-          content:
-            (context ? `Context:\n${context}\n\n` : '') + `Prompt: ${prompt}`,
+          content: fullPrompt,
         },
       ],
       temperature: 0.2,
@@ -104,7 +105,7 @@ RESPONSE STYLE:
     const data = await resp.json();
     const answer = data?.choices?.[0]?.message?.content ?? '';
     return json(200, { answer });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return json(500, {
       error: 'AI service error',
       details: String(err?.message ?? err),

@@ -1,4 +1,4 @@
-import { BIWorkflowSliceCreator, BITestResult } from '../types/biWorkflowTypes';
+import { BIWorkflowSliceCreator } from '../types/biWorkflowTypes';
 
 /**
  * Create BI Test slice
@@ -37,18 +37,13 @@ export const createBITestSlice: BIWorkflowSliceCreator = (set) => ({
 
   setBiTestDate: (date: string) => set({ biTestDate: date }),
 
-  recordBITestResult: async (result: Omit<BITestResult, 'id'>) => {
-    const newResult: BITestResult = {
-      ...result,
-      id: `bi-test-${Date.now()}`,
-    };
+  // recordBITestResult is handled by biologicalIndicatorSlice.ts
+  // This maintains single responsibility principle
+  recordBITestResult: async () => {},
 
-    set((state) => ({
-      biTestResults: [...state.biTestResults, newResult],
-      biTestCompleted: true,
-      biTestDate: new Date().toISOString(),
-      biTestPassed: result.passed,
-    }));
+  // Debug: Check if this slice is being used
+  debugCheck: () => {
+    console.log('🔬 biTestSlice is being used!');
   },
 
   setNextBITestDue: (date: Date) => set({ nextBITestDue: date }),

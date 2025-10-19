@@ -1,7 +1,9 @@
 import React from 'react';
-import { vi, describe, test, expect } from 'vitest';
+import { vi, describe, expect } from 'vitest';
 import { render, screen } from '../../utils/testUtils';
 import PackagingWorkflow from '../../../src/components/Sterilization/workflows/PackagingWorkflow/index';
+import { FacilityProvider } from '../../../src/contexts/FacilityContext';
+import { UserProvider } from '../../../src/contexts/UserContext';
 
 // Mock the store before any imports that use it
 vi.mock('../../../src/store/sterilizationStore', () => ({
@@ -45,6 +47,17 @@ vi.mock('../../../src/services/packagingService', () => ({
 
 // Import the mocked function after the mock is set up
 import { useSterilizationStore } from '../../../src/store/sterilizationStore';
+
+// Test wrapper component that provides necessary context
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <UserProvider>
+      <FacilityProvider>
+        {children}
+      </FacilityProvider>
+    </UserProvider>
+  );
+};
 
 describe('PackagingWorkflow UI', () => {
   const mockStore = {
@@ -112,7 +125,11 @@ describe('PackagingWorkflow UI', () => {
   });
 
   it('renders operator name input initially', () => {
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter your name')).toBeInTheDocument();
@@ -129,7 +146,11 @@ describe('PackagingWorkflow UI', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the scanner interface
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -147,7 +168,11 @@ describe('PackagingWorkflow UI', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the empty state
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -165,7 +190,11 @@ describe('PackagingWorkflow UI', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the scanned tools
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -183,7 +212,11 @@ describe('PackagingWorkflow UI', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the package form
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -201,7 +234,11 @@ describe('PackagingWorkflow UI', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the finalize form
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -210,7 +247,11 @@ describe('PackagingWorkflow UI', () => {
   });
 
   it('displays workflow step labels correctly', () => {
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
     expect(screen.getByText('Start Session')).toBeInTheDocument();
@@ -220,14 +261,22 @@ describe('PackagingWorkflow UI', () => {
     mockStore.batchLoading = true;
     mockStore.packagingLoading = true;
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // Loading states should be handled by the component
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
   });
 
   it('renders accessibility roles and labels', () => {
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     const startButton = screen.getByText('Start Session');
     expect(startButton).toBeInTheDocument();
@@ -246,7 +295,11 @@ describe('PackagingWorkflow UI', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // Error states should be handled gracefully - component shows initial form
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();

@@ -22,7 +22,8 @@ export const useInventoryFormValidation =
     const validateField = useCallback(
       async (field: string, value: unknown): Promise<string | null> => {
         try {
-          await inventoryItemSchema.validateAt(field, { [field]: value });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          inventoryItemSchema.pick({ [field]: true } as any).parse({ [field]: value });
           return null;
         } catch (error: unknown) {
           return error instanceof Error ? error.message : 'Validation failed';
@@ -34,17 +35,18 @@ export const useInventoryFormValidation =
     const validateForm = useCallback(
       async (formData: Partial<LocalInventoryItem>): Promise<boolean> => {
         try {
-          await inventoryItemSchema.validate(formData, { abortEarly: false });
+          inventoryItemSchema.parse(formData);
           setErrors({});
           return true;
         } catch (error: unknown) {
           const newErrors: ValidationErrors = {};
-          if (error && typeof error === 'object' && 'inner' in error) {
+          if (error && typeof error === 'object' && 'issues' in error) {
             const validationError = error as {
-              inner: Array<{ path: string; message: string }>;
+              issues: Array<{ path: string[]; message: string }>;
             };
-            validationError.inner.forEach((err) => {
-              newErrors[err.path] = err.message;
+            validationError.issues.forEach((err) => {
+              const fieldPath = err.path.join('.');
+              newErrors[fieldPath] = err.message;
             });
           }
           setErrors(newErrors);

@@ -27,7 +27,11 @@ export default function Assistant() {
     try {
       const response = await UnifiedAIService.askAI(
         userMessage,
-        'User is asking for help in the Cliniio AI Assistant'
+        {
+          module: 'ai-assistant',
+          facilityId: 'unknown',
+          userId: 'unknown'
+        }
       );
 
       setMessages((prev) => [

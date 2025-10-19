@@ -116,15 +116,12 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
 
           if (activeIncidents.length > 0) {
             // Sync the most recent active incident to sterilization store
-            // const _latestIncident = activeIncidents[0];
-            // TODO: Implement syncBIFailureFromDatabase method in sterilization store // TRACK: Migrate to GitHub issue
-            // sterilizationStore.syncBIFailureFromDatabase({
-            //   status: latestIncident.status,
-            //   failure_date: latestIncident.failure_date,
-            //   affected_tools_count: latestIncident.affected_tools_count,
-            //   affected_batch_ids: latestIncident.affected_batch_ids,
-            //   detected_by_operator_id: latestIncident.detected_by_operator_id,
-            // });
+            const latestIncident = activeIncidents[0];
+            sterilizationStore.activateBIFailure({
+              affectedToolsCount: latestIncident.affected_tools_count || 0,
+              affectedBatchIds: latestIncident.affected_batch_ids || [],
+              operator: latestIncident.detected_by_operator_id || 'unknown',
+            });
           } else {
             // No active incidents, ensure sterilization store reflects this
             sterilizationStore.deactivateBIFailure();

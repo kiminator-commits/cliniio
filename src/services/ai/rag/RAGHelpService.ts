@@ -2,6 +2,9 @@ import { KnowledgeBaseService, RAGContext } from './KnowledgeBaseService';
 import { SmartRAGRouter, SmartRAGContext } from './SmartRAGRouter';
 import { SupabaseRAGService, SupabaseRAGContext } from './SupabaseRAGService';
 import { aiServiceIntegration } from '../AIServiceIntegration';
+import { UnifiedAIService } from '../UnifiedAIService';
+import { enhancedRAGService, EnhancedRAGRequest } from './EnhancedRAGService';
+import { logger } from '../../logging/structuredLogger';
 
 export interface RAGHelpResponse {
   answer: string;
@@ -42,44 +45,68 @@ export class RAGHelpService {
   }
 
   /**
-   * Generate RAG-enhanced help response
+   * Generate RAG-enhanced help response using vector search
    */
   async generateHelpResponse(
     question: string,
     userRole: string,
-    context: string
+    context: string,
+    facilityId?: string
   ): Promise<RAGHelpResponse> {
     try {
-      // Get relevant context from knowledge base
-      const ragContext = this.knowledgeBase.getRAGContext(question, userRole, context);
-      
-      // Build enhanced prompt with retrieved context
-      const enhancedPrompt = this.buildEnhancedPrompt(ragContext);
-      
-      // Call OpenAI with enhanced context
-      const response = await this.callOpenAI(enhancedPrompt);
+      logger.info('Generating RAG help response', {
+        module: 'rag-help',
+        facilityId: facilityId || 'unknown'
+      }, {
+        question: question.substring(0, 100),
+        userRole
+      });
+
+      // Use enhanced RAG service with vector search
+      const enhancedRequest: EnhancedRAGRequest = {
+        query: question,
+        userRole,
+        feature: 'help-system',
+        facilityId,
+        category: 'help',
+        additionalContext: { userContext: context }
+      };
+
+      const enhancedResponse = await enhancedRAGService.generateEnhancedResponse(enhancedRequest);
       
       // Track usage
-      const inputTokens = Math.ceil(enhancedPrompt.length / 4);
-      const outputTokens = Math.ceil(response.length / 4);
+      const inputTokens = Math.ceil(question.length / 4);
+      const outputTokens = Math.ceil(enhancedResponse.answer.length / 4);
       aiServiceIntegration.trackHelpUsage(inputTokens, outputTokens, true);
       
+      logger.info('RAG help response generated', {
+        module: 'rag-help',
+        facilityId: facilityId || 'unknown'
+      }, {
+        question: question.substring(0, 100),
+        confidence: enhancedResponse.confidence,
+        sourcesFound: enhancedResponse.sources.length
+      });
+      
       return {
-        answer: response,
-        sources: ragContext.relevantDocuments.map(doc => doc.document.source),
-        confidence: this.calculateConfidence(ragContext),
-        contextUsed: ragContext as unknown as SupabaseRAGContext,
-        questionType: 'help',
+        answer: enhancedResponse.answer,
+        sources: enhancedResponse.sources,
+        confidence: enhancedResponse.confidence,
+        contextUsed: enhancedResponse.contextUsed as unknown as SupabaseRAGContext,
+        questionType: enhancedResponse.questionType,
         sourceBreakdown: {
-          helpArticles: ragContext.relevantDocuments.filter(doc => doc.document.source === 'help').length,
-          knowledgeArticles: ragContext.relevantDocuments.filter(doc => doc.document.source === 'knowledge').length,
-          courses: ragContext.relevantDocuments.filter(doc => doc.document.source === 'courses').length,
-          policies: ragContext.relevantDocuments.filter(doc => doc.document.source === 'policies').length,
-          procedures: ragContext.relevantDocuments.filter(doc => doc.document.source === 'procedures').length,
+          ...enhancedResponse.sourceBreakdown,
+          helpArticles: enhancedResponse.sourceBreakdown.knowledgeArticles || 0
         }
       };
     } catch (error) {
-      console.error('RAG Help Service error:', error);
+      logger.error('RAG Help Service error', {
+        module: 'rag-help',
+        facilityId: facilityId || 'unknown'
+      }, {
+        question: question.substring(0, 100),
+        error: error instanceof Error ? error.message : String(error)
+      });
       
       // Track failed request
       aiServiceIntegration.trackHelpUsage(0, 0, false);
@@ -133,34 +160,6 @@ Answer:`;
     return prompt;
   }
 
-  /**
-   * Call OpenAI API
-   */
-  private async callOpenAI(prompt: string): Promise<string> {
-    const { OpenAI } = await import('openai');
-    
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is not set');
-    }
-
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
-      max_tokens: 1000,
-    });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    return content;
-  }
 
   /**
    * Calculate confidence score based on context relevance

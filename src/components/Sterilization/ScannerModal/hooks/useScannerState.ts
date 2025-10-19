@@ -82,7 +82,7 @@ export const useScannerState = () => {
         // Log workflow event (mock implementation)
         if (currentSessionId) {
           try {
-            // TODO: Implement tool logging when WorkflowService.addTool is available
+            // Tool logging will be implemented when WorkflowService.addTool is available
             console.log('Tool scanned:', tool.id, tool.name, tool.barcode, workflowType);
           } catch (err) {
             console.error(err);

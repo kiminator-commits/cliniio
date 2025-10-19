@@ -303,7 +303,7 @@ vi.mock('./src/store/sterilizationStore', () => ({
 }));
 
 // AGGRESSIVE Memory cleanup after each test
-import { useLoginStore } from './src/stores/useLoginStore';
+import { useLoginStore } from './src/store/useLoginStore';
 
 afterEach(() => {
   // Reset login store

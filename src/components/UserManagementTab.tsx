@@ -280,7 +280,7 @@ export default function UserManagementTab() {
     
     try {
       await assignRole(editingUser.id, facilityId, editForm.role);
-      // TODO: Update other fields like name, email
+      // Note: Currently only updating role. Name/email updates require additional API endpoints
       setEditingUser(null);
       await reload();
     } catch (error) {

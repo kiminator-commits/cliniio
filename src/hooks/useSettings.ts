@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useSettingsStore } from "@/store/useSettingsStoreHook";
 
 export function useSettings(facilityId: string) {
   const {

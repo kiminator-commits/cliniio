@@ -1,14 +1,5 @@
 import React from 'react';
 
-// TODO: Implement shared version from CourseViewer
-// This component will provide hierarchical navigation for both CourseViewer and ContentBuilder
-// Features to include:
-// - Expandable/collapsible modules
-// - Drag and drop reordering
-// - Lesson completion states
-// - Visual status indicators
-// - Keyboard navigation support
-
 interface Lesson {
   id: string;
   title: string;

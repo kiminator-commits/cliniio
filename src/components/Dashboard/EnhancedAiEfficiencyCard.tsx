@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaRobot } from 'react-icons/fa';
 import {
   AIImpactMetrics,
@@ -15,8 +15,8 @@ export const EnhancedAiEfficiencyCard: React.FC<
   EnhancedAiEfficiencyCardProps
 > = ({ timeframe = 'daily', aiImpactMetrics }) => {
   const [metrics, setMetrics] = useState<AIImpactMetrics | null>(null);
-
   const [loading, setLoading] = useState(true);
+  const lastLogTime = useRef<number>(0);
 
   useEffect(() => {
     // If pre-loaded metrics are provided, use them immediately
@@ -106,20 +106,30 @@ export const EnhancedAiEfficiencyCard: React.FC<
       }
     })();
 
-    console.log('🕒 EnhancedAiEfficiencyCard: getTimeframeValue:', {
-      timeframe,
-      timeSavings: displayMetrics.timeSavings,
-      returnedValue: value,
-    });
+    // Throttle debug logging to prevent console spam
+    const now = Date.now();
+    if (now - lastLogTime.current > 1000) {
+      console.log('🕒 EnhancedAiEfficiencyCard: getTimeframeValue:', {
+        timeframe,
+        timeSavings: displayMetrics.timeSavings,
+        returnedValue: value,
+      });
+      lastLogTime.current = now;
+    }
 
     return value;
   };
 
   const formatTime = (minutes: number) => {
-    console.log(
-      '⏰ EnhancedAiEfficiencyCard: formatTime called with:',
-      minutes
-    );
+    // Throttle debug logging to prevent console spam
+    const now = Date.now();
+    if (now - lastLogTime.current > 1000) {
+      console.log(
+        '⏰ EnhancedAiEfficiencyCard: formatTime called with:',
+        minutes
+      );
+    }
+    
     const result = (() => {
       if (minutes < 60) return `${minutes} m`;
       const hours = Math.floor(minutes / 60);
@@ -128,7 +138,12 @@ export const EnhancedAiEfficiencyCard: React.FC<
         ? `${hours}h ${remainingMinutes} m`
         : `${hours}h`;
     })();
-    console.log('⏰ EnhancedAiEfficiencyCard: formatTime result:', result);
+    
+    if (now - lastLogTime.current > 1000) {
+      console.log('⏰ EnhancedAiEfficiencyCard: formatTime result:', result);
+      lastLogTime.current = now;
+    }
+    
     return result;
   };
 

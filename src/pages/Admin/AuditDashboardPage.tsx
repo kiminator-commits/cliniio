@@ -10,8 +10,13 @@ import type { AuditFlag, ActivityRecord } from '@/types/auditTypes';
 import { Card } from '@/components/ui/card';
 import { Loader2, X, AlertTriangle, Clock, Database, Download, CheckCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import { useFacility } from '@/contexts/FacilityContext';
+import { useUser } from '@/contexts/UserContext';
 
 export default function AuditDashboardPage() {
+  const { getCurrentFacilityId } = useFacility();
+  const { currentUser } = useUser();
+  
   const [flags, setFlags] = useState<AuditFlag[]>([]);
   const [_activities, setActivities] = useState<ActivityRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,11 +131,11 @@ export default function AuditDashboardPage() {
       table_name: 'audit_flags',
       action: 'compliance_issue_resolved',
       record_id: flagId,
-      user_id: '00000000-0000-0000-0000-000000000000', // placeholder UUID for system actions
-      facility_id: '550e8400-e29b-41d4-a716-446655440000', // TODO: Get actual facility ID
+      user_id: currentUser?.id || '00000000-0000-0000-0000-000000000000', // Use actual user ID or fallback
+      facility_id: getCurrentFacilityId() || 'unknown-facility',
       metadata: {
         resolution_timestamp: new Date().toISOString(),
-        resolved_by: 'system', // TODO: Get actual user
+        resolved_by: currentUser?.email || 'system',
         resolution_type: 'manual_resolution',
       },
       created_at: new Date().toISOString(),
@@ -180,7 +185,7 @@ export default function AuditDashboardPage() {
       const reportData = {
         generated_at: new Date().toISOString(),
         generated_by: _user?.email || 'system',
-        facility_id: '550e8400-e29b-41d4-a716-446655440000', // TODO: Get actual facility ID
+        facility_id: getCurrentFacilityId() || 'unknown-facility',
         active_issues: flags.filter(f => !f.resolved),
         resolved_issues: flags.filter(f => f.resolved),
         total_issues: flags.length,
@@ -201,7 +206,7 @@ export default function AuditDashboardPage() {
           action: 'compliance_report_exported',
           record_id: null,
           user_id: _user?.id || 'system',
-          facility_id: '550e8400-e29b-41d4-a716-446655440000',
+          facility_id: getCurrentFacilityId() || 'unknown-facility',
           metadata: {
             export_timestamp: new Date().toISOString(),
             exported_by: _user?.email || 'system',

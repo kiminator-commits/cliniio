@@ -1,4 +1,4 @@
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 
 // ⚠️ TEMPORARY: force cleanup of stale realtime subscriptions
 // import '@/debug/runRealtimeCleanup';
@@ -17,17 +17,23 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import GlobalBIFailureBanner from './components/Sterilization/GlobalBIFailureBanner';
 import NotificationContainer from './components/notifications/NotificationContainer';
+import { EnhancedPerformanceDashboard } from './components/EnhancedPerformanceDashboard';
 
 // CRITICAL: Import realtime auto-optimizer to prevent database overload
 import './services/_core/realtimeCompatibility';
 
+// Import enhanced performance tracking
+import './services/EnhancedPerformanceService';
+
 // Direct imports for critical pages only
 import HomePage from './pages/Home';
-import SterilizationPage from './pages/Sterilization/Sterilization';
-import InventoryPage from './pages/Inventory';
-import EnvironmentalCleanPage from './pages/EnvironmentalClean/page';
-import KnowledgeHubPage from './pages/KnowledgeHub';
-import LibraryPage from './pages/library/page';
+
+// Lazy load all other pages for better performance
+const SterilizationPage = lazy(() => import('./pages/Sterilization/Sterilization'));
+const InventoryPage = lazy(() => import('./pages/Inventory'));
+const EnvironmentalCleanPage = lazy(() => import('./pages/EnvironmentalClean/page'));
+const KnowledgeHubPage = lazy(() => import('./pages/KnowledgeHub'));
+const LibraryPage = lazy(() => import('./pages/library/page'));
 
 // Lazy load scanner pages (large components)
 const ScannerPage = lazy(() => import('./pages/Sterilization/ScannerPage'));
@@ -250,6 +256,8 @@ function installPostgrestFetchGuard() {
 const queryClient = new QueryClient();
 
 function App() {
+  const [showPerformanceDashboard, setShowPerformanceDashboard] = React.useState(false);
+
   // Initialize services and install guards once on client
   React.useEffect(() => {
     // Initialize inventory service facade
@@ -276,6 +284,17 @@ function App() {
         realTimeStatusMonitor.startMonitoring();
       }
     );
+
+    // Add keyboard shortcut for performance dashboard (Ctrl+Shift+P)
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key === 'P') {
+        event.preventDefault();
+        setShowPerformanceDashboard(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
@@ -285,7 +304,10 @@ function App() {
           <FacilityProvider>
             <Router>
               <NavigationProvider>
-                <Routes>
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
+                  <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+                </div>}>
+                  <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route
@@ -399,7 +421,8 @@ function App() {
                     element={<HelpArticlePage />}
                   />
                   <Route path="/" element={<Navigate to="/home" replace />} />
-                </Routes>
+                  </Routes>
+                </Suspense>
                 <NotificationContainer />
               </NavigationProvider>
               <GlobalBIFailureBanner />
@@ -407,6 +430,12 @@ function App() {
           </FacilityProvider>
         </UserProvider>
       </ErrorBoundary>
+      
+      {/* Enhanced Performance Dashboard */}
+      <EnhancedPerformanceDashboard
+        isVisible={showPerformanceDashboard}
+        onClose={() => setShowPerformanceDashboard(false)}
+      />
     </QueryClientProvider>
   );
 }

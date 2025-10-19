@@ -114,7 +114,7 @@ export class SupabaseAuthService {
           first_name: firstName,
           last_name: lastName,
           role,
-          facility_id: 'default', // TODO: Assign proper facility during signup process
+          facility_id: null, // Facility will be assigned during onboarding process
         };
 
         const { error: profileError } = await supabase

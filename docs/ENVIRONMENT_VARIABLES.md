@@ -136,7 +136,6 @@ The following files have been updated to use the unified system:
 ### Services
 
 - `src/lib/supabase.ts` - Supabase client configuration
-- `src/services/phi4Service.ts` - AI service configuration
 - `src/services/taskService.ts` - Task service
 
 ### Hooks

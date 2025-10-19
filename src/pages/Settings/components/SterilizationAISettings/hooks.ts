@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../../../../contexts/UserContext';
 import { SterilizationAISettings as _SterilizationAISettingsType } from '../../../../services/ai/sterilization/types';
 import { Message as _Message } from '../../../../types/sterilizationAISettingsTypes';
-import { isValidApiKeyValue } from '../../utils/sterilizationAISettingsUtils';
+// import { isValidApiKeyValue } from '../../utils/sterilizationAISettingsUtils';
 import {
   fetchSettings,
   saveSettings as saveSettingsToStorage,
@@ -93,19 +93,10 @@ export const useSterilizationAISettings = () => {
     }));
   };
 
-  const handleApiKeyChange = (
-    field:
-      | 'openai_api_key_encrypted'
-      | 'google_vision_api_key_encrypted'
-      | 'azure_computer_vision_key_encrypted',
-    value: string
-  ) => {
-    if (isValidApiKeyValue(value)) {
-      setState((prev) => ({
-        ...prev,
-        settings: { ...prev.settings, [field]: value },
-      }));
-    }
+  const handleApiKeyChange = () => {
+    // API key management has been moved to server-side for security
+    // This function is kept for compatibility but does nothing
+    console.warn('API key management has been moved to server-side for security reasons');
   };
 
   return {

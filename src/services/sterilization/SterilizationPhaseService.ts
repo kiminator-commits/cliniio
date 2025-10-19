@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient';
-import { useLoginStore } from '../../stores/useLoginStore';
+import { useLoginStore } from '../../store/useLoginStore';
 import { ToolService } from '../tools/ToolService';
 
 async function getCurrentFacilityId(): Promise<string> {

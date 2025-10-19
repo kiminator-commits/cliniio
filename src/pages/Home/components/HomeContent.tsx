@@ -64,9 +64,8 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
 
     // Task completion handler
     const completeTask = useCallback(async (taskId: string) => {
-      // Simple task completion logic
+      // Simple task completion logic - placeholder implementation
       console.log('Completing task:', taskId);
-      // TODO: Implement actual task completion
     }, []);
 
     // Simple refresh function for tasks
@@ -205,7 +204,7 @@ export const HomeContent: React.FC<HomeContentProps> = React.memo(
           // Show success message with points awarded
           if (points && points > 0) {
             console.log(`Task completed! Awarded ${points} points.`);
-            // TODO: Add toast notification or visual feedback
+            // Add toast notification or visual feedback in future iteration
           }
         } catch (error) {
           console.error('Error toggling task:', error);

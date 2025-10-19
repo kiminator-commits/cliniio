@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi, describe, test, expect } from 'vitest';
+import { vi, describe, expect } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -10,7 +10,7 @@ import { renderWithProviders } from '../../utils/renderWithProviders';
 import LoginForm from '@/pages/Login/LoginForm';
 import { LOGIN_LABELS } from '@/constants/loginConstants';
 import { SecureAuthService } from '@/services/secureAuthService';
-import { useLoginStore } from '@/stores/useLoginStore';
+import { useLoginStore } from '@/store/useLoginStore';
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => ({

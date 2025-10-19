@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Icon from '@mdi/react';
 import { mdiTestTube, mdiCheckCircle, mdiAlertCircle } from '@mdi/js';
 import { useSterilizationStore } from '../../store/sterilizationStore';
+import { useCleanBIStore } from '../../store/biStore';
 import { BITestResult } from '../../types/toolTypes';
 import { BIFailConfirmationModal } from './BIFailConfirmationModal';
 import { useQuarantineData } from './BIFailureResolution/hooks/useQuarantineData';
@@ -24,12 +25,19 @@ const BITestBanner: React.FC<BITestBannerProps> = ({
     'pass' | 'fail' | 'skip' | null
   >(null);
 
-  const { currentCycle, enforceBI } = useSterilizationStore();
+  // Use clean BI store for BI-related functionality
+  const { enforceBI } = useCleanBIStore();
+  
+  // Keep using sterilization store for non-BI functionality
+  const { currentCycle } = useSterilizationStore();
+  
   const quarantineData = useQuarantineData();
 
   if (!isVisible || !enforceBI) return null;
 
   const handleResultSelect = (result: 'pass' | 'fail' | 'skip') => {
+    console.log('🔬 BITestBanner: Button clicked:', result);
+    
     if (result === 'fail') {
       setPendingResult(result);
       setShowFailConfirmation(true);
@@ -50,6 +58,7 @@ const BITestBanner: React.FC<BITestBannerProps> = ({
       onOptOut();
     }
 
+    console.log('🔬 BITestBanner: Calling onComplete with:', testResult);
     onComplete(testResult);
   };
 

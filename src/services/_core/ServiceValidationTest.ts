@@ -88,7 +88,11 @@ export class ServiceValidationTest {
       // Test basic AI functionality
       const response = await UnifiedAIService.askAI(
         'Test prompt for validation',
-        'Service validation test'
+        {
+          module: 'service-validation',
+          facilityId: 'unknown',
+          userId: 'unknown'
+        }
       );
 
       const responseTime = Date.now() - startTime;

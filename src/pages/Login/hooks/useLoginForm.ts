@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLoginStore } from '@/stores/useLoginStore';
+import { useLoginStore } from '@/store/useLoginStore';
 import { useUser } from '@/contexts/UserContext';
 import { SecureAuthService } from '@/services/secureAuthService';
 import { trackEvent } from '@/services/analyticsService';

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
-import { useLoginStore } from '@/stores/useLoginStore';
+import { useLoginStore } from '@/store/useLoginStore';
 import { facilityConfigService } from '@/services/facilityConfigService';
 
 const AuthCallback: React.FC = () => {

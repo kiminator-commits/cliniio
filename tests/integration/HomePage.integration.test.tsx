@@ -1,5 +1,5 @@
 import React from 'react';
-import { vi, describe, test, expect } from 'vitest';
+import { vi, describe, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from '@/pages/Home';
@@ -62,7 +62,7 @@ vi.mock('@/contexts/UserContext', () => ({
   }),
 }));
 
-vi.mock('@/stores/useLoginStore', () => ({
+vi.mock('@/store/useLoginStore', () => ({
   useLoginStore: vi.fn((selector) => {
     const state = {
       authToken: 'mock-token',

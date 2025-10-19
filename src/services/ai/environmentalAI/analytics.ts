@@ -84,7 +84,7 @@ export class EnvironmentalAIAnalyticsService {
   // Get AI insights for environmental cleaning
   async getEnvironmentalInsights(): Promise<EnvironmentalAIInsight[]> {
     try {
-      // TODO: Implement when environmental AI tables are created
+      // Return empty array until environmental AI tables are created
       // For now, return empty array
       return [];
     } catch (error) {
@@ -146,7 +146,7 @@ export class EnvironmentalAIAnalyticsService {
   // Get environmental cleaning cost data for analytics
   async getEnvironmentalCleaningCostData(): Promise<EnvironmentalCleaningCostData> {
     try {
-      // TODO: Implement when environmental_cleaning_costs table is created
+      // Return mock data until environmental_cleaning_costs table is created
       // For now, return mock data
       return {
         staff_costs: 12000,

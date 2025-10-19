@@ -1,14 +1,5 @@
 import React from 'react';
 
-// TODO: Implement shared version from CourseViewer
-// This component will provide consistent action buttons across both CourseViewer and ContentBuilder
-// Features to include:
-// - Sticky bottom positioning
-// - Primary and secondary actions
-// - Progress context display
-// - Auto-save indicators
-// - Responsive design
-
 interface Action {
   id: string;
   label: string;

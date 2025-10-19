@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { UnifiedAIService } from '../../../src/services/ai/UnifiedAIService';
 import { aiServiceIntegration } from '../../../src/services/ai/AIServiceIntegration';
 import { unifiedRAGService } from '../../../src/services/ai/rag/UnifiedRAGService';
-
-// Validate OpenAI API key
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY environment variable is not set');
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Rate limiting and caching
 const requestCache = new Map<string, { data: unknown; timestamp: number }>();
@@ -161,22 +152,14 @@ Generate insights about:
 Return as JSON array with structure:
 [{"type": "trend|anomaly|prediction|recommendation", "title": "...", "description": "...", "confidence": 0.95, "actionable": true, "priority": "low|medium|high|critical", "sources": ["knowledge_base", "data_analysis"]}]`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
-      max_tokens: 800,
-      timeout: 15000,
+    const content = await UnifiedAIService.askAI(prompt, {
+      module: 'analytics',
+      facilityId: 'unknown'
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    // Track token usage
-    const inputTokens = response.usage?.prompt_tokens || 0;
-    const outputTokens = response.usage?.completion_tokens || 0;
+    // Track token usage (estimated)
+    const inputTokens = Math.ceil(prompt.length / 4);
+    const outputTokens = Math.ceil(content.length / 4);
     aiServiceIntegration.trackAnalyticsUsage(inputTokens, outputTokens, true);
 
     // Parse JSON response and add RAG metadata

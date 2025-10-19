@@ -7,7 +7,7 @@ interface AIChatProps {
   onBack: () => void;
 }
 
-export const AIChat: React.FC<AIChatProps> = ({ currentContext, onBack }) => {
+export const AIChat: React.FC<AIChatProps> = ({ currentContext: _currentContext, onBack }) => {
   const [messages, setMessages] = useState<
     Array<{ role: 'user' | 'assistant'; content: string }>
   >([
@@ -46,7 +46,11 @@ export const AIChat: React.FC<AIChatProps> = ({ currentContext, onBack }) => {
     try {
       const response = await UnifiedAIService.askAI(
         userMessage,
-        `User is on ${currentContext} page and asking for help. Only answer questions related to ${currentContext}.`
+        {
+          module: 'ai-chat',
+          facilityId: 'unknown',
+          userId: 'unknown'
+        }
       );
 
       setMessages((prev) => [

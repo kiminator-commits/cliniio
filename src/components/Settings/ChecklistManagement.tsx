@@ -113,7 +113,11 @@ const ChecklistManagement: React.FC = () => {
         // Generate AI suggestions using the unified AI service
         const aiResponse = await UnifiedAIService.askAI(
           `Generate 5-7 detailed checklist items for "${selectedChecklist.title}" in the ${selectedChecklist.category} category. Each item should include title, detailed instructions, and suggested inventory requirements.`,
-          `Category: ${selectedChecklist.category}, Title: ${selectedChecklist.title}`
+          {
+            module: 'checklist-management',
+            facilityId: 'unknown',
+            userId: 'unknown'
+          }
         );
 
         // Parse the AI response to extract structured suggestions

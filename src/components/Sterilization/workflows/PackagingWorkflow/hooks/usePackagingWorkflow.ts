@@ -5,6 +5,7 @@ import { PackagingService } from '@/services/packagingService';
 import { validateLocationAssignment } from '@/services/ai/aiTriageService';
 import { supabase } from '@/lib/supabaseClient';
 import { useUser } from '@/contexts/UserContext';
+import { useFacility } from '@/contexts/FacilityContext';
 
 // ✅ Connected to packagingSessionSlice for real batching and session control
 
@@ -30,6 +31,7 @@ export const usePackagingWorkflow = (
   } = useSterilizationStore();
 
   const { currentUser } = useUser();
+  const { getCurrentFacilityId } = useFacility();
 
   // Local state - must be called before any early returns
   const [operatorName, setOperatorName] = useState('');
@@ -342,9 +344,9 @@ export const usePackagingWorkflow = (
 
     // ✅ Connected to packagingSessionSlice for real batching and session control
     // Start packaging session with operator name and facility ID
-    const facilityId = 'default-facility'; // TODO: Get from context or props
+    const facilityId = getCurrentFacilityId() || 'unknown-facility';
     startPackagingSession(operatorName, facilityId);
-  }, [operatorName, startPackagingSession]);
+  }, [operatorName, startPackagingSession, getCurrentFacilityId]);
 
   return {
     // State

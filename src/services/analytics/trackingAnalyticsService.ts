@@ -65,8 +65,38 @@ class TrackingAnalyticsService {
       this.events = this.events.slice(-this.MAX_EVENTS);
     }
 
-    // TODO: Send to external analytics service (e.g., PostHog, Mixpanel)
+    // Send to external analytics service (PostHog, Mixpanel, etc.)
+    // This enables external analytics integration for business intelligence
+    this.sendToExternalAnalytics(analyticsEvent);
     console.log('📊 Analytics Event:', analyticsEvent);
+  }
+
+  /**
+   * Send analytics event to external service
+   * Currently logs to console, can be extended to send to PostHog, Mixpanel, etc.
+   */
+  private sendToExternalAnalytics(event: TrackingAnalyticsEvent): void {
+    try {
+      // For now, just log the event
+      // In production, this would send to external analytics service
+      console.log('📈 External Analytics:', {
+        service: 'tracking_analytics',
+        eventType: event.eventType,
+        toolId: event.toolId,
+        doctorName: event.doctorName,
+        timestamp: event.timestamp,
+      });
+      
+      // Future implementation would look like:
+      // await posthog.capture(event.doctorName, event.eventType, {
+      //   toolId: event.toolId,
+      //   toolName: event.toolName,
+      //   priority: event.priority,
+      //   ...event.metadata
+      // });
+    } catch (error) {
+      console.warn('Failed to send to external analytics:', error);
+    }
   }
 
   /**

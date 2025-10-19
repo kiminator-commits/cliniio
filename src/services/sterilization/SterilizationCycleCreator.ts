@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { Database } from '@/types/database.types';
-import { useLoginStore } from '../../stores/useLoginStore';
+import { useLoginStore } from '../../store/useLoginStore';
 import { TransactionManager } from './TransactionManager';
 import { ErrorHandler } from '../error/ErrorHandler';
 import { ToolService } from '@/services/tools/ToolService';

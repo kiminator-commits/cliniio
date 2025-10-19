@@ -257,8 +257,9 @@ export const MobileTab: React.FC<MobileTabProps> = () => {
           })
         );
       }
-    } catch {
-      // TODO: handle error
+    } catch (error) {
+      console.error('Failed to load mobile shortcuts:', error);
+      // Could add toast notification here: toast.error('Failed to load mobile shortcuts');
     }
   };
 
@@ -297,8 +298,9 @@ export const MobileTab: React.FC<MobileTabProps> = () => {
       } else {
         console.log('Mobile settings saved successfully');
       }
-    } catch {
-      // TODO: handle error
+    } catch (error) {
+      console.error('Failed to save mobile shortcuts:', error);
+      // Could add toast notification here: toast.error('Failed to save mobile shortcuts');
     }
   }, [workflowShortcuts]);
 

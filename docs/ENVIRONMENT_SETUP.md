@@ -32,7 +32,7 @@ VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 # OpenAI API Key for AI features
 VITE_OPENAI_API_KEY=sk-your-openai-api-key-here
 
-# Note: Phi-4 has been replaced with OpenAI GPT-4 Mini
+# Note: All AI features are powered by OpenAI GPT-4o.
 
 # Google Vision API Key
 VITE_GOOGLE_VISION_API_KEY=your_google_vision_api_key_here

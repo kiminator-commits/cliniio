@@ -1,3 +1,6 @@
+import { UnifiedAIService } from '../UnifiedAIService';
+import { logger } from '../../logging/structuredLogger';
+
 export class OpenAIService {
   // Real OpenAI API integration for text analysis
   static async callOpenAI(prompt: string, apiKey: string): Promise<string> {
@@ -6,47 +9,24 @@ export class OpenAIService {
     }
 
     try {
-      // Make actual OpenAI API call to ChatGPT-4
-      const response = await fetch(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gpt-4',
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are a healthcare AI specialist for Cliniio, specializing in sterilization facility management, medical instrument analysis, and compliance workflows. Provide accurate, actionable insights based on the data provided.',
-              },
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
-            temperature: 0.3,
-            max_tokens: 1000,
-          }),
-        }
-      );
+      // Use UnifiedAIService for consistent AI calls
+      const systemPrompt = 'You are a healthcare AI specialist for Cliniio, specializing in sterilization facility management, medical instrument analysis, and compliance workflows. Provide accurate, actionable insights based on the data provided.';
+      const fullPrompt = `${systemPrompt}\n\n${prompt}`;
+      
+      const response = await UnifiedAIService.askAI(fullPrompt, {
+        module: 'sterilization-analysis',
+        facilityId: 'unknown'
+      });
 
-      if (!response.ok) {
-        throw new Error(
-          `OpenAI API error: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      return (
-        data.choices[0]?.message?.content ||
-        'AI analysis completed but no response received'
-      );
+      return response;
     } catch (error) {
-      console.error('OpenAI API call failed:', error);
+      logger.error('OpenAI API call failed', {
+        module: 'sterilization-analysis',
+        facilityId: 'unknown'
+      }, {
+        error: error instanceof Error ? error.message : String(error),
+        promptLength: prompt.length
+      });
       throw new Error('AI analysis failed');
     }
   }

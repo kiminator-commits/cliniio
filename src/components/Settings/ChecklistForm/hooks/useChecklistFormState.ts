@@ -67,7 +67,11 @@ export const useChecklistFormState = (
         // Generate AI suggestions using the unified AI service
         const aiResponse = await UnifiedAIService.askAI(
           `Generate 8 checklist title suggestions for the ${checklistFormData.category} category. Each title should be descriptive and follow healthcare facility naming conventions.`,
-          `Category: ${checklistFormData.category}`
+          {
+            module: 'checklist-form',
+            facilityId: 'unknown',
+            userId: 'unknown'
+          }
         );
 
         // Parse the AI response to extract title suggestions

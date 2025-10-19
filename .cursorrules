@@ -1,0 +1,99 @@
+# Cursor AI Rules for Cliniio 3.0
+# This file configures Cursor's AI behavior to maintain code quality
+
+## Code Quality Rules
+
+### TODO Comments
+- NEVER automatically add TODO, FIXME, HACK, or XXX comments
+- Only add TODO comments when explicitly requested by the user
+- If suggesting improvements, use descriptive comments instead of TODOs
+- Prefer implementing solutions over leaving placeholder comments
+
+### Code Style
+- Follow existing code patterns and conventions
+- Maintain consistent indentation and formatting
+- Use TypeScript strict mode patterns
+- Prefer functional components over class components
+- Use existing utility functions and services
+
+### Architecture
+- Respect the existing service facade pattern
+- Use InventoryServiceFacade for all inventory operations
+- Follow the established error handling patterns
+- Maintain separation of concerns between UI, business logic, and data layers
+
+### Performance
+- Consider bundle size when suggesting new dependencies
+- Prefer lazy loading for non-critical components
+- Use existing optimization patterns (memo, useMemo, useCallback)
+- Avoid unnecessary re-renders
+
+### Security
+- Never hardcode sensitive values
+- Use existing context providers for user/facility data
+- Follow established authentication patterns
+- Validate all user inputs
+
+### Testing
+- Maintain existing test patterns
+- Use existing mock implementations
+- Follow the established test structure
+
+## File Organization
+- Place new files in appropriate directories
+- Follow existing naming conventions
+- Use existing import patterns
+- Maintain the established folder structure
+
+## Documentation
+- Update relevant documentation when making architectural changes
+- Use existing documentation patterns
+- Prefer inline comments over separate documentation files
+
+### Documentation File Organization
+- ALL documentation files (.md) MUST be placed in the docs/ directory
+- NEVER create README.md files in subdirectories (src/, tests/, components/, etc.)
+- Use the organized docs/ structure:
+  - docs/architecture/ - for architecture and structure documentation
+  - docs/migration/ - for migration guides and plans
+  - docs/pages/ - for page-specific documentation
+  - docs/components/ - for component documentation
+  - docs/services/ - for service documentation
+  - docs/guides/ - for user guides and tutorials
+  - docs/api/ - for API documentation
+  - docs/tests/ - for testing documentation
+  - docs/store/ - for state management documentation
+- When creating new documentation, choose the appropriate subdirectory
+- Use descriptive filenames that clearly indicate the content
+
+### SQL File Organization
+- NEVER create SQL files in the root directory or src/ directory
+- NEVER create sample data SQL files (insert_*.sql, populate_*.sql, etc.)
+- NEVER create schema baseline files
+- ONLY create SQL files in supabase/migrations/ when creating actual database migrations
+- Use Supabase dashboard for schema management, not SQL files
+- Prefer TypeScript types and documentation over SQL files for schema reference
+
+## Dependencies
+- Avoid adding new dependencies unless absolutely necessary
+- Use existing utility libraries
+- Prefer built-in solutions over external packages
+- Consider bundle size impact
+
+## Error Handling
+- Use existing error handling services
+- Follow established error boundary patterns
+- Provide meaningful error messages
+- Log errors appropriately
+
+## State Management
+- Use Zustand for global state
+- Use React Context for component-specific state
+- Follow existing state management patterns
+- Avoid prop drilling
+
+## API Integration
+- Use existing Supabase integration patterns
+- Follow established data fetching patterns
+- Use existing error handling for API calls
+- Maintain consistent response handling

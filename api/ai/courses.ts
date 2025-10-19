@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { UnifiedAIService } from '../../../src/services/ai/UnifiedAIService';
 import { aiServiceIntegration } from '../../../src/services/ai/AIServiceIntegration';
 import { unifiedRAGService } from '../../../src/services/ai/rag/UnifiedRAGService';
-
-// Validate OpenAI API key
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY environment variable is not set');
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,21 +49,14 @@ Suggest courses that:
 Return as JSON array with structure:
 [{"title": "...", "description": "...", "difficulty": "beginner|intermediate|advanced", "duration": "...", "topics": ["..."], "prerequisites": ["..."], "ragSources": ["knowledge_base", "course_catalog"]}]`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
-      max_tokens: 1000,
+    const content = await UnifiedAIService.askAI(prompt, {
+      module: 'course-generation',
+      facilityId: 'unknown'
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    // Track token usage
-    const inputTokens = response.usage?.prompt_tokens || 0;
-    const outputTokens = response.usage?.completion_tokens || 0;
+    // Track token usage (estimated)
+    const inputTokens = Math.ceil(prompt.length / 4);
+    const outputTokens = Math.ceil(content.length / 4);
     aiServiceIntegration.trackCourseGenerationUsage(inputTokens, outputTokens, true);
 
     // Parse JSON response and add RAG metadata

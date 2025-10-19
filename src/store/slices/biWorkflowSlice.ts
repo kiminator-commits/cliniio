@@ -23,8 +23,12 @@ export const createBIWorkflowSlice: BIWorkflowSliceCreator = (
   get,
   store
 ) => ({
-  // BI Test Management Actions - Delegated to biTestSlice
-  ...createBITestSlice(set, get, store),
+  // BI Test Management Actions - Delegated to biTestSlice (excluding recordBITestResult)
+  ...(() => {
+    const biTestSlice = createBITestSlice(set, get, store);
+    const { recordBITestResult, ...rest } = biTestSlice; // Exclude recordBITestResult
+    return rest;
+  })(),
 
   // BI Failure Management Actions - Delegated to biFailureSlice
   ...createBIFailureSlice(set, get, store),

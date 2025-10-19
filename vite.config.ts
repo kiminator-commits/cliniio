@@ -1,10 +1,20 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Bundle analyzer for production builds
+    process.env.ANALYZE === 'true' && visualizer({
+      filename: 'dist/bundle-analysis.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ].filter(Boolean),
   esbuild: {
     // Reduce TypeScript checking to improve performance
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
@@ -71,19 +81,56 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
       },
       output: {
-        // Better code splitting
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@mdi/react', 'lucide-react', 'react-icons'],
-          utils: ['clsx', 'framer-motion', 'react-hot-toast'],
-          data: ['@tanstack/react-query', 'zustand'],
-          // Separate login page for faster initial load
-          login: ['./src/pages/Login'],
-          // Separate error handling for lazy loading
-          errors: [
-            './src/components/UserFriendlyErrorHandler',
-            './src/components/SupportContact',
-          ],
+        // Better code splitting strategy
+        manualChunks: (id) => {
+          // Vendor chunks for better caching
+          if (id.includes('node_modules')) {
+            // Core React ecosystem
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            // UI libraries
+            if (id.includes('@mdi') || id.includes('lucide-react') || id.includes('react-icons') || id.includes('bootstrap')) {
+              return 'ui-vendor';
+            }
+            // Data management
+            if (id.includes('@tanstack') || id.includes('zustand') || id.includes('@supabase')) {
+              return 'data-vendor';
+            }
+            // Utilities
+            if (id.includes('clsx') || id.includes('framer-motion') || id.includes('date-fns')) {
+              return 'utils-vendor';
+            }
+            // AI/External services
+            if (id.includes('openai') || id.includes('@zxing') || id.includes('jspdf')) {
+              return 'services-vendor';
+            }
+            // Everything else
+            return 'vendor';
+          }
+          
+          // App chunks for better loading
+          if (id.includes('/src/pages/Login')) {
+            return 'login-page';
+          }
+          if (id.includes('/src/pages/Settings')) {
+            return 'settings-pages';
+          }
+          if (id.includes('/src/pages/Inventory')) {
+            return 'inventory-pages';
+          }
+          if (id.includes('/src/pages/Sterilization')) {
+            return 'sterilization-pages';
+          }
+          if (id.includes('/src/pages/KnowledgeHub')) {
+            return 'knowledgehub-pages';
+          }
+          if (id.includes('/src/components/')) {
+            return 'components';
+          }
+          if (id.includes('/src/services/')) {
+            return 'services';
+          }
         },
         // Optimize chunk naming
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -105,9 +152,13 @@ export default defineConfig({
       '@tanstack/react-query',
       'zustand',
       'clsx',
+      'date-fns',
+      'react-hot-toast',
     ],
     // Exclude problematic dependencies
     exclude: ['@mdi/js', 'framer-motion', 'redis'],
+    // Force optimization for better tree-shaking
+    force: true,
   },
   // Optimize for development performance
   define: {

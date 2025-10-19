@@ -4,7 +4,7 @@ import { useHomeDataLoader } from '../../hooks/useHomeDataLoader';
 import { RocketLoading } from '../../components/ui/RocketLoading';
 import { useUser } from '../../contexts/UserContext';
 import { Navigate } from 'react-router-dom';
-import { useLoginStore } from '../../stores/useLoginStore';
+import { useLoginStore } from '../../store/useLoginStore';
 
 export default function HomePage() {
   const { currentUser, isLoading: userLoading } = useUser();

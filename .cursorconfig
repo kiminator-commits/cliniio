@@ -1,0 +1,19 @@
+{
+  "cursor.ai": {
+    "rules": {
+      "noAutoTodos": true,
+      "preferImplementation": true,
+      "maintainArchitecture": true
+    },
+    "codeGeneration": {
+      "avoidPlaceholders": true,
+      "preferCompleteSolutions": true,
+      "respectExistingPatterns": true
+    },
+    "comments": {
+      "avoidAutoGeneration": true,
+      "onlyWhenRequested": true,
+      "preferDescriptiveComments": true
+    }
+  }
+}

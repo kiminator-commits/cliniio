@@ -26,6 +26,30 @@ A modern healthcare management system built with React, TypeScript, and Tailwind
 - React Router DOM
 - React Icons
 
+## Development
+
+### Cursor AI Configuration
+
+This project includes Cursor AI configuration files to maintain code quality:
+
+- `.cursorrules` - AI behavior rules and coding standards
+- `.cursorconfig` - Cursor-specific settings to prevent automatic TODO generation
+
+**Key Rules:**
+- No automatic TODO/FIXME comments
+- Prefer complete implementations over placeholders
+- Respect existing architecture patterns
+- Use established service facade pattern
+
+### Code Quality
+
+The project follows strict coding standards:
+- TypeScript strict mode
+- Service facade pattern for all operations
+- Comprehensive error handling
+- Performance optimizations (lazy loading, code splitting)
+- Security best practices
+
 ## Getting Started
 
 ### Prerequisites

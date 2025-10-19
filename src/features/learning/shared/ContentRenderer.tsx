@@ -1,14 +1,5 @@
 import React from 'react';
 
-// TODO: Implement shared version from CourseViewer
-// This component will provide consistent content display across both CourseViewer and ContentBuilder
-// Features to include:
-// - HTML content rendering with sanitization
-// - Media integration (images, videos, files)
-// - Responsive design
-// - Accessibility support
-// - Print-friendly styling
-
 interface ContentRendererProps {
   content: string;
   className?: string;

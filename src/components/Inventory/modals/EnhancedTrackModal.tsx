@@ -3,15 +3,13 @@ import Icon from '../../Icon/Icon';
 import {
   mdiClose,
   mdiCheck,
-  mdiAlert,
-  mdiInformation,
-  mdiClock,
   mdiEye,
   mdiEyeOff,
 } from '@mdi/js';
 import { useTrackedTools } from '../../../hooks/inventory/useTrackedTools';
 import { useInventoryDataAccess } from '../../../hooks/inventory/useInventoryDataAccess';
 import { TrackedToolPriority } from '../../../services/trackedToolsService';
+import { getPriorityIcon, getPriorityBadgeColor } from '../../../utils/priorityUtils';
 
 interface EnhancedTrackModalProps {
   isOpen: boolean;
@@ -125,34 +123,6 @@ export const EnhancedTrackModal: React.FC<EnhancedTrackModalProps> = ({
       return 'bg-red-100 text-red-800';
     }
     return 'bg-gray-100 text-gray-800';
-  };
-
-  // Get priority badge color
-  const getPriorityBadgeColor = (priority: string): string => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'low':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  // Get priority icon
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return mdiAlert;
-      case 'medium':
-        return mdiInformation;
-      case 'low':
-        return mdiClock;
-      default:
-        return mdiInformation;
-    }
   };
 
   if (!isOpen) return null;

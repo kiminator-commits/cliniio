@@ -195,7 +195,11 @@ const ChecklistItemForm: React.FC<ChecklistItemFormProps> = ({
       try {
         const description = await UnifiedAIService.askAI(
           `Generate detailed instructions for checklist item "${title}" in the ${category || selectedChecklist?.category} category. Provide step-by-step instructions that are clear and actionable.`,
-          `Category: ${category || selectedChecklist?.category}, Title: ${title}`
+          {
+            module: 'checklist-item-form',
+            facilityId: 'unknown',
+            userId: 'unknown'
+          }
         );
         setItemFormData((prev) => ({ ...prev, instructions: description }));
       } catch (aiError) {

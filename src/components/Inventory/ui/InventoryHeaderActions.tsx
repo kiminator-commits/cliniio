@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import Icon from '@mdi/react';
 import { mdiFileUploadOutline } from '@mdi/js';
 import { useInventoryHeaderData } from '@/hooks/inventory/useInventoryHeaderData';
+import { useInventoryHeaderKeyboard } from '../InventoryHeaderSection/hooks/useInventoryHeaderKeyboard';
 
 export interface InventoryHeaderActionsProps {
   activeTab: string;
@@ -18,42 +19,13 @@ export const InventoryHeaderActions: React.FC<InventoryHeaderActionsProps> = ({
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const uploadButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Keyboard navigation handler
-  const handleKeyDown = (event: React.KeyboardEvent, buttonType: string) => {
-    switch (event.key) {
-      case 'ArrowRight':
-        event.preventDefault();
-        if (buttonType === 'add') {
-          uploadButtonRef.current?.focus();
-        }
-        break;
-      case 'ArrowLeft':
-        event.preventDefault();
-        if (buttonType === 'upload') {
-          addButtonRef.current?.focus();
-        }
-        break;
-      case 'Enter':
-      case ' ': {
-        event.preventDefault();
-        if (buttonType === 'add') {
-          handleShowAddModal();
-        } else if (buttonType === 'upload') {
-          handleUploadBarcode();
-        }
-        break;
-      }
-      case 'Escape': {
-        event.preventDefault();
-        // Return focus to a safe fallback
-        const bannerElement = event.currentTarget.closest('[role="banner"]');
-        if (bannerElement) {
-          (bannerElement as HTMLElement).focus();
-        }
-        break;
-      }
-    }
-  };
+  // Use shared keyboard navigation hook
+  const { handleKeyDown } = useInventoryHeaderKeyboard({
+    addButtonRef,
+    uploadButtonRef,
+    handleShowAddModal,
+    handleUploadBarcode,
+  });
 
   // Focus management - focus first action button when component mounts
   useEffect(() => {

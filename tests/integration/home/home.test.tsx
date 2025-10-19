@@ -10,7 +10,7 @@ import { FacilityProvider } from '../../../src/contexts/FacilityContext';
 // Mock hooks and stores used in HomePage
 
 // Mock the useLoginStore hook
-vi.mock('@/stores/useLoginStore', () => ({
+vi.mock('@/store/useLoginStore', () => ({
   useLoginStore: vi.fn((selector) => {
     const state = {
       authToken: 'mock-token',

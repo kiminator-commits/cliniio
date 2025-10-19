@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { useLoginForm } from './hooks/useLoginForm';
-import { useLoginStore } from '@/stores/useLoginStore';
+import { useLoginStore } from '@/store/useLoginStore';
 import LoginHeader from './LoginHeader';
 import LoginFooter from './LoginFooter';
 import EmailField from './components/EmailField';

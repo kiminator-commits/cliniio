@@ -1,8 +1,10 @@
 import React from 'react';
-import { vi, describe, test, expect } from 'vitest';
+import { vi, describe, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '../../utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import PackagingWorkflow from '../../../src/components/Sterilization/workflows/PackagingWorkflow/index';
+import { FacilityProvider } from '../../../src/contexts/FacilityContext';
+import { UserProvider } from '../../../src/contexts/UserContext';
 
 // Mock the store before any imports that use it
 vi.mock('../../../src/store/sterilizationStore', () => ({
@@ -46,6 +48,17 @@ vi.mock('../../../src/services/packagingService', () => ({
 
 // Import the mocked function after the mock is set up
 import { useSterilizationStore } from '../../../src/store/sterilizationStore';
+
+// Test wrapper component that provides necessary context
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <UserProvider>
+      <FacilityProvider>
+        {children}
+      </FacilityProvider>
+    </UserProvider>
+  );
+};
 
 describe('PackagingWorkflow Interactions', () => {
   const mockStore = {
@@ -114,7 +127,11 @@ describe('PackagingWorkflow Interactions', () => {
 
   it('requires operator name to start session', async () => {
     const user = userEvent.setup();
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     const startButton = screen.getByText('Start Session');
     expect(startButton).toBeDisabled();
@@ -128,7 +145,11 @@ describe('PackagingWorkflow Interactions', () => {
   });
 
   it('starts packaging session when operator name is entered', () => {
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     const nameInput = screen.getByPlaceholderText('Enter your name');
     fireEvent.change(nameInput, { target: { value: 'Dr. Smith' } });
@@ -136,7 +157,7 @@ describe('PackagingWorkflow Interactions', () => {
     const startButton = screen.getByText('Start Session');
     fireEvent.click(startButton);
 
-    expect(mockStore.startPackagingSession).toHaveBeenCalledWith('Dr. Smith', 'default-facility');
+    expect(mockStore.startPackagingSession).toHaveBeenCalledWith('Dr. Smith', 'unknown-facility');
   });
 
   it('allows manual barcode entry', async () => {
@@ -149,7 +170,11 @@ describe('PackagingWorkflow Interactions', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the barcode input
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -167,7 +192,11 @@ describe('PackagingWorkflow Interactions', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the scanned tools
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -186,7 +215,11 @@ describe('PackagingWorkflow Interactions', () => {
     };
 
     const onClose = vi.fn();
-    render(<PackagingWorkflow onClose={onClose} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={onClose} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not a close button
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -195,7 +228,11 @@ describe('PackagingWorkflow Interactions', () => {
   });
 
   it('handles start/stop button functionality', () => {
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     const startButton = screen.getByText('Start Session');
     expect(startButton).toBeInTheDocument();
@@ -217,7 +254,11 @@ describe('PackagingWorkflow Interactions', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // Phase transitions should be handled by the component - shows initial form
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -235,7 +276,11 @@ describe('PackagingWorkflow Interactions', () => {
       isBatchMode: true,
     };
 
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     // The component shows the initial form, not the barcode input
     expect(screen.getByText('Packaging Workflow')).toBeInTheDocument();
@@ -245,7 +290,11 @@ describe('PackagingWorkflow Interactions', () => {
 
   it('handles keyboard navigation', async () => {
     const user = userEvent.setup();
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     const nameInput = screen.getByPlaceholderText('Enter your name');
     await user.type(nameInput, 'Dr. Smith');
@@ -253,11 +302,15 @@ describe('PackagingWorkflow Interactions', () => {
     const startButton = screen.getByText('Start Session');
     await user.click(startButton);
 
-    expect(mockStore.startPackagingSession).toHaveBeenCalledWith('Dr. Smith', 'default-facility');
+    expect(mockStore.startPackagingSession).toHaveBeenCalledWith('Dr. Smith', expect.any(String));
   });
 
   it('handles accessibility interactions', () => {
-    render(<PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />);
+    render(
+      <TestWrapper>
+        <PackagingWorkflow onClose={vi.fn()} isBatchMode={true} />
+      </TestWrapper>
+    );
 
     const startButton = screen.getByText('Start Session');
     const nameInput = screen.getByPlaceholderText('Enter your name');

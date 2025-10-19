@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLoginStore } from '@/stores/useLoginStore';
+import { useLoginStore } from '@/store/useLoginStore';
 
 const AuthDebug: React.FC = () => {
   const authToken = useLoginStore((state) => state.authToken);

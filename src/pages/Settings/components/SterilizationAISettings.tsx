@@ -86,7 +86,7 @@ const SterilizationAISettings: React.FC = () => {
 
         {/* API Keys & Services */}
         <ApiKeysServices
-          settings={settings}
+          settings={settings as unknown as Record<string, unknown>}
           onApiKeyChange={handleApiKeyChange}
         />
 

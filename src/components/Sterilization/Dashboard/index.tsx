@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useMemo, memo } from 'react';
 import { useSterilizationStore } from '../../../store/sterilizationStore';
+import { useCleanBIStore } from '../../../store/biStore';
 import BITestBanner from '../BITestBanner';
 import { checkBITestDue } from '../../../utils/checkBITestDue';
 import { useDashboardLogic } from '../hooks/useDashboardLogic';
@@ -8,7 +9,6 @@ import { BITestResult } from '../../../types/toolTypes';
 import { DashboardHeader } from './DashboardHeader';
 import {
   initializeBIFailureState,
-  useBIStore,
 } from '../../../services/bi/failure/index';
 
 import { DashboardTabs } from './DashboardTabs';
@@ -30,18 +30,21 @@ interface SterilizationDashboardProps {
  */
 const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
   ({ SterilizationAnalyticsComponent }) => {
+    // Use the clean BI store for BI-related functionality
     const {
-      startNewCycle,
       recordBITestResult,
       lastBITestDate,
       biTestOptedOut,
       setBiTestOptedOut,
       enforceBI,
+    } = useCleanBIStore();
+
+    // Keep using the sterilization store for non-BI functionality
+    const {
+      startNewCycle,
       showBatchCodeModal,
       setShowBatchCodeModal,
     } = useSterilizationStore();
-
-    const { initError, subscribe, unsubscribe } = useBIStore();
 
     // Business logic separated into hook
     const {
@@ -67,14 +70,8 @@ const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
       // Initialize BI data on mount
       initializeBIFailureState();
 
-      // Enable realtime updates
-      subscribe();
-
-      // Cleanup on unmount
-      return () => {
-        unsubscribe();
-      };
-    }, [subscribe, unsubscribe]);
+      // Clean store doesn't need subscription management
+    }, []);
 
     // Check for BI test due every 5 minutes instead of every minute for better performance
     useEffect(() => {
@@ -115,9 +112,14 @@ const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
     */
 
     const handleBITestComplete = useCallback(
-      (result: BITestResult) => {
-        // The banner and store now use the same BITestResult interface
-        recordBITestResult(result);
+      async (result: BITestResult) => {
+        console.log('🔬 Dashboard: handleBITestComplete called with:', result);
+        try {
+          await recordBITestResult(result);
+          console.log('🔬 Dashboard: BI test result recorded successfully');
+        } catch (error) {
+          console.error('🔬 Dashboard: Error recording BI test result:', error);
+        }
       },
       [recordBITestResult]
     );
@@ -154,6 +156,15 @@ const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
         ? new Date(lastBITestDate).toDateString()
         : null;
 
+      console.log('🔬 Dashboard: Banner visibility check:', {
+        enforceBI,
+        biTestOptedOut,
+        lastBITestDate,
+        lastTestDate,
+        today,
+        shouldShow: lastTestDate !== today
+      });
+
       return lastTestDate !== today;
     }, [enforceBI, biTestOptedOut, lastBITestDate]);
 
@@ -177,13 +188,6 @@ const SterilizationDashboard: React.FC<SterilizationDashboardProps> = memo(
           onComplete={handleBITestComplete}
           onOptOut={handleBITestOptOut}
         />
-
-        {/* BI Initialization Error Banner */}
-        {initError && (
-          <div className="bg-red-100 text-red-700 text-sm p-2 rounded-md">
-            BI Initialization Failed: {initError.message}
-          </div>
-        )}
 
         <DashboardHeader />
 

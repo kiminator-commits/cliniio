@@ -1,7 +1,7 @@
 import React from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getInventoryService } from '@/services/ServiceAccess';
+import { InventoryServiceFacadeImpl } from '@/services/inventory/InventoryServiceFacade';
 import {
   InventoryDataResponse,
   InventoryFilters,
@@ -109,10 +109,9 @@ export const useCentralizedInventoryData =
 
         // Filtered data methods (compatible with existing useFilteredInventoryData)
         getFilteredData: async (searchQuery: string) => {
-          const inventoryService = (await getInventoryService()) as {
-            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
-          };
-          const allItems = await inventoryService.fetchInventoryItems();
+          const inventoryService = await InventoryServiceFacadeImpl.getInstance();
+          const response = await inventoryService.getAllItems();
+          const allItems = response.data || [];
           if (!allItems || !Array.isArray(allItems)) {
             return [];
           }
@@ -124,10 +123,9 @@ export const useCentralizedInventoryData =
         },
 
         getFilteredSuppliesData: async (searchQuery: string) => {
-          const inventoryService = (await getInventoryService()) as {
-            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
-          };
-          const allItems = await inventoryService.fetchInventoryItems();
+          const inventoryService = await InventoryServiceFacadeImpl.getInstance();
+          const response = await inventoryService.getAllItems();
+          const allItems = response.data || [];
           return allItems.filter(
             (item) =>
               item.category === 'Supplies' &&
@@ -139,10 +137,9 @@ export const useCentralizedInventoryData =
         },
 
         getFilteredEquipmentData: async (searchQuery: string) => {
-          const inventoryService = (await getInventoryService()) as {
-            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
-          };
-          const allItems = await inventoryService.fetchInventoryItems();
+          const inventoryService = await InventoryServiceFacadeImpl.getInstance();
+          const response = await inventoryService.getAllItems();
+          const allItems = response.data || [];
           return allItems.filter(
             (item) =>
               item.category === 'Equipment' &&
@@ -154,10 +151,9 @@ export const useCentralizedInventoryData =
         },
 
         getFilteredOfficeHardwareData: async (searchQuery: string) => {
-          const inventoryService = (await getInventoryService()) as {
-            fetchInventoryItems: () => Promise<LocalInventoryItem[]>;
-          };
-          const allItems = await inventoryService.fetchInventoryItems();
+          const inventoryService = await InventoryServiceFacadeImpl.getInstance();
+          const response = await inventoryService.getAllItems();
+          const allItems = response.data || [];
           return allItems.filter(
             (item) =>
               item.category === 'Office Hardware' &&
@@ -190,38 +186,45 @@ export const useCentralizedInventoryData =
             while (retryCount < maxRetries) {
               try {
                 // Get the service instance through the factory
-                const inventoryService = (await getInventoryService()) as {
-                  fetchAllInventoryData: () => Promise<InventoryDataResponse>;
-                };
-                const data = await inventoryService.fetchAllInventoryData();
+                const inventoryService = await InventoryServiceFacadeImpl.getInstance();
+                const response = await inventoryService.getAllItems();
+                const allItems = response.data || [];
 
-                // Derive a unified "all items" array from the categorized data.
-                const allItems = [
-                  ...(data?.tools ?? []),
-                  ...(data?.supplies ?? []),
-                  ...(data?.equipment ?? []),
-                  ...(data?.officeHardware ?? []),
-                ];
+                // Categorize items by type
+                const categorizedData = {
+                  tools: allItems.filter(item => item.category === 'Tools'),
+                  supplies: allItems.filter(item => item.category === 'Supplies'),
+                  equipment: allItems.filter(item => item.category === 'Equipment'),
+                  officeHardware: allItems.filter(item => item.category === 'Office Hardware'),
+                };
 
                 // Atomically set ALL slices from the same source
                 console.log(
                   '[useCentralizedInventoryData] Setting state with data:',
                   {
                     allItems: allItems.length,
-                    tools: data?.tools?.length || 0,
-                    supplies: data?.supplies?.length || 0,
-                    equipment: data?.equipment?.length || 0,
-                    officeHardware: data?.officeHardware?.length || 0,
+                    tools: categorizedData.tools.length,
+                    supplies: categorizedData.supplies.length,
+                    equipment: categorizedData.equipment.length,
+                    officeHardware: categorizedData.officeHardware.length,
                   }
                 );
 
                 set({
                   items: allItems,
-                  tools: data?.tools ?? [],
-                  supplies: data?.supplies ?? [],
-                  equipment: data?.equipment ?? [],
-                  officeHardware: data?.officeHardware ?? [],
-                  data: data,
+                  tools: categorizedData.tools,
+                  supplies: categorizedData.supplies,
+                  equipment: categorizedData.equipment,
+                  officeHardware: categorizedData.officeHardware,
+                  data: { 
+                    tools: categorizedData.tools, 
+                    supplies: categorizedData.supplies, 
+                    equipment: categorizedData.equipment, 
+                    officeHardware: categorizedData.officeHardware,
+                    categories: Array.from(new Set(allItems.map(item => item.category).filter(Boolean))),
+                    isLoading: false,
+                    error: null
+                  },
                   error: null,
                   isLoading: false,
                 });
@@ -229,10 +232,10 @@ export const useCentralizedInventoryData =
                 __log('✅ single-source applied', {
                   counts: {
                     all: allItems.length,
-                    tools: (data?.tools ?? []).length,
-                    supplies: (data?.supplies ?? []).length,
-                    equipment: (data?.equipment ?? []).length,
-                    officeHardware: (data?.officeHardware ?? []).length,
+                    tools: categorizedData.tools.length,
+                    supplies: categorizedData.supplies.length,
+                    equipment: categorizedData.equipment.length,
+                    officeHardware: categorizedData.officeHardware.length,
                   },
                 });
 

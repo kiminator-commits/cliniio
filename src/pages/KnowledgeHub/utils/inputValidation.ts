@@ -1,28 +1,33 @@
+import * as z from 'zod';
 import * as yup from 'yup';
 import { ContentStatus } from '../types';
 
 // Validation schemas for user inputs
-export const searchQuerySchema = yup.object({
-  query: yup
-    .string()
-    .required('Search query is required')
-    .min(1, 'Search query cannot be empty')
-    .test(
-      'not-whitespace-only',
-      'Search query cannot be only whitespace',
-      (value) => {
-        return value ? value.trim().length > 0 : false;
-      }
+export const searchQuerySchema = z.object({
+  query: z.string()
+    .min(1, 'Search query is required')
+    .refine(
+      (val) => val.trim().length > 0,
+      'Search query cannot be empty'
     )
-    .test(
-      'max-length',
-      'Search query cannot exceed 1000 characters',
-      (value) => {
-        return value ? value.length <= 1000 : true;
-      }
+    .refine(
+      (val) => val.length <= 1000,
+      'Search query is too long'
     )
-    .matches(
-      /^[a-zA-Z0-9\s\-_.,!?()@]+$/,
+    .refine(
+      (val) => !/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi.test(val),
+      'Invalid characters detected'
+    )
+    .refine(
+      (val) => val.trim().length > 0,
+      'Search query cannot be only whitespace'
+    )
+    .refine(
+      (val) => val.length <= 1000,
+      'Search query cannot exceed 1000 characters'
+    )
+    .refine(
+      (val) => /^[a-zA-Z0-9\s\-_.,!?()@]+$/.test(val),
       'Search query contains invalid characters'
     ),
 });
@@ -77,10 +82,10 @@ export const validateSearchQuery = (
   query: string
 ): { isValid: boolean; error?: string } => {
   try {
-    searchQuerySchema.validateSync({ query });
+    searchQuerySchema.parse({ query });
     return { isValid: true };
   } catch (error) {
-    return { isValid: false, error: (error as yup.ValidationError).message };
+    return { isValid: false, error: error instanceof Error ? error.message : 'Validation failed' };
   }
 };
 
