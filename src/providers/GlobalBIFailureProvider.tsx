@@ -194,7 +194,7 @@ export const GlobalBIFailureProvider: React.FC<GlobalBIFailureProviderProps> =
           (payload) => {
             logger.warn('🚨 New BI failure detected:', payload.new);
             // Handle new BI failure incident
-            handleBIFailureIncident(payload.new as Record<string, unknown>);
+            handleBIFailureIncident(payload.new as unknown as BIFailureIncident);
           }
         )
         .subscribe();

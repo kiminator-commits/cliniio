@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import clsx from 'clsx';
 import {
   FaHome,
   FaFlask,
@@ -69,12 +70,26 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
   ];
 
   return (
-    <div
-      className={`bg-white shadow-lg transition-all duration-300 flex flex-col min-h-screen ${
-        isOpen ? 'w-full sm:w-64 md:w-64' : 'w-16 sm:w-20 md:w-20'
-      }`}
-    >
-      <div className="flex-1 pt-4 overflow-y-auto">
+    <>
+      {/* Mobile backdrop overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+      
+      {/* Drawer */}
+      <aside
+        className={clsx(
+          'bg-white shadow-lg transition-all duration-300 flex flex-col min-h-screen',
+          isOpen 
+            ? 'fixed inset-y-0 left-0 z-50 w-full md:relative md:w-64' 
+            : 'w-16 sm:w-20 md:w-20'
+        )}
+      >
+        <div className="flex-1 pt-4 overflow-y-auto">
         {isOpen ? (
           <div className="px-4 sm:px-6 pb-6 flex justify-between items-center">
             <div className="relative">
@@ -321,6 +336,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
           )}
         </div>
       </div>
-    </div>
+      </aside>
+    </>
   );
 };

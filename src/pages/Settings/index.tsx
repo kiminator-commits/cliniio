@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { SharedLayout } from '../../components/Layout/SharedLayout';
 import Icon from '@mdi/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
@@ -108,8 +108,8 @@ const sectionColors: Record<string, { bg: string; icon: string }> = {
 
 const Settings: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [openDrawer, setOpenDrawer] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [complianceFlagCount, setComplianceFlagCount] = useState<number>(0);
   const [_facilitySettings, _setFacilitySettings] =
     useState<FacilitySettings | null>(null);
@@ -118,10 +118,24 @@ const Settings: React.FC = () => {
 
   // Handle URL parameters to open specific sections
   useEffect(() => {
+    // Removed error handling from location state
+  }, [location.state]);
+
+  // Handle URL parameters to open specific sections
+  useEffect(() => {
     const section = searchParams.get('section');
+    const _subtab = searchParams.get('subtab');
+    const review = searchParams.get('review');
+    
     if (section && settingsSections.some(s => s.id === section)) {
       // Use setTimeout to avoid calling setState synchronously in effect
       setTimeout(() => setOpenDrawer(section), 0);
+    }
+    
+    // Handle deep linking for content approval
+    if (review && section === 'content') {
+      // Store review content ID for the PublishingTab to use
+      sessionStorage.setItem('reviewContentId', review);
     }
   }, [searchParams]);
 
@@ -196,11 +210,9 @@ const Settings: React.FC = () => {
 
   const handleCardClick = (id: string) => {
     try {
-      setError(null);
       setOpenDrawer((prev) => (prev === id ? null : id));
     } catch (err) {
       console.error('Error opening settings card:', err);
-      setError(err instanceof Error ? err.message : 'Failed to open settings');
     }
   };
 
@@ -360,11 +372,6 @@ const Settings: React.FC = () => {
             </p>
           </div>
 
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-600 text-sm">Error: {error}</p>
-            </div>
-          )}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {renderGridWithDrawer()}

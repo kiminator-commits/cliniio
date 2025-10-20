@@ -16,12 +16,20 @@ interface OfficeHoursSettings {
   openHolidays: boolean;
   startHour: number;
   endHour: number;
+  clinicTypes?: string[];
+  clinics?: {
+    name: string;
+    phone: string;
+    fax?: string;
+    email?: string;
+  }[];
 }
 
 const OfficeHoursSettings: React.FC = () => {
   const [facilityId, setFacilityId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [clinicSearch, setClinicSearch] = useState('');
 
   // Load settings from database or use defaults
   const [settings, setSettings] = useState<OfficeHoursSettings>(() => {
@@ -39,6 +47,8 @@ const OfficeHoursSettings: React.FC = () => {
       openHolidays: false,
       startHour: 8,
       endHour: 17,
+      clinicTypes: [],
+      clinics: [],
     };
   });
 
@@ -54,6 +64,21 @@ const OfficeHoursSettings: React.FC = () => {
     };
 
     loadFacilityId();
+  }, []);
+
+  // Hydrate from localStorage to preserve client-managed fields like clinics
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('officeHoursSettings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          setSettings((prev) => ({ ...prev, ...parsed }));
+        }
+      }
+    } catch {
+      // ignore localStorage parse errors
+    }
   }, []);
 
   const loadSettingsFromDatabase = useCallback(async () => {
@@ -127,6 +152,45 @@ const OfficeHoursSettings: React.FC = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const toggleClinicType = (tag: string) => {
+    const current = new Set(settings.clinicTypes || []);
+    if (current.has(tag)) {
+      current.delete(tag);
+    } else {
+      current.add(tag);
+    }
+    const newSettings = { ...settings, clinicTypes: Array.from(current) };
+    setSettings(newSettings);
+    saveSettingsToDatabase(newSettings);
+  };
+
+  const _handleTextChange = (field: 'country' | 'address', value: string) => {
+    const newSettings = { ...settings, [field]: value } as OfficeHoursSettings;
+    setSettings(newSettings);
+    saveSettingsToDatabase(newSettings);
+  };
+
+  const addClinic = () => {
+    const newClinics = [...(settings.clinics || []), { name: '', phone: '', fax: '', email: '' }];
+    const newSettings = { ...settings, clinics: newClinics };
+    setSettings(newSettings);
+    saveSettingsToDatabase(newSettings);
+  };
+
+  const removeClinic = (index: number) => {
+    const newClinics = (settings.clinics || []).filter((_, i) => i !== index);
+    const newSettings = { ...settings, clinics: newClinics };
+    setSettings(newSettings);
+    saveSettingsToDatabase(newSettings);
+  };
+
+  const updateClinicField = (index: number, field: 'name' | 'phone' | 'fax' | 'email', value: string) => {
+    const newClinics = (settings.clinics || []).map((c, i) => (i === index ? { ...c, [field]: value } : c));
+    const newSettings = { ...settings, clinics: newClinics };
+    setSettings(newSettings);
+    saveSettingsToDatabase(newSettings);
   };
 
   const handleDayToggle = (day: keyof OfficeHoursSettings['workingDays']) => {
@@ -310,6 +374,192 @@ const OfficeHoursSettings: React.FC = () => {
               ))}
             </select>
           </div>
+        </div>
+      </div>
+
+      {/* Clinic Type and Location */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-center space-x-2 mb-6">
+          <div className="p-2 bg-[#4ECDC4] bg-opacity-10 rounded-lg">
+            <svg className="w-5 h-5 text-[#4ECDC4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4" />
+            </svg>
+          </div>
+          <h6 className="text-lg font-semibold text-gray-800">
+            🏥 Clinic Type & Location
+          </h6>
+        </div>
+
+        <div className="mb-6">
+          <div className="text-sm font-medium text-gray-600 mb-2">Clinic Type</div>
+          <input
+            type="text"
+            value={clinicSearch}
+            onChange={(e) => setClinicSearch(e.target.value)}
+            placeholder="Search clinic types..."
+            className="w-full mb-4 px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
+          />
+
+          {(() => {
+            const groups = [
+              {
+                title: 'Primary Care & Wellness',
+                tags: ['Primary Care','Internal Medicine','Pediatrics','Adolescent Medicine','Geriatrics','Women’s Health','Men’s Health','Obstetrics & Gynecology','Midwifery','Fertility & Reproductive Health','Sexual Health / STI','Preventive Health & Wellness']
+              },
+              {
+                title: 'Dentistry',
+                tags: ['Dental (General)','Pediatric Dentistry','Orthodontics','Endodontics','Periodontics','Prosthodontics','Oral & Maxillofacial Surgery']
+              },
+              {
+                title: 'Surgery',
+                tags: ['General Surgery','Ambulatory Surgery Center','Orthopedic Surgery','Cardiothoracic Surgery','Vascular Surgery','Neurosurgery','Plastic & Reconstructive Surgery','ENT (Otolaryngology) Surgery','Urologic Surgery','Colorectal Surgery','Ophthalmic Surgery']
+              },
+              {
+                title: 'Urgent, Occupational & Travel',
+                tags: ['Urgent Care','Walk-in / After-hours','Occupational Health','Travel Medicine','Sports Medicine','Student Health']
+              },
+              {
+                title: 'Medical Specialties',
+                tags: ['Cardiology','Pulmonology','Endocrinology','Gastroenterology','Nephrology','Rheumatology','Hematology','Oncology','Neurology','Allergy & Immunology','Infectious Disease','Dermatology','Pain Management','Palliative Care','Sleep Medicine','Wound Care','Diabetes Education','Nutrition & Dietetics']
+              },
+              {
+                title: 'Mental & Behavioral Health',
+                tags: ['Psychiatry','Psychology / Behavioral Health','Substance Use & Recovery','Developmental & Autism Services']
+              },
+              {
+                title: 'Rehabilitation & Therapies',
+                tags: ['Physical Therapy','Occupational Therapy','Speech-Language Pathology','Chiropractic','Podiatry']
+              },
+              {
+                title: 'Vision, Imaging & Diagnostics',
+                tags: ['Audiology','Optometry / Medical Ophthalmology','Radiology & Imaging']
+              },
+              {
+                title: 'Care Models & Settings',
+                tags: ['Community Health Center','Rural Health Clinic','Public Health / Immunization','Telemedicine / Virtual Care','Home Health','Private Practice','Integrative / Functional Medicine','Allied Health (Multidisciplinary)']
+              }
+            ];
+
+            const allTags = groups.flatMap((g) => g.tags);
+            const query = clinicSearch.trim().toLowerCase();
+            const selected = new Set(settings.clinicTypes || []);
+            const selectedList = (settings.clinicTypes || []).slice().sort();
+            const filtered = query
+              ? allTags
+                  .filter((t) => !selected.has(t))
+                  .filter((t) => t.toLowerCase().includes(query))
+                  .sort((a, b) => a.localeCompare(b))
+              : [];
+
+            return (
+              <>
+                {selectedList.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 mb-2">Selected</div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedList.map((tag) => (
+                        <button
+                          key={tag}
+                          onClick={() => toggleClinicType(tag)}
+                          className="px-3 py-1.5 rounded-full text-sm font-medium transition bg-[#4ECDC4] text-white shadow flex items-center"
+                          aria-label={`Remove ${tag}`}
+                          title={`Remove ${tag}`}
+                        >
+                          <span>{tag}</span>
+                          <span className="ml-2 text-white/90 hover:text-white font-bold">×</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  {filtered.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => toggleClinicType(tag)}
+                      className="px-3 py-1.5 rounded-full text-sm font-medium transition bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+
+        <div className="mb-4 flex items-center justify-between">
+          <div className="text-sm font-medium text-gray-600">Clinic Locations</div>
+          <button
+            type="button"
+            onClick={addClinic}
+            className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#4ECDC4] text-white hover:opacity-90"
+          >
+            + Add Location
+          </button>
+        </div>
+
+        {(settings.clinics || []).length === 0 ? (
+          <div className="text-sm text-gray-500 mb-2">No locations added yet.</div>
+        ) : null}
+
+        <div className="space-y-4">
+          {(settings.clinics || []).map((clinic, index) => (
+            <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Clinic Name</label>
+                  <input
+                    type="text"
+                    value={clinic.name}
+                    onChange={(e) => updateClinicField(index, 'name', e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
+                    placeholder="Enter clinic name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Clinic Phone</label>
+                  <input
+                    type="tel"
+                    value={clinic.phone}
+                    onChange={(e) => updateClinicField(index, 'phone', e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
+                    placeholder="e.g. +1 555 123 4567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Clinic Fax</label>
+                  <input
+                    type="tel"
+                    value={clinic.fax || ''}
+                    onChange={(e) => updateClinicField(index, 'fax', e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
+                    placeholder="Optional"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Clinic Email</label>
+                  <input
+                    type="email"
+                    value={clinic.email || ''}
+                    onChange={(e) => updateClinicField(index, 'email', e.target.value)}
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4]"
+                    placeholder="name@example.com"
+                  />
+                </div>
+              </div>
+              <div className="mt-3 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => removeClinic(index)}
+                  className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-red-100 text-red-700 hover:bg-red-200"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

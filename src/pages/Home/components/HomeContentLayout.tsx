@@ -7,6 +7,7 @@ import { Task } from '../../../store/homeStore';
 import HomeTasksSection from './HomeTasksSection';
 import HomeMetricsSection from './HomeMetricsSection';
 import HomeGamificationSection from './HomeGamificationSection';
+import TaskList from '../../../components/TaskList';
 
 interface HomeContentLayoutProps {
   gamificationData: {
@@ -107,6 +108,11 @@ const HomeContentLayout: React.FC<HomeContentLayoutProps> = React.memo(
                 aiImpactMetrics={aiImpactMetrics}
               />
             </div>
+          </div>
+
+          {/* Approval Tasks Section */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <TaskList />
           </div>
         </div>
       </div>

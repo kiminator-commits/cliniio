@@ -55,7 +55,7 @@ const NavBar: React.FC<NavBarProps> = ({
 
         {/* Feature buttons with enhanced accessibility */}
         <nav
-          className="flex gap-4 pr-8"
+          className="flex gap-2 md:gap-4 pr-4 md:pr-8"
           role="navigation"
           aria-label="Dashboard actions"
         >
@@ -72,7 +72,7 @@ const NavBar: React.FC<NavBarProps> = ({
             return (
               <Tooltip key={f.label} content={f.description}>
                 <button
-                  className={`rounded-xl w-12 h-12 flex items-center justify-center transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  className={`rounded-xl w-14 h-14 md:w-12 md:h-12 flex items-center justify-center transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     f.label === 'Cumulative Stats'
                       ? 'bg-purple-100 focus:ring-purple-500'
                       : f.label === 'Leaderboard'

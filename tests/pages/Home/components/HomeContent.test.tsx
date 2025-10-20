@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
-import { vi, describe, test, expect } from 'vitest';
+import { vi, describe, expect } from 'vitest';
 import React from 'react';
 import HomeContent from '@/pages/Home/components/HomeContent';
 import { FacilityProvider } from '@/contexts/FacilityContext';
+import { UserProvider } from '@/contexts/UserContext';
 
 // Mock Supabase to avoid authentication issues
 vi.mock('@/lib/supabaseClient', () => ({
@@ -20,6 +21,21 @@ vi.mock('@/lib/supabaseClient', () => ({
       }),
     }),
   },
+}));
+
+// Mock UserContext
+vi.mock('@/contexts/UserContext', () => ({
+  UserProvider: ({ children }: { children: React.ReactNode }) => children,
+  useUser: () => ({
+    currentUser: {
+      id: 'test-user-id',
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'nurse',
+    },
+    loading: false,
+    error: null,
+  }),
 }));
 
 // Mock the hooks and components to avoid complex dependencies
@@ -197,9 +213,11 @@ describe('HomeContent', () => {
 
   it('renders without crashing', () => {
     render(
-      <FacilityProvider>
-        <HomeContent homeData={mockHomeData} />
-      </FacilityProvider>
+      <UserProvider>
+        <FacilityProvider>
+          <HomeContent homeData={mockHomeData} />
+        </FacilityProvider>
+      </UserProvider>
     );
 
     // Check that the component renders without throwing an error
@@ -209,9 +227,11 @@ describe('HomeContent', () => {
 
   it('contains all main sections', () => {
     render(
-      <FacilityProvider>
-        <HomeContent homeData={mockHomeData} />
-      </FacilityProvider>
+      <UserProvider>
+        <FacilityProvider>
+          <HomeContent homeData={mockHomeData} />
+        </FacilityProvider>
+      </UserProvider>
     );
 
     // Check that all main sections are rendered
@@ -221,9 +241,11 @@ describe('HomeContent', () => {
 
   it('renders components in correct order', () => {
     render(
-      <FacilityProvider>
-        <HomeContent homeData={mockHomeData} />
-      </FacilityProvider>
+      <UserProvider>
+        <FacilityProvider>
+          <HomeContent homeData={mockHomeData} />
+        </FacilityProvider>
+      </UserProvider>
     );
 
     // Check that components are rendered in the expected order

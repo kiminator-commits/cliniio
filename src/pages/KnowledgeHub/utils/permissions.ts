@@ -63,6 +63,29 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission> = {
 
 // Helper function to get user role from string
 export const getUserRole = (roleString: string): UserRole => {
+  // Normalize the role string to handle common variations
+  const normalizedRole = roleString?.toLowerCase().trim();
+  
+  // Map common role variations to the standard roles
+  const roleMapping: Record<string, UserRole> = {
+    'admin': 'Administrator',
+    'administrator': 'Administrator',
+    'physician': 'Physician',
+    'doctor': 'Physician',
+    'nurse': 'Nurse',
+    'technician': 'Technician',
+    'tech': 'Technician',
+    'student': 'Student',
+    'user': 'User',
+    'default': 'User',
+  };
+  
+  const mappedRole = roleMapping[normalizedRole];
+  if (mappedRole) {
+    return mappedRole;
+  }
+  
+  // Fallback: check if it's already a valid role
   const validRoles: UserRole[] = [
     'Administrator',
     'Physician',
@@ -71,6 +94,7 @@ export const getUserRole = (roleString: string): UserRole => {
     'Student',
     'User',
   ];
+  
   return validRoles.includes(roleString as UserRole)
     ? (roleString as UserRole)
     : 'User';

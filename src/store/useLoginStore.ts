@@ -92,6 +92,10 @@ export const useLoginStore = create<LoginState>((set, get) => {
     },
     
     setAuthToken: (token) => {
+      if (typeof window !== 'undefined' && token) {
+        // Persist the token to storage (use localStorage by default)
+        localStorage.setItem('token', token);
+      }
       set({ authToken: token, token });
     },
     

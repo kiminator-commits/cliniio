@@ -10,7 +10,9 @@ const mapToServiceTask = (task: Task) => ({
   title: task.title,
   description: task.description,
   status: task.status,
-  priority: task.priority === 'urgent' ? 'high' : task.priority || 'medium',
+  priority: (task.priority === 'urgent' ? 'urgent' : 
+            task.priority === 'high' ? 'high' : 
+            task.priority === 'low' ? 'low' : 'normal') as 'high' | 'low' | 'normal' | 'urgent',
   due_date: task.dueDate,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
@@ -137,9 +139,8 @@ const VirtualizedTasksList: React.FC<VirtualizedTasksListProps> = React.memo(
 
         // Map to service task format and implement actual task update service call
         const serviceTask = mapToServiceTask(updatedTask);
-        const { createTaskService } = await import('@/services/taskService');
-        const taskService = createTaskService();
-        await taskService.updateTask(serviceTask);
+        const { TaskService } = await import('@/services/taskService');
+        await TaskService.updateTask(serviceTask.id, serviceTask);
 
         // Update parent component if callback provided
         if (onTaskUpdate) {

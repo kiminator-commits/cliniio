@@ -76,8 +76,9 @@ export const useAISettings = () => {
   const { getCurrentFacilityId } = useFacility();
   const facilityId = getCurrentFacilityId();
 
+  // Return null if facility ID is not available instead of throwing an error
   if (!facilityId) {
-    throw new Error('Facility ID not available');
+    return null;
   }
 
   // Memoize the service instance to prevent infinite loops

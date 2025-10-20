@@ -3,6 +3,8 @@ export { default as ContentEditor } from './ContentEditor';
 export { default as ContentTypeSelector } from './ContentTypeSelector';
 export { default as CourseBuilder } from './CourseBuilder';
 export { default as SimpleContentEditor } from './SimpleContentEditor';
+export { ContentTypeView } from './ContentTypeView';
+export { DraftsList } from './DraftsList';
 
 // Course step components
 export * from './CourseSteps';

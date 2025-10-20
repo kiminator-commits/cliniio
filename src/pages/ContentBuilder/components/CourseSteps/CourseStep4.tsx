@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '@mdi/react';
-import { mdiEye, mdiPublish, mdiClock } from '@mdi/js';
+import { mdiEye, mdiPublish, mdiClock, mdiCheckCircle } from '@mdi/js';
 import { useContentBuilder } from '../../context';
 import { useContentBuilderActions } from '../../hooks';
+import { usePublishingSettings } from '../../../../hooks/usePublishingSettings';
+import { submitForApproval } from '../../../../services/contentDraftsService';
+import { toast } from 'react-hot-toast';
 import CourseValidation from './CourseValidation';
 import PublishingSettings from './PublishingSettings';
 import SEOMetadata from './SEOMetadata';
@@ -20,11 +23,13 @@ const CourseStep4: React.FC = () => {
   const { state } = useContentBuilder();
   const { updateCourseField } = useContentBuilderActions();
   const { courseData } = state;
+  const { settings: publishingSettings } = usePublishingSettings();
 
   const [validationResults, setValidationResults] = useState<
     ValidationResult[]
   >([]);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isSubmittingForApproval, setIsSubmittingForApproval] = useState(false);
   const [publishSettings, setPublishSettings] = useState({
     isPublic: true,
     requireEnrollment: false,
@@ -196,7 +201,7 @@ const CourseStep4: React.FC = () => {
   const handlePublish = async () => {
     const validationStatus = getValidationStatus();
     if (validationStatus.status === 'error') {
-      alert('Please resolve all validation errors before publishing');
+      toast.error('Please resolve all validation errors before publishing');
       return;
     }
 
@@ -209,14 +214,47 @@ const CourseStep4: React.FC = () => {
       // Update course status
       updateCourseField({ isPublished: true });
 
-      alert(
-        'Course published successfully! It is now available in the library.'
-      );
+      toast.success('Course published successfully! It is now available in the library.');
     } catch (err) {
       console.error(err);
-      alert('Failed to publish course. Please try again.');
+      toast.error('Failed to publish course. Please try again.');
     } finally {
       setIsPublishing(false);
+    }
+  };
+
+  const handleSubmitForApproval = async () => {
+    const validationStatus = getValidationStatus();
+    if (validationStatus.status === 'error') {
+      toast.error('Please resolve all validation errors before submitting for approval.');
+      return;
+    }
+
+    if (!courseData.id) {
+      toast.error('Course ID not found. Please save the course first.');
+      return;
+    }
+
+    setIsSubmittingForApproval(true);
+
+    try {
+      const success = await submitForApproval(courseData.id, 'courses');
+      
+      if (success) {
+        toast.success('Course submitted for approval! Reviewers will be notified.', {
+          duration: 5000,
+        });
+        
+        // Update course status
+        updateCourseField({ isPublished: false });
+      } else {
+        toast.error('Failed to submit course for approval. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting for approval:', error);
+      toast.error('Failed to submit course for approval. Please try again.');
+    } finally {
+      setIsSubmittingForApproval(false);
     }
   };
 
@@ -258,18 +296,35 @@ const CourseStep4: React.FC = () => {
             <Icon path={mdiEye} size={1} className="text-blue-600" />
             <span className="font-medium text-blue-900 text-sm">Preview</span>
           </button>
-          <button
-            onClick={handlePublish}
-            disabled={validationStatus.status === 'error' || isPublishing}
-            className={`inline-flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
-              validationStatus.status === 'error' || isPublishing
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
-          >
-            <Icon path={isPublishing ? mdiClock : mdiPublish} size={1} />
-            <span>{isPublishing ? 'Publishing...' : 'Publish Course'}</span>
-          </button>
+          
+          {/* Show appropriate button based on publishing settings */}
+          {publishingSettings?.requireApproval ? (
+            <button
+              onClick={handleSubmitForApproval}
+              disabled={validationStatus.status === 'error' || isSubmittingForApproval}
+              className={`inline-flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
+                validationStatus.status === 'error' || isSubmittingForApproval
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-orange-600 text-white hover:bg-orange-700'
+              }`}
+            >
+              <Icon path={isSubmittingForApproval ? mdiClock : mdiCheckCircle} size={1} />
+              <span>{isSubmittingForApproval ? 'Submitting...' : 'Submit for Approval'}</span>
+            </button>
+          ) : (
+            <button
+              onClick={handlePublish}
+              disabled={validationStatus.status === 'error' || isPublishing}
+              className={`inline-flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
+                validationStatus.status === 'error' || isPublishing
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+            >
+              <Icon path={isPublishing ? mdiClock : mdiPublish} size={1} />
+              <span>{isPublishing ? 'Publishing...' : 'Publish Course'}</span>
+            </button>
+          )}
         </div>
       </div>
 

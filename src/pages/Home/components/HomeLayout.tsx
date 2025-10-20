@@ -3,11 +3,11 @@ import clsx from 'clsx';
 import { SharedLayout } from '../../../components/Layout/SharedLayout';
 import NavBar from '../../../components/NavBar';
 import { HOME_UI_CONSTANTS } from '../../../constants/homeUiConstants';
-import { calculateNavBarMargins } from '../../../utils/homeUtils';
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
 import { useHomeStore } from '../../../store/homeStore';
 import { useNavigation } from '../../../contexts/NavigationContext';
 import { HomeData } from '../../../types/homeDataTypes';
+import { calculateNavBarMargins } from '../../../utils/homeUtils';
 
 // Import components directly to avoid lazy loading waterfalls
 import HomeModals from './HomeModals';
@@ -21,9 +21,10 @@ export default function HomeLayout({ homeData }: HomeLayoutProps) {
   const { setShowStatsModal, setShowLeaderboardModal, setShowChallengeModal } =
     useHomeStore();
   const { isDrawerOpen } = useNavigation();
-  const { navBarMarginLeft, navBarMarginTop } =
-    calculateNavBarMargins(isDrawerOpen);
   const mainContentRef = useRef<HTMLDivElement>(null);
+  
+  // Calculate navbar margins based on drawer state
+  const { navBarMarginLeft, navBarMarginTop } = calculateNavBarMargins(isDrawerOpen);
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleStatsClick = useCallback(
@@ -44,7 +45,7 @@ export default function HomeLayout({ homeData }: HomeLayoutProps) {
       <SharedLayout>
         <div
           className={clsx(
-            'h-screen bg-gradient-to-br hide-scrollbar overflow-hidden',
+            'min-h-[100dvh] md:h-screen bg-gradient-to-br hide-scrollbar overflow-hidden',
             `from-${HOME_UI_CONSTANTS.COLORS.BG_GRADIENT.FROM}`,
             `to-${HOME_UI_CONSTANTS.COLORS.BG_GRADIENT.TO}`
           )}
@@ -71,11 +72,11 @@ export default function HomeLayout({ homeData }: HomeLayoutProps) {
           >
             {/* Fixed header with NavBar */}
             <div
-              style={{
-                marginLeft: navBarMarginLeft,
-                marginTop: navBarMarginTop,
-              }}
               className="flex-shrink-0"
+              style={{ 
+                marginLeft: navBarMarginLeft,
+                marginTop: navBarMarginTop 
+              }}
               aria-label="Dashboard header container"
             >
               <NavBar
@@ -87,8 +88,8 @@ export default function HomeLayout({ homeData }: HomeLayoutProps) {
 
             {/* Scrollable content area */}
             <div
-              style={{ marginLeft: navBarMarginLeft }}
               className="flex-1 overflow-y-auto hide-scrollbar"
+              style={{ marginLeft: navBarMarginLeft }}
               role="region"
               aria-label="Dashboard content"
             >

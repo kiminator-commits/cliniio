@@ -7,11 +7,18 @@ import {
   mdiPublish,
   mdiRobot,
   mdiTable,
+  mdiCheck,
+  mdiAlertCircle,
+  mdiLoading,
 } from '@mdi/js';
 import { supabase } from '../../../lib/supabase';
 import { useUser } from '../../../contexts/UserContext';
 import { useContentBuilder } from '../context/ContentBuilderContext';
 import { useContentBuilderActions } from '../hooks';
+import { useContentBuilderSettings } from '../../../hooks/useContentBuilderSettings';
+import { useAutoSave } from '../../../hooks/useAutoSave';
+import { fetchDraftById } from '../../../services/contentDraftsService';
+import { logContentActivity } from '../../../services/contentActivityService';
 import SDSAIAssistant from './SDSAIAssistant';
 import { ContentFormFields } from './ContentFormFields';
 import { PDFUploadHandler } from './PDFUploadHandler';
@@ -38,15 +45,18 @@ interface ContentType {
 
 interface SimpleContentEditorProps {
   contentType: ContentType;
+  draftId?: string; // Optional draft ID to load
 }
 
 const SimpleContentEditor: React.FC<SimpleContentEditorProps> = ({
   contentType,
+  draftId
 }) => {
   const { state } = useContentBuilder();
   const { setActiveTab } = useContentBuilderActions();
   const { activeTab } = state;
   const { currentUser } = useUser();
+  const { settings } = useContentBuilderSettings();
 
   // Form state
   const [title, setTitle] = useState('');
@@ -257,20 +267,261 @@ const SimpleContentEditor: React.FC<SimpleContentEditorProps> = ({
   };
 
   // Save functions
-  const handleSavePolicy = async () => {
-    // Implementation for saving policy
-    console.log('Saving policy:', { title, description, content, tags });
-  };
+  const handleSavePolicy = useCallback(async (_isAutoSave: boolean = false) => {
+    if (!currentUser?.id || !currentUser?.facility_id) {
+      throw new Error('User not authenticated');
+    }
 
-  const handleSaveProcedure = async () => {
-    // Implementation for saving procedure
-    console.log('Saving procedure:', { title, description, content, tags });
-  };
+    const policyData = {
+      title: title || 'Untitled Policy',
+      description: description || '',
+      content: content || '',
+      tags: tags || [],
+      author_id: currentUser.id,
+      facility_id: currentUser.facility_id,
+      content_type: 'policy',
+      status: 'draft',
+      published_at: null, // Keep as draft
+      archived_at: null,
+      department: 'General',
+      domain: 'General',
+      policy_number: `POL-${Date.now()}`,
+      version: '1.0',
+      estimated_read_time_minutes: Math.ceil((content?.length || 0) / 200), // Rough estimate
+      points: 5
+    };
 
-  const saveLearningPathway = async () => {
-    // Implementation for saving learning pathway
-    console.log('Saving pathway:', { pathwaySections, selectedPathwayItems });
-  };
+    const { data, error } = await supabase
+      .from('policies')
+      .upsert(policyData, { 
+        onConflict: 'id',
+        ignoreDuplicates: false 
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to save policy: ${error.message}`);
+    }
+
+    // Log activity
+    await logContentActivity({
+      user_id: currentUser.id,
+      user_name: currentUser.name || 'Unknown User',
+      user_email: currentUser.email || '',
+      facility_id: currentUser.facility_id,
+      activity_type: 'draft_saved',
+      content_type: 'policy',
+      content_id: data.id,
+      content_title: policyData.title,
+      content_description: policyData.description,
+      metadata: {
+        auto_saved: false,
+        version: policyData.version,
+        department: policyData.department,
+        tags: policyData.tags
+      }
+    });
+  }, [currentUser, title, description, content, tags]);
+
+  const handleSaveProcedure = useCallback(async () => {
+    if (!currentUser?.id || !currentUser?.facility_id) {
+      throw new Error('User not authenticated');
+    }
+
+    const procedureData = {
+      title: title || 'Untitled Procedure',
+      description: description || '',
+      content: content || '',
+      tags: tags || [],
+      author_id: currentUser.id,
+      facility_id: currentUser.facility_id,
+      content_type: 'procedure',
+      published_at: null, // Keep as draft
+      archived_at: null,
+      department: 'General',
+      domain: 'General',
+      difficulty_level: 'medium',
+      safety_level: 'medium',
+      estimated_duration_minutes: Math.ceil((content?.length || 0) / 100), // Rough estimate
+      points: 5
+    };
+
+    const { data, error } = await supabase
+      .from('procedures')
+      .upsert(procedureData, { 
+        onConflict: 'id',
+        ignoreDuplicates: false 
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to save procedure: ${error.message}`);
+    }
+
+    // Log activity
+    await logContentActivity({
+      user_id: currentUser.id,
+      user_name: currentUser.name || 'Unknown User',
+      user_email: currentUser.email || '',
+      facility_id: currentUser.facility_id,
+      activity_type: 'draft_saved',
+      content_type: 'procedure',
+      content_id: data.id,
+      content_title: procedureData.title,
+      content_description: procedureData.description,
+      metadata: {
+        auto_saved: false,
+        department: procedureData.department,
+        tags: procedureData.tags
+      }
+    });
+  }, [currentUser, title, description, content, tags]);
+
+  const saveLearningPathway = useCallback(async () => {
+    if (!currentUser?.id || !currentUser?.facility_id) {
+      throw new Error('User not authenticated');
+    }
+
+    const pathwayData = {
+      title: title || 'Untitled Learning Pathway',
+      description: description || '',
+      content: JSON.stringify({
+        sections: pathwaySections,
+        items: selectedPathwayItems
+      }),
+      author_id: currentUser.id,
+      facility_id: currentUser.facility_id,
+      content_type: 'learning_pathway',
+      published_at: null, // Keep as draft
+      archived_at: null,
+      department: 'General',
+      estimated_duration_minutes: selectedPathwayItems.reduce((total, item) => total + (item.estimated_duration || 0), 0),
+      points: selectedPathwayItems.length * 2,
+      is_active: true,
+      is_repeat: false
+    };
+
+    const { data, error } = await supabase
+      .from('courses')
+      .upsert(pathwayData, { 
+        onConflict: 'id',
+        ignoreDuplicates: false 
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to save learning pathway: ${error.message}`);
+    }
+
+    // Log activity
+    await logContentActivity({
+      user_id: currentUser.id,
+      user_name: currentUser.name || 'Unknown User',
+      user_email: currentUser.email || '',
+      facility_id: currentUser.facility_id,
+      activity_type: 'draft_saved',
+      content_type: 'learning_pathway',
+      content_id: data.id,
+      content_title: pathwayData.title,
+      content_description: pathwayData.description,
+      metadata: {
+        auto_saved: false,
+        department: pathwayData.department,
+        sections_count: pathwaySections.length,
+        items_count: selectedPathwayItems.length
+      }
+    });
+  }, [currentUser, title, description, pathwaySections, selectedPathwayItems]);
+
+  // Auto-save functionality with activity logging
+  const handleAutoSave = useCallback(async () => {
+    try {
+      switch (contentType.id) {
+        case 'policy':
+          await handleSavePolicy();
+          break;
+        case 'procedure':
+          await handleSaveProcedure();
+          break;
+        case 'pathway':
+          await saveLearningPathway();
+          break;
+        default:
+          await handleSaveProcedure();
+      }
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      throw error;
+    }
+  }, [contentType.id, handleSavePolicy, handleSaveProcedure, saveLearningPathway]);
+
+  const getSaveFunction = useCallback(() => {
+    return handleAutoSave;
+  }, [handleAutoSave]);
+
+  const autoSave = useAutoSave({
+    enabled: settings.autoSave,
+    debounceDelay: 2000, // 2 seconds
+    saveInterval: 30000, // 30 seconds
+    onSave: getSaveFunction(),
+    onError: (error) => {
+      console.error('Auto-save failed:', error);
+    },
+    onSuccess: () => {
+      console.log('Auto-save successful');
+    },
+  });
+
+  // Load draft data when draftId is provided
+  useEffect(() => {
+    if (draftId) {
+      const loadDraft = async () => {
+        try {
+          const contentTypeKey = contentType.id === 'course' ? 'courses' : 
+                                 contentType.id === 'policy' ? 'policies' :
+                                 contentType.id === 'procedure' ? 'procedures' :
+                                 contentType.id === 'pathway' ? 'learning_pathways' : 'courses';
+          
+          const draft = await fetchDraftById(draftId, contentTypeKey as 'courses' | 'policies' | 'procedures' | 'learning_pathways');
+          if (draft) {
+            setTitle(draft.title || '');
+            setDescription(draft.description || '');
+            setContent(draft.content || '');
+            setTags(draft.tags || []);
+            
+            // Load pathway-specific data if it's a learning pathway
+            if (contentType.id === 'pathway' && draft.content) {
+              try {
+                const pathwayData = JSON.parse(draft.content);
+                if (pathwayData.sections) {
+                  setPathwaySections(pathwayData.sections);
+                }
+                if (pathwayData.items) {
+                  setSelectedPathwayItems(pathwayData.items);
+                }
+              } catch (e) {
+                console.error('Failed to parse pathway data:', e);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load draft:', error);
+        }
+      };
+      
+      loadDraft();
+    }
+  }, [draftId, contentType.id]);
+
+  // Trigger auto-save when content changes
+  useEffect(() => {
+    if (title || description || content) {
+      autoSave.triggerSave();
+    }
+  }, [title, description, content, autoSave]);
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -405,13 +656,15 @@ const SimpleContentEditor: React.FC<SimpleContentEditorProps> = ({
           </button>
           <button
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#4ECDC4] hover:bg-[#3db8b0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4ECDC4]"
-            onClick={
-              contentType.id === 'pathway'
-                ? saveLearningPathway
-                : contentType.id === 'policy'
-                  ? handleSavePolicy
-                  : handleSaveProcedure
-            }
+            onClick={async () => {
+              if (settings.autoSave) {
+                await autoSave.forceSave();
+              } else {
+                // Manual save when auto-save is disabled
+                const saveFunction = getSaveFunction();
+                await saveFunction();
+              }
+            }}
           >
             <Icon path={mdiContentSave} size={1} className="mr-2" />
             {contentType.id === 'pathway' ? 'Save Pathway' : 'Save Draft'}
@@ -424,6 +677,51 @@ const SimpleContentEditor: React.FC<SimpleContentEditorProps> = ({
             : 'Publish to Library'}
         </button>
       </div>
+
+      {/* Auto-save Status Indicator */}
+      {settings.autoSave && (
+        <div className="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-lg">
+          <div className="flex items-center space-x-2">
+            {autoSave.status === 'saving' && (
+              <>
+                <Icon path={mdiLoading} size={0.8} className="animate-spin text-blue-500" />
+                <span className="text-sm text-blue-600">Saving...</span>
+              </>
+            )}
+            {autoSave.status === 'saved' && (
+              <>
+                <Icon path={mdiCheck} size={0.8} className="text-green-500" />
+                <span className="text-sm text-green-600">
+                  Saved {autoSave.lastSaved ? `at ${autoSave.lastSaved.toLocaleTimeString()}` : ''}
+                </span>
+              </>
+            )}
+            {autoSave.status === 'error' && (
+              <>
+                <Icon path={mdiAlertCircle} size={0.8} className="text-red-500" />
+                <span className="text-sm text-red-600">
+                  Save failed: {autoSave.error}
+                </span>
+                <button
+                  onClick={autoSave.clearError}
+                  className="text-xs text-red-500 hover:text-red-700 underline"
+                >
+                  Dismiss
+                </button>
+              </>
+            )}
+            {autoSave.status === 'idle' && autoSave.isDirty && (
+              <>
+                <Icon path={mdiContentSave} size={0.8} className="text-gray-400" />
+                <span className="text-sm text-gray-500">Unsaved changes</span>
+              </>
+            )}
+          </div>
+          <div className="text-xs text-gray-400">
+            Auto-save {settings.autoSave ? 'enabled' : 'disabled'}
+          </div>
+        </div>
+      )}
 
       {/* Table Builder Modal */}
       {showTableBuilder && (

@@ -233,10 +233,10 @@ const InventoryDashboard: React.FC = () => {
       value={contextValue as InventoryDashboardContextType}
     >
       <ErrorBoundary fallback={<InventoryErrorFallback />}>
-        <div className="p-6 space-y-6">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
           <InventoryHeader />
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex flex-col gap-4 lg:w-1/4 pl-4">
+            <div className="flex flex-col gap-4 lg:w-1/4 pl-0 md:pl-4">
               <Suspense fallback={<CardSkeleton />}>
                 <InventoryInsightsCardLazy data={insightsData} />
               </Suspense>
@@ -252,10 +252,10 @@ const InventoryDashboard: React.FC = () => {
                 />
               </Suspense>
             </div>
-            <div className="flex-1 pr-4">
+            <div className="flex-1 pr-0 md:pr-4">
               <Suspense fallback={<TableSkeleton rows={8} columns={5} />}>
                 <div
-                  className="bg-white rounded-lg shadow p-6 w-full max-w-full flex flex-col min-h-fit"
+                  className="bg-white rounded-lg shadow p-4 md:p-6 w-full max-w-full flex flex-col min-h-fit"
                   style={{ borderLeft: '4px solid rgba(78, 205, 196, 0.5)' }}
                   role="region"
                   aria-label="inventory table and controls"

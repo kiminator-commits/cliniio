@@ -1,17 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Icon from '@mdi/react';
 import { mdiPencil, mdiLightbulb, mdiFileImage, mdiPublish } from '@mdi/js';
 import { ContentBuilderTab } from './ContentManagementSettings/ContentBuilderTab';
 import { PublishingTab } from './ContentManagementSettings/PublishingTab';
-import { WorkflowTab } from './ContentManagementSettings/WorkflowTab';
 import { AITab } from './ContentManagementSettings/AITab';
 import { MediaTab } from './ContentManagementSettings/MediaTab';
 import { ContentManagementTab } from './ContentManagementSettings/types';
 
 const ContentManagementSettings: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('builder');
+  const [searchParams] = useSearchParams();
+  
+  // Initialize state with URL parameters
+  const getInitialTab = () => {
+    const subtab = searchParams.get('subtab');
+    const review = searchParams.get('review');
+    
+    if (review) return 'publishing';
+    if (subtab && ['builder', 'publishing', 'ai', 'media'].includes(subtab)) {
+      return subtab;
+    }
+    return 'builder';
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab);
+  const [reviewContentId, setReviewContentId] = useState<string | null>(
+    searchParams.get('review')
+  );
+
+  // Handle URL parameter changes
+  useEffect(() => {
+    const review = searchParams.get('review');
+    
+    if (review) {
+      // Use setTimeout to avoid calling setState synchronously in effect
+      setTimeout(() => setReviewContentId(review), 0);
+    }
+  }, [searchParams]);
 
   const handleLaunchContentBuilder = () => {
     navigate('/content-builder');
@@ -20,7 +46,6 @@ const ContentManagementSettings: React.FC = () => {
   const tabs: ContentManagementTab[] = [
     { id: 'builder', label: 'Content Builder', icon: mdiPencil },
     { id: 'publishing', label: 'Publishing', icon: mdiPublish },
-    { id: 'workflow', label: 'Workflow', icon: mdiPencil },
     { id: 'ai', label: 'AI Suggestions', icon: mdiLightbulb },
     { id: 'media', label: 'Media Settings', icon: mdiFileImage },
   ];
@@ -32,9 +57,7 @@ const ContentManagementSettings: React.FC = () => {
           <ContentBuilderTab onLaunchBuilder={handleLaunchContentBuilder} />
         );
       case 'publishing':
-        return <PublishingTab />;
-      case 'workflow':
-        return <WorkflowTab />;
+        return <PublishingTab reviewContentId={reviewContentId} />;
       case 'ai':
         return <AITab />;
       case 'media':

@@ -32,14 +32,29 @@ a {
   box-sizing: border-box;
 }
 
-/* Remove focus indicators from non-form elements */
-button:focus,
-a:focus,
-[tabindex]:focus,
-.btn:focus,
-.nav-link:focus {
-  outline: none !important;
-  box-shadow: none !important;
+/* Remove focus indicators from non-form elements on desktop only */
+@media (min-width: 768px) {
+  button:focus,
+  a:focus,
+  [tabindex]:focus,
+  .btn:focus,
+  .nav-link:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Mobile focus indicators - restore for better accessibility */
+@media (max-width: 767px) {
+  button:focus,
+  a:focus,
+  [tabindex]:focus,
+  .btn:focus,
+  .nav-link:focus {
+    outline: 2px solid #4ECDC4 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2) !important;
+  }
 }
 
 /* Remove ALL focus rings from inventory table elements */
@@ -57,15 +72,45 @@ a:focus,
   ring: none !important;
 }
 
-/* Hide scrollbar for all browsers */
-.hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-  overflow-y: auto;
+/* Hide scrollbar for all browsers on desktop */
+@media (min-width: 768px) {
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    overflow-y: auto;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }
 
-.hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+/* Show scrollbars on mobile for better UX */
+@media (max-width: 767px) {
+  .hide-scrollbar {
+    -ms-overflow-style: auto; /* IE and Edge */
+    scrollbar-width: thin; /* Firefox */
+    overflow-y: auto;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: block; /* Chrome, Safari and Opera */
+    width: 8px;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar-thumb {
+    background: #4ECDC4;
+    border-radius: 4px;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #38b2ac;
+  }
 }
 
 /* Force hide scrollbars for specific elements */
@@ -73,6 +118,7 @@ a:focus,
   -ms-overflow-style: none !important; /* IE and Edge */
   scrollbar-width: none !important; /* Firefox */
   overflow-y: auto !important;
+  overflow-x: hidden !important; /* Hide horizontal scrollbar */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -94,6 +140,7 @@ a:focus,
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important; /* Hide horizontal scrollbar */
 }
 
 .bi-modal-scrollbar-hide::-webkit-scrollbar {

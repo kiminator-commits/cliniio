@@ -8,7 +8,11 @@ import CoursePlanningStep from './CourseSteps/CoursePlanningStep';
 import ContentBuilderStep from './CourseSteps/ContentBuilderStep';
 import CourseStep4 from './CourseSteps/CourseStep4';
 
-const CourseBuilder: React.FC = () => {
+interface CourseBuilderProps {
+  draftId?: string;
+}
+
+const CourseBuilder: React.FC<CourseBuilderProps> = ({ draftId: _draftId }) => {
   const { state } = useContentBuilder();
   const { setCourseStep } = useContentBuilderActions();
   const { courseStep } = state;

@@ -105,11 +105,11 @@ const LoginForm: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <LoginHeader />
 
-          <form className="mt-8 space-y-6" onSubmit={handleFormSubmit}>
+          <form className="mt-6 md:mt-8 space-y-4 md:space-y-6" onSubmit={handleFormSubmit}>
             {/* Hidden CSRF token field for secure authentication */}
             {isSecureMode && csrfToken && (
               <input type="hidden" name="csrfToken" value={csrfToken} />

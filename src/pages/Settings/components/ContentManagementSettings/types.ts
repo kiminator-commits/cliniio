@@ -13,24 +13,8 @@ export interface ContentBuilderSettings {
 }
 
 export interface PublishingSettings {
-  autoPublish: boolean;
-  publishSchedule: string;
-  approvalWorkflow: boolean;
-  versionControl: boolean;
-  contentExpiry: boolean;
-  expiryDays: number;
-}
-
-export interface WorkflowSettings {
-  enableWorkflow: boolean;
-  approvalSteps: number;
-  notificationSettings: {
-    email: boolean;
-    push: boolean;
-    sms: boolean;
-  };
-  escalationRules: boolean;
-  deadlineReminders: boolean;
+  requireApproval: boolean;
+  notifyReviewers: boolean;
 }
 
 export interface AISettings {
@@ -40,6 +24,7 @@ export interface AISettings {
   readabilityScore: boolean;
   plagiarismCheck: boolean;
   autoTagging: boolean;
+  confidenceThreshold?: number;
 }
 
 export interface MediaSettings {

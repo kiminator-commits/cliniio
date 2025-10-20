@@ -29,7 +29,7 @@ export default function AnalyticsDashboard() {
   // ✅ Compute dynamic average cycle time & trend
   const averageCycleMinutes = useMemo(() => {
     if (!Array.isArray(cycles) || !cycles.length) return 0;
-    const total = (cycles as SterilizationCycle[]).reduce((sum, c) => {
+    const total = (cycles as unknown as SterilizationCycle[]).reduce((sum, c) => {
       // Calculate duration from start_time to end_time
       if (c.start_time && c.end_time) {
         const start = new Date(c.start_time);
@@ -43,7 +43,7 @@ export default function AnalyticsDashboard() {
 
   const previousAverage = useMemo(() => {
     if (!Array.isArray(cycles) || !cycles.length) return 0;
-    const past = (cycles as SterilizationCycle[]).filter((c) => {
+    const past = (cycles as unknown as SterilizationCycle[]).filter((c) => {
       if (!c.end_time) return false;
       const d = new Date(c.end_time);
       const now = new Date();

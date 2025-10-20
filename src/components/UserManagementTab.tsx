@@ -161,7 +161,8 @@ export default function UserManagementTab() {
         create_tasks: true,
         edit_tasks: true,
         delete_tasks: true,
-        assign_tasks: true
+        assign_tasks: true,
+        approve_content: true
       },
       manager: {
         view_dashboard: true,
@@ -176,7 +177,8 @@ export default function UserManagementTab() {
         create_tasks: true,
         edit_tasks: true,
         delete_tasks: true,
-        assign_tasks: true
+        assign_tasks: true,
+        approve_content: true
       },
       technician: {
         view_dashboard: true,
@@ -923,6 +925,34 @@ export default function UserManagementTab() {
                     ))}
                   </div>
                 </div>
+
+                {/* Content Management */}
+                <div>
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">📚 Content Management</h5>
+                  <div className="space-y-2">
+                    {[
+                      { id: 'approve_content', label: 'Approve Content', desc: 'Approve content for publishing' }
+                    ].map((permission) => (
+                      <div key={permission.id} className="flex items-center justify-between py-2">
+                        <div>
+                          <div className="text-sm font-medium">{permission.label}</div>
+                          <div className="text-xs text-gray-500">{permission.desc}</div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editForm.permissions?.[permission.id] || false}
+                            onChange={(e) => handlePermissionChange(permission.id, e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#4ECDC4]/20 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
+                            editForm.permissions?.[permission.id] ? 'bg-[#4ECDC4] after:translate-x-full' : 'bg-gray-200'
+                          }`}></div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
             </div>
@@ -1121,6 +1151,34 @@ export default function UserManagementTab() {
                       { id: 'edit_tasks', label: 'Edit Tasks', desc: 'Modify existing tasks' },
                       { id: 'delete_tasks', label: 'Delete Tasks', desc: 'Remove tasks and assignments' },
                       { id: 'assign_tasks', label: 'Assign Tasks', desc: 'Assign tasks to team members' }
+                    ].map((permission) => (
+                      <div key={permission.id} className="flex items-center justify-between py-2">
+                        <div>
+                          <div className="text-sm font-medium">{permission.label}</div>
+                          <div className="text-xs text-gray-500">{permission.desc}</div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={addUserForm.permissions?.[permission.id] || false}
+                            onChange={(e) => handleAddUserPermissionChange(permission.id, e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#4ECDC4]/20 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
+                            addUserForm.permissions?.[permission.id] ? 'bg-[#4ECDC4] after:translate-x-full' : 'bg-gray-200'
+                          }`}></div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Content Management */}
+                <div>
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">📚 Content Management</h5>
+                  <div className="space-y-2">
+                    {[
+                      { id: 'approve_content', label: 'Approve Content', desc: 'Approve content for publishing' }
                     ].map((permission) => (
                       <div key={permission.id} className="flex items-center justify-between py-2">
                         <div>
@@ -1362,6 +1420,34 @@ export default function UserManagementTab() {
                             { id: 'edit_tasks', label: 'Edit Tasks', desc: 'Modify existing tasks' },
                             { id: 'delete_tasks', label: 'Delete Tasks', desc: 'Remove tasks and assignments' },
                             { id: 'assign_tasks', label: 'Assign Tasks', desc: 'Assign tasks to team members' }
+                          ].map((permission) => (
+                            <div key={permission.id} className="flex items-center justify-between py-2">
+                              <div>
+                                <div className="text-sm font-medium">{permission.label}</div>
+                                <div className="text-xs text-gray-500">{permission.desc}</div>
+                              </div>
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={roleForm.permissions?.[permission.id] || false}
+                                  onChange={(e) => handleRolePermissionChange(permission.id, e.target.checked)}
+                                  className="sr-only peer"
+                                />
+                                <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#4ECDC4]/20 rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
+                                  roleForm.permissions?.[permission.id] ? 'bg-[#4ECDC4] after:translate-x-full' : 'bg-gray-200'
+                                }`}></div>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Content Management */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-3">📚 Content Management</h5>
+                        <div className="space-y-2">
+                          {[
+                            { id: 'approve_content', label: 'Approve Content', desc: 'Approve content for publishing' }
                           ].map((permission) => (
                             <div key={permission.id} className="flex items-center justify-between py-2">
                               <div>

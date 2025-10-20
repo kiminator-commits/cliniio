@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@mdi/react';
 import { mdiArrowLeft, mdiChevronLeft, mdiChevronRight } from '@mdi/js';
 import { SharedLayout } from '../../components/Layout/SharedLayout';
 import { ContentBuilderProvider, useContentBuilder } from './context';
 import { useContentBuilderActions } from './hooks';
-import { CourseBuilder, SimpleContentEditor } from './components';
+import { CourseBuilder, SimpleContentEditor, ContentTypeView } from './components';
 import { contentTypes } from './constants';
 
 const ContentBuilderContent: React.FC = () => {
@@ -14,6 +14,20 @@ const ContentBuilderContent: React.FC = () => {
   const { setSelectedContentType } = useContentBuilderActions();
   const { selectedContentType } = state;
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const location = useLocation();
+  
+  // Prefill title/topic from AI Suggestions deep link
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const title = params.get('title');
+    if (title) {
+      // Ensure course is selected by default for this flow
+      setSelectedContentType('course');
+      // We rely on the underlying editors to read initial title from params if needed
+      // Alternatively, we can set a global store or context if available
+      // For now, no-op here; consumers can read from URL as needed
+    }
+  }, [location.search, setSelectedContentType]);
 
   const handleBackToSettings = () => {
     navigate('/settings');
@@ -21,13 +35,21 @@ const ContentBuilderContent: React.FC = () => {
 
   const renderContentEditor = () => {
     if (selectedContentType === 'course') {
-      return <CourseBuilder />;
+      return (
+        <ContentTypeView contentType={{ id: 'course', label: 'Course', description: 'Create interactive learning courses', icon: contentTypes.find(t => t.id === 'course')?.icon || '' }}>
+          {(draftId) => <CourseBuilder draftId={draftId} />}
+        </ContentTypeView>
+      );
     }
 
     const contentType = contentTypes.find((t) => t.id === selectedContentType);
     if (!contentType) return null;
 
-    return <SimpleContentEditor contentType={contentType} />;
+    return (
+      <ContentTypeView contentType={{ id: contentType.id, label: contentType.label, description: contentType.description, icon: contentType.icon }}>
+        {(draftId) => <SimpleContentEditor contentType={contentType} draftId={draftId} />}
+      </ContentTypeView>
+    );
   };
 
   return (

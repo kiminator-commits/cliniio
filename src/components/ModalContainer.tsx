@@ -6,6 +6,7 @@ import { GamificationData } from '../store/homeStore';
 import { GamificationData as StatsModalGamificationData } from './StatsModal';
 import { GamificationData as LeaderboardModalGamificationData } from './LeaderboardModal';
 import { leaderboardService } from '../services/leaderboardService';
+import { useFacility } from '../contexts/FacilityContext';
 
 interface LeaderboardUser {
   id: string;
@@ -41,6 +42,8 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
   leaderboardLoading: _leaderboardLoading = false,
   leaderboardError: _leaderboardError = null,
 }) => {
+  const { getCurrentFacilityId } = useFacility();
+  
   // Load leaderboard data only when modal opens
   const [leaderboardData, setLeaderboardData] =
     useState<LeaderboardModalGamificationData>({
@@ -61,8 +64,9 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
         setLeaderboardErrorState(null);
       }, 0);
 
+      const facilityId = getCurrentFacilityId();
       leaderboardService
-        .fetchLeaderboardData()
+        .fetchLeaderboardData(facilityId || undefined)
         .then((data) => {
           setLeaderboardData({
             rank: 1, // Default rank since we don't have user-specific rank in the data
@@ -84,7 +88,7 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
           setIsLoadingLeaderboard(false);
         });
     }
-  }, [isLeaderboardOpen, leaderboardTopUsers.length]);
+  }, [isLeaderboardOpen, leaderboardTopUsers.length, getCurrentFacilityId]);
   // Transform store gamification data to StatsModal format
   const statsModalData: StatsModalGamificationData = {
     stats: gamificationData.stats || {

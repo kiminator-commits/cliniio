@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Icon from '@mdi/react';
 import { mdiTag, mdiPlus, mdiClose, mdiLightbulb } from '@mdi/js';
+import { useContentAISettings } from '../../../hooks/useContentAISettings';
 
 interface SmartTagManagerProps {
   tags: string[];
@@ -16,6 +17,7 @@ export const SmartTagManager: React.FC<SmartTagManagerProps> = ({
   title,
 }) => {
   const [newTag, setNewTag] = useState('');
+  const { settings } = useContentAISettings();
 
   // Generate smart tag suggestions based on content
   const smartTagSuggestions = useMemo(() => {
@@ -91,6 +93,20 @@ export const SmartTagManager: React.FC<SmartTagManagerProps> = ({
     // Remove duplicates and sort
     return [...new Set(suggestions)].sort();
   }, [content, title, tags]);
+
+  // Auto-merge suggestions when autoTagging is enabled
+  useEffect(() => {
+    if (!settings.autoTagging) return;
+    if (!smartTagSuggestions.length) return;
+
+    const merged = Array.from(
+      new Set([...tags, ...smartTagSuggestions])
+    );
+
+    if (merged.length !== tags.length) {
+      onTagsChange(merged);
+    }
+  }, [settings.autoTagging, smartTagSuggestions, tags, onTagsChange]);
 
   // Tag validation - prevent useless tags
   const isTagValid = (tag: string): boolean => {

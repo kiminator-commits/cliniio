@@ -2,14 +2,14 @@ import React from 'react';
 import clsx from 'clsx';
 import { mdiClipboardText, mdiFilter } from '@mdi/js';
 import Icon from '@mdi/react';
-import TaskList from '@/components/TaskList';
+import TaskCard from '@/components/TaskCard';
 import { HOME_UI_CONSTANTS } from '../../../constants/homeUiConstants';
 import {
   MIN_PANEL_WIDTH,
   MARGIN_TOP_12PX,
 } from '../../../constants/layoutConstants';
 
-import { Task } from '../../../store/homeStore';
+import { Task } from '../../../services/taskService';
 
 interface TasksPanelProps {
   tasks: Task[];
@@ -24,7 +24,7 @@ export function TasksPanel({
   storeAvailablePoints,
   storeShowFilters,
   setStoreShowFilters,
-  handleTaskComplete,
+  handleTaskComplete: _handleTaskComplete,
 }: TasksPanelProps) {
   return (
     <div
@@ -73,7 +73,9 @@ export function TasksPanel({
         </div>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <TaskList tasks={tasks} onComplete={handleTaskComplete} />
+        {tasks.map((task) => (
+          <TaskCard key={task.id} task={task} />
+        ))}
       </div>
     </div>
   );

@@ -300,6 +300,26 @@ const AIAnalyticsSettings: React.FC = () => {
     );
   }
 
+  // Early return if facility ID is not available
+  if (!facilityId || !aiSettingsService) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="text-center">
+            <div className="text-gray-500 text-lg mb-2">⚠️</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Facility Not Available
+            </h3>
+            <p className="text-gray-600">
+              AI Settings are not available because no facility is currently selected. 
+              Please ensure you are logged in and have access to a facility.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* AI Usage Alert Banner */}

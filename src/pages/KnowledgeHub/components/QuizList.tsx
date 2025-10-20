@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ContentItem } from '../types';
 import QuizComponent from './QuizComponent';
 import { QuizCreationForm } from './QuizCreationForm';
+import { useContentCreationAccess } from '../../../hooks/useContentCreationAccess';
 
 interface QuizListProps {
   quizzes: ContentItem[];
@@ -17,6 +18,8 @@ export const QuizList: React.FC<QuizListProps> = ({
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  
+  const { isContentCreationEnabled } = useContentCreationAccess();
 
   const handleStartQuiz = (quizId: string) => {
     setSelectedQuizId(quizId);
@@ -90,10 +93,20 @@ export const QuizList: React.FC<QuizListProps> = ({
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={!isContentCreationEnabled}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            isContentCreationEnabled
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
         >
           Create Quiz
         </button>
+        {!isContentCreationEnabled && (
+          <div className="text-xs text-gray-500 mt-1">
+            Content creation is disabled. Enable it in Settings &gt; Content Management.
+          </div>
+        )}
       </div>
 
       {/* Quiz List */}

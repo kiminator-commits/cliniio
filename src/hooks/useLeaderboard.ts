@@ -1,31 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   leaderboardService,
   LeaderboardData,
 } from '../services/leaderboardService';
+import { useFacility } from '../contexts/FacilityContext';
 
 export const useLeaderboard = () => {
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardData>({
-    id: '',
-    user_id: '',
-    facility_id: '',
-    points: 0,
-    rank: 1,
-    user_name: '',
-    department: '',
-    created_at: '',
-    updated_at: '',
-  });
+  const { getCurrentFacilityId } = useFacility();
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const data = await leaderboardService.fetchLeaderboardData();
-      setLeaderboardData(data as unknown as LeaderboardData);
+      const facilityId = getCurrentFacilityId();
+      const data = await leaderboardService.fetchLeaderboardData(facilityId || undefined);
+      setLeaderboardData(data);
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
       setError(
@@ -34,11 +27,11 @@ export const useLeaderboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getCurrentFacilityId]);
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+  }, [fetchLeaderboard]);
 
   return {
     leaderboardData,

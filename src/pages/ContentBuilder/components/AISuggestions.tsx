@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useContentBuilder } from '../context/ContentBuilderContext';
+import { useContentAISettings } from '../../../hooks/useContentAISettings';
 import Icon from '@mdi/react';
 import { mdiLightbulb, mdiTrendingUp, mdiCheck } from '@mdi/js';
 import { AISuggestion } from '../types';
 
 const AISuggestions: React.FC = () => {
   const { state, dispatch } = useContentBuilder();
+  const { settings } = useContentAISettings();
 
   const [expandedSuggestion, setExpandedSuggestion] = useState<string | null>(
     null
@@ -115,7 +117,9 @@ const AISuggestions: React.FC = () => {
         ...state.currentContent,
         title: suggestion.title,
         description: suggestion.description,
-        tags: [...state.currentContent.tags, 'AI-suggested'],
+        tags: settings.autoTagging 
+          ? [...new Set([...state.currentContent.tags, 'AI-suggested'])]
+          : state.currentContent.tags,
       };
       dispatch({ type: 'UPDATE_CONTENT', payload: updatedContent });
     }

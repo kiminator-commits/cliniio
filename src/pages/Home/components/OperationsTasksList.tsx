@@ -1,6 +1,6 @@
 import React from 'react';
-import TaskList from '@/components/TaskList';
-import { Task } from '../../../store/homeStore';
+import TaskCard from '@/components/TaskCard';
+import { Task } from '../../../services/taskService';
 
 interface Props {
   tasks: Task[];
@@ -9,7 +9,9 @@ interface Props {
 export const OperationsTasksList = ({ tasks }: Props) => {
   return (
     <div className="grid gap-3">
-      <TaskList tasks={tasks} onComplete={() => {}} />
+      {tasks.map((task) => (
+        <TaskCard key={task.id} task={task} />
+      ))}
     </div>
   );
 };
